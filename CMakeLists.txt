@@ -31,18 +31,18 @@ set(LIBRARY_PATH ${ROOT_PATH}/library)
 # source file
 #
 
-macro(add_group group inc src f_list)
+function(add_group group inc src f_list)
     # make group
     file(GLOB f_inc "${inc}/*.h")
 	#message(STATUS "${group} header: ${f_inc}")	
     aux_source_directory(${src} f_src)
-	#message(STATUS "${group} source: ${f_src}")
+	message(STATUS "${group} source: ${f_src}")
     source_group(${group} FILES ${f_inc} ${f_src})
 
     # add to source list
-    set(${f_list} ${${f_list}} ${f_inc} ${f_src})
+    set(${f_list} ${${f_list}} ${f_inc} ${f_src} PARENT_SCOPE)
 
-endmacro(add_group)
+endfunction(add_group)
 
 set(IEP_SOURCE)
 
@@ -74,6 +74,9 @@ target_include_directories(imexpress PRIVATE ${LIBRARY_PATH}/eigen)
 # gsl
 add_subdirectory(${LIBRARY_PATH}/gsl gsl)
 target_link_libraries(imexpress gsl)
+
+# test
+add_subdirectory(${ROOT_PATH}/test test)
 
 #
 # package
