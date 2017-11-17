@@ -27,6 +27,9 @@ set(OUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 set(BUILD_PATH ${ROOT_PATH}/build)
 set(LIBRARY_PATH ${ROOT_PATH}/library)
 
+include(${BUILD_PATH}/environment.cmake)
+include(${BUILD_PATH}/${ENV}.cmake)
+
 #
 # source file
 #
@@ -36,7 +39,7 @@ function(add_group group inc src f_list)
     file(GLOB f_inc "${inc}/*.h")
 	#message(STATUS "${group} header: ${f_inc}")	
     aux_source_directory(${src} f_src)
-	message(STATUS "${group} source: ${f_src}")
+	#message(STATUS "${group} source: ${f_src}")
     source_group(${group} FILES ${f_inc} ${f_src})
 
     # add to source list
@@ -56,6 +59,8 @@ add_group(common
 #
 
 add_library(imexpress STATIC ${IEP_SOURCE})
+
+target_include_directories(imexpress PRIVATE ${ROOT_PATH}/include)
 
 #
 # header file path

@@ -1,6 +1,6 @@
 [submodule "library/gsl"]
 	path = library/gsl
 	url = https://github.com/newser/gsl-cmake.git
-[submodule "library/catch"]
-	path = test/catch
-	url = https://github.com/philsquared/Catch.git
+[submodule "test/Catch2"]
+	path = library/Catch2
+	url = https://github.com/catchorg/Catch2.git

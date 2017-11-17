@@ -24,7 +24,7 @@
 set(test_src test_run.cpp)
 
 aux_source_directory(case test_src)
-message(STATUS "test source: ${test_src}")
+#message(STATUS "test source: ${test_src}")
 
 #
 # build
@@ -36,6 +36,8 @@ add_executable(test_run ${test_src})
 # header file path
 #
 
+target_include_directories(test_run PRIVATE ${ROOT_PATH}/include)
+
 # gsl
 target_include_directories(test_run PRIVATE ${OUT_PATH}/gsl)
 
@@ -43,7 +45,7 @@ target_include_directories(test_run PRIVATE ${OUT_PATH}/gsl)
 target_include_directories(test_run PRIVATE ${LIBRARY_PATH}/eigen)
 
 # catch
-target_include_directories(test_run PRIVATE ${ROOT_PATH}/test/catch/include)
+target_include_directories(test_run PRIVATE ${LIBRARY_PATH}/Catch2/single_include)
 
 #
 # link
