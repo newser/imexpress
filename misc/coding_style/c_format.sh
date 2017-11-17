@@ -20,7 +20,6 @@ fi
 if [ $2 == 0 ]
 then
   FLIST=$(find $FPATH -not -path "*library/*" -type f \( -name "*.h" -o -name "*.c" -o -name "*.cpp" \))
-  FLIST=$FLIST" "$(find $FPATH -type f \( -name "*wrapper.c" -o -name "*wrapper.h" \))
 else
   FLIST=$(git status -s $FPATH | awk '/\.h$/{if ($1 != "D") print $NF}')
   FLIST=$FLIST" "$(git status -s $FPATH | awk '/\.c$/{if ($1 != "D") print $NF}')

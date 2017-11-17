@@ -37,7 +37,7 @@ include(${BUILD_PATH}/${ENV}.cmake)
 function(add_group group inc src f_list)
     # make group
     file(GLOB f_inc "${inc}/*.h")
-	#message(STATUS "${group} header: ${f_inc}")	
+	#message(STATUS "${group} header: ${f_inc}")
     aux_source_directory(${src} f_src)
 	#message(STATUS "${group} source: ${f_src}")
     source_group(${group} FILES ${f_inc} ${f_src})
@@ -47,18 +47,17 @@ function(add_group group inc src f_list)
 
 endfunction(add_group)
 
-set(IEP_SOURCE)
-
-add_group(common 
-          ${ROOT_PATH}/include/common
-          ${ROOT_PATH}/source/common
-          IEP_SOURCE)
+set(IEXP_SOURCE)
+add_group(common ${ROOT_PATH}/include/common ${ROOT_PATH}/source/common IEXP_SOURCE)
+add_group(math ${ROOT_PATH}/include/math ${ROOT_PATH}/source/math IEXP_SOURCE)
+add_group(complex ${ROOT_PATH}/include/complex ${ROOT_PATH}/source/complex IEXP_SOURCE)
+add_group(polynomial ${ROOT_PATH}/include/polynomial ${ROOT_PATH}/source/polynomial IEXP_SOURCE)
 
 #
 # build
 #
 
-add_library(imexpress STATIC ${IEP_SOURCE})
+add_library(imexpress STATIC ${IEXP_SOURCE})
 
 target_include_directories(imexpress PRIVATE ${ROOT_PATH}/include)
 

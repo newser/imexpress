@@ -16,24 +16,29 @@
  * limitations under the License.
  */
 
-#ifndef __IEXP_NAMESPACE__
-#define __IEXP_NAMESPACE__
+#ifndef __IEXP_TEST_UTIL__
+#define __IEXP_TEST_UTIL__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
-namespace Eigen {
-}
+#include <common/environment.h>
 
-namespace iexp = Eigen;
+#include <common/namespace.h>
+
+IEXP_NS_BEGIN
 
 ////////////////////////////////////////////////////////////
 // macro definition
 ////////////////////////////////////////////////////////////
 
-#define IEXP_NS_BEGIN namespace Eigen {
-#define IEXP_NS_END }
+#define __D_EQ(a, b)                                                           \
+    ((std::abs((a) - (b)) < (std::numeric_limits<double>::epsilon())) ||       \
+     (std::isnan((a)) && std::isnan((b))))
+
+#define __D_EQ_IN(a, b, e)                                                     \
+    ((std::abs((a) - (b)) < (e)) || (std::isnan((a)) && std::isnan((b))))
 
 ////////////////////////////////////////////////////////////
 // type definition
@@ -47,4 +52,6 @@ namespace iexp = Eigen;
 // interface declaration
 ////////////////////////////////////////////////////////////
 
-#endif /* __IEXP_NAMESPACE__ */
+IEXP_NS_END
+
+#endif /* __IEXP_TEST_UTIL__ */

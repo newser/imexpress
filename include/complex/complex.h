@@ -16,52 +16,22 @@
  * limitations under the License.
  */
 
-#ifndef __IEP_MATH_CONST__
-#define __IEP_MATH_CONST__
+#ifndef __IEXP_COMPLEX__
+#define __IEXP_COMPLEX__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
+#include <common/common.h>
+
 #include <gsl/gsl_math.h>
+
+IEXP_NS_BEGIN
 
 ////////////////////////////////////////////////////////////
 // macro definition
 ////////////////////////////////////////////////////////////
-
-#define IEP_E M_E
-
-#define IEP_LOG2E M_LOG2E
-
-#define IEP_LOG10E M_LOG10E
-
-#define IEP_SQRT2 M_SQRT2
-
-#define IEP_SQRT1_2 M_SQRT1_2
-
-#define IEP_SQRT3 M_SQRT3
-
-#define IEP_PI M_PI
-
-#define IEP_PI_2 M_PI_2
-
-#define IEP_PI_4 M_PI_4
-
-#define IEP_SQRTPI M_SQRTPI
-
-#define IEP_2_SQRTPI M_2_SQRTPI
-
-#define IEP_1_PI M_1_PI
-
-#define IEP_2_PI M_2_PI
-
-#define IEP_LN10 M_LN10
-
-#define IEP_LN2 M_LN2
-
-#define IEP_LNPI M_LNPI
-
-#define IEP_EULER M_EULER
 
 ////////////////////////////////////////////////////////////
 // type definition
@@ -75,4 +45,6 @@
 // interface declaration
 ////////////////////////////////////////////////////////////
 
-#endif /* __IEP_MATH_CONST__ */
+IEXP_NS_END
+
+#endif /* __IEXP_COMPLEX__ */

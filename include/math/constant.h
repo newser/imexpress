@@ -16,24 +16,56 @@
  * limitations under the License.
  */
 
-#ifndef __IEXP_NAMESPACE__
-#define __IEXP_NAMESPACE__
+#ifndef __IEXP_MATH_CONSTANT__
+#define __IEXP_MATH_CONSTANT__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
-namespace Eigen {
-}
+#include <common/common.h>
 
-namespace iexp = Eigen;
+#include <gsl/gsl_math.h>
+
+IEXP_NS_BEGIN
 
 ////////////////////////////////////////////////////////////
 // macro definition
 ////////////////////////////////////////////////////////////
 
-#define IEXP_NS_BEGIN namespace Eigen {
-#define IEXP_NS_END }
+#define IEXP_E M_E
+
+#define IEXP_LOG2E M_LOG2E
+
+#define IEXP_LOG10E M_LOG10E
+
+#define IEXP_SQRT2 M_SQRT2
+
+#define IEXP_SQRT1_2 M_SQRT1_2
+
+#define IEXP_SQRT3 M_SQRT3
+
+#define IEXP_PI M_PI
+
+#define IEXP_PI_2 M_PI_2
+
+#define IEXP_PI_4 M_PI_4
+
+#define IEXP_SQRTPI M_SQRTPI
+
+#define IEXP_2_SQRTPI M_2_SQRTPI
+
+#define IEXP_1_PI M_1_PI
+
+#define IEXP_2_PI M_2_PI
+
+#define IEXP_LN10 M_LN10
+
+#define IEXP_LN2 M_LN2
+
+#define IEXP_LNPI M_LNPI
+
+#define IEXP_EULER M_EULER
 
 ////////////////////////////////////////////////////////////
 // type definition
@@ -47,4 +79,6 @@ namespace iexp = Eigen;
 // interface declaration
 ////////////////////////////////////////////////////////////
 
-#endif /* __IEXP_NAMESPACE__ */
+IEXP_NS_END
+
+#endif /* __IEXP_MATH_CONSTANT__ */

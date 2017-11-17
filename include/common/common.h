@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-#ifndef __IEP_COMMON__
-#define __IEP_COMMON__
+#ifndef __IEXP_COMMON__
+#define __IEXP_COMMON__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -25,8 +25,9 @@
 
 #include <common/environment.h>
 
-#include <common/math_const.h>
 #include <common/namespace.h>
+
+IEXP_NS_BEGIN
 
 ////////////////////////////////////////////////////////////
 // macro definition
@@ -44,4 +45,6 @@
 // interface declaration
 ////////////////////////////////////////////////////////////
 
-#endif /* __IEP_COMMON__ */
+IEXP_NS_END
+
+#endif /* __IEXP_COMMON__ */

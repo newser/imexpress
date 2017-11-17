@@ -13,7 +13,7 @@ int main()
     std::cout << m << std::endl;
 
     Eigen::Array<int, 2, 2> a;
-    std::cout << Eigen::isnan(a);
+    // std::cout << Eigen::isnan(a) << Eigen::pos;
 
     return 0;
 }

@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-#ifndef __IEP_ENVIRONMENT__
-#define __IEP_ENVIRONMENT__
+#ifndef __IEXP_ENVIRONMENT__
+#define __IEXP_ENVIRONMENT__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -39,4 +39,4 @@
 // interface declaration
 ////////////////////////////////////////////////////////////
 
-#endif /* __IEP_ENVIRONMENT__ */
+#endif /* __IEXP_ENVIRONMENT__ */

@@ -16,24 +16,28 @@
  * limitations under the License.
  */
 
-#ifndef __IEXP_NAMESPACE__
-#define __IEXP_NAMESPACE__
+#ifndef __IEXP_MATH_INF_NAN__
+#define __IEXP_MATH_INF_NAN__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
-namespace Eigen {
-}
+#include <common/common.h>
 
-namespace iexp = Eigen;
+#include <gsl/gsl_math.h>
+
+IEXP_NS_BEGIN
 
 ////////////////////////////////////////////////////////////
 // macro definition
 ////////////////////////////////////////////////////////////
 
-#define IEXP_NS_BEGIN namespace Eigen {
-#define IEXP_NS_END }
+#define IEXP_POSINF GSL_POSINF
+
+#define IEXP_NEGINF GSL_NEGINF
+
+#define IEXP_NAN GSL_NAN
 
 ////////////////////////////////////////////////////////////
 // type definition
@@ -47,4 +51,6 @@ namespace iexp = Eigen;
 // interface declaration
 ////////////////////////////////////////////////////////////
 
-#endif /* __IEXP_NAMESPACE__ */
+IEXP_NS_END
+
+#endif /* __IEXP_MATH_INF_NAN__ */

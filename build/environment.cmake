@@ -95,20 +95,6 @@ function(get_toolchain toolchain)
     endif ()
 endfunction(get_toolchain)
 
-# get host
-function(get_host_os host_os)
-    if (CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
-        set(${host_os} windows PARENT_SCOPE)
-    elseif (CMAKE_HOST_SYSTEM_NAME STREQUAL Linux)
-        set(${host_os} linux PARENT_SCOPE)    
-    elseif (CMAKE_HOST_SYSTEM_NAME STREQUAL Darwin)
-        set(${host_os} macos PARENT_SCOPE)
-    else ()
-        # more to be added
-        message(FATAL_ERROR "unsupported system: ${${CMAKE_HOST_SYSTEM_NAME}}")
-    endif ()
-endfunction(get_host_os)
-
 # construct environment name
 message(STATUS "DETECTING ENVIRONMENT ...")
 
@@ -127,26 +113,12 @@ endif ()
 set(ENV_CPU ${ENV_CPU} CACHE INTERNAL "cpu")
 message(STATUS "cpu: ${ENV_CPU}")
 
-# app building toolchain
+# toolchain
 message(STATUS "detecting toochain")
 get_toolchain(ENV_TOOLCHAIN)
 set(ENV_TOOLCHAIN ${ENV_TOOLCHAIN} CACHE INTERNAL "toochain")
 message(STATUS "toochain: ${ENV_TOOLCHAIN}")
 
-# host
-message(STATUS "detecting host")
-get_host_os(ENV_HOST)
-set(ENV_HOST ${ENV_HOST} CACHE INTERNAL "host")
-message(STATUS "host: ${ENV_HOST}")
-
-# make env name
-#if (ENV_OS STREQUAL ENV_HOST)
-#    set(ENV "${ENV_OS}-${ENV_CPU}-${ENV_TOOLCHAIN}")
-#else ()
-#    set(ENV "${ENV_OS}-${ENV_CPU}-${ENV_TOOLCHAIN}--${ENV_HOST}")
-#endif ()
-# the toolchain implies host platform, e.g. vs implies building on windows
-#set(ENV "${ENV_OS}-${ENV_CPU}-${ENV_TOOLCHAIN}")
 set(ENV "${ENV_OS}-${ENV_TOOLCHAIN}")
 
 include(TestBigEndian)

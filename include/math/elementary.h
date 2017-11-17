@@ -16,21 +16,18 @@
  * limitations under the License.
  */
 
-/**
-@file tt_backtrace.h
-@brief back trace
-
-this file defines back trace APIs
-*/
-
-#ifndef __TT_BACKTRACE__
-#define __TT_BACKTRACE__
+#ifndef __IEXP_MATH_ELEMENTARY__
+#define __IEXP_MATH_ELEMENTARY__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
-#include <tt_basic_type.h>
+#include <common/common.h>
+
+#include <gsl/gsl_math.h>
+
+IEXP_NS_BEGIN
 
 ////////////////////////////////////////////////////////////
 // macro definition
@@ -48,13 +45,32 @@ this file defines back trace APIs
 // interface declaration
 ////////////////////////////////////////////////////////////
 
-/**
-@fn void tt_backtrace_component_register()
-register backtrace system
-*/
-tt_export void tt_backtrace_component_register();
+// todo: expm1
 
-tt_export const tt_char_t *tt_backtrace(IN OPT const tt_char_t *prefix,
-                                        IN OPT const tt_char_t *suffix);
+// todo: hypot
 
-#endif /* __TT_BACKTRACE__ */
+// todo: hypot3
+
+// todo: acosh
+
+// todo: asinh
+
+// todo: atanh
+
+// todo: ldexp
+
+// todo: frexp
+
+// todo: odd
+
+// todo: even
+
+// todo: max
+
+// todo: min
+
+// todo: cmp
+
+IEXP_NS_END
+
+#endif /* __IEXP_MATH_ELEMENTARY__ */
