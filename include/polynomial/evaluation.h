@@ -111,9 +111,9 @@ class eval_deriv_functor
         ArrayType;
 
     eval_deriv_functor(const T &c, typename T::Scalar x, int order)
-        : m_c(c.eval())
-        , m_result(order)
+        : m_result(order)
     {
+        typename Eigen::internal::eval<T>::type m_c(c.eval());
         eval_deriv_impl<typename T::Scalar>(m_c.data(),
                                             m_c.size(),
                                             x,
@@ -127,7 +127,6 @@ class eval_deriv_functor
     }
 
   private:
-    typename Eigen::internal::eval<T>::type m_c;
     ArrayType m_result;
 };
 
