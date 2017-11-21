@@ -21,7 +21,7 @@
 # source file
 #
 
-set(test_src test_run.cpp)
+set(test_src test_imexpress.cpp)
 
 aux_source_directory(case test_src)
 #message(STATUS "test source: ${test_src}")
@@ -30,28 +30,29 @@ aux_source_directory(case test_src)
 # build
 #
 
-add_executable(test_run ${test_src})
+add_executable(test_imexpress ${test_src})
 
 #
 # header file path
 #
 
-target_include_directories(test_run PRIVATE ${ROOT_PATH}/include)
+target_include_directories(test_imexpress PRIVATE ${ROOT_PATH}/include)
+target_include_directories(test_imexpress PRIVATE ${ROOT_PATH}/test)
 
 # gsl
-target_include_directories(test_run PRIVATE ${OUT_PATH}/gsl)
+target_include_directories(test_imexpress PRIVATE ${OUT_PATH}/gsl)
 
 # eigen
-target_include_directories(test_run PRIVATE ${LIBRARY_PATH}/eigen)
+target_include_directories(test_imexpress PRIVATE ${LIBRARY_PATH}/eigen)
 
 # catch
-target_include_directories(test_run PRIVATE ${LIBRARY_PATH}/Catch2/single_include)
+target_include_directories(test_imexpress PRIVATE ${LIBRARY_PATH}/Catch2/single_include)
 
 #
 # link
 #
 
-target_link_libraries(test_run imexpress)
+target_link_libraries(test_imexpress imexpress)
 
 #
 # package

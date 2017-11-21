@@ -16,26 +16,23 @@
  * USA.
  */
 
-#ifndef __IEXP_COMMON__
-#define __IEXP_COMMON__
+#ifndef __IEXP_UTIL__
+#define __IEXP_UTIL__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
-#include <common/environment.h>
-
-#include <common/eigen_config.h>
-#include <common/namespace.h>
-#include <common/util.h>
-
-#include <gsl/config.h>
-
-IEXP_NS_BEGIN
-
 ////////////////////////////////////////////////////////////
 // macro definition
 ////////////////////////////////////////////////////////////
+
+#define IEXP_NOT_NULL(p)                                                       \
+    do {                                                                       \
+        if ((p) == NULL) {                                                     \
+            throw std::bad_alloc();                                            \
+        }                                                                      \
+    } while (0)
 
 ////////////////////////////////////////////////////////////
 // type definition
@@ -49,6 +46,4 @@ IEXP_NS_BEGIN
 // interface declaration
 ////////////////////////////////////////////////////////////
 
-IEXP_NS_END
-
-#endif /* __IEXP_COMMON__ */
+#endif /* __IEXP_UTIL__ */

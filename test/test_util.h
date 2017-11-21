@@ -40,6 +40,10 @@ IEXP_NS_BEGIN
 #define __D_EQ_IN(a, b, e)                                                     \
     ((std::abs((a) - (b)) < (e)) || (std::isnan((a)) && std::isnan((b))))
 
+#define __D_EQ9(a, b) __D_EQ_IN(a, b, 1e-9)
+
+#define __D_EQ7(a, b) __D_EQ_IN(a, b, 1e-7)
+
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
