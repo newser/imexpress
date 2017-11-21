@@ -1,19 +1,19 @@
 /* Copyright (C) 2017 haniu (niuhao.cn@gmail.com)
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or (at
+ * your option) any later version.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
+ * USA.
  */
 
 #ifndef __IEXP_POLY_DIVIDED_DIFFERENCE__
@@ -25,7 +25,6 @@
 
 #include <common/common.h>
 
-#include <config.h>
 #include <gsl/gsl_poly.h>
 
 IEXP_NS_BEGIN
@@ -67,12 +66,12 @@ class dd_functor
                   T::SizeAtCompileTime,
                   1,
                   ColMajor,
-                  T::MaxSizeAtCompileTime,
+                  T::SizeAtCompileTime,
                   1>
         ArrayType;
 
     dd_functor(const T &xa, const T &ya)
-        : m_result(xa.size())
+        : m_result(xa.size(), 1)
     {
         typename Eigen::internal::eval<T>::type m_xa(xa.eval()),
             m_ya(ya.eval());
@@ -92,7 +91,7 @@ class dd_functor
 };
 
 template <typename T>
-CwiseNullaryOp<dd_functor<T>, typename dd_functor<T>::ArrayType> dd(
+inline CwiseNullaryOp<dd_functor<T>, typename dd_functor<T>::ArrayType> dd(
     const Eigen::ArrayBase<T> &xa, const Eigen::ArrayBase<T> &ya)
 {
     eigen_assert((xa.derived().cols() == 1) || (xa.derived().rows() == 1));
@@ -169,12 +168,12 @@ class dd_taylor_functor
                   T::SizeAtCompileTime,
                   1,
                   ColMajor,
-                  T::MaxSizeAtCompileTime,
+                  T::SizeAtCompileTime,
                   1>
         ArrayType;
 
     dd_taylor_functor(typename T::Scalar xp, const T &dd, const T &xa)
-        : m_result(dd.size())
+        : m_result(dd.size(), 1)
     {
         typename Eigen::internal::eval<T>::type m_dd(dd.eval()),
             m_xa(xa.eval());
@@ -197,7 +196,8 @@ class dd_taylor_functor
 };
 
 template <typename T>
-CwiseNullaryOp<dd_taylor_functor<T>, typename dd_taylor_functor<T>::ArrayType>
+inline CwiseNullaryOp<dd_taylor_functor<T>,
+                      typename dd_taylor_functor<T>::ArrayType>
 dd_taylor(typename T::Scalar xp,
           const Eigen::ArrayBase<T> &dd,
           const Eigen::ArrayBase<T> &xa)
@@ -248,7 +248,7 @@ class dd_hermit_functor
         ArrayType;
 
     dd_hermit_functor(const T &xa, const T &ya, const T &dya)
-        : m_result(xa.size() << 1)
+        : m_result(xa.size() << 1, 1)
     {
         ArrayType m_za(xa.size() << 1);
         typename Eigen::internal::eval<T>::type m_xa(xa.eval()),
@@ -271,7 +271,8 @@ class dd_hermit_functor
 };
 
 template <typename T>
-CwiseNullaryOp<dd_hermit_functor<T>, typename dd_hermit_functor<T>::ArrayType>
+inline CwiseNullaryOp<dd_hermit_functor<T>,
+                      typename dd_hermit_functor<T>::ArrayType>
 dd_hermit(const Eigen::ArrayBase<T> &xa,
           const Eigen::ArrayBase<T> &ya,
           const Eigen::ArrayBase<T> &dya)

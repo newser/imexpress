@@ -16,25 +16,24 @@
  * USA.
  */
 
-#ifndef __IEXP_COMMON__
-#define __IEXP_COMMON__
+#ifndef __IEXP_EIGEN_CONFIG__
+#define __IEXP_EIGEN_CONFIG__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
-#include <common/environment.h>
+namespace Eigen {
+}
 
-#include <common/eigen_config.h>
-#include <common/namespace.h>
-
-#include <gsl/config.h>
-
-IEXP_NS_BEGIN
+namespace iexp = Eigen;
 
 ////////////////////////////////////////////////////////////
 // macro definition
 ////////////////////////////////////////////////////////////
+
+#define IEXP_NS_BEGIN namespace Eigen {
+#define IEXP_NS_END }
 
 ////////////////////////////////////////////////////////////
 // type definition
@@ -48,6 +47,4 @@ IEXP_NS_BEGIN
 // interface declaration
 ////////////////////////////////////////////////////////////
 
-IEXP_NS_END
-
-#endif /* __IEXP_COMMON__ */
+#endif /* __IEXP_EIGEN_CONFIG__ */

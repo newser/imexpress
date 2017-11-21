@@ -1,6 +1,7 @@
 #include <../test/test_util.h>
 #include <Eigen/Dense>
 #include <catch.hpp>
+#include <gsl/gsl_math.h>
 #include <iostream>
 #include <math/elementary.h>
 #include <unsupported/Eigen/SpecialFunctions>
