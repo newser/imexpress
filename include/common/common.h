@@ -27,6 +27,7 @@
 
 #include <common/eigen_config.h>
 #include <common/namespace.h>
+#include <common/type.h>
 #include <common/util.h>
 
 #include <gsl/config.h>

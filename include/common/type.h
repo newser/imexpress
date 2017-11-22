@@ -16,44 +16,42 @@
  * USA.
  */
 
-#ifndef __IEXP_UTIL__
-#define __IEXP_UTIL__
+#ifndef __IEXP_TYPE__
+#define __IEXP_TYPE__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
+#include <common/namespace.h>
+
+#include <gsl/config.h>
+#include <gsl/gsl_mode.h>
+
+#include <Eigen/Dense>
+
+IEXP_NS_BEGIN
+
 ////////////////////////////////////////////////////////////
 // macro definition
 ////////////////////////////////////////////////////////////
-
-#define IEXP_NOT_NULL(p)                                                       \
-    do {                                                                       \
-        if ((p) == NULL) {                                                     \
-            throw std::bad_alloc();                                            \
-        }                                                                      \
-    } while (0)
-
-#define TYPE_IS(t1, t2) type_is<t1, t2>::value
 
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
 
-template <typename T, typename U>
-struct type_is
+enum precision
 {
-    static const bool value = false;
+    // Double-precision, a relative accuracy of approximately 2 * 10^{-16}.
+    DOUBLE = GSL_PREC_DOUBLE,
+    // Single-precision, a relative accuracy of approximately 10^{-7}.
+    SINGLE = GSL_PREC_SINGLE,
+    // Approximate values, a relative accuracy of approximately 5 * 10^{-4}.
+    APPROX = GSL_PREC_APPROX,
 };
 
 template <typename T>
-struct type_is<T, T>
-{
-    static const bool value = true;
-};
-
-template <typename T>
-struct type_eval
+struct eval_type
 {
     typedef typename Eigen::internal::eval<T>::type type;
 };
@@ -66,4 +64,6 @@ struct type_eval
 // interface declaration
 ////////////////////////////////////////////////////////////
 
-#endif /* __IEXP_UTIL__ */
+IEXP_NS_END
+
+#endif /* __IEXP_TYPE__ */

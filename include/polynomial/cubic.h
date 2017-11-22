@@ -71,7 +71,7 @@ class solve_cubic_functor
     solve_cubic_functor(const T &c)
         : m_result(IEXP_NAN, IEXP_NAN, IEXP_NAN)
     {
-        typename Eigen::internal::eval<T>::type m_c(c.eval());
+        typename type_eval<T>::type m_c(c.eval());
         solve_cubic_impl<typename T::Scalar>(m_c[0],
                                              m_c[1],
                                              m_c[2],
@@ -141,7 +141,7 @@ class complex_solve_cubic_functor
     complex_solve_cubic_functor(const T &c)
         : m_result(IEXP_NAN, IEXP_NAN, IEXP_NAN)
     {
-        typename Eigen::internal::eval<T>::type m_c(c.eval());
+        typename type_eval<T>::type m_c(c.eval());
         complex_solve_cubic_impl<typename T::Scalar>(c[0],
                                                      c[1],
                                                      c[2],

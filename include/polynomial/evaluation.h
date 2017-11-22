@@ -72,7 +72,7 @@ inline typename T::Scalar eval(const Eigen::ArrayBase<T> &c,
 {
     eigen_assert((c.derived().cols() == 1) || (c.derived().rows() == 1));
 
-    typename Eigen::internal::eval<T>::type m_c(c.eval());
+    typename type_eval<T>::type m_c(c.eval());
     return eval_impl<typename T::Scalar>(m_c.data(), m_c.size(), x);
 }
 
@@ -112,7 +112,7 @@ class eval_deriv_functor
     eval_deriv_functor(const T &c, typename T::Scalar x, int order)
         : m_result(order, 1)
     {
-        typename Eigen::internal::eval<T>::type m_c(c.eval());
+        typename type_eval<T>::type m_c(c.eval());
         eval_deriv_impl<typename T::Scalar>(m_c.data(),
                                             m_c.size(),
                                             x,

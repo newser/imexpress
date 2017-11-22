@@ -52,6 +52,7 @@ add_group(common ${ROOT_PATH}/include/common ${ROOT_PATH}/source/common IEXP_SOU
 add_group(math ${ROOT_PATH}/include/math ${ROOT_PATH}/source/math IEXP_SOURCE)
 add_group(complex ${ROOT_PATH}/include/complex ${ROOT_PATH}/source/complex IEXP_SOURCE)
 add_group(polynomial ${ROOT_PATH}/include/polynomial ${ROOT_PATH}/source/polynomial IEXP_SOURCE)
+add_group(special ${ROOT_PATH}/include/special ${ROOT_PATH}/source/special IEXP_SOURCE)
 
 #
 # build

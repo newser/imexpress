@@ -76,7 +76,7 @@ class complex_solve_functor
     complex_solve_functor(const T &a)
         : m_result(a.size() - 1, 1)
     {
-        typename Eigen::internal::eval<T>::type m_a(a.eval());
+        typename type_eval<T>::type m_a(a.eval());
         complex_solve_impl<typename T::Scalar>(m_a.data(),
                                                m_a.size(),
                                                m_result.data());
