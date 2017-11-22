@@ -1,5 +1,4 @@
 #include <../test/test_util.h>
-#include <Eigen/Dense>
 #include <catch.hpp>
 #include <iostream>
 #include <polynomial/evaluation.h>

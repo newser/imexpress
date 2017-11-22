@@ -1,4 +1,3 @@
-#include <Eigen/Dense>
 #include <catch.hpp>
 #include <iostream>
 #include <math/inf_nan.h>
