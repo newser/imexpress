@@ -69,7 +69,7 @@ TEST_CASE("sf_airy_scaled")
 
     x << -5.0, 0.6999999999999907, 1.649999999999991, 2.54999999999999,
         3.499999999999987, 5.39999999999998;
-    y = iexp::sf::airy_Ai_scaled(x);
+    y = iexp::sf::airy_Ai<true>(x);
     REQUIRE(__D_EQ9(y(0, 0), 0.3507610090241142));
     REQUIRE(__D_EQ9(y(0, 1), 0.2795125667681217));
     REQUIRE(__D_EQ9(y(0, 2), 0.2395493001442741));
@@ -77,11 +77,11 @@ TEST_CASE("sf_airy_scaled")
     REQUIRE(__D_EQ9(y(1, 1), 0.2032920808163519));
     REQUIRE(__D_EQ9(y(1, 2), 0.1836050093282229));
 
-    y = iexp::sf::airy_Bi_scaled(x);
+    y = iexp::sf::airy_Bi<true>(x);
     REQUIRE(__D_EQ9(y(0, 0), -0.1383691349016005));
     REQUIRE(__D_EQ9(y(1, 2), 0.3734050675720473));
 
-    y = iexp::sf::airy_Ai_scaled(x, e);
+    y = iexp::sf::airy_Ai<true>(x, e);
     REQUIRE(__D_EQ9(y(0, 0), 0.3507610090241142));
     REQUIRE(__D_EQ9(y(0, 1), 0.2795125667681217));
     REQUIRE(__D_EQ9(y(0, 2), 0.2395493001442741));
@@ -99,7 +99,7 @@ TEST_CASE("sf_airy_scaled")
         REQUIRE(__D_EQ9(e(1, 0), r.err));
     }
 
-    y = iexp::sf::airy_Bi_scaled(x, e);
+    y = iexp::sf::airy_Bi<true>(x, e);
     REQUIRE(__D_EQ9(y(0, 0), -0.1383691349016005));
     REQUIRE(__D_EQ9(y(1, 2), 0.3734050675720473));
 
@@ -114,11 +114,11 @@ TEST_CASE("sf_airy_scaled")
     }
 
     // compile
-    y = iexp::sf::airy_Ai_scaled((x + x) * 2);
-    y = iexp::sf::airy_Ai_scaled((x + x) * 2, e);
+    y = iexp::sf::airy_Ai<true>((x + x) * 2);
+    y = iexp::sf::airy_Ai<true>((x + x) * 2, e);
     // y = iexp::sf::airy_Ai((x + x) * 2, e + e);
-    y = iexp::sf::airy_Bi_scaled((x + x) * 2);
-    y = iexp::sf::airy_Bi_scaled((x + x) * 2, e);
+    y = iexp::sf::airy_Bi<true>((x + x) * 2);
+    y = iexp::sf::airy_Bi<true>((x + x) * 2, e);
 }
 
 TEST_CASE("sf_airy_deriv")
@@ -187,15 +187,15 @@ TEST_CASE("sf_airy_deriv_scaled")
     iexp::ArrayXXd x = iexp::ArrayXXd::Random(2, 1), y(2, 1), e(2, 1);
 
     x << -5.0, 6.299999999999977;
-    y = iexp::sf::airy_Ai_deriv_scaled(x);
+    y = iexp::sf::airy_Ai_deriv<true>(x);
     REQUIRE(__D_EQ9(y(0, 0), 0.3271928185544435));
     REQUIRE(__D_EQ9(y(1, 0), -0.4508799189585947));
 
-    y = iexp::sf::airy_Bi_deriv_scaled(x);
+    y = iexp::sf::airy_Bi_deriv<true>(x);
     REQUIRE(__D_EQ9(y(0, 0), 0.778411773001899));
     REQUIRE(__D_EQ9(y(1, 0), 0.8852064139737571));
 
-    y = iexp::sf::airy_Ai_deriv_scaled(x, e);
+    y = iexp::sf::airy_Ai_deriv<true>(x, e);
     REQUIRE(__D_EQ9(y(0, 0), 0.3271928185544435));
     REQUIRE(__D_EQ9(y(1, 0), -0.4508799189585947));
 
@@ -207,7 +207,7 @@ TEST_CASE("sf_airy_deriv_scaled")
         REQUIRE(__D_EQ9(e(1, 0), r.err));
     }
 
-    y = iexp::sf::airy_Bi_deriv_scaled(x, e);
+    y = iexp::sf::airy_Bi_deriv<true>(x, e);
     REQUIRE(__D_EQ9(y(0, 0), 0.778411773001899));
     REQUIRE(__D_EQ9(y(1, 0), 0.8852064139737571));
 
@@ -220,8 +220,8 @@ TEST_CASE("sf_airy_deriv_scaled")
     }
 
     // compile
-    y = iexp::sf::airy_Ai_deriv_scaled((x + x) * 2);
-    y = iexp::sf::airy_Ai_deriv_scaled((x + x) * 2, e);
+    y = iexp::sf::airy_Ai_deriv<true>((x + x) * 2);
+    y = iexp::sf::airy_Ai_deriv<true>((x + x) * 2, e);
     // y = iexp::sf::airy_Ai((x + x) * 2, e + e);
 }
 
@@ -244,7 +244,6 @@ TEST_CASE("sf_airy_zero")
     REQUIRE(__D_EQ9(y(0, 3), -64.2355167606561537));
 
     y = iexp::sf::airy_n0_Ai(x, e);
-    std::cout << y << std::endl;
     REQUIRE(__D_EQ9(y(0, 0), -4.087949444130970617));
     REQUIRE(__D_EQ9(y(0, 1), -38.02100867725525443));
     REQUIRE(__D_EQ9(y(0, 2), -60.45555727411669871));

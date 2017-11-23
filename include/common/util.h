@@ -36,6 +36,8 @@
 
 #define TYPE_IS(t1, t2) type_is<t1, t2>::value
 
+#define TYPE_CHOOSE(v, t1, t2) type_choose<v, t1, t2>::type
+
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
@@ -56,6 +58,24 @@ template <typename T>
 struct type_eval
 {
     typedef typename Eigen::internal::eval<T>::type type;
+};
+
+template <typename T1, typename T2, bool V>
+struct type_choose
+{
+    typedef void type;
+};
+
+template <typename T1, typename T2>
+struct type_choose<T1, T2, true>
+{
+    typedef T1 type;
+};
+
+template <typename T1, typename T2>
+struct type_choose<T1, T2, false>
+{
+    typedef T2 type;
 };
 
 ////////////////////////////////////////////////////////////
