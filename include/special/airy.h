@@ -117,7 +117,7 @@ inline double airy_Ai_e_impl<false, double>(const double x,
         e = r.err;
         return r.val;
     }
-    throw std::invalid_argument("todo");
+    THROW_OR_RETURN_NAN(std::runtime_error("airy_Ai"));
 }
 
 template <>
@@ -130,7 +130,7 @@ inline double airy_Ai_e_impl<true, double>(const double x,
         e = r.err;
         return r.val;
     }
-    throw std::invalid_argument("todo");
+    THROW_OR_RETURN_NAN(std::runtime_error("airy_Ai_scaled"));
 }
 
 template <bool scaled, typename T, typename U>
@@ -260,7 +260,7 @@ inline double airy_Ai_deriv_e_impl<false, double>(const double x,
         e = r.err;
         return r.val;
     }
-    throw std::invalid_argument("todo");
+    THROW_OR_RETURN_NAN(std::runtime_error("airy_Ai_deriv"));
 }
 
 template <>
@@ -273,7 +273,7 @@ inline double airy_Ai_deriv_e_impl<true, double>(const double x,
         e = r.err;
         return r.val;
     }
-    throw std::invalid_argument("todo");
+    THROW_OR_RETURN_NAN(std::runtime_error("airy_Ai_deriv_scaled"));
 }
 
 template <bool scaled, typename T, typename U>
@@ -401,7 +401,7 @@ inline double airy_Bi_e_impl<false, double>(const double x,
         e = r.err;
         return r.val;
     }
-    throw std::invalid_argument("todo");
+    THROW_OR_RETURN_NAN(std::runtime_error("airy_Bi"));
 }
 
 template <>
@@ -414,7 +414,7 @@ inline double airy_Bi_e_impl<true, double>(const double x,
         e = r.err;
         return r.val;
     }
-    throw std::invalid_argument("todo");
+    THROW_OR_RETURN_NAN(std::runtime_error("airy_Bi_scaled"));
 }
 
 template <bool scaled, typename T, typename U>
@@ -544,7 +544,7 @@ inline double airy_Bi_deriv_e_impl<false, double>(const double x,
         e = r.err;
         return r.val;
     }
-    throw std::invalid_argument("todo");
+    THROW_OR_RETURN_NAN(std::runtime_error("airy_Bi_deriv"));
 }
 
 template <>
@@ -557,7 +557,7 @@ inline double airy_Bi_deriv_e_impl<true, double>(const double x,
         e = r.err;
         return r.val;
     }
-    throw std::invalid_argument("todo");
+    THROW_OR_RETURN_NAN(std::runtime_error("airy_Bi_deriv_scaled"));
 }
 
 template <bool scaled, typename T, typename U>

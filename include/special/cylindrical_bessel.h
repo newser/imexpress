@@ -109,7 +109,7 @@ inline double cbessel_j_e_impl(const int n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    throw std::invalid_argument("todo");
+    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_j"));
 }
 
 template <typename T, typename U>
@@ -224,7 +224,7 @@ inline double cbessel_y_e_impl(const int n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    throw std::invalid_argument("todo");
+    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_y"));
 }
 
 template <typename T, typename U>

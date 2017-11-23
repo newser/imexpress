@@ -134,7 +134,7 @@ inline double mcbessel_i_e_impl<false, double>(const int n,
         e = r.err;
         return r.val;
     }
-    throw std::invalid_argument("todo");
+    THROW_OR_RETURN_NAN(std::runtime_error("mcbessel_i"));
 }
 
 template <>
@@ -147,7 +147,7 @@ inline double mcbessel_i_e_impl<true, double>(const int n,
         e = r.err;
         return r.val;
     }
-    throw std::invalid_argument("todo");
+    THROW_OR_RETURN_NAN(std::runtime_error("mcbessel_i, scaled"));
 }
 
 template <bool scaled, typename T, typename U>
@@ -274,7 +274,7 @@ inline double mcbessel_k_e_impl<false, double>(const int n,
         e = r.err;
         return r.val;
     }
-    throw std::invalid_argument("todo");
+    THROW_OR_RETURN_NAN(std::runtime_error("mcbessel_k"));
 }
 
 template <>
@@ -287,7 +287,7 @@ inline double mcbessel_k_e_impl<true, double>(const int n,
         e = r.err;
         return r.val;
     }
-    throw std::invalid_argument("todo");
+    THROW_OR_RETURN_NAN(std::runtime_error("mcbessel_k, scaled"));
 }
 
 template <bool scaled, typename T, typename U>
