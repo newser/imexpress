@@ -44,8 +44,8 @@ namespace sf {
 // bessel first kind
 // ========================================
 
-template <typename T>
-inline T cbessel_j_impl(const int n, const T x)
+template <typename T, typename V>
+inline T cbessel_j_impl(const V n, const T x)
 {
     throw std::invalid_argument("todo");
 }
@@ -56,7 +56,13 @@ inline double cbessel_j_impl(const int n, const double x)
     return gsl_sf_bessel_Jn(n, x);
 }
 
-template <typename T>
+template <>
+inline double cbessel_j_impl(const double n, const double x)
+{
+    return gsl_sf_bessel_Jnu(n, x);
+}
+
+template <typename T, typename V>
 class cbessel_j_functor
 {
   public:
@@ -68,7 +74,7 @@ class cbessel_j_functor
                   T::MaxColsAtCompileTime>
         ArrayType;
 
-    cbessel_j_functor(const int n, const T &x)
+    cbessel_j_functor(const V n, const T &x)
         : m_n(n)
         , m_x(x)
     {
@@ -76,27 +82,27 @@ class cbessel_j_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return cbessel_j_impl<typename T::Scalar>(m_n, m_x(i, j));
+        return cbessel_j_impl<typename T::Scalar, V>(m_n, m_x(i, j));
     }
 
   private:
-    const int m_n;
+    const V m_n;
     const T &m_x;
 };
 
-template <typename T>
-inline CwiseNullaryOp<cbessel_j_functor<T>,
-                      typename cbessel_j_functor<T>::ArrayType>
-cbessel_j(const int n, const Eigen::ArrayBase<T> &x)
+template <typename T, typename V>
+inline CwiseNullaryOp<cbessel_j_functor<T, V>,
+                      typename cbessel_j_functor<T, V>::ArrayType>
+cbessel_j(const V n, const Eigen::ArrayBase<T> &x)
 {
-    typedef typename cbessel_j_functor<T>::ArrayType ArrayType;
+    typedef typename cbessel_j_functor<T, V>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
-                                  cbessel_j_functor<T>(n, x.derived()));
+                                  cbessel_j_functor<T, V>(n, x.derived()));
 }
 
-template <typename T>
-inline T cbessel_j_e_impl(const int n, const T x, T &e)
+template <typename T, typename V>
+inline T cbessel_j_e_impl(const V n, const T x, T &e)
 {
     throw std::invalid_argument("todo");
 }
@@ -112,7 +118,18 @@ inline double cbessel_j_e_impl(const int n, const double x, double &e)
     THROW_OR_RETURN_NAN(std::runtime_error("cbessel_j"));
 }
 
-template <typename T, typename U>
+template <>
+inline double cbessel_j_e_impl(const double n, const double x, double &e)
+{
+    gsl_sf_result r;
+    if (gsl_sf_bessel_Jnu_e(n, x, &r) == GSL_SUCCESS) {
+        e = r.err;
+        return r.val;
+    }
+    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_j"));
+}
+
+template <typename T, typename U, typename V>
 class cbessel_j_e_functor
 {
   public:
@@ -124,7 +141,7 @@ class cbessel_j_e_functor
                   T::MaxColsAtCompileTime>
         ArrayType;
 
-    cbessel_j_e_functor(const int n, const T &x, U &e)
+    cbessel_j_e_functor(const V n, const T &x, U &e)
         : m_n(n)
         , m_x(x)
         , m_e(e)
@@ -133,34 +150,36 @@ class cbessel_j_e_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return cbessel_j_e_impl<typename T::Scalar>(m_n, m_x(i, j), m_e(i, j));
+        return cbessel_j_e_impl<typename T::Scalar, V>(m_n,
+                                                       m_x(i, j),
+                                                       m_e(i, j));
     }
 
   private:
-    const int m_n;
+    const V m_n;
     const T &m_x;
     U &m_e;
 };
 
-template <typename T, typename U>
-inline CwiseNullaryOp<cbessel_j_e_functor<T, U>,
-                      typename cbessel_j_e_functor<T, U>::ArrayType>
-cbessel_j(const int n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+template <typename T, typename U, typename V>
+inline CwiseNullaryOp<cbessel_j_e_functor<T, U, V>,
+                      typename cbessel_j_e_functor<T, U, V>::ArrayType>
+cbessel_j(const V n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
 {
-    typedef typename cbessel_j_e_functor<T, U>::ArrayType ArrayType;
+    typedef typename cbessel_j_e_functor<T, U, V>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
-                                  cbessel_j_e_functor<T, U>(n,
-                                                            x.derived(),
-                                                            e.derived()));
+                                  cbessel_j_e_functor<T, U, V>(n,
+                                                               x.derived(),
+                                                               e.derived()));
 }
 
 // ========================================
 // bessel second kind
 // ========================================
 
-template <typename T>
-inline T cbessel_y_impl(const int n, const T x)
+template <typename T, typename V>
+inline T cbessel_y_impl(const V n, const T x)
 {
     throw std::invalid_argument("todo");
 }
@@ -171,7 +190,13 @@ inline double cbessel_y_impl(const int n, const double x)
     return gsl_sf_bessel_Yn(n, x);
 }
 
-template <typename T>
+template <>
+inline double cbessel_y_impl(const double n, const double x)
+{
+    return gsl_sf_bessel_Ynu(n, x);
+}
+
+template <typename T, typename V>
 class cbessel_y_functor
 {
   public:
@@ -183,7 +208,7 @@ class cbessel_y_functor
                   T::MaxColsAtCompileTime>
         ArrayType;
 
-    cbessel_y_functor(const int n, const T &x)
+    cbessel_y_functor(const V n, const T &x)
         : m_n(n)
         , m_x(x)
     {
@@ -191,27 +216,27 @@ class cbessel_y_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return cbessel_y_impl<typename T::Scalar>(m_n, m_x(i, j));
+        return cbessel_y_impl<typename T::Scalar, V>(m_n, m_x(i, j));
     }
 
   private:
-    const int m_n;
+    const V m_n;
     const T &m_x;
 };
 
-template <typename T>
-inline CwiseNullaryOp<cbessel_y_functor<T>,
-                      typename cbessel_y_functor<T>::ArrayType>
-cbessel_y(const int n, const Eigen::ArrayBase<T> &x)
+template <typename T, typename V>
+inline CwiseNullaryOp<cbessel_y_functor<T, V>,
+                      typename cbessel_y_functor<T, V>::ArrayType>
+cbessel_y(const V n, const Eigen::ArrayBase<T> &x)
 {
-    typedef typename cbessel_y_functor<T>::ArrayType ArrayType;
+    typedef typename cbessel_y_functor<T, V>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
-                                  cbessel_y_functor<T>(n, x.derived()));
+                                  cbessel_y_functor<T, V>(n, x.derived()));
 }
 
-template <typename T>
-inline T cbessel_y_e_impl(const int n, const T x, T &e)
+template <typename T, typename V>
+inline T cbessel_y_e_impl(const V n, const T x, T &e)
 {
     throw std::invalid_argument("todo");
 }
@@ -227,7 +252,18 @@ inline double cbessel_y_e_impl(const int n, const double x, double &e)
     THROW_OR_RETURN_NAN(std::runtime_error("cbessel_y"));
 }
 
-template <typename T, typename U>
+template <>
+inline double cbessel_y_e_impl(const double n, const double x, double &e)
+{
+    gsl_sf_result r;
+    if (gsl_sf_bessel_Ynu_e(n, x, &r) == GSL_SUCCESS) {
+        e = r.err;
+        return r.val;
+    }
+    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_y"));
+}
+
+template <typename T, typename U, typename V>
 class cbessel_y_e_functor
 {
   public:
@@ -239,7 +275,7 @@ class cbessel_y_e_functor
                   T::MaxColsAtCompileTime>
         ArrayType;
 
-    cbessel_y_e_functor(const int n, const T &x, U &e)
+    cbessel_y_e_functor(const V n, const T &x, U &e)
         : m_n(n)
         , m_x(x)
         , m_e(e)
@@ -248,26 +284,28 @@ class cbessel_y_e_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return cbessel_y_e_impl<typename T::Scalar>(m_n, m_x(i, j), m_e(i, j));
+        return cbessel_y_e_impl<typename T::Scalar, V>(m_n,
+                                                       m_x(i, j),
+                                                       m_e(i, j));
     }
 
   private:
-    const int m_n;
+    const V m_n;
     const T &m_x;
     U &m_e;
 };
 
-template <typename T, typename U>
-inline CwiseNullaryOp<cbessel_y_e_functor<T, U>,
-                      typename cbessel_y_e_functor<T, U>::ArrayType>
-cbessel_y(const int n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+template <typename T, typename U, typename V>
+inline CwiseNullaryOp<cbessel_y_e_functor<T, U, V>,
+                      typename cbessel_y_e_functor<T, U, V>::ArrayType>
+cbessel_y(const V n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
 {
-    typedef typename cbessel_y_e_functor<T, U>::ArrayType ArrayType;
+    typedef typename cbessel_y_e_functor<T, U, V>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
-                                  cbessel_y_e_functor<T, U>(n,
-                                                            x.derived(),
-                                                            e.derived()));
+                                  cbessel_y_e_functor<T, U, V>(n,
+                                                               x.derived(),
+                                                               e.derived()));
 }
 
 ////////////////////////////////////////////////////////////

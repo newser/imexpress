@@ -304,3 +304,69 @@ TEST_CASE("sf_mcbessel_k_scaled")
     gsl_sf_bessel_Kn_scaled_e(4, m(0, 0), &r);
     REQUIRE(__D_EQ9(e(0, 0), r.err));
 }
+
+TEST_CASE("sf_cbessel_j, fractional order")
+{
+    iexp::ArrayXd m(2), m2(2), e(2);
+    gsl_sf_result r;
+
+    // 0.0001
+    m << 1.0, 10.0;
+    m2 = iexp::sf::cbessel_j(0.0001, m);
+    REQUIRE(__D_EQ9(m2(0, 0), 0.7652115411876708497));
+    REQUIRE(__D_EQ9(m2(1, 0), -0.2459270166445205));
+
+    m2 = iexp::sf::cbessel_j(0.0001, m, e);
+    REQUIRE(__D_EQ9(m2(0, 0), 0.7652115411876708497));
+    REQUIRE(__D_EQ9(m2(1, 0), -0.2459270166445205));
+    gsl_sf_bessel_Jnu_e(0.0001, m(0, 0), &r);
+    REQUIRE(__D_EQ9(e(0, 0), r.err));
+    gsl_sf_bessel_Jnu_e(0.0001, m(1, 0), &r);
+    REQUIRE(__D_EQ9(e(1, 0), r.err));
+
+    // 2.0
+    m2 = iexp::sf::cbessel_j(0.75, m);
+    REQUIRE(__D_EQ9(m2(0, 0), 0.5586524932048917478));
+    REQUIRE(__D_EQ9(m2(1, 0), -0.04968928974751508135));
+
+    m2 = iexp::sf::cbessel_j(0.75, m, e);
+    REQUIRE(__D_EQ9(m2(0, 0), 0.5586524932048917478));
+    REQUIRE(__D_EQ9(m2(1, 0), -0.04968928974751508135));
+    gsl_sf_bessel_Jnu_e(0.75, m(0, 0), &r);
+    REQUIRE(__D_EQ9(e(0, 0), r.err));
+    gsl_sf_bessel_Jnu_e(0.75, m(1, 0), &r);
+    REQUIRE(__D_EQ9(e(1, 0), r.err));
+}
+
+TEST_CASE("sf_cbessel_y, fractional order")
+{
+    iexp::ArrayXd m(2), m2(2), e(2);
+    gsl_sf_result r;
+
+    // 0.0001
+    m << 1.0, 10.0;
+    m2 = iexp::sf::cbessel_y(0.0001, m);
+    REQUIRE(__D_EQ9(m2(0, 0), 0.08813676933044478439));
+    REQUIRE(__D_EQ9(m2(1, 0), 0.05570979797521875261));
+
+    m2 = iexp::sf::cbessel_y(0.0001, m, e);
+    REQUIRE(__D_EQ9(m2(0, 0), 0.08813676933044478439));
+    REQUIRE(__D_EQ9(m2(1, 0), 0.05570979797521875261));
+    gsl_sf_bessel_Ynu_e(0.0001, m(0, 0), &r);
+    REQUIRE(__D_EQ9(e(0, 0), r.err));
+    gsl_sf_bessel_Ynu_e(0.0001, m(1, 0), &r);
+    REQUIRE(__D_EQ9(e(1, 0), r.err));
+
+    // 2.0
+    m2 = iexp::sf::cbessel_y(0.75, m);
+    REQUIRE(__D_EQ9(m2(0, 0), -0.6218694174429746383));
+    REQUIRE(__D_EQ9(m2(1, 0), 0.24757063446760384953));
+
+    m2 = iexp::sf::cbessel_y(0.75, m, e);
+    REQUIRE(__D_EQ9(m2(0, 0), -0.6218694174429746383));
+    REQUIRE(__D_EQ9(m2(1, 0), 0.24757063446760384953));
+    gsl_sf_bessel_Ynu_e(0.75, m(0, 0), &r);
+    REQUIRE(__D_EQ9(e(0, 0), r.err));
+    gsl_sf_bessel_Ynu_e(0.75, m(1, 0), &r);
+    REQUIRE(__D_EQ9(e(1, 0), r.err));
+}
