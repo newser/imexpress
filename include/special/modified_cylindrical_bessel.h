@@ -45,13 +45,13 @@ namespace sf {
 // ========================================
 
 template <bool scaled, typename T, typename V>
-inline T mcbessel_i_impl(const V n, const T x)
+inline T cbessel_i_impl(const V n, const T x)
 {
     throw std::invalid_argument("todo");
 }
 
 template <>
-inline double mcbessel_i_impl<false>(const int n, const double x)
+inline double cbessel_i_impl<false>(const int n, const double x)
 {
     // gsl_sf_bessel_In does not call gsl_sf_bessel_i0...
     if (n == 0) {
@@ -64,25 +64,25 @@ inline double mcbessel_i_impl<false>(const int n, const double x)
 }
 
 template <>
-inline double mcbessel_i_impl<true>(const int n, const double x)
+inline double cbessel_i_impl<true>(const int n, const double x)
 {
     return gsl_sf_bessel_In_scaled(n, x);
 }
 
 template <>
-inline double mcbessel_i_impl<false>(const double n, const double x)
+inline double cbessel_i_impl<false>(const double n, const double x)
 {
     return gsl_sf_bessel_Inu(n, x);
 }
 
 template <>
-inline double mcbessel_i_impl<true>(const double n, const double x)
+inline double cbessel_i_impl<true>(const double n, const double x)
 {
     return gsl_sf_bessel_Inu_scaled(n, x);
 }
 
 template <bool scaled, typename T, typename V>
-class mcbessel_i_functor
+class cbessel_i_functor
 {
   public:
     typedef Array<typename T::Scalar,
@@ -93,7 +93,7 @@ class mcbessel_i_functor
                   T::MaxColsAtCompileTime>
         ArrayType;
 
-    mcbessel_i_functor(const V n, const T &x)
+    cbessel_i_functor(const V n, const T &x)
         : m_n(n)
         , m_x(x)
     {
@@ -101,7 +101,7 @@ class mcbessel_i_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return mcbessel_i_impl<scaled, typename T::Scalar, V>(m_n, m_x(i, j));
+        return cbessel_i_impl<scaled, typename T::Scalar, V>(m_n, m_x(i, j));
     }
 
   private:
@@ -110,25 +110,25 @@ class mcbessel_i_functor
 };
 
 template <bool scaled = false, typename T = void, typename V = void>
-inline CwiseNullaryOp<mcbessel_i_functor<scaled, T, V>,
-                      typename mcbessel_i_functor<scaled, T, V>::ArrayType>
-mcbessel_i(const V n, const Eigen::ArrayBase<T> &x)
+inline CwiseNullaryOp<cbessel_i_functor<scaled, T, V>,
+                      typename cbessel_i_functor<scaled, T, V>::ArrayType>
+cbessel_i(const V n, const Eigen::ArrayBase<T> &x)
 {
-    typedef typename mcbessel_i_functor<scaled, T, V>::ArrayType ArrayType;
-    return ArrayType::
-        NullaryExpr(x.rows(),
-                    x.cols(),
-                    mcbessel_i_functor<scaled, T, V>(n, x.derived()));
+    typedef typename cbessel_i_functor<scaled, T, V>::ArrayType ArrayType;
+    return ArrayType::NullaryExpr(x.rows(),
+                                  x.cols(),
+                                  cbessel_i_functor<scaled, T, V>(n,
+                                                                  x.derived()));
 }
 
 template <bool scaled, typename T, typename V>
-inline T mcbessel_i_e_impl(const V n, const T x, T &e)
+inline T cbessel_i_e_impl(const V n, const T x, T &e)
 {
     throw std::invalid_argument("todo");
 }
 
 template <>
-inline double mcbessel_i_e_impl<false>(const int n, const double x, double &e)
+inline double cbessel_i_e_impl<false>(const int n, const double x, double &e)
 {
     gsl_sf_result r;
     int s;
@@ -144,46 +144,44 @@ inline double mcbessel_i_e_impl<false>(const int n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("mcbessel_i"));
+    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_i"));
 }
 
 template <>
-inline double mcbessel_i_e_impl<true>(const int n, const double x, double &e)
+inline double cbessel_i_e_impl<true>(const int n, const double x, double &e)
 {
     gsl_sf_result r;
     if (gsl_sf_bessel_In_scaled_e(n, x, &r) == GSL_SUCCESS) {
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("mcbessel_i, scaled"));
+    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_i, scaled"));
 }
 
 template <>
-inline double mcbessel_i_e_impl<false>(const double n,
-                                       const double x,
-                                       double &e)
+inline double cbessel_i_e_impl<false>(const double n, const double x, double &e)
 {
     gsl_sf_result r;
     if (gsl_sf_bessel_Inu_e(n, x, &r) == GSL_SUCCESS) {
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("mcbessel_i, fractional"));
+    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_i, fractional"));
 }
 
 template <>
-inline double mcbessel_i_e_impl<true>(const double n, const double x, double &e)
+inline double cbessel_i_e_impl<true>(const double n, const double x, double &e)
 {
     gsl_sf_result r;
     if (gsl_sf_bessel_Inu_scaled_e(n, x, &r) == GSL_SUCCESS) {
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("mcbessel_i, scaled, fractional"));
+    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_i, scaled, fractional"));
 }
 
 template <bool scaled, typename T, typename U, typename V>
-class mcbessel_i_e_functor
+class cbessel_i_e_functor
 {
   public:
     typedef Array<typename T::Scalar,
@@ -194,7 +192,7 @@ class mcbessel_i_e_functor
                   T::MaxColsAtCompileTime>
         ArrayType;
 
-    mcbessel_i_e_functor(const V n, const T &x, U &e)
+    cbessel_i_e_functor(const V n, const T &x, U &e)
         : m_n(n)
         , m_x(x)
         , m_e(e)
@@ -203,9 +201,9 @@ class mcbessel_i_e_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return mcbessel_i_e_impl<scaled, typename T::Scalar, V>(m_n,
-                                                                m_x(i, j),
-                                                                m_e(i, j));
+        return cbessel_i_e_impl<scaled, typename T::Scalar, V>(m_n,
+                                                               m_x(i, j),
+                                                               m_e(i, j));
     }
 
   private:
@@ -218,17 +216,17 @@ template <bool scaled = false,
           typename T = void,
           typename U = void,
           typename V = void>
-inline CwiseNullaryOp<mcbessel_i_e_functor<scaled, T, U, V>,
-                      typename mcbessel_i_e_functor<scaled, T, U, V>::ArrayType>
-mcbessel_i(const V n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+inline CwiseNullaryOp<cbessel_i_e_functor<scaled, T, U, V>,
+                      typename cbessel_i_e_functor<scaled, T, U, V>::ArrayType>
+cbessel_i(const V n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
 {
-    typedef typename mcbessel_i_e_functor<scaled, T, U, V>::ArrayType ArrayType;
+    typedef typename cbessel_i_e_functor<scaled, T, U, V>::ArrayType ArrayType;
     return ArrayType::
         NullaryExpr(x.rows(),
                     x.cols(),
-                    mcbessel_i_e_functor<scaled, T, U, V>(n,
-                                                          x.derived(),
-                                                          e.derived()));
+                    cbessel_i_e_functor<scaled, T, U, V>(n,
+                                                         x.derived(),
+                                                         e.derived()));
 }
 
 // ========================================
@@ -236,37 +234,37 @@ mcbessel_i(const V n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
 // ========================================
 
 template <bool scaled, typename T, typename V>
-inline T mcbessel_k_impl(const V n, const T x)
+inline T cbessel_k_impl(const V n, const T x)
 {
     throw std::invalid_argument("todo");
 }
 
 template <>
-inline double mcbessel_k_impl<false>(const int n, const double x)
+inline double cbessel_k_impl<false>(const int n, const double x)
 {
     return gsl_sf_bessel_Kn(n, x);
 }
 
 template <>
-inline double mcbessel_k_impl<true>(const int n, const double x)
+inline double cbessel_k_impl<true>(const int n, const double x)
 {
     return gsl_sf_bessel_Kn_scaled(n, x);
 }
 
 template <>
-inline double mcbessel_k_impl<false>(const double n, const double x)
+inline double cbessel_k_impl<false>(const double n, const double x)
 {
     return gsl_sf_bessel_Knu(n, x);
 }
 
 template <>
-inline double mcbessel_k_impl<true>(const double n, const double x)
+inline double cbessel_k_impl<true>(const double n, const double x)
 {
     return gsl_sf_bessel_Knu_scaled(n, x);
 }
 
 template <bool scaled, typename T, typename V>
-class mcbessel_k_functor
+class cbessel_k_functor
 {
   public:
     typedef Array<typename T::Scalar,
@@ -277,7 +275,7 @@ class mcbessel_k_functor
                   T::MaxColsAtCompileTime>
         ArrayType;
 
-    mcbessel_k_functor(const V n, const T &x)
+    cbessel_k_functor(const V n, const T &x)
         : m_n(n)
         , m_x(x)
     {
@@ -285,7 +283,7 @@ class mcbessel_k_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return mcbessel_k_impl<scaled, typename T::Scalar, V>(m_n, m_x(i, j));
+        return cbessel_k_impl<scaled, typename T::Scalar, V>(m_n, m_x(i, j));
     }
 
   private:
@@ -294,71 +292,69 @@ class mcbessel_k_functor
 };
 
 template <bool scaled = false, typename T = void, typename V = void>
-inline CwiseNullaryOp<mcbessel_k_functor<scaled, T, V>,
-                      typename mcbessel_k_functor<scaled, T, V>::ArrayType>
-mcbessel_k(const V n, const Eigen::ArrayBase<T> &x)
+inline CwiseNullaryOp<cbessel_k_functor<scaled, T, V>,
+                      typename cbessel_k_functor<scaled, T, V>::ArrayType>
+cbessel_k(const V n, const Eigen::ArrayBase<T> &x)
 {
-    typedef typename mcbessel_k_functor<scaled, T, V>::ArrayType ArrayType;
-    return ArrayType::
-        NullaryExpr(x.rows(),
-                    x.cols(),
-                    mcbessel_k_functor<scaled, T, V>(n, x.derived()));
+    typedef typename cbessel_k_functor<scaled, T, V>::ArrayType ArrayType;
+    return ArrayType::NullaryExpr(x.rows(),
+                                  x.cols(),
+                                  cbessel_k_functor<scaled, T, V>(n,
+                                                                  x.derived()));
 }
 
 template <bool scaled, typename T, typename V>
-inline T mcbessel_k_e_impl(const V n, const T x, T &e)
+inline T cbessel_k_e_impl(const V n, const T x, T &e)
 {
     throw std::invalid_argument("todo");
 }
 
 template <>
-inline double mcbessel_k_e_impl<false>(const int n, const double x, double &e)
+inline double cbessel_k_e_impl<false>(const int n, const double x, double &e)
 {
     gsl_sf_result r;
     if (gsl_sf_bessel_Kn_e(n, x, &r) == GSL_SUCCESS) {
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("mcbessel_k"));
+    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_k"));
 }
 
 template <>
-inline double mcbessel_k_e_impl<true>(const int n, const double x, double &e)
+inline double cbessel_k_e_impl<true>(const int n, const double x, double &e)
 {
     gsl_sf_result r;
     if (gsl_sf_bessel_Kn_scaled_e(n, x, &r) == GSL_SUCCESS) {
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("mcbessel_k, scaled"));
+    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_k, scaled"));
 }
 
 template <>
-inline double mcbessel_k_e_impl<false>(const double n,
-                                       const double x,
-                                       double &e)
+inline double cbessel_k_e_impl<false>(const double n, const double x, double &e)
 {
     gsl_sf_result r;
     if (gsl_sf_bessel_Knu_e(n, x, &r) == GSL_SUCCESS) {
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("mcbessel_k, fractional"));
+    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_k, fractional"));
 }
 
 template <>
-inline double mcbessel_k_e_impl<true>(const double n, const double x, double &e)
+inline double cbessel_k_e_impl<true>(const double n, const double x, double &e)
 {
     gsl_sf_result r;
     if (gsl_sf_bessel_Knu_scaled_e(n, x, &r) == GSL_SUCCESS) {
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("mcbessel_k, scaled, fractional"));
+    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_k, scaled, fractional"));
 }
 
 template <bool scaled, typename T, typename U, typename V>
-class mcbessel_k_e_functor
+class cbessel_k_e_functor
 {
   public:
     typedef Array<typename T::Scalar,
@@ -369,7 +365,7 @@ class mcbessel_k_e_functor
                   T::MaxColsAtCompileTime>
         ArrayType;
 
-    mcbessel_k_e_functor(const V n, const T &x, U &e)
+    cbessel_k_e_functor(const V n, const T &x, U &e)
         : m_n(n)
         , m_x(x)
         , m_e(e)
@@ -378,9 +374,9 @@ class mcbessel_k_e_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return mcbessel_k_e_impl<scaled, typename T::Scalar, V>(m_n,
-                                                                m_x(i, j),
-                                                                m_e(i, j));
+        return cbessel_k_e_impl<scaled, typename T::Scalar, V>(m_n,
+                                                               m_x(i, j),
+                                                               m_e(i, j));
     }
 
   private:
@@ -393,17 +389,17 @@ template <bool scaled = false,
           typename T = void,
           typename U = void,
           typename V = void>
-inline CwiseNullaryOp<mcbessel_k_e_functor<scaled, T, U, V>,
-                      typename mcbessel_k_e_functor<scaled, T, U, V>::ArrayType>
-mcbessel_k(const V n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+inline CwiseNullaryOp<cbessel_k_e_functor<scaled, T, U, V>,
+                      typename cbessel_k_e_functor<scaled, T, U, V>::ArrayType>
+cbessel_k(const V n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
 {
-    typedef typename mcbessel_k_e_functor<scaled, T, U, V>::ArrayType ArrayType;
+    typedef typename cbessel_k_e_functor<scaled, T, U, V>::ArrayType ArrayType;
     return ArrayType::
         NullaryExpr(x.rows(),
                     x.cols(),
-                    mcbessel_k_e_functor<scaled, T, U, V>(n,
-                                                          x.derived(),
-                                                          e.derived()));
+                    cbessel_k_e_functor<scaled, T, U, V>(n,
+                                                         x.derived(),
+                                                         e.derived()));
 }
 
 ////////////////////////////////////////////////////////////

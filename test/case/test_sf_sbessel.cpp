@@ -142,19 +142,19 @@ TEST_CASE("sf_sbessel_y")
     REQUIRE(__D_EQ9(e(1, 0), r.err));
 }
 
-TEST_CASE("sf_msbessel_i_scaled")
+TEST_CASE("sf_sbessel_i_scaled")
 {
     iexp::ArrayXd m(3), m2(3), e(3);
     gsl_sf_result r;
 
     // I0
     m << 0.1, 2.0, 100.0;
-    m2 = iexp::sf::msbessel_i<true>(0, m);
+    m2 = iexp::sf::sbessel_i<true>(0, m);
     REQUIRE(__D_EQ9(m2(0, 0), 0.9063462346100907067));
     REQUIRE(__D_EQ9(m2(1, 0), 0.24542109027781645493));
     REQUIRE(__D_EQ9(m2(2, 0), 0.005000000000000000000));
 
-    m2 = iexp::sf::msbessel_i<true>(0, m, e);
+    m2 = iexp::sf::sbessel_i<true>(0, m, e);
     REQUIRE(__D_EQ9(m2(0, 0), 0.9063462346100907067));
     REQUIRE(__D_EQ9(m2(1, 0), 0.24542109027781645493));
     REQUIRE(__D_EQ9(m2(2, 0), 0.005000000000000000000));
@@ -164,12 +164,12 @@ TEST_CASE("sf_msbessel_i_scaled")
     REQUIRE(__D_EQ7(e(2, 0), r.err));
 
     // I1
-    m2 = iexp::sf::msbessel_i<true>(1, m);
+    m2 = iexp::sf::sbessel_i<true>(1, m);
     REQUIRE(__D_EQ9(m2(0, 0), 0.030191419289002226846));
     REQUIRE(__D_EQ9(m2(1, 0), 0.131868364583275317610));
     REQUIRE(__D_EQ9(m2(2, 0), 0.004950000000000000000));
 
-    m2 = iexp::sf::msbessel_i<true>(1, m, e);
+    m2 = iexp::sf::sbessel_i<true>(1, m, e);
     REQUIRE(__D_EQ9(m2(0, 0), 0.030191419289002226846));
     REQUIRE(__D_EQ9(m2(1, 0), 0.131868364583275317610));
     REQUIRE(__D_EQ9(m2(2, 0), 0.004950000000000000000));
@@ -179,28 +179,28 @@ TEST_CASE("sf_msbessel_i_scaled")
     REQUIRE(__D_EQ9(e(2, 0), r.err));
 
     // In
-    m2 = iexp::sf::msbessel_i<true>(4, m);
+    m2 = iexp::sf::sbessel_i<true>(4, m);
     REQUIRE(__D_EQ9(m2(0, 0), 9.579352242057134927e-08));
 
-    m2 = iexp::sf::msbessel_i<true>(4, m, e);
+    m2 = iexp::sf::sbessel_i<true>(4, m, e);
     REQUIRE(__D_EQ9(m2(0, 0), 9.579352242057134927e-08));
     gsl_sf_bessel_In_e(4, m(0, 0), &r);
     REQUIRE(__D_EQ9(e(0, 0), r.err));
 }
 
-TEST_CASE("sf_msbessel_k")
+TEST_CASE("sf_sbessel_k")
 {
     iexp::ArrayXd m(3), m2(3), e(3);
     gsl_sf_result r;
 
     // K0
     m << 0.1, 2.0, 100.0;
-    m2 = iexp::sf::msbessel_k<true>(0, m);
+    m2 = iexp::sf::sbessel_k<true>(0, m);
     REQUIRE(__D_EQ9(m2(0, 0), 15.707963267948966192));
     REQUIRE(__D_EQ9(m2(1, 0), 0.7853981633974483096));
     REQUIRE(__D_EQ9(m2(2, 0), 0.015707963267948966192));
 
-    m2 = iexp::sf::msbessel_k<true>(0, m, e);
+    m2 = iexp::sf::sbessel_k<true>(0, m, e);
     REQUIRE(__D_EQ9(m2(0, 0), 15.707963267948966192));
     REQUIRE(__D_EQ9(m2(1, 0), 0.7853981633974483096));
     REQUIRE(__D_EQ9(m2(2, 0), 0.015707963267948966192));
@@ -211,13 +211,13 @@ TEST_CASE("sf_msbessel_k")
 
     // K1
     m << 0.1, 2.0, 100.0;
-    m2 = iexp::sf::msbessel_k<true>(1, m);
+    m2 = iexp::sf::sbessel_k<true>(1, m);
     // std::cout << m2 << std::endl;
     REQUIRE(__D_EQ9(m2(0, 0), 172.78759594743862812));
     REQUIRE(__D_EQ9(m2(1, 0), 1.1780972450961724644));
     REQUIRE(__D_EQ9(m2(2, 0), 0.015865042900628455854));
 
-    m2 = iexp::sf::msbessel_k<true>(1, m, e);
+    m2 = iexp::sf::sbessel_k<true>(1, m, e);
     REQUIRE(__D_EQ9(m2(0, 0), 172.78759594743862812));
     REQUIRE(__D_EQ9(m2(1, 0), 1.1780972450961724644));
     REQUIRE(__D_EQ9(m2(2, 0), 0.015865042900628455854));
@@ -229,11 +229,11 @@ TEST_CASE("sf_msbessel_k")
     // Kn
     m.resize(2);
     m << 1.0 / 256.0, 1.0 / 8.0;
-    m2 = iexp::sf::msbessel_k<true>(4, m);
+    m2 = iexp::sf::sbessel_k<true>(4, m);
     // REQUIRE(__D_EQ_Nep(m2(0, 0), 1.8205599816961954439e+14, 1000));
     REQUIRE(__D_EQ9(m2(1, 0), 6.1173217814406597530e+06));
 
-    m2 = iexp::sf::msbessel_k<true>(4, m, e);
+    m2 = iexp::sf::sbessel_k<true>(4, m, e);
     // REQUIRE(__D_EQ9(m2(0, 0), 1.8205599816961954439e+14));
     REQUIRE(__D_EQ9(m2(1, 0), 6.1173217814406597530e+06));
     gsl_sf_bessel_kl_scaled_e(4, m(0, 0), &r);
