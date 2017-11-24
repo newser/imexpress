@@ -308,6 +308,162 @@ cbessel_y(const V n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
                                                                e.derived()));
 }
 
+// ========================================
+// location of x-th 0 of first kind bessel
+// ========================================
+
+template <typename V>
+inline double cbessel_n0_j_impl(const V n, const unsigned int x)
+{
+    throw std::invalid_argument("todo");
+}
+
+template <>
+inline double cbessel_n0_j_impl(const int n, const unsigned int x)
+{
+    if (n == 0) {
+        return gsl_sf_bessel_zero_J0(x);
+    } else if (n == 1) {
+        return gsl_sf_bessel_zero_J1(x);
+    } else {
+        throw std::invalid_argument("use 'n.0' instead");
+    }
+}
+
+template <>
+inline double cbessel_n0_j_impl(const double n, const unsigned int x)
+{
+    return gsl_sf_bessel_zero_Jnu(n, x);
+}
+
+template <typename T, typename V>
+class cbessel_n0_j_functor
+{
+  public:
+    typedef Array<double,
+                  T::RowsAtCompileTime,
+                  T::ColsAtCompileTime,
+                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                  T::MaxRowsAtCompileTime,
+                  T::MaxColsAtCompileTime>
+        ArrayType;
+
+    cbessel_n0_j_functor(const V n, const T &x)
+        : m_n(n)
+        , m_x(x)
+    {
+    }
+
+    const double operator()(Index i, Index j) const
+    {
+        return cbessel_n0_j_impl(m_n, (unsigned int)m_x(i, j));
+    }
+
+  private:
+    const V m_n;
+    const T &m_x;
+};
+
+template <typename T, typename V>
+inline CwiseNullaryOp<cbessel_n0_j_functor<T, V>,
+                      typename cbessel_n0_j_functor<T, V>::ArrayType>
+cbessel_n0_j(const V n, const Eigen::ArrayBase<T> &x)
+{
+    static_assert(TYPE_IS(typename T::Scalar, int) ||
+                      TYPE_IS(typename T::Scalar, unsigned int),
+                  "x can only be int or uint array");
+
+    typedef typename cbessel_n0_j_functor<T, V>::ArrayType ArrayType;
+    return ArrayType::NullaryExpr(x.rows(),
+                                  x.cols(),
+                                  cbessel_n0_j_functor<T, V>(n, x.derived()));
+}
+
+template <typename V, typename T>
+inline double cbessel_n0_j_e_impl(const V n, const unsigned int x, T &e)
+{
+    throw std::invalid_argument("todo");
+}
+
+template <>
+inline double cbessel_n0_j_e_impl(const int n, const unsigned int x, double &e)
+{
+    gsl_sf_result r;
+    int s;
+    if (n == 0) {
+        s = gsl_sf_bessel_zero_J0_e(x, &r);
+    } else if (n == 1) {
+        s = gsl_sf_bessel_zero_J1_e(x, &r);
+    } else {
+        throw std::invalid_argument("use 'n.0' instead");
+    }
+    if (s == GSL_SUCCESS) {
+        e = r.err;
+        return r.val;
+    }
+    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_n0_j"));
+}
+
+template <>
+inline double cbessel_n0_j_e_impl(const double n,
+                                  const unsigned int x,
+                                  double &e)
+{
+    gsl_sf_result r;
+    if (gsl_sf_bessel_zero_Jnu_e(n, x, &r) == GSL_SUCCESS) {
+        e = r.err;
+        return r.val;
+    }
+    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_n0_j"));
+}
+
+template <typename T, typename U, typename V>
+class cbessel_n0_j_e_functor
+{
+  public:
+    typedef Array<double,
+                  T::RowsAtCompileTime,
+                  T::ColsAtCompileTime,
+                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                  T::MaxRowsAtCompileTime,
+                  T::MaxColsAtCompileTime>
+        ArrayType;
+
+    cbessel_n0_j_e_functor(const V n, const T &x, U &e)
+        : m_n(n)
+        , m_x(x)
+        , m_e(e)
+    {
+    }
+
+    const double operator()(Index i, Index j) const
+    {
+        return cbessel_n0_j_e_impl(m_n, m_x(i, j), m_e(i, j));
+    }
+
+  private:
+    const V m_n;
+    const T &m_x;
+    U &m_e;
+};
+
+template <typename T, typename U, typename V>
+inline CwiseNullaryOp<cbessel_n0_j_e_functor<T, U, V>,
+                      typename cbessel_n0_j_e_functor<T, U, V>::ArrayType>
+cbessel_n0_j(const V n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+{
+    static_assert(TYPE_IS(typename T::Scalar, int) ||
+                      TYPE_IS(typename T::Scalar, unsigned int),
+                  "x can only be int or uint array");
+
+    typedef typename cbessel_n0_j_e_functor<T, U, V>::ArrayType ArrayType;
+    return ArrayType::NullaryExpr(x.rows(),
+                                  x.cols(),
+                                  cbessel_n0_j_e_functor<T, U, V>(n,
+                                                                  x.derived(),
+                                                                  e.derived()));
+}
+
 ////////////////////////////////////////////////////////////
 // global variants
 ////////////////////////////////////////////////////////////
