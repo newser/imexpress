@@ -53,7 +53,16 @@ inline T sbessel_j_impl(const int n, const T x)
 template <>
 inline double sbessel_j_impl(const int n, const double x)
 {
-    return gsl_sf_bessel_jl(n, x);
+    // gsl_sf_bessel_jl does not allow negative x...
+    if (n == 0) {
+        return gsl_sf_bessel_j0(x);
+    } else if (n == 1) {
+        return gsl_sf_bessel_j1(x);
+    } else if (n == 2) {
+        return gsl_sf_bessel_j2(x);
+    } else {
+        return gsl_sf_bessel_jl(n, x);
+    }
 }
 
 template <typename T>
@@ -105,7 +114,18 @@ template <>
 inline double sbessel_j_e_impl(const int n, const double x, double &e)
 {
     gsl_sf_result r;
-    if (gsl_sf_bessel_jl_e(n, x, &r) == GSL_SUCCESS) {
+    int s;
+    // gsl_sf_bessel_jl does not allow negative x...
+    if (n == 0) {
+        s = gsl_sf_bessel_j0_e(x, &r);
+    } else if (n == 1) {
+        s = gsl_sf_bessel_j1_e(x, &r);
+    } else if (n == 2) {
+        s = gsl_sf_bessel_j2_e(x, &r);
+    } else {
+        s = gsl_sf_bessel_jl_e(n, x, &r);
+    }
+    if (s == GSL_SUCCESS) {
         e = r.err;
         return r.val;
     }

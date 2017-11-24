@@ -51,6 +51,12 @@ inline T msbessel_i_impl(const int n, const T x)
 }
 
 template <>
+inline double msbessel_i_impl<false, double>(const int n, const double x)
+{
+    throw std::invalid_argument("must set template param 'scaled' to true");
+}
+
+template <>
 inline double msbessel_i_impl<true, double>(const int n, const double x)
 {
     return gsl_sf_bessel_il_scaled(n, x);
@@ -84,7 +90,7 @@ class msbessel_i_functor
     const T &m_x;
 };
 
-template <bool scaled = true, typename T = void>
+template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<msbessel_i_functor<scaled, T>,
                       typename msbessel_i_functor<scaled, T>::ArrayType>
 msbessel_i(const int n, const Eigen::ArrayBase<T> &x)
@@ -100,6 +106,14 @@ template <bool scaled, typename T>
 inline T msbessel_i_e_impl(const int n, const T x, T &e)
 {
     throw std::invalid_argument("todo");
+}
+
+template <>
+inline double msbessel_i_e_impl<false, double>(const int n,
+                                               const double x,
+                                               double &e)
+{
+    throw std::invalid_argument("must set template param 'scaled' to true");
 }
 
 template <>
@@ -147,7 +161,7 @@ class msbessel_i_e_functor
     U &m_e;
 };
 
-template <bool scaled = true, typename T = void, typename U = void>
+template <bool scaled = false, typename T = void, typename U = void>
 inline CwiseNullaryOp<msbessel_i_e_functor<scaled, T, U>,
                       typename msbessel_i_e_functor<scaled, T, U>::ArrayType>
 msbessel_i(const int n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
@@ -169,6 +183,12 @@ template <bool scaled, typename T>
 inline T msbessel_k_impl(const int n, const T x)
 {
     throw std::invalid_argument("todo");
+}
+
+template <>
+inline double msbessel_k_impl<false, double>(const int n, const double x)
+{
+    throw std::invalid_argument("must set template param 'scaled' to true");
 }
 
 template <>
@@ -205,7 +225,7 @@ class msbessel_k_functor
     const T &m_x;
 };
 
-template <bool scaled = true, typename T = void>
+template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<msbessel_k_functor<scaled, T>,
                       typename msbessel_k_functor<scaled, T>::ArrayType>
 msbessel_k(const int n, const Eigen::ArrayBase<T> &x)
@@ -221,6 +241,14 @@ template <bool scaled, typename T>
 inline T msbessel_k_e_impl(const int n, const T x, T &e)
 {
     throw std::invalid_argument("todo");
+}
+
+template <>
+inline double msbessel_k_e_impl<false, double>(const int n,
+                                               const double x,
+                                               double &e)
+{
+    throw std::invalid_argument("must set template param 'scaled' to true");
 }
 
 template <>
@@ -268,7 +296,7 @@ class msbessel_k_e_functor
     U &m_e;
 };
 
-template <bool scaled = true, typename T = void, typename U = void>
+template <bool scaled = false, typename T = void, typename U = void>
 inline CwiseNullaryOp<msbessel_k_e_functor<scaled, T, U>,
                       typename msbessel_k_e_functor<scaled, T, U>::ArrayType>
 msbessel_k(const int n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
