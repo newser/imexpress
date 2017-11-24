@@ -370,3 +370,58 @@ TEST_CASE("sf_cbessel_y, fractional order")
     gsl_sf_bessel_Ynu_e(0.75, m(1, 0), &r);
     REQUIRE(__D_EQ9(e(1, 0), r.err));
 }
+
+TEST_CASE("sf_mcbessel_i, fractional order")
+{
+    iexp::ArrayXd m(2), m2(2), e(2);
+    gsl_sf_result r;
+
+    // 0.0001
+    m << 1.0, 10.0;
+    m2 = iexp::sf::mcbessel_i(0.0001, m);
+    REQUIRE(__D_EQ9(m2(1, 0), 2815.7166269770030352));
+
+    m2 = iexp::sf::mcbessel_i(0.0001, m, e);
+    REQUIRE(__D_EQ9(m2(1, 0), 2815.7166269770030352));
+    gsl_sf_bessel_Inu_e(0.0001, m(1, 0), &r);
+    REQUIRE(__D_EQ9(e(1, 0), r.err));
+
+    // 0.0001, scaled
+    m << 1.0, 10.0;
+    m2 = iexp::sf::mcbessel_i<true>(0.0001, m);
+    REQUIRE(__D_EQ9(m2(1, 0), 0.127833337095816696722));
+
+    m2 = iexp::sf::mcbessel_i<true>(0.0001, m, e);
+    REQUIRE(__D_EQ9(m2(1, 0), 0.127833337095816696722));
+    gsl_sf_bessel_Inu_scaled_e(0.0001, m(1, 0), &r);
+    REQUIRE(__D_EQ9(e(1, 0), r.err));
+}
+
+TEST_CASE("sf_mcbessel_k, fractional order")
+{
+    iexp::ArrayXd m(2), m2(2), e(2);
+    gsl_sf_result r;
+
+    // 0.0001
+    m << 0.001, 10.0;
+    m2 = iexp::sf::mcbessel_k(0.0001, m);
+    REQUIRE(__D_EQ9(m2(0, 0), 7.023689431812884141));
+    REQUIRE(__D_EQ9(m2(1, 0), 0.000017780062324654874306));
+
+    m2 = iexp::sf::mcbessel_k(0.0001, m, e);
+    REQUIRE(__D_EQ9(m2(0, 0), 7.023689431812884141));
+    REQUIRE(__D_EQ9(m2(1, 0), 0.000017780062324654874306));
+    gsl_sf_bessel_Knu_e(0.0001, m(0, 0), &r);
+    REQUIRE(__D_EQ9(e(0, 0), r.err));
+    gsl_sf_bessel_Knu_e(0.0001, m(1, 0), &r);
+    REQUIRE(__D_EQ9(e(1, 0), r.err));
+
+    // 2.0
+    m2 = iexp::sf::mcbessel_k<true>(0.0001, m);
+    REQUIRE(__D_EQ9(m2(1, 0), 0.3916319346235421817));
+
+    m2 = iexp::sf::mcbessel_k<true>(0.0001, m, e);
+    REQUIRE(__D_EQ9(m2(1, 0), 0.3916319346235421817));
+    gsl_sf_bessel_Knu_e(0.75, m(1, 0), &r);
+    REQUIRE(__D_EQ9(e(1, 0), r.err));
+}
