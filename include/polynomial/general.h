@@ -94,7 +94,7 @@ class complex_solve_functor
 template <typename T>
 inline CwiseNullaryOp<complex_solve_functor<T>,
                       typename complex_solve_functor<T>::ArrayType>
-complex_solve(const Eigen::ArrayBase<T> &a)
+complex_solve(const ArrayBase<T> &a)
 {
     eigen_assert((a.derived().cols() == 1) || (a.derived().rows() == 1));
 

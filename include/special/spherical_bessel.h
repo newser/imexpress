@@ -96,7 +96,7 @@ class sbessel_j_functor
 template <typename T>
 inline CwiseNullaryOp<sbessel_j_functor<T>,
                       typename sbessel_j_functor<T>::ArrayType>
-sbessel_j(const int n, const Eigen::ArrayBase<T> &x)
+sbessel_j(const int n, const ArrayBase<T> &x)
 {
     typedef typename sbessel_j_functor<T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -165,7 +165,7 @@ class sbessel_j_e_functor
 template <typename T, typename U>
 inline CwiseNullaryOp<sbessel_j_e_functor<T, U>,
                       typename sbessel_j_e_functor<T, U>::ArrayType>
-sbessel_j(const int n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+sbessel_j(const int n, const ArrayBase<T> &x, ArrayBase<U> &e)
 {
     typedef typename sbessel_j_e_functor<T, U>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -222,7 +222,7 @@ class sbessel_y_functor
 template <typename T>
 inline CwiseNullaryOp<sbessel_y_functor<T>,
                       typename sbessel_y_functor<T>::ArrayType>
-sbessel_y(const int n, const Eigen::ArrayBase<T> &x)
+sbessel_y(const int n, const ArrayBase<T> &x)
 {
     typedef typename sbessel_y_functor<T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -280,7 +280,7 @@ class sbessel_y_e_functor
 template <typename T, typename U>
 inline CwiseNullaryOp<sbessel_y_e_functor<T, U>,
                       typename sbessel_y_e_functor<T, U>::ArrayType>
-sbessel_y(const int n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+sbessel_y(const int n, const ArrayBase<T> &x, ArrayBase<U> &e)
 {
     typedef typename sbessel_y_e_functor<T, U>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),

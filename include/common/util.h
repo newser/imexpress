@@ -40,6 +40,14 @@
 
 #define THROW_OR_RETURN_NAN(t) throw(t)
 
+#define VEC_SAME_SIZE(v1, v2)                                                  \
+    (((v1).rows() == 1) || ((v1).cols() == 1)) &&                              \
+        (((v2).rows() == 1) || ((v2).cols() == 1)) &&                          \
+        ((v1).size() == (v2).size())
+
+#define MATRIX_SAME_SIZE(m1, m2)                                               \
+    (((m1).rows() == (m2).rows()) && ((m1).cols() == (m2).cols()))
+
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////

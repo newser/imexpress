@@ -78,7 +78,7 @@ class airy_n0_Ai_functor
 template <typename T>
 inline CwiseNullaryOp<airy_n0_Ai_functor<T>,
                       typename airy_n0_Ai_functor<T>::ArrayType>
-airy_n0_Ai(const Eigen::ArrayBase<T> &x)
+airy_n0_Ai(const ArrayBase<T> &x)
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),
@@ -131,7 +131,7 @@ class airy_n0_Ai_e_functor
 template <typename T, typename U>
 inline CwiseNullaryOp<airy_n0_Ai_e_functor<T, U>,
                       typename airy_n0_Ai_e_functor<T, U>::ArrayType>
-airy_n0_Ai(const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+airy_n0_Ai(const ArrayBase<T> &x, ArrayBase<U> &e)
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),
@@ -182,7 +182,7 @@ class airy_n0_Ai_deriv_functor
 template <typename T>
 inline CwiseNullaryOp<airy_n0_Ai_deriv_functor<T>,
                       typename airy_n0_Ai_deriv_functor<T>::ArrayType>
-airy_n0_Ai_deriv(const Eigen::ArrayBase<T> &x)
+airy_n0_Ai_deriv(const ArrayBase<T> &x)
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),
@@ -235,7 +235,7 @@ class airy_n0_Ai_deriv_e_functor
 template <typename T, typename U>
 inline CwiseNullaryOp<airy_n0_Ai_deriv_e_functor<T, U>,
                       typename airy_n0_Ai_deriv_e_functor<T, U>::ArrayType>
-airy_n0_Ai_deriv(const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+airy_n0_Ai_deriv(const ArrayBase<T> &x, ArrayBase<U> &e)
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),
@@ -287,7 +287,7 @@ class airy_n0_Bi_functor
 template <typename T>
 inline CwiseNullaryOp<airy_n0_Bi_functor<T>,
                       typename airy_n0_Bi_functor<T>::ArrayType>
-airy_n0_Bi(const Eigen::ArrayBase<T> &x)
+airy_n0_Bi(const ArrayBase<T> &x)
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),
@@ -340,7 +340,7 @@ class airy_n0_Bi_e_functor
 template <typename T, typename U>
 inline CwiseNullaryOp<airy_n0_Bi_e_functor<T, U>,
                       typename airy_n0_Bi_e_functor<T, U>::ArrayType>
-airy_n0_Bi(const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+airy_n0_Bi(const ArrayBase<T> &x, ArrayBase<U> &e)
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),
@@ -391,7 +391,7 @@ class airy_n0_Bi_deriv_functor
 template <typename T>
 inline CwiseNullaryOp<airy_n0_Bi_deriv_functor<T>,
                       typename airy_n0_Bi_deriv_functor<T>::ArrayType>
-airy_n0_Bi_deriv(const Eigen::ArrayBase<T> &x)
+airy_n0_Bi_deriv(const ArrayBase<T> &x)
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),
@@ -444,7 +444,7 @@ class airy_n0_Bi_deriv_e_functor
 template <typename T, typename U>
 inline CwiseNullaryOp<airy_n0_Bi_deriv_e_functor<T, U>,
                       typename airy_n0_Bi_deriv_e_functor<T, U>::ArrayType>
-airy_n0_Bi_deriv(const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+airy_n0_Bi_deriv(const ArrayBase<T> &x, ArrayBase<U> &e)
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),

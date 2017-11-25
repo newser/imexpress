@@ -93,7 +93,7 @@ class airy_Ai_functor
 template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<airy_Ai_functor<scaled, T>,
                       typename airy_Ai_functor<scaled, T>::ArrayType>
-airy_Ai(const Eigen::ArrayBase<T> &x, const precision p = DOUBLE)
+airy_Ai(const ArrayBase<T> &x, const precision p = DOUBLE)
 {
     typedef typename airy_Ai_functor<scaled, T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -168,9 +168,7 @@ class airy_Ai_e_functor
 template <bool scaled = false, typename T = void, typename U = void>
 inline CwiseNullaryOp<airy_Ai_e_functor<scaled, T, U>,
                       typename airy_Ai_e_functor<scaled, T, U>::ArrayType>
-airy_Ai(const Eigen::ArrayBase<T> &x,
-        Eigen::ArrayBase<U> &e,
-        const precision p = DOUBLE)
+airy_Ai(const ArrayBase<T> &x, ArrayBase<U> &e, const precision p = DOUBLE)
 {
     typedef typename airy_Ai_e_functor<scaled, T, U>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -235,7 +233,7 @@ class airy_Ai_deriv_functor
 template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<airy_Ai_deriv_functor<scaled, T>,
                       typename airy_Ai_deriv_functor<scaled, T>::ArrayType>
-airy_Ai_deriv(const Eigen::ArrayBase<T> &x, const precision p = DOUBLE)
+airy_Ai_deriv(const ArrayBase<T> &x, const precision p = DOUBLE)
 {
     typedef typename airy_Ai_deriv_functor<scaled, T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -311,8 +309,8 @@ class airy_Ai_deriv_e_functor
 template <bool scaled = false, typename T = void, typename U = void>
 inline CwiseNullaryOp<airy_Ai_deriv_e_functor<scaled, T, U>,
                       typename airy_Ai_deriv_e_functor<scaled, T, U>::ArrayType>
-airy_Ai_deriv(const Eigen::ArrayBase<T> &x,
-              Eigen::ArrayBase<U> &e,
+airy_Ai_deriv(const ArrayBase<T> &x,
+              ArrayBase<U> &e,
               const precision p = DOUBLE)
 {
     typedef typename airy_Ai_deriv_e_functor<scaled, T, U>::ArrayType ArrayType;
@@ -377,7 +375,7 @@ class airy_Bi_functor
 template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<airy_Bi_functor<scaled, T>,
                       typename airy_Bi_functor<scaled, T>::ArrayType>
-airy_Bi(const Eigen::ArrayBase<T> &x, const precision p = DOUBLE)
+airy_Bi(const ArrayBase<T> &x, const precision p = DOUBLE)
 {
     typedef typename airy_Bi_functor<scaled, T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -452,9 +450,7 @@ class airy_Bi_e_functor
 template <bool scaled = false, typename T = void, typename U = void>
 inline CwiseNullaryOp<airy_Bi_e_functor<scaled, T, U>,
                       typename airy_Bi_e_functor<scaled, T, U>::ArrayType>
-airy_Bi(const Eigen::ArrayBase<T> &x,
-        Eigen::ArrayBase<U> &e,
-        const precision p = DOUBLE)
+airy_Bi(const ArrayBase<T> &x, ArrayBase<U> &e, const precision p = DOUBLE)
 {
     typedef typename airy_Bi_e_functor<scaled, T, U>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -519,7 +515,7 @@ class airy_Bi_deriv_functor
 template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<airy_Bi_deriv_functor<scaled, T>,
                       typename airy_Bi_deriv_functor<scaled, T>::ArrayType>
-airy_Bi_deriv(const Eigen::ArrayBase<T> &x, const precision p = DOUBLE)
+airy_Bi_deriv(const ArrayBase<T> &x, const precision p = DOUBLE)
 {
     typedef typename airy_Bi_deriv_functor<scaled, T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -595,8 +591,8 @@ class airy_Bi_deriv_e_functor
 template <bool scaled = false, typename T = void, typename U = void>
 inline CwiseNullaryOp<airy_Bi_deriv_e_functor<scaled, T, U>,
                       typename airy_Bi_deriv_e_functor<scaled, T, U>::ArrayType>
-airy_Bi_deriv(const Eigen::ArrayBase<T> &x,
-              Eigen::ArrayBase<U> &e,
+airy_Bi_deriv(const ArrayBase<T> &x,
+              ArrayBase<U> &e,
               const precision p = DOUBLE)
 {
     typedef typename airy_Bi_deriv_e_functor<scaled, T, U>::ArrayType ArrayType;

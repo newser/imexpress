@@ -81,7 +81,7 @@ class clausen_functor
 template <typename T>
 inline CwiseNullaryOp<clausen_functor<T>,
                       typename clausen_functor<T>::ArrayType>
-clausen(const Eigen::ArrayBase<T> &x)
+clausen(const ArrayBase<T> &x)
 {
     typedef typename clausen_functor<T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -137,7 +137,7 @@ class clausen_e_functor
 template <typename T, typename U>
 inline CwiseNullaryOp<clausen_e_functor<T, U>,
                       typename clausen_e_functor<T, U>::ArrayType>
-clausen(const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+clausen(const ArrayBase<T> &x, ArrayBase<U> &e)
 {
     typedef typename clausen_e_functor<T, U>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),

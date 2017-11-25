@@ -91,7 +91,7 @@ class dd_functor
 
 template <typename T>
 inline CwiseNullaryOp<dd_functor<T>, typename dd_functor<T>::ArrayType> dd(
-    const Eigen::ArrayBase<T> &xa, const Eigen::ArrayBase<T> &ya)
+    const ArrayBase<T> &xa, const ArrayBase<T> &ya)
 {
     eigen_assert((xa.derived().cols() == 1) || (xa.derived().rows() == 1));
     eigen_assert((ya.derived().cols() == 1) || (ya.derived().rows() == 1));
@@ -122,8 +122,8 @@ inline double dd_eval_impl(const double *dd,
 }
 
 template <typename T>
-inline typename T::Scalar dd_eval(const Eigen::ArrayBase<T> &dd,
-                                  const Eigen::ArrayBase<T> &xa,
+inline typename T::Scalar dd_eval(const ArrayBase<T> &dd,
+                                  const ArrayBase<T> &xa,
                                   const typename T::Scalar x)
 {
     eigen_assert((dd.derived().cols() == 1) || (dd.derived().rows() == 1));
@@ -196,9 +196,7 @@ class dd_taylor_functor
 template <typename T>
 inline CwiseNullaryOp<dd_taylor_functor<T>,
                       typename dd_taylor_functor<T>::ArrayType>
-dd_taylor(typename T::Scalar xp,
-          const Eigen::ArrayBase<T> &dd,
-          const Eigen::ArrayBase<T> &xa)
+dd_taylor(typename T::Scalar xp, const ArrayBase<T> &dd, const ArrayBase<T> &xa)
 {
     eigen_assert((dd.derived().cols() == 1) || (dd.derived().rows() == 1));
     eigen_assert((xa.derived().cols() == 1) || (xa.derived().rows() == 1));
@@ -271,9 +269,9 @@ class dd_hermit_functor
 template <typename T>
 inline CwiseNullaryOp<dd_hermit_functor<T>,
                       typename dd_hermit_functor<T>::ArrayType>
-dd_hermit(const Eigen::ArrayBase<T> &xa,
-          const Eigen::ArrayBase<T> &ya,
-          const Eigen::ArrayBase<T> &dya)
+dd_hermit(const ArrayBase<T> &xa,
+          const ArrayBase<T> &ya,
+          const ArrayBase<T> &dya)
 {
     eigen_assert((xa.derived().cols() == 1) || (xa.derived().rows() == 1));
     eigen_assert((ya.derived().cols() == 1) || (ya.derived().rows() == 1));

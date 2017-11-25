@@ -87,9 +87,9 @@ class hydroR1_functor
 template <typename T>
 inline CwiseNullaryOp<hydroR1_functor<T>,
                       typename hydroR1_functor<T>::ArrayType>
-hydroR(const Eigen::ArrayBase<T> &z, const Eigen::ArrayBase<T> &r)
+hydroR(const ArrayBase<T> &z, const ArrayBase<T> &r)
 {
-    eigen_assert((z.rows() == r.rows()) && (z.cols() == r.cols()));
+    eigen_assert(MATRIX_SAME_SIZE(z, r));
 
     typedef typename hydroR1_functor<T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(z.rows(),
@@ -147,11 +147,9 @@ class hydroR1_e_functor
 template <typename T, typename U>
 inline CwiseNullaryOp<hydroR1_e_functor<T, U>,
                       typename hydroR1_e_functor<T, U>::ArrayType>
-hydroR(const Eigen::ArrayBase<T> &z,
-       const Eigen::ArrayBase<T> &r,
-       Eigen::ArrayBase<U> &e)
+hydroR(const ArrayBase<T> &z, const ArrayBase<T> &r, ArrayBase<U> &e)
 {
-    eigen_assert((z.rows() == r.rows()) && (z.cols() == r.cols()));
+    eigen_assert(MATRIX_SAME_SIZE(z, r));
 
     typedef typename hydroR1_e_functor<T, U>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(z.rows(),
@@ -218,21 +216,21 @@ class hydroR_functor
 template <typename T, typename V>
 inline CwiseNullaryOp<hydroR_functor<T, V>,
                       typename hydroR_functor<T, V>::ArrayType>
-hydroR(const Eigen::ArrayBase<V> &n,
-       const Eigen::ArrayBase<V> &l,
-       const Eigen::ArrayBase<T> &z,
-       const Eigen::ArrayBase<T> &r)
+hydroR(const ArrayBase<V> &n,
+       const ArrayBase<V> &l,
+       const ArrayBase<T> &z,
+       const ArrayBase<T> &r)
 {
     static_assert(TYPE_IS(typename V::Scalar, int) ||
                       TYPE_IS(typename V::Scalar, unsigned int),
                   "n and l can only be int or uint array");
-    eigen_assert((z.rows() == r.rows()) && (z.cols() == r.cols()) &&
-                 (z.rows() == n.rows()) && (z.cols() == n.cols()) &&
-                 (z.rows() == l.rows()) && (z.cols() == l.cols()));
+    eigen_assert(MATRIX_SAME_SIZE(n, l));
+    eigen_assert(MATRIX_SAME_SIZE(n, z));
+    eigen_assert(MATRIX_SAME_SIZE(n, r));
 
     typedef typename hydroR_functor<T, V>::ArrayType ArrayType;
-    return ArrayType::NullaryExpr(z.rows(),
-                                  z.cols(),
+    return ArrayType::NullaryExpr(n.rows(),
+                                  n.cols(),
                                   hydroR_functor<T, V>(n.derived(),
                                                        l.derived(),
                                                        z.derived(),
@@ -298,22 +296,22 @@ class hydroR_e_functor
 template <typename T, typename U, typename V>
 inline CwiseNullaryOp<hydroR_e_functor<T, U, V>,
                       typename hydroR_e_functor<T, U, V>::ArrayType>
-hydroR(const Eigen::ArrayBase<V> &n,
-       const Eigen::ArrayBase<V> &l,
-       const Eigen::ArrayBase<T> &z,
-       const Eigen::ArrayBase<T> &r,
-       Eigen::ArrayBase<U> &e)
+hydroR(const ArrayBase<V> &n,
+       const ArrayBase<V> &l,
+       const ArrayBase<T> &z,
+       const ArrayBase<T> &r,
+       ArrayBase<U> &e)
 {
     static_assert(TYPE_IS(typename V::Scalar, int) ||
                       TYPE_IS(typename V::Scalar, unsigned int),
                   "n and l can only be int or uint array");
-    eigen_assert((z.rows() == r.rows()) && (z.cols() == r.cols()) &&
-                 (z.rows() == n.rows()) && (z.cols() == n.cols()) &&
-                 (z.rows() == l.rows()) && (z.cols() == l.cols()));
+    eigen_assert(MATRIX_SAME_SIZE(n, l));
+    eigen_assert(MATRIX_SAME_SIZE(n, z));
+    eigen_assert(MATRIX_SAME_SIZE(n, r));
 
     typedef typename hydroR_e_functor<T, U, V>::ArrayType ArrayType;
-    return ArrayType::NullaryExpr(z.rows(),
-                                  z.cols(),
+    return ArrayType::NullaryExpr(n.rows(),
+                                  n.cols(),
                                   hydroR_e_functor<T, U, V>(n.derived(),
                                                             l.derived(),
                                                             z.derived(),

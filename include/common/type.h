@@ -53,7 +53,7 @@ enum precision
 template <typename T>
 struct eval_type
 {
-    typedef typename Eigen::internal::eval<T>::type type;
+    typedef typename internal::eval<T>::type type;
 };
 
 ////////////////////////////////////////////////////////////

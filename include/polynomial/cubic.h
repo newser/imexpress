@@ -92,7 +92,7 @@ class solve_cubic_functor
 template <typename T>
 inline CwiseNullaryOp<solve_cubic_functor<T>,
                       typename solve_cubic_functor<T>::ArrayType>
-solve_cubic(const Eigen::ArrayBase<T> &c)
+solve_cubic(const ArrayBase<T> &c)
 {
     eigen_assert((c.derived().cols() == 1) || (c.derived().rows() == 1));
     eigen_assert(c.derived().size() == 3);
@@ -162,7 +162,7 @@ class complex_solve_cubic_functor
 template <typename T>
 inline CwiseNullaryOp<complex_solve_cubic_functor<T>,
                       typename complex_solve_cubic_functor<T>::ArrayType>
-complex_solve_cubic(const Eigen::ArrayBase<T> &c)
+complex_solve_cubic(const ArrayBase<T> &c)
 {
     eigen_assert((c.derived().cols() == 1) || (c.derived().rows() == 1));
     eigen_assert(c.derived().size() == 3);

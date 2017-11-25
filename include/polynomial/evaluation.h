@@ -67,7 +67,7 @@ inline std::complex<double> eval_impl(const std::complex<double> *c,
 }
 
 template <typename T>
-inline typename T::Scalar eval(const Eigen::ArrayBase<T> &c,
+inline typename T::Scalar eval(const ArrayBase<T> &c,
                                const typename T::Scalar x)
 {
     eigen_assert((c.derived().cols() == 1) || (c.derived().rows() == 1));
@@ -132,7 +132,7 @@ class eval_deriv_functor
 template <typename T>
 inline CwiseNullaryOp<eval_deriv_functor<T>,
                       typename eval_deriv_functor<T>::ArrayType>
-eval_deriv(const Eigen::ArrayBase<T> &c, typename T::Scalar x, int order)
+eval_deriv(const ArrayBase<T> &c, typename T::Scalar x, int order)
 {
     eigen_assert((c.derived().cols() == 1) || (c.derived().rows() == 1));
 

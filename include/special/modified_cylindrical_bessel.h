@@ -112,7 +112,7 @@ class cbessel_i_functor
 template <bool scaled = false, typename T = void, typename V = void>
 inline CwiseNullaryOp<cbessel_i_functor<scaled, T, V>,
                       typename cbessel_i_functor<scaled, T, V>::ArrayType>
-cbessel_i(const V n, const Eigen::ArrayBase<T> &x)
+cbessel_i(const V n, const ArrayBase<T> &x)
 {
     typedef typename cbessel_i_functor<scaled, T, V>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -218,7 +218,7 @@ template <bool scaled = false,
           typename V = void>
 inline CwiseNullaryOp<cbessel_i_e_functor<scaled, T, U, V>,
                       typename cbessel_i_e_functor<scaled, T, U, V>::ArrayType>
-cbessel_i(const V n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+cbessel_i(const V n, const ArrayBase<T> &x, ArrayBase<U> &e)
 {
     typedef typename cbessel_i_e_functor<scaled, T, U, V>::ArrayType ArrayType;
     return ArrayType::
@@ -294,7 +294,7 @@ class cbessel_k_functor
 template <bool scaled = false, typename T = void, typename V = void>
 inline CwiseNullaryOp<cbessel_k_functor<scaled, T, V>,
                       typename cbessel_k_functor<scaled, T, V>::ArrayType>
-cbessel_k(const V n, const Eigen::ArrayBase<T> &x)
+cbessel_k(const V n, const ArrayBase<T> &x)
 {
     typedef typename cbessel_k_functor<scaled, T, V>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -391,7 +391,7 @@ template <bool scaled = false,
           typename V = void>
 inline CwiseNullaryOp<cbessel_k_e_functor<scaled, T, U, V>,
                       typename cbessel_k_e_functor<scaled, T, U, V>::ArrayType>
-cbessel_k(const V n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+cbessel_k(const V n, const ArrayBase<T> &x, ArrayBase<U> &e)
 {
     typedef typename cbessel_k_e_functor<scaled, T, U, V>::ArrayType ArrayType;
     return ArrayType::

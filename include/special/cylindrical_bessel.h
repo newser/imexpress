@@ -93,7 +93,7 @@ class cbessel_j_functor
 template <typename T, typename V>
 inline CwiseNullaryOp<cbessel_j_functor<T, V>,
                       typename cbessel_j_functor<T, V>::ArrayType>
-cbessel_j(const V n, const Eigen::ArrayBase<T> &x)
+cbessel_j(const V n, const ArrayBase<T> &x)
 {
     typedef typename cbessel_j_functor<T, V>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -164,7 +164,7 @@ class cbessel_j_e_functor
 template <typename T, typename U, typename V>
 inline CwiseNullaryOp<cbessel_j_e_functor<T, U, V>,
                       typename cbessel_j_e_functor<T, U, V>::ArrayType>
-cbessel_j(const V n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+cbessel_j(const V n, const ArrayBase<T> &x, ArrayBase<U> &e)
 {
     typedef typename cbessel_j_e_functor<T, U, V>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -227,7 +227,7 @@ class cbessel_y_functor
 template <typename T, typename V>
 inline CwiseNullaryOp<cbessel_y_functor<T, V>,
                       typename cbessel_y_functor<T, V>::ArrayType>
-cbessel_y(const V n, const Eigen::ArrayBase<T> &x)
+cbessel_y(const V n, const ArrayBase<T> &x)
 {
     typedef typename cbessel_y_functor<T, V>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -298,7 +298,7 @@ class cbessel_y_e_functor
 template <typename T, typename U, typename V>
 inline CwiseNullaryOp<cbessel_y_e_functor<T, U, V>,
                       typename cbessel_y_e_functor<T, U, V>::ArrayType>
-cbessel_y(const V n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+cbessel_y(const V n, const ArrayBase<T> &x, ArrayBase<U> &e)
 {
     typedef typename cbessel_y_e_functor<T, U, V>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -367,7 +367,7 @@ class cbessel_n0_j_functor
 template <typename T, typename V>
 inline CwiseNullaryOp<cbessel_n0_j_functor<T, V>,
                       typename cbessel_n0_j_functor<T, V>::ArrayType>
-cbessel_n0_j(const V n, const Eigen::ArrayBase<T> &x)
+cbessel_n0_j(const V n, const ArrayBase<T> &x)
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),
@@ -450,7 +450,7 @@ class cbessel_n0_j_e_functor
 template <typename T, typename U, typename V>
 inline CwiseNullaryOp<cbessel_n0_j_e_functor<T, U, V>,
                       typename cbessel_n0_j_e_functor<T, U, V>::ArrayType>
-cbessel_n0_j(const V n, const Eigen::ArrayBase<T> &x, Eigen::ArrayBase<U> &e)
+cbessel_n0_j(const V n, const ArrayBase<T> &x, ArrayBase<U> &e)
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),

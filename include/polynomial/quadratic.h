@@ -87,7 +87,7 @@ class solve_quad_functor
 template <typename T>
 inline CwiseNullaryOp<solve_quad_functor<T>,
                       typename solve_quad_functor<T>::ArrayType>
-solve_quad(const Eigen::ArrayBase<T> &c)
+solve_quad(const ArrayBase<T> &c)
 {
     eigen_assert((c.derived().cols() == 1) || (c.derived().rows() == 1));
     eigen_assert(c.derived().size() == 3);
@@ -153,7 +153,7 @@ class complex_solve_quad_functor
 template <typename T>
 inline CwiseNullaryOp<complex_solve_quad_functor<T>,
                       typename complex_solve_quad_functor<T>::ArrayType>
-complex_solve_quad(const Eigen::ArrayBase<T> &c)
+complex_solve_quad(const ArrayBase<T> &c)
 {
     eigen_assert((c.derived().cols() == 1) || (c.derived().rows() == 1));
     eigen_assert(c.derived().size() == 3);
