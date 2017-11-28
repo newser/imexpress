@@ -42,22 +42,22 @@ IEXP_NS_BEGIN
 // ========================================
 
 template <typename T>
-inline void sort_impl(T *data, const size_t n)
+inline void sort_impl(T *data, const int n)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline void sort_impl(double *data, const size_t n)
+inline void sort_impl(double *data, const int n)
 {
-    return gsl_sort(data, 1, n);
+    gsl_sort(data, 1, n);
 }
 
 #define DEFINE_SORT(type, suffix)                                              \
     template <>                                                                \
-    inline void sort_impl(type *data, const size_t n)                          \
+    inline void sort_impl(type *data, const int n)                             \
     {                                                                          \
-        return gsl_sort_##suffix(data, 1, n);                                  \
+        gsl_sort_##suffix(data, 1, n);                                         \
     }
 DEFINE_TYPE_SUFFIX(DEFINE_SORT)
 
@@ -103,22 +103,22 @@ sort(const ArrayBase<T> &v)
 // ========================================
 
 template <typename T>
-inline void sort2_impl(T *data1, T *data2, const size_t n)
+inline void sort2_impl(T *data1, T *data2, const int n)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline void sort2_impl(double *data1, double *data2, const size_t n)
+inline void sort2_impl(double *data1, double *data2, const int n)
 {
-    return gsl_sort2(data1, 1, data2, 1, n);
+    gsl_sort2(data1, 1, data2, 1, n);
 }
 
 #define DEFINE_SORT2(type, suffix)                                             \
     template <>                                                                \
-    inline void sort2_impl(type *data1, type *data2, const size_t n)           \
+    inline void sort2_impl(type *data1, type *data2, const int n)              \
     {                                                                          \
-        return gsl_sort2_##suffix(data1, 1, data2, 1, n);                      \
+        gsl_sort2_##suffix(data1, 1, data2, 1, n);                             \
     }
 DEFINE_TYPE_SUFFIX(DEFINE_SORT2)
 

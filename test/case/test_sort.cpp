@@ -1,5 +1,6 @@
 #include <catch.hpp>
 #include <iostream>
+#include <sort/smallest.h>
 #include <sort/sort.h>
 #include <sort/sort_index.h>
 #include <test_util.h>
@@ -86,4 +87,19 @@ TEST_CASE("test_sort_index")
     REQUIRE(i2(0) == 2);
     REQUIRE(i2(1) == 1);
     REQUIRE(i2(2) == 0);
+}
+
+TEST_CASE("test_smallest")
+{
+    ArrayXi i(4), i2(4), i3(4);
+    i << 3, 2, 1, 4;
+    i2 = smallest(2, i);
+    REQUIRE(i2.size() == 2);
+    REQUIRE(i2(0) == 1);
+    REQUIRE(i2(1) == 2);
+
+    i2 = smallest_index(2, i);
+    REQUIRE(i2.size() == 2);
+    REQUIRE(i2(0) == 2);
+    REQUIRE(i2(1) == 1);
 }

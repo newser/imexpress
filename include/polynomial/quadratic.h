@@ -85,8 +85,7 @@ inline CwiseNullaryOp<solve_quad_functor<T>,
                       typename solve_quad_functor<T>::ArrayType>
 solve_quad(const ArrayBase<T> &c)
 {
-    eigen_assert((c.derived().cols() == 1) || (c.derived().rows() == 1));
-    eigen_assert(c.derived().size() == 3);
+    eigen_assert(IS_VEC(c) && (c.size() == 3));
 
     typedef typename solve_quad_functor<T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(2, solve_quad_functor<T>(c.derived()));
@@ -147,8 +146,7 @@ inline CwiseNullaryOp<complex_solve_quad_functor<T>,
                       typename complex_solve_quad_functor<T>::ArrayType>
 complex_solve_quad(const ArrayBase<T> &c)
 {
-    eigen_assert((c.derived().cols() == 1) || (c.derived().rows() == 1));
-    eigen_assert(c.derived().size() == 3);
+    eigen_assert(IS_VEC(c) && (c.size() == 3));
 
     typedef typename complex_solve_quad_functor<T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(2,

@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_INDEX__
-#define __IEXP_INDEX__
+#ifndef __IEXP_SORT_INDEX__
+#define __IEXP_SORT_INDEX__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -38,24 +38,22 @@ IEXP_NS_BEGIN
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline void sort_index_impl(size_t *index, const T *data, const size_t n)
+inline void sort_index_impl(size_t *index, const T *data, const int n)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline void sort_index_impl(size_t *index, const double *data, const size_t n)
+inline void sort_index_impl(size_t *index, const double *data, const int n)
 {
-    return gsl_sort_index(index, data, 1, n);
+    gsl_sort_index(index, data, 1, n);
 }
 
 #define DEFINE_SORT_INDEX(type, suffix)                                        \
     template <>                                                                \
-    inline void sort_index_impl(size_t *index,                                 \
-                                const type *data,                              \
-                                const size_t n)                                \
+    inline void sort_index_impl(size_t *index, const type *data, const int n)  \
     {                                                                          \
-        return gsl_sort_##suffix##_index(index, data, 1, n);                   \
+        gsl_sort_##suffix##_index(index, data, 1, n);                          \
     }
 DEFINE_TYPE_SUFFIX(DEFINE_SORT_INDEX)
 
@@ -115,4 +113,4 @@ sort_index(const ArrayBase<T> &v)
 
 IEXP_NS_END
 
-#endif /* __IEXP_INDEX__ */
+#endif /* __IEXP_SORT_INDEX__ */

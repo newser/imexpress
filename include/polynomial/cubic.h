@@ -94,8 +94,7 @@ inline CwiseNullaryOp<solve_cubic_functor<T>,
                       typename solve_cubic_functor<T>::ArrayType>
 solve_cubic(const ArrayBase<T> &c)
 {
-    eigen_assert((c.derived().cols() == 1) || (c.derived().rows() == 1));
-    eigen_assert(c.derived().size() == 3);
+    eigen_assert(IS_VEC(c) && (c.size() == 3));
 
     typedef typename solve_cubic_functor<T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(3, solve_cubic_functor<T>(c.derived()));
@@ -164,8 +163,7 @@ inline CwiseNullaryOp<complex_solve_cubic_functor<T>,
                       typename complex_solve_cubic_functor<T>::ArrayType>
 complex_solve_cubic(const ArrayBase<T> &c)
 {
-    eigen_assert((c.derived().cols() == 1) || (c.derived().rows() == 1));
-    eigen_assert(c.derived().size() == 3);
+    eigen_assert(IS_VEC(c) && (c.size() == 3));
 
     typedef typename complex_solve_cubic_functor<T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(3,

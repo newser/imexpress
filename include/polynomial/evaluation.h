@@ -70,7 +70,7 @@ template <typename T>
 inline typename T::Scalar eval(const ArrayBase<T> &c,
                                const typename T::Scalar x)
 {
-    eigen_assert((c.derived().cols() == 1) || (c.derived().rows() == 1));
+    eigen_assert(IS_VEC(c));
 
     typename type_eval<T>::type m_c(c.eval());
     return eval_impl(m_c.data(), m_c.size(), x);
@@ -130,7 +130,7 @@ inline CwiseNullaryOp<eval_deriv_functor<T>,
                       typename eval_deriv_functor<T>::ArrayType>
 eval_deriv(const ArrayBase<T> &c, typename T::Scalar x, int order)
 {
-    eigen_assert((c.derived().cols() == 1) || (c.derived().rows() == 1));
+    eigen_assert(IS_VEC(c));
 
     // order 0: [f(x)]
     // order 1: [f(x), f'(x)]

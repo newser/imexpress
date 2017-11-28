@@ -90,9 +90,7 @@ template <typename T>
 inline CwiseNullaryOp<dd_functor<T>, typename dd_functor<T>::ArrayType> dd(
     const ArrayBase<T> &xa, const ArrayBase<T> &ya)
 {
-    eigen_assert((xa.derived().cols() == 1) || (xa.derived().rows() == 1));
-    eigen_assert((ya.derived().cols() == 1) || (ya.derived().rows() == 1));
-    eigen_assert(xa.derived().size() == ya.derived().size());
+    eigen_assert(VEC_SAME_SIZE(xa, ya));
 
     typedef typename dd_functor<T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(xa.derived().size(),
@@ -123,9 +121,7 @@ inline typename T::Scalar dd_eval(const ArrayBase<T> &dd,
                                   const ArrayBase<T> &xa,
                                   const typename T::Scalar x)
 {
-    eigen_assert((dd.derived().cols() == 1) || (dd.derived().rows() == 1));
-    eigen_assert((xa.derived().cols() == 1) || (xa.derived().rows() == 1));
-    eigen_assert(dd.derived().size() == xa.derived().size());
+    eigen_assert(VEC_SAME_SIZE(dd, xa));
 
     typename type_eval<T>::type m_dd(dd.eval()), m_xa(xa.eval());
     return dd_eval_impl(m_dd.data(), m_xa.data(), m_dd.size(), x);
@@ -192,9 +188,7 @@ inline CwiseNullaryOp<dd_taylor_functor<T>,
                       typename dd_taylor_functor<T>::ArrayType>
 dd_taylor(typename T::Scalar xp, const ArrayBase<T> &dd, const ArrayBase<T> &xa)
 {
-    eigen_assert((dd.derived().cols() == 1) || (dd.derived().rows() == 1));
-    eigen_assert((xa.derived().cols() == 1) || (xa.derived().rows() == 1));
-    eigen_assert(dd.derived().size() == xa.derived().size());
+    eigen_assert(VEC_SAME_SIZE(dd, xa));
 
     typedef typename dd_taylor_functor<T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(xa.derived().size(),
@@ -267,11 +261,8 @@ dd_hermit(const ArrayBase<T> &xa,
           const ArrayBase<T> &ya,
           const ArrayBase<T> &dya)
 {
-    eigen_assert((xa.derived().cols() == 1) || (xa.derived().rows() == 1));
-    eigen_assert((ya.derived().cols() == 1) || (ya.derived().rows() == 1));
-    eigen_assert(xa.derived().size() == ya.derived().size());
-    eigen_assert((dya.derived().cols() == 1) || (dya.derived().rows() == 1));
-    eigen_assert(xa.derived().size() == dya.derived().size());
+    eigen_assert(VEC_SAME_SIZE(xa, ya));
+    eigen_assert(VEC_SAME_SIZE(xa, dya));
 
     typedef typename dd_hermit_functor<T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(xa.derived().size() << 1,

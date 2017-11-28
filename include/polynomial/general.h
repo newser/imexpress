@@ -94,7 +94,7 @@ inline CwiseNullaryOp<complex_solve_functor<T>,
                       typename complex_solve_functor<T>::ArrayType>
 complex_solve(const ArrayBase<T> &a)
 {
-    eigen_assert((a.derived().cols() == 1) || (a.derived().rows() == 1));
+    eigen_assert(IS_VEC(a));
 
     typedef typename complex_solve_functor<T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(a.derived().size() - 1,
