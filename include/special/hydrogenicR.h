@@ -47,7 +47,7 @@ namespace sf {
 template <typename T>
 inline T hydroR1_impl(const T z, const T r)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -100,7 +100,7 @@ hydroR(const ArrayBase<T> &z, const ArrayBase<T> &r)
 template <typename T>
 inline T hydroR1_e_impl(const T z, const T r, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -166,7 +166,7 @@ hydroR(const ArrayBase<T> &z, const ArrayBase<T> &r, ArrayBase<U> &e)
 template <typename T, typename V>
 inline T hydroR_impl(const V n, const V l, const T z, const T r)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -240,7 +240,7 @@ hydroR(const ArrayBase<V> &n,
 template <typename T, typename V>
 inline T hydroR_e_impl(const V n, const V l, const T z, const T r, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>

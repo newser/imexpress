@@ -47,7 +47,7 @@ namespace sf {
 template <typename T>
 inline T coulw_f_impl(const T l, const T eta, const T x)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -111,7 +111,7 @@ coulw_f(const ArrayBase<T> &l, const ArrayBase<T> &eta, const ArrayBase<T> &x)
 template <typename T>
 inline T coulw_f_e_impl(const T l, const T eta, const T x, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -190,7 +190,7 @@ coulw_f(const ArrayBase<T> &l,
 template <typename T>
 inline T coulw_df_impl(const T l, const T eta, const T x)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -254,7 +254,7 @@ coulw_df(const ArrayBase<T> &l, const ArrayBase<T> &eta, const ArrayBase<T> &x)
 template <typename T>
 inline T coulw_df_e_impl(const T l, const T eta, const T x, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -333,7 +333,7 @@ coulw_df(const ArrayBase<T> &l,
 template <typename T>
 inline T coulw_g_impl(const T l, const T eta, const T x)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -397,7 +397,7 @@ coulw_g(const ArrayBase<T> &l, const ArrayBase<T> &eta, const ArrayBase<T> &x)
 template <typename T>
 inline T coulw_g_e_impl(const T l, const T eta, const T x, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -476,7 +476,7 @@ coulw_g(const ArrayBase<T> &l,
 template <typename T>
 inline T coulw_dg_impl(const T l, const T eta, const T x)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -540,7 +540,7 @@ coulw_dg(const ArrayBase<T> &l, const ArrayBase<T> &eta, const ArrayBase<T> &x)
 template <typename T>
 inline T coulw_dg_e_impl(const T l, const T eta, const T x, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -620,7 +620,7 @@ template <typename T>
 inline void coulw_fg_impl(
     const T l, const int k, const T eta, const T x, T &F, T &G)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -690,7 +690,7 @@ template <typename T>
 inline void coulw_dfg_impl(
     const T l, const int k, const T eta, const T x, T &F, T &G, T &dF, T &dG)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -769,7 +769,7 @@ inline void coulw_dfg(const ArrayBase<T> &l,
 template <typename T>
 inline T coulw_cl_impl(const T l, const T eta)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -827,7 +827,7 @@ coulw_cl(const ArrayBase<T> &l, const ArrayBase<T> &eta)
 template <typename T>
 inline T coulw_cl_e_impl(const T l, const T eta, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>

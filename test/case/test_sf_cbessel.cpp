@@ -153,6 +153,22 @@ TEST_CASE("sf_cbessel_i")
     REQUIRE(__D_EQ9(m2(0, 0), 2.6054690212996573677e-07));
     gsl_sf_bessel_In_e(4, m(0, 0), &r);
     REQUIRE(__D_EQ9(e(0, 0), r.err));
+
+    iexp::Matrix3i m33;
+    m33 << 1, 2, 3, 4, 5, 6, 7, 8, 9;
+    // std::cout << m33 << std::endl;
+
+    iexp::PermutationMatrix<3> p;
+    p.setIdentity();
+    p.applyTranspositionOnTheRight(1, 2); // 0, 2, 1
+    // std::cout << p * m33 << std::endl;
+    // std::cout << m33 * p << std::endl;
+
+    p.applyTranspositionOnTheLeft(0, 2); // 2, 0, 1
+    // std::cout << p * m33 << std::endl;
+    // std::cout << m33 * p << std::endl;
+
+    m33.block(0, 0, 1, 1);
 }
 
 TEST_CASE("sf_cbessel_k")

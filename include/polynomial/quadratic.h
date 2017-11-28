@@ -48,7 +48,7 @@ template <typename T>
 inline void solve_quad_impl(
     const T a, const T b, const T c, double *x0, double *x1)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -68,11 +68,7 @@ class solve_quad_functor
         : m_result(IEXP_NAN, IEXP_NAN)
     {
         typename type_eval<T>::type m_c(c.eval());
-        solve_quad_impl<typename T::Scalar>(m_c[0],
-                                            m_c[1],
-                                            m_c[2],
-                                            &m_result[0],
-                                            &m_result[1]);
+        solve_quad_impl(m_c[0], m_c[1], m_c[2], &m_result[0], &m_result[1]);
     }
 
     const double &operator()(Index i) const
@@ -107,7 +103,7 @@ inline void complex_solve_quad_impl(const T a,
                                     std::complex<double> *x0,
                                     std::complex<double> *x1)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -134,11 +130,7 @@ class complex_solve_quad_functor
         : m_result(IEXP_NAN, IEXP_NAN)
     {
         typename type_eval<T>::type m_c(c.eval());
-        complex_solve_quad_impl<typename T::Scalar>(c[0],
-                                                    c[1],
-                                                    c[2],
-                                                    &m_result[0],
-                                                    &m_result[1]);
+        complex_solve_quad_impl(c[0], c[1], c[2], &m_result[0], &m_result[1]);
     }
 
     const typename std::complex<double> &operator()(Index i) const

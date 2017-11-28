@@ -48,7 +48,7 @@ template <typename T>
 inline void solve_cubic_impl(
     const T a, const T b, const T c, double *x0, double *x1, double *x2)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -72,12 +72,12 @@ class solve_cubic_functor
         : m_result(IEXP_NAN, IEXP_NAN, IEXP_NAN)
     {
         typename type_eval<T>::type m_c(c.eval());
-        solve_cubic_impl<typename T::Scalar>(m_c[0],
-                                             m_c[1],
-                                             m_c[2],
-                                             &m_result[0],
-                                             &m_result[1],
-                                             &m_result[2]);
+        solve_cubic_impl(m_c[0],
+                         m_c[1],
+                         m_c[2],
+                         &m_result[0],
+                         &m_result[1],
+                         &m_result[2]);
     }
 
     const double &operator()(Index i) const
@@ -113,7 +113,7 @@ inline void complex_solve_cubic_impl(const T a,
                                      std::complex<double> *x1,
                                      std::complex<double> *x2)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -142,12 +142,12 @@ class complex_solve_cubic_functor
         : m_result(IEXP_NAN, IEXP_NAN, IEXP_NAN)
     {
         typename type_eval<T>::type m_c(c.eval());
-        complex_solve_cubic_impl<typename T::Scalar>(c[0],
-                                                     c[1],
-                                                     c[2],
-                                                     &m_result[0],
-                                                     &m_result[1],
-                                                     &m_result[2]);
+        complex_solve_cubic_impl(c[0],
+                                 c[1],
+                                 c[2],
+                                 &m_result[0],
+                                 &m_result[1],
+                                 &m_result[2]);
     }
 
     const typename std::complex<double> &operator()(Index i) const

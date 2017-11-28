@@ -47,7 +47,7 @@ namespace sf {
 template <typename T, typename V>
 inline T cbessel_j_impl(const V n, const T x)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -104,7 +104,7 @@ cbessel_j(const V n, const ArrayBase<T> &x)
 template <typename T, typename V>
 inline T cbessel_j_e_impl(const V n, const T x, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -181,7 +181,7 @@ cbessel_j(const V n, const ArrayBase<T> &x, ArrayBase<U> &e)
 template <typename T, typename V>
 inline T cbessel_y_impl(const V n, const T x)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -238,7 +238,7 @@ cbessel_y(const V n, const ArrayBase<T> &x)
 template <typename T, typename V>
 inline T cbessel_y_e_impl(const V n, const T x, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -315,7 +315,7 @@ cbessel_y(const V n, const ArrayBase<T> &x, ArrayBase<U> &e)
 template <typename V>
 inline double cbessel_n0_j_impl(const V n, const unsigned int x)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(V);
 }
 
 template <>
@@ -326,7 +326,7 @@ inline double cbessel_n0_j_impl(const int n, const unsigned int x)
     } else if (n == 1) {
         return gsl_sf_bessel_zero_J1(x);
     } else {
-        throw std::invalid_argument("use 'n.0' instead");
+        THROW_OR_RETURN_NAN(std::invalid_argument("use 'n.0' instead"));
     }
 }
 
@@ -382,7 +382,7 @@ cbessel_n0_j(const V n, const ArrayBase<T> &x)
 template <typename V, typename T>
 inline double cbessel_n0_j_e_impl(const V n, const unsigned int x, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -395,7 +395,7 @@ inline double cbessel_n0_j_e_impl(const int n, const unsigned int x, double &e)
     } else if (n == 1) {
         s = gsl_sf_bessel_zero_J1_e(x, &r);
     } else {
-        throw std::invalid_argument("use 'n.0' instead");
+        THROW_OR_RETURN_NAN(std::invalid_argument("use 'n.0' instead"));
     }
     if (s == GSL_SUCCESS) {
         e = r.err;

@@ -45,7 +45,7 @@ inline void complex_solve_impl(const T *a,
                                const int len,
                                std::complex<double> *z)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -77,9 +77,7 @@ class complex_solve_functor
         : m_result(a.size() - 1, 1)
     {
         typename type_eval<T>::type m_a(a.eval());
-        complex_solve_impl<typename T::Scalar>(m_a.data(),
-                                               m_a.size(),
-                                               m_result.data());
+        complex_solve_impl(m_a.data(), m_a.size(), m_result.data());
     }
 
     const typename std::complex<double> &operator()(Index i) const

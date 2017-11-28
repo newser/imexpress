@@ -53,6 +53,9 @@ add_group(math ${ROOT_PATH}/include/math ${ROOT_PATH}/source/math IEXP_SOURCE)
 add_group(complex ${ROOT_PATH}/include/complex ${ROOT_PATH}/source/complex IEXP_SOURCE)
 add_group(polynomial ${ROOT_PATH}/include/polynomial ${ROOT_PATH}/source/polynomial IEXP_SOURCE)
 add_group(special ${ROOT_PATH}/include/special ${ROOT_PATH}/source/special IEXP_SOURCE)
+add_group(combination ${ROOT_PATH}/include/combination ${ROOT_PATH}/source/combination IEXP_SOURCE)
+add_group(multiset ${ROOT_PATH}/include/multiset ${ROOT_PATH}/source/multiset IEXP_SOURCE)
+add_group(sort ${ROOT_PATH}/include/sort ${ROOT_PATH}/source/sort IEXP_SOURCE)
 
 #
 # build

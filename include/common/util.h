@@ -40,13 +40,15 @@
 
 #define THROW_OR_RETURN_NAN(t) throw(t)
 
+#define IS_VEC(v) (((v).rows() == 1) || ((v).cols() == 1))
+
 #define VEC_SAME_SIZE(v1, v2)                                                  \
-    (((v1).rows() == 1) || ((v1).cols() == 1)) &&                              \
-        (((v2).rows() == 1) || ((v2).cols() == 1)) &&                          \
-        ((v1).size() == (v2).size())
+    (IS_VEC(v1) && IS_VEC(v2) && ((v1).size() == (v2).size()))
 
 #define MATRIX_SAME_SIZE(m1, m2)                                               \
     (((m1).rows() == (m2).rows()) && ((m1).cols() == (m2).cols()))
+
+#define UNSUPPORTED_TYPE(T) throw std::invalid_argument(typeid(T).name())
 
 ////////////////////////////////////////////////////////////
 // type definition

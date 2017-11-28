@@ -44,7 +44,7 @@ namespace sf {
     template <typename T>                                                      \
     inline T debye##n##_impl(const T x)                                        \
     {                                                                          \
-        throw std::invalid_argument("todo");                                   \
+        UNSUPPORTED_TYPE(T);                                                   \
     }                                                                          \
                                                                                \
     template <>                                                                \
@@ -93,7 +93,7 @@ namespace sf {
     template <typename T>                                                      \
     inline T debye##n##_e_impl(const T x, T &e)                                \
     {                                                                          \
-        throw std::invalid_argument("todo");                                   \
+        UNSUPPORTED_TYPE(T);                                                   \
     }                                                                          \
                                                                                \
     template <>                                                                \

@@ -43,7 +43,7 @@ namespace sf {
 template <typename T>
 inline T clausen_impl(const T x)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -92,7 +92,7 @@ clausen(const ArrayBase<T> &x)
 template <typename T>
 inline T clausen_e_impl(const T x, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>

@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_DAWSON__
-#define __IEXP_DAWSON__
+#ifndef __IEXP_INDEX__
+#define __IEXP_INDEX__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -25,12 +25,9 @@
 
 #include <common/common.h>
 
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_sf_dawson.h>
+#include <gsl/gsl_sort.h>
 
 IEXP_NS_BEGIN
-
-namespace sf {
 
 ////////////////////////////////////////////////////////////
 // macro definition
@@ -41,108 +38,71 @@ namespace sf {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline T dawson_impl(const T x)
+inline void sort_index_impl(size_t *index, const T *data, const size_t n)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double dawson_impl(const double x)
+inline void sort_index_impl(size_t *index, const double *data, const size_t n)
 {
-    return gsl_sf_dawson(x);
+    return gsl_sort_index(index, data, 1, n);
 }
 
+#define DEFINE_SORT_INDEX(type, suffix)                                        \
+    template <>                                                                \
+    inline void sort_index_impl(size_t *index,                                 \
+                                const type *data,                              \
+                                const size_t n)                                \
+    {                                                                          \
+        return gsl_sort_##suffix##_index(index, data, 1, n);                   \
+    }
+DEFINE_TYPE_SUFFIX(DEFINE_SORT_INDEX)
+
 template <typename T>
-class dawson_functor
+class sort_index_functor
 {
   public:
-    typedef Array<typename T::Scalar,
+    typedef Array<int,
                   T::RowsAtCompileTime,
                   T::ColsAtCompileTime,
                   T::Flags & RowMajorBit ? RowMajor : ColMajor,
                   T::MaxRowsAtCompileTime,
                   T::MaxColsAtCompileTime>
         ArrayType;
-
-    dawson_functor(const T &x)
-        : m_x(x)
-    {
-    }
-
-    const typename T::Scalar operator()(Index i, Index j) const
-    {
-        return dawson_impl(m_x(i, j));
-    }
-
-  private:
-    const T &m_x;
-};
-
-template <typename T>
-inline CwiseNullaryOp<dawson_functor<T>, typename dawson_functor<T>::ArrayType>
-dawson(const ArrayBase<T> &x)
-{
-    typedef typename dawson_functor<T>::ArrayType ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  dawson_functor<T>(x.derived()));
-}
-
-template <typename T>
-inline T dawson_e_impl(const T x, T &e)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double dawson_e_impl(const double x, double &e)
-{
-    gsl_sf_result r;
-    if (gsl_sf_dawson_e(x, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    THROW_OR_RETURN_NAN(std::runtime_error("dawson"));
-}
-
-template <typename T, typename U>
-class dawson_e_functor
-{
-  public:
-    typedef Array<typename T::Scalar,
+    typedef Array<size_t,
                   T::RowsAtCompileTime,
                   T::ColsAtCompileTime,
                   T::Flags & RowMajorBit ? RowMajor : ColMajor,
                   T::MaxRowsAtCompileTime,
                   T::MaxColsAtCompileTime>
-        ArrayType;
+        IndexArrayType;
 
-    dawson_e_functor(const T &x, U &e)
-        : m_x(x)
-        , m_e(e)
+    sort_index_functor(const T &v)
+        : m_result(v.rows(), v.cols())
     {
+        typename type_eval<T>::type m_v(v.eval());
+        sort_index_impl(m_result.data(), m_v.data(), m_v.size());
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    const int operator()(Index i, Index j) const
     {
-        return dawson_e_impl(m_x(i, j), m_e(i, j));
+        return (int)m_result(i, j);
     }
 
   private:
-    const T &m_x;
-    U &m_e;
+    IndexArrayType m_result;
 };
 
-template <typename T, typename U>
-inline CwiseNullaryOp<dawson_e_functor<T, U>,
-                      typename dawson_e_functor<T, U>::ArrayType>
-dawson(const ArrayBase<T> &x, ArrayBase<U> &e)
+template <typename T>
+inline CwiseNullaryOp<sort_index_functor<T>,
+                      typename sort_index_functor<T>::ArrayType>
+sort_index(const ArrayBase<T> &v)
 {
-    typedef typename dawson_e_functor<T, U>::ArrayType ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  dawson_e_functor<T, U>(x.derived(),
-                                                         e.derived()));
+    typedef typename sort_index_functor<T>::ArrayType ArrayType;
+    return ArrayType::NullaryExpr(v.rows(),
+                                  v.cols(),
+                                  sort_index_functor<T>(v.derived()));
 }
 
 ////////////////////////////////////////////////////////////
@@ -152,8 +112,7 @@ dawson(const ArrayBase<T> &x, ArrayBase<U> &e)
 ////////////////////////////////////////////////////////////
 // interface declaration
 ////////////////////////////////////////////////////////////
-}
 
 IEXP_NS_END
 
-#endif /* __IEXP_DAWSON__ */
+#endif /* __IEXP_INDEX__ */

@@ -47,7 +47,7 @@ namespace sf {
 template <bool scaled, typename T>
 inline T airy_Ai_impl(const T x, const precision p)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -104,7 +104,7 @@ airy_Ai(const ArrayBase<T> &x, const precision p = DOUBLE)
 template <bool scaled, typename T>
 inline T airy_Ai_e_impl(const T x, const precision p, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -185,7 +185,7 @@ airy_Ai(const ArrayBase<T> &x, ArrayBase<U> &e, const precision p = DOUBLE)
 template <bool scaled, typename T>
 inline T airy_Ai_deriv_impl(const T x, const precision p)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -245,7 +245,7 @@ airy_Ai_deriv(const ArrayBase<T> &x, const precision p = DOUBLE)
 template <bool scaled, typename T>
 inline T airy_Ai_deriv_e_impl(const T x, const precision p, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -329,7 +329,7 @@ airy_Ai_deriv(const ArrayBase<T> &x,
 template <bool scaled, typename T>
 inline T airy_Bi_impl(const T x, const precision p)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -386,7 +386,7 @@ airy_Bi(const ArrayBase<T> &x, const precision p = DOUBLE)
 template <bool scaled, typename T>
 inline T airy_Bi_e_impl(const T x, const precision p, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -467,7 +467,7 @@ airy_Bi(const ArrayBase<T> &x, ArrayBase<U> &e, const precision p = DOUBLE)
 template <bool scaled, typename T>
 inline T airy_Bi_deriv_impl(const T x, const precision p)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -527,7 +527,7 @@ airy_Bi_deriv(const ArrayBase<T> &x, const precision p = DOUBLE)
 template <bool scaled, typename T>
 inline T airy_Bi_deriv_e_impl(const T x, const precision p, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>

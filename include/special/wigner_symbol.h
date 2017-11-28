@@ -48,7 +48,7 @@ template <typename T>
 inline double wigner3j_impl(
     const T ja, const T jb, const T jc, const T ma, const T mb, const T mc)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -144,7 +144,7 @@ inline double wigner3j_e_impl(const T ja,
                               const T mc,
                               U &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -251,7 +251,7 @@ template <typename T>
 inline double wigner6j_impl(
     const T ja, const T jb, const T jc, const T jd, const T je, const T jf)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -347,7 +347,7 @@ inline double wigner6j_e_impl(const T ja,
                               const T jf,
                               U &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -461,7 +461,7 @@ inline double wigner9j_impl(const T ja,
                             const T jh,
                             const T ji)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -584,7 +584,7 @@ inline double wigner9j_e_impl(const T ja,
                               const T ji,
                               U &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>

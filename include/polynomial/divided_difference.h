@@ -46,7 +46,7 @@ namespace poly {
 template <typename T>
 inline void dd_impl(T *dd, const T *xa, const T *ya, const int len)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -74,10 +74,7 @@ class dd_functor
         : m_result(xa.size(), 1)
     {
         typename type_eval<T>::type m_xa(xa.eval()), m_ya(ya.eval());
-        dd_impl<typename T::Scalar>(m_result.data(),
-                                    m_xa.data(),
-                                    m_ya.data(),
-                                    m_xa.size());
+        dd_impl(m_result.data(), m_xa.data(), m_ya.data(), m_xa.size());
     }
 
     const typename T::Scalar &operator()(Index i) const
@@ -109,7 +106,7 @@ inline CwiseNullaryOp<dd_functor<T>, typename dd_functor<T>::ArrayType> dd(
 template <typename T>
 inline double dd_eval_impl(const T *dd, const T *xa, const int len, const T x)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -131,10 +128,7 @@ inline typename T::Scalar dd_eval(const ArrayBase<T> &dd,
     eigen_assert(dd.derived().size() == xa.derived().size());
 
     typename type_eval<T>::type m_dd(dd.eval()), m_xa(xa.eval());
-    return dd_eval_impl<typename T::Scalar>(m_dd.data(),
-                                            m_xa.data(),
-                                            m_dd.size(),
-                                            x);
+    return dd_eval_impl(m_dd.data(), m_xa.data(), m_dd.size(), x);
 }
 
 // ========================================
@@ -145,7 +139,7 @@ template <typename T>
 inline void dd_taylor_impl(
     T *c, const T xp, const T *dd, const T *xa, const int len, T *w)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -176,12 +170,12 @@ class dd_taylor_functor
     {
         typename type_eval<T>::type m_dd(dd.eval()), m_xa(xa.eval());
         ArrayType m_w(dd.size());
-        dd_taylor_impl<typename T::Scalar>(m_result.data(),
-                                           xp,
-                                           m_dd.data(),
-                                           m_xa.data(),
-                                           m_xa.size(),
-                                           m_w.data());
+        dd_taylor_impl(m_result.data(),
+                       xp,
+                       m_dd.data(),
+                       m_xa.data(),
+                       m_xa.size(),
+                       m_w.data());
     }
 
     const typename T::Scalar &operator()(Index i) const
@@ -217,7 +211,7 @@ template <typename T>
 inline void dd_hermit_impl(
     T *dd, T *za, const T *xa, const T *ya, const T *dya, const int len)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -249,12 +243,12 @@ class dd_hermit_functor
         ArrayType m_za(xa.size() << 1);
         typename type_eval<T>::type m_xa(xa.eval()), m_ya(ya.eval()),
             m_dya(dya.eval());
-        dd_hermit_impl<typename T::Scalar>(m_result.data(),
-                                           m_za.data(),
-                                           m_xa.data(),
-                                           m_ya.data(),
-                                           m_dya.data(),
-                                           xa.size());
+        dd_hermit_impl(m_result.data(),
+                       m_za.data(),
+                       m_xa.data(),
+                       m_ya.data(),
+                       m_dya.data(),
+                       xa.size());
     }
 
     const typename T::Scalar &operator()(Index i) const

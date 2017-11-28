@@ -46,7 +46,7 @@ namespace poly {
 template <typename T>
 inline T eval_impl(const T *c, const int len, const T x)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -73,7 +73,7 @@ inline typename T::Scalar eval(const ArrayBase<T> &c,
     eigen_assert((c.derived().cols() == 1) || (c.derived().rows() == 1));
 
     typename type_eval<T>::type m_c(c.eval());
-    return eval_impl<typename T::Scalar>(m_c.data(), m_c.size(), x);
+    return eval_impl(m_c.data(), m_c.size(), x);
 }
 
 // ========================================
@@ -84,7 +84,7 @@ template <typename T>
 inline void eval_deriv_impl(
     const T *c, const int len, const T x, T *res, const int res_len)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -113,11 +113,7 @@ class eval_deriv_functor
         : m_result(order, 1)
     {
         typename type_eval<T>::type m_c(c.eval());
-        eval_deriv_impl<typename T::Scalar>(m_c.data(),
-                                            m_c.size(),
-                                            x,
-                                            m_result.data(),
-                                            order);
+        eval_deriv_impl(m_c.data(), m_c.size(), x, m_result.data(), order);
     }
 
     const typename T::Scalar &operator()(Index i) const

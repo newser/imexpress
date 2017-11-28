@@ -47,7 +47,7 @@ namespace sf {
 template <typename T>
 inline T sbessel_j_impl(const int n, const T x)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -107,7 +107,7 @@ sbessel_j(const int n, const ArrayBase<T> &x)
 template <typename T>
 inline T sbessel_j_e_impl(const int n, const T x, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -182,7 +182,7 @@ sbessel_j(const int n, const ArrayBase<T> &x, ArrayBase<U> &e)
 template <typename T>
 inline T sbessel_y_impl(const int n, const T x)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -233,7 +233,7 @@ sbessel_y(const int n, const ArrayBase<T> &x)
 template <typename T>
 inline T sbessel_y_e_impl(const int n, const T x, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>

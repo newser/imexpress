@@ -36,6 +36,11 @@ IEXP_NS_BEGIN
 // macro definition
 ////////////////////////////////////////////////////////////
 
+#define DEFINE_TYPE_SUFFIX(def)                                                \
+    def(char, char) def(unsigned char, uchar) def(short, short)                \
+        def(unsigned short, ushort) def(int, int) def(unsigned int, uint)      \
+            def(long, long) def(unsigned long, ulong) def(float, float)
+
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
@@ -48,12 +53,6 @@ enum precision
     SINGLE = GSL_PREC_SINGLE,
     // Approximate values, a relative accuracy of approximately 5 * 10^{-4}.
     APPROX = GSL_PREC_APPROX,
-};
-
-template <typename T>
-struct eval_type
-{
-    typedef typename internal::eval<T>::type type;
 };
 
 ////////////////////////////////////////////////////////////

@@ -47,7 +47,7 @@ namespace sf {
 template <bool scaled, typename T, typename V>
 inline T cbessel_i_impl(const V n, const T x)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -124,7 +124,7 @@ cbessel_i(const V n, const ArrayBase<T> &x)
 template <bool scaled, typename T, typename V>
 inline T cbessel_i_e_impl(const V n, const T x, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -236,7 +236,7 @@ cbessel_i(const V n, const ArrayBase<T> &x, ArrayBase<U> &e)
 template <bool scaled, typename T, typename V>
 inline T cbessel_k_impl(const V n, const T x)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
@@ -306,7 +306,7 @@ cbessel_k(const V n, const ArrayBase<T> &x)
 template <bool scaled, typename T, typename V>
 inline T cbessel_k_e_impl(const V n, const T x, T &e)
 {
-    throw std::invalid_argument("todo");
+    UNSUPPORTED_TYPE(T);
 }
 
 template <>
