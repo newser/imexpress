@@ -1,5 +1,6 @@
 #include <catch.hpp>
 #include <iostream>
+#include <sort/largest.h>
 #include <sort/smallest.h>
 #include <sort/sort.h>
 #include <sort/sort_index.h>
@@ -95,11 +96,22 @@ TEST_CASE("test_smallest")
     i << 3, 2, 1, 4;
     i2 = smallest(2, i);
     REQUIRE(i2.size() == 2);
-    REQUIRE(i2(0) == 1);
-    REQUIRE(i2(1) == 2);
+    REQUIRE((((i2(0) == 1) && (i2(1) == 2)) || ((i2(0) == 2) && (i2(1) == 1))));
 
     i2 = smallest_index(2, i);
     REQUIRE(i2.size() == 2);
-    REQUIRE(i2(0) == 2);
-    REQUIRE(i2(1) == 1);
+    REQUIRE((((i2(0) == 1) && (i2(1) == 2)) || ((i2(0) == 2) && (i2(1) == 1))));
+}
+
+TEST_CASE("test_largest")
+{
+    ArrayXi i(4), i2(4), i3(4);
+    i << 3, 2, 1, 4;
+    i2 = largest(2, i);
+    REQUIRE(i2.size() == 2);
+    REQUIRE((((i2(0) == 3) && (i2(1) == 4)) || ((i2(0) == 4) && (i2(1) == 3))));
+
+    i2 = largest_index(2, i);
+    REQUIRE(i2.size() == 2);
+    REQUIRE((((i2(0) == 0) && (i2(1) == 3)) || ((i2(0) == 3) && (i2(1) == 0))));
 }
