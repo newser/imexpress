@@ -45,6 +45,9 @@ target_include_directories(test_imexpress PRIVATE ${OUT_PATH}/gsl)
 # eigen
 target_include_directories(test_imexpress PRIVATE ${LIBRARY_PATH}/eigen)
 
+# fft
+target_include_directories(test_imexpress PRIVATE ${LIBRARY_PATH}/fft/fftw/api)
+
 # catch
 target_include_directories(test_imexpress PRIVATE ${LIBRARY_PATH}/Catch2/single_include)
 
