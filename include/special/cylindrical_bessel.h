@@ -82,7 +82,7 @@ class cbessel_j_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return cbessel_j_impl<typename T::Scalar, V>(m_n, m_x(i, j));
+        return cbessel_j_impl(m_n, m_x(i, j));
     }
 
   private:
@@ -150,9 +150,7 @@ class cbessel_j_e_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return cbessel_j_e_impl<typename T::Scalar, V>(m_n,
-                                                       m_x(i, j),
-                                                       m_e(i, j));
+        return cbessel_j_e_impl(m_n, m_x(i, j), m_e(i, j));
     }
 
   private:
@@ -216,7 +214,7 @@ class cbessel_y_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return cbessel_y_impl<typename T::Scalar, V>(m_n, m_x(i, j));
+        return cbessel_y_impl(m_n, m_x(i, j));
     }
 
   private:
@@ -284,9 +282,7 @@ class cbessel_y_e_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return cbessel_y_e_impl<typename T::Scalar, V>(m_n,
-                                                       m_x(i, j),
-                                                       m_e(i, j));
+        return cbessel_y_e_impl(m_n, m_x(i, j), m_e(i, j));
     }
 
   private:

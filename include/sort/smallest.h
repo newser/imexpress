@@ -66,6 +66,7 @@ inline void smallest_impl(double *dest,
         gsl_sort_##suffix##_smallest(dest, k, src, 1, n);                      \
     }
 DEFINE_TYPE_SUFFIX(DEFINE_SMALLEST)
+#undef DEFINE_SMALLEST
 
 template <typename T>
 class smallest_functor

@@ -56,6 +56,7 @@ inline void sort_index_impl(size_t *index, const double *data, const int n)
         gsl_sort_##suffix##_index(index, data, 1, n);                          \
     }
 DEFINE_TYPE_SUFFIX(DEFINE_SORT_INDEX)
+#undef DEFINE_SORT_INDEX
 
 template <typename T>
 class sort_index_functor

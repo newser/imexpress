@@ -42,20 +42,20 @@ class combination
   public:
     typedef size_t index;
 
-    enum init
+    enum class init
     {
-        none,
-        first,
-        last,
+        NONE,
+        FIRST,
+        LAST,
     };
 
-    combination(const index n, const index k, init i = none)
+    combination(const index n, const index k, init i = init::NONE)
     {
         m_gc = gsl_combination_alloc(n, k);
-        IEXP_NOT_NULL(m_gc);
-        if (i == first) {
+        IEXP_NOT_NULLPTR(m_gc);
+        if (i == init::FIRST) {
             gsl_combination_init_first(m_gc);
-        } else if (i == last) {
+        } else if (i == init::LAST) {
             gsl_combination_init_last(m_gc);
         }
     }
@@ -63,14 +63,14 @@ class combination
     combination(const combination &c)
     {
         m_gc = gsl_combination_alloc(c.n(), c.k());
-        IEXP_NOT_NULL(m_gc);
+        IEXP_NOT_NULLPTR(m_gc);
         gsl_combination_memcpy(m_gc, c.m_gc);
     }
 
     combination(combination &&c)
     {
         m_gc = c.m_gc;
-        c.m_gc = NULL;
+        c.m_gc = nullptr;
     }
 
     ~combination()

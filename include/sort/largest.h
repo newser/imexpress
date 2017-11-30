@@ -138,6 +138,7 @@ inline void largest_index_impl(size_t *index,
         gsl_sort_##suffix##_largest_index(index, k, src, 1, n);                \
     }
 DEFINE_TYPE_SUFFIX(DEFINE_LARGEST_INDEX)
+#undef DEFINE_LARGEST_INDEX
 
 template <typename T>
 class largest_index_functor

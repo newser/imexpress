@@ -82,7 +82,7 @@ class airy_Ai_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return airy_Ai_impl<scaled, typename T::Scalar>(m_x(i, j), m_p);
+        return airy_Ai_impl<scaled>(m_x(i, j), m_p);
     }
 
   private:
@@ -93,7 +93,7 @@ class airy_Ai_functor
 template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<airy_Ai_functor<scaled, T>,
                       typename airy_Ai_functor<scaled, T>::ArrayType>
-airy_Ai(const ArrayBase<T> &x, const precision p = DOUBLE)
+airy_Ai(const ArrayBase<T> &x, const precision p = precision::DOUBLE)
 {
     typedef typename airy_Ai_functor<scaled, T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -154,9 +154,7 @@ class airy_Ai_e_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return airy_Ai_e_impl<scaled, typename T::Scalar>(m_x(i, j),
-                                                          m_p,
-                                                          m_e(i, j));
+        return airy_Ai_e_impl<scaled>(m_x(i, j), m_p, m_e(i, j));
     }
 
   private:
@@ -168,7 +166,9 @@ class airy_Ai_e_functor
 template <bool scaled = false, typename T = void, typename U = void>
 inline CwiseNullaryOp<airy_Ai_e_functor<scaled, T, U>,
                       typename airy_Ai_e_functor<scaled, T, U>::ArrayType>
-airy_Ai(const ArrayBase<T> &x, ArrayBase<U> &e, const precision p = DOUBLE)
+airy_Ai(const ArrayBase<T> &x,
+        ArrayBase<U> &e,
+        const precision p = precision::DOUBLE)
 {
     typedef typename airy_Ai_e_functor<scaled, T, U>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -222,7 +222,7 @@ class airy_Ai_deriv_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return airy_Ai_deriv_impl<scaled, typename T::Scalar>(m_x(i, j), m_p);
+        return airy_Ai_deriv_impl<scaled>(m_x(i, j), m_p);
     }
 
   private:
@@ -233,7 +233,7 @@ class airy_Ai_deriv_functor
 template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<airy_Ai_deriv_functor<scaled, T>,
                       typename airy_Ai_deriv_functor<scaled, T>::ArrayType>
-airy_Ai_deriv(const ArrayBase<T> &x, const precision p = DOUBLE)
+airy_Ai_deriv(const ArrayBase<T> &x, const precision p = precision::DOUBLE)
 {
     typedef typename airy_Ai_deriv_functor<scaled, T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -295,9 +295,7 @@ class airy_Ai_deriv_e_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return airy_Ai_deriv_e_impl<scaled, typename T::Scalar>(m_x(i, j),
-                                                                m_p,
-                                                                m_e(i, j));
+        return airy_Ai_deriv_e_impl<scaled>(m_x(i, j), m_p, m_e(i, j));
     }
 
   private:
@@ -311,7 +309,7 @@ inline CwiseNullaryOp<airy_Ai_deriv_e_functor<scaled, T, U>,
                       typename airy_Ai_deriv_e_functor<scaled, T, U>::ArrayType>
 airy_Ai_deriv(const ArrayBase<T> &x,
               ArrayBase<U> &e,
-              const precision p = DOUBLE)
+              const precision p = precision::DOUBLE)
 {
     typedef typename airy_Ai_deriv_e_functor<scaled, T, U>::ArrayType ArrayType;
     return ArrayType::
@@ -364,7 +362,7 @@ class airy_Bi_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return airy_Bi_impl<scaled, typename T::Scalar>(m_x(i, j), m_p);
+        return airy_Bi_impl<scaled>(m_x(i, j), m_p);
     }
 
   private:
@@ -375,7 +373,7 @@ class airy_Bi_functor
 template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<airy_Bi_functor<scaled, T>,
                       typename airy_Bi_functor<scaled, T>::ArrayType>
-airy_Bi(const ArrayBase<T> &x, const precision p = DOUBLE)
+airy_Bi(const ArrayBase<T> &x, const precision p = precision::DOUBLE)
 {
     typedef typename airy_Bi_functor<scaled, T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -436,9 +434,7 @@ class airy_Bi_e_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return airy_Bi_e_impl<scaled, typename T::Scalar>(m_x(i, j),
-                                                          m_p,
-                                                          m_e(i, j));
+        return airy_Bi_e_impl<scaled>(m_x(i, j), m_p, m_e(i, j));
     }
 
   private:
@@ -450,7 +446,9 @@ class airy_Bi_e_functor
 template <bool scaled = false, typename T = void, typename U = void>
 inline CwiseNullaryOp<airy_Bi_e_functor<scaled, T, U>,
                       typename airy_Bi_e_functor<scaled, T, U>::ArrayType>
-airy_Bi(const ArrayBase<T> &x, ArrayBase<U> &e, const precision p = DOUBLE)
+airy_Bi(const ArrayBase<T> &x,
+        ArrayBase<U> &e,
+        const precision p = precision::DOUBLE)
 {
     typedef typename airy_Bi_e_functor<scaled, T, U>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -504,7 +502,7 @@ class airy_Bi_deriv_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return airy_Bi_deriv_impl<scaled, typename T::Scalar>(m_x(i, j), m_p);
+        return airy_Bi_deriv_impl<scaled>(m_x(i, j), m_p);
     }
 
   private:
@@ -515,7 +513,7 @@ class airy_Bi_deriv_functor
 template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<airy_Bi_deriv_functor<scaled, T>,
                       typename airy_Bi_deriv_functor<scaled, T>::ArrayType>
-airy_Bi_deriv(const ArrayBase<T> &x, const precision p = DOUBLE)
+airy_Bi_deriv(const ArrayBase<T> &x, const precision p = precision::DOUBLE)
 {
     typedef typename airy_Bi_deriv_functor<scaled, T>::ArrayType ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
@@ -577,9 +575,7 @@ class airy_Bi_deriv_e_functor
 
     const typename T::Scalar operator()(Index i, Index j) const
     {
-        return airy_Bi_deriv_e_impl<scaled, typename T::Scalar>(m_x(i, j),
-                                                                m_p,
-                                                                m_e(i, j));
+        return airy_Bi_deriv_e_impl<scaled>(m_x(i, j), m_p, m_e(i, j));
     }
 
   private:
@@ -593,7 +589,7 @@ inline CwiseNullaryOp<airy_Bi_deriv_e_functor<scaled, T, U>,
                       typename airy_Bi_deriv_e_functor<scaled, T, U>::ArrayType>
 airy_Bi_deriv(const ArrayBase<T> &x,
               ArrayBase<U> &e,
-              const precision p = DOUBLE)
+              const precision p = precision::DOUBLE)
 {
     typedef typename airy_Bi_deriv_e_functor<scaled, T, U>::ArrayType ArrayType;
     return ArrayType::

@@ -33,12 +33,10 @@ IEXP_NS_BEGIN
 // macro definition
 ////////////////////////////////////////////////////////////
 
-#define __D_EQ(a, b)                                                           \
-    ((std::abs((a) - (b)) < (std::numeric_limits<double>::epsilon())) ||       \
-     (std::isnan((a)) && std::isnan((b))))
-
 #define __D_EQ_IN(a, b, e)                                                     \
     ((std::abs((a) - (b)) < (e)) || (std::isnan((a)) && std::isnan((b))))
+
+#define __D_EQ(a, b) __D_EQ_IN(a, b, std::numeric_limits<double>::epsilon())
 
 #define __D_EQ9(a, b) __D_EQ_IN(a, b, 1e-9)
 
@@ -48,6 +46,11 @@ IEXP_NS_BEGIN
 
 #define __D_EQ_Nep(a, b, n)                                                    \
     __D_EQ_IN(a, b, (n)*std::numeric_limits<double>::epsilon())
+
+#define __F_EQ_IN(a, b, e)                                                     \
+    ((std::abs((a) - (b)) < (e)) || (std::isnan((a)) && std::isnan((b))))
+
+#define __F_EQ(a, b) __D_EQ_IN(a, b, std::numeric_limits<float>::epsilon())
 
 ////////////////////////////////////////////////////////////
 // type definition

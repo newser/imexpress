@@ -42,20 +42,20 @@ class multiset
   public:
     typedef size_t index;
 
-    enum init
+    enum class init
     {
-        none,
-        first,
-        last,
+        NONE,
+        FIRST,
+        LAST,
     };
 
-    multiset(const index n, const index k, init i = none)
+    multiset(const index n, const index k, init i = init::NONE)
     {
         m_gm = gsl_multiset_alloc(n, k);
-        IEXP_NOT_NULL(m_gm);
-        if (i == first) {
+        IEXP_NOT_NULLPTR(m_gm);
+        if (i == init::FIRST) {
             gsl_multiset_init_first(m_gm);
-        } else if (i == last) {
+        } else if (i == init::LAST) {
             gsl_multiset_init_last(m_gm);
         }
     }
@@ -63,14 +63,14 @@ class multiset
     multiset(const multiset &c)
     {
         m_gm = gsl_multiset_alloc(c.n(), c.k());
-        IEXP_NOT_NULL(m_gm);
+        IEXP_NOT_NULLPTR(m_gm);
         gsl_multiset_memcpy(m_gm, c.m_gm);
     }
 
     multiset(multiset &&c)
     {
         m_gm = c.m_gm;
-        c.m_gm = NULL;
+        c.m_gm = nullptr;
     }
 
     ~multiset()

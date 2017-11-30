@@ -23,13 +23,19 @@
 // import header files
 ////////////////////////////////////////////////////////////
 
+#include <common/namespace.h>
+
+#include <Eigen/Dense>
+
+IEXP_NS_BEGIN
+
 ////////////////////////////////////////////////////////////
 // macro definition
 ////////////////////////////////////////////////////////////
 
-#define IEXP_NOT_NULL(p)                                                       \
+#define IEXP_NOT_NULLPTR(p)                                                    \
     do {                                                                       \
-        if ((p) == NULL) {                                                     \
+        if ((p) == nullptr) {                                                  \
             throw std::bad_alloc();                                            \
         }                                                                      \
     } while (0)
@@ -97,5 +103,7 @@ struct type_choose<T1, T2, false>
 ////////////////////////////////////////////////////////////
 // interface declaration
 ////////////////////////////////////////////////////////////
+
+IEXP_NS_END
 
 #endif /* __IEXP_UTIL__ */

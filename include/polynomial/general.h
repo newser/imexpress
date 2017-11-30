@@ -54,7 +54,7 @@ inline void complex_solve_impl(const double *a,
                                std::complex<double> *z)
 {
     gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc(len);
-    IEXP_NOT_NULL(w);
+    IEXP_NOT_NULLPTR(w);
 
     gsl_poly_complex_solve(a, len, w, (gsl_complex_packed_ptr)z);
 

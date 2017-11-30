@@ -25,8 +25,9 @@
 
 #include <common/environment.h>
 
-#include <common/eigen_config.h>
 #include <common/namespace.h>
+
+#include <common/eigen_config.h>
 #include <common/type.h>
 #include <common/util.h>
 

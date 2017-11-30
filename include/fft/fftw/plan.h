@@ -16,51 +16,48 @@
  * USA.
  */
 
-#ifndef __IEXP_TYPE__
-#define __IEXP_TYPE__
+#ifndef __IEXP_FFT_FFTW_PLAN__
+#define __IEXP_FFT_FFTW_PLAN__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
-#include <common/namespace.h>
+#include <common/common.h>
+#include <fft/type.h>
 
-#include <gsl/config.h>
-#include <gsl/gsl_mode.h>
+#include <fftw3.h>
 
 IEXP_NS_BEGIN
+
+namespace fftw3 {
 
 ////////////////////////////////////////////////////////////
 // macro definition
 ////////////////////////////////////////////////////////////
 
-#define DEFINE_TYPE_SUFFIX(def)                                                \
-    def(char, char) def(unsigned char, uchar) def(short, short)                \
-        def(unsigned short, ushort) def(int, int) def(unsigned int, uint)      \
-            def(long, long) def(unsigned long, ulong) def(float, float)
-
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
 
-enum class precision
+template <typename T>
+class plan
 {
-    // Double-precision, a relative accuracy of approximately 2 * 10^{-16}.
-    DOUBLE = GSL_PREC_DOUBLE,
-    // Single-precision, a relative accuracy of approximately 10^{-7}.
-    SINGLE = GSL_PREC_SINGLE,
-    // Approximate values, a relative accuracy of approximately 5 * 10^{-4}.
-    APPROX = GSL_PREC_APPROX,
 };
 
 ////////////////////////////////////////////////////////////
 // global variants
 ////////////////////////////////////////////////////////////
 
+extern fftw_r2r_kind fwd_kind[KIND_NUM];
+
+extern fftw_r2r_kind inv_kind[KIND_NUM];
+
 ////////////////////////////////////////////////////////////
-// interface declaration
+// indexerface declaration
 ////////////////////////////////////////////////////////////
+}
 
 IEXP_NS_END
 
-#endif /* __IEXP_TYPE__ */
+#endif /* __IEXP_FFT_FFTW_PLAN__ */

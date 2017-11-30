@@ -60,6 +60,7 @@ inline void sort_impl(double *data, const int n)
         gsl_sort_##suffix(data, 1, n);                                         \
     }
 DEFINE_TYPE_SUFFIX(DEFINE_SORT)
+#undef DEFINE_SORT
 
 template <typename T>
 class sort_functor

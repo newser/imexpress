@@ -16,17 +16,14 @@
  * USA.
  */
 
-#ifndef __IEXP_TYPE__
-#define __IEXP_TYPE__
+#ifndef __IEXP_FFT_TYPE__
+#define __IEXP_FFT_TYPE__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
-#include <common/namespace.h>
-
-#include <gsl/config.h>
-#include <gsl/gsl_mode.h>
+#include <common/common.h>
 
 IEXP_NS_BEGIN
 
@@ -34,23 +31,22 @@ IEXP_NS_BEGIN
 // macro definition
 ////////////////////////////////////////////////////////////
 
-#define DEFINE_TYPE_SUFFIX(def)                                                \
-    def(char, char) def(unsigned char, uchar) def(short, short)                \
-        def(unsigned short, ushort) def(int, int) def(unsigned int, uint)      \
-            def(long, long) def(unsigned long, ulong) def(float, float)
-
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
 
-enum class precision
+enum kind
 {
-    // Double-precision, a relative accuracy of approximately 2 * 10^{-16}.
-    DOUBLE = GSL_PREC_DOUBLE,
-    // Single-precision, a relative accuracy of approximately 10^{-7}.
-    SINGLE = GSL_PREC_SINGLE,
-    // Approximate values, a relative accuracy of approximately 5 * 10^{-4}.
-    APPROX = GSL_PREC_APPROX,
+    DCT_I,
+    DCT_II,
+    DCT_III,
+    DCT_IV,
+    DST_I,
+    DST_II,
+    DST_III,
+    DST_IV,
+
+    KIND_NUM
 };
 
 ////////////////////////////////////////////////////////////
@@ -58,9 +54,9 @@ enum class precision
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
-// interface declaration
+// indexerface declaration
 ////////////////////////////////////////////////////////////
 
 IEXP_NS_END
 
-#endif /* __IEXP_TYPE__ */
+#endif /* __IEXP_FFT_TYPE__ */

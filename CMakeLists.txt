@@ -59,6 +59,8 @@ add_group(special ${ROOT_PATH}/include/special ${ROOT_PATH}/source/special IEXP_
 add_group(combination ${ROOT_PATH}/include/combination ${ROOT_PATH}/source/combination IEXP_SOURCE)
 add_group(multiset ${ROOT_PATH}/include/multiset ${ROOT_PATH}/source/multiset IEXP_SOURCE)
 add_group(sort ${ROOT_PATH}/include/sort ${ROOT_PATH}/source/sort IEXP_SOURCE)
+add_group(fft ${ROOT_PATH}/include/fft ${ROOT_PATH}/source/fft IEXP_SOURCE)
+add_group(fft ${ROOT_PATH}/include/fft/fftw ${ROOT_PATH}/source/fft/fftw IEXP_SOURCE)
 
 #
 # build
