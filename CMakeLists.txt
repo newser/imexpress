@@ -40,9 +40,9 @@ include(${BUILD_PATH}/util.cmake)
 function(add_group group inc src f_list)
     # make group
     file(GLOB f_inc "${inc}/*.h")
-	#message(STATUS "${group} header: ${f_inc}")
+    #message(STATUS "${group} header: ${f_inc}")
     aux_source_directory(${src} f_src)
-	#message(STATUS "${group} source: ${f_src}")
+    #message(STATUS "${group} source: ${f_src}")
     source_group(${group} FILES ${f_inc} ${f_src})
 
     # add to source list
@@ -93,6 +93,9 @@ target_link_libraries(imexpress gsl)
 
 # fft
 add_subdirectory(${LIBRARY_PATH}/fft fft)
+if (FFT_FLOAT_LIB)
+    target_link_libraries(imexpress ${FFT_FLOAT_LIB})
+endif ()
 target_link_libraries(imexpress ${FFT_LIB})
 
 # test

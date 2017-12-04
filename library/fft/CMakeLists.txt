@@ -30,7 +30,6 @@ hide(ENABLE_OPENMP BOOL OFF) #todo
 hide(ENABLE_THREADS BOOL OFF) #todo
 hide(WITH_COMBINED_THREADS BOOL OFF) #todo
 
-hide(ENABLE_FLOAT BOOL ON)
 hide(ENABLE_LONG_DOUBLE BOOL OFF)
 hide(ENABLE_QUAD_PRECISION BOOL OFF)
 
@@ -39,21 +38,56 @@ hide(ENABLE_SSE2 BOOL ON)
 hide(ENABLE_AVX BOOL ON)
 hide(ENABLE_AVX2 BOOL ON)
 
-add_subdirectory(${FFTW_PATH})
+# todo: if enabled float
+if (1)
+    foreach(t "Debug" "Release")
+        foreach(n "libfftw3f.a")
+            if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/fftw/float/${t}/${n})
+                set(fft3wf_path ${CMAKE_CURRENT_BINARY_DIR}/fftw/float/${t}/${n})
+                break()
+            endif ()
+        endforeach ()
+    endforeach ()
 
-if (ENABLE_QUAD_PRECISION)
-    set(fft_name fftw3q)
-elseif (ENABLE_LONG_DOUBLE)
-    set(fft_name fftw3l)
-elseif (ENABLE_FLOAT)
-    set(fft_name fftw3f)
+    if (fft3wf_path)
+        add_library(fftw3f STATIC IMPORTED GLOBAL)
+        set_target_properties(fftw3f PROPERTIES IMPORTED_LOCATION ${fft3wf_path})
+    else ()
+        hide(ENABLE_FLOAT BOOL ON)
+        add_subdirectory(${FFTW_PATH} ${CMAKE_CURRENT_BINARY_DIR}/fftw/float)
+
+        # no need to show fftw compile warnings
+        target_compile_options(fftw3f PRIVATE ${FLAG_DISABLE_WARNING})
+    endif ()
+
+    set(FFT_FLOAT_LIB fftw3f PARENT_SCOPE)
 endif ()
 
-# no need to show fftw compile warnings
-target_compile_options(${fft_name} PRIVATE ${FLAG_DISABLE_WARNING})
+# todo: if enabled double
+if (1)
+    foreach(t "Debug" "Release")
+        foreach(n "libfftw3.a")
+            if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/fftw/double/${t}/${n})
+                set(fft3w_path ${CMAKE_CURRENT_BINARY_DIR}/fftw/double/${t}/${n})
+                break()
+            endif ()
+        endforeach ()
+    endforeach ()
+
+    if (fft3w_path)
+        add_library(fftw3 STATIC IMPORTED GLOBAL)
+        set_target_properties(fftw3 PROPERTIES IMPORTED_LOCATION ${fft3w_path})
+    else ()
+        hide(ENABLE_FLOAT BOOL OFF)
+        add_subdirectory(${FFTW_PATH} ${CMAKE_CURRENT_BINARY_DIR}/fftw/double)
+
+        # no need to show fftw compile warnings
+        target_compile_options(fftw3 PRIVATE ${FLAG_DISABLE_WARNING})
+    endif ()
+
+    set(FFT_LIB fftw3 PARENT_SCOPE)
+endif ()
 
 #
 # result
 #
-
-set(FFT_LIB ${fft_name} PARENT_SCOPE)

@@ -124,6 +124,8 @@ class plan<double>
     // r2c
     // ========================================
 
+    // num of i: n
+    // num of o: (n/2 + 1)
     void fwd(const int n, const scalar_t *i, complex_t *o)
     {
         if (m_plan == nullptr) {
@@ -137,6 +139,8 @@ class plan<double>
         fftw_execute_dft_r2c(m_plan, (scalar_t *)i, (fftw_complex *)o);
     }
 
+    // num of i: (n/2 + 1)
+    // num of o: n
     void inv(const int n, const complex_t *i, scalar_t *o)
     {
         if (m_plan == nullptr) {
@@ -150,6 +154,8 @@ class plan<double>
         fftw_execute_dft_c2r(m_plan, (fftw_complex *)i, o);
     }
 
+    // num of i: n0 * n1
+    // num of o: n0 * (n1/2 + 1)
     void fwd(const int n0, const int n1, const scalar_t *i, complex_t *o)
     {
         if (m_plan == nullptr) {
@@ -164,17 +170,22 @@ class plan<double>
         fftw_execute_dft_r2c(m_plan, (scalar_t *)i, (fftw_complex *)o);
     }
 
+    // num of i: n0 * (n1/2 + 1)
+    // num of o: n0 * n1
     void inv(const int n0, const int n1, const complex_t *i, scalar_t *o)
     {
         if (m_plan == nullptr) {
-            m_plan = fftw_plan_dft_c2r_2d(n0,
-                                          n1,
-                                          (fftw_complex *)i,
-                                          o,
-                                          FFTW_ESTIMATE | FFTW_PRESERVE_INPUT);
+            // can not use FFTW_PRESERVE_INPUT for c2r
+            fftw_complex *__i = new fftw_complex[n0 * n1];
+            IEXP_NOT_NULLPTR(__i);
+
+            m_plan = fftw_plan_dft_c2r_2d(n0, n1, __i, o, FFTW_ESTIMATE);
             IEXP_NOT_NULLPTR(m_plan);
+
+            delete[] __i;
         }
 
+        // Note i would be modified!!!
         fftw_execute_dft_c2r(m_plan, (fftw_complex *)i, o);
     }
 
@@ -247,6 +258,9 @@ class plan<double>
     }
 
   private:
+    plan(const plan &) = delete;
+    plan &operator=(const plan &) = delete;
+
     fftw_plan m_plan;
 };
 
