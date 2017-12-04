@@ -117,7 +117,7 @@ inline double airy_Ai_e_impl<false, double>(const double x,
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("airy_Ai"));
+    RETURN_NAN_OR_THROW(std::runtime_error("airy_Ai"));
 }
 
 template <>
@@ -130,7 +130,7 @@ inline double airy_Ai_e_impl<true, double>(const double x,
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("airy_Ai_scaled"));
+    RETURN_NAN_OR_THROW(std::runtime_error("airy_Ai_scaled"));
 }
 
 template <bool scaled, typename T, typename U>
@@ -258,7 +258,7 @@ inline double airy_Ai_deriv_e_impl<false, double>(const double x,
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("airy_Ai_deriv"));
+    RETURN_NAN_OR_THROW(std::runtime_error("airy_Ai_deriv"));
 }
 
 template <>
@@ -271,7 +271,7 @@ inline double airy_Ai_deriv_e_impl<true, double>(const double x,
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("airy_Ai_deriv_scaled"));
+    RETURN_NAN_OR_THROW(std::runtime_error("airy_Ai_deriv_scaled"));
 }
 
 template <bool scaled, typename T, typename U>
@@ -397,7 +397,7 @@ inline double airy_Bi_e_impl<false, double>(const double x,
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("airy_Bi"));
+    RETURN_NAN_OR_THROW(std::runtime_error("airy_Bi"));
 }
 
 template <>
@@ -410,7 +410,7 @@ inline double airy_Bi_e_impl<true, double>(const double x,
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("airy_Bi_scaled"));
+    RETURN_NAN_OR_THROW(std::runtime_error("airy_Bi_scaled"));
 }
 
 template <bool scaled, typename T, typename U>
@@ -538,7 +538,7 @@ inline double airy_Bi_deriv_e_impl<false, double>(const double x,
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("airy_Bi_deriv"));
+    RETURN_NAN_OR_THROW(std::runtime_error("airy_Bi_deriv"));
 }
 
 template <>
@@ -551,7 +551,7 @@ inline double airy_Bi_deriv_e_impl<true, double>(const double x,
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("airy_Bi_deriv_scaled"));
+    RETURN_NAN_OR_THROW(std::runtime_error("airy_Bi_deriv_scaled"));
 }
 
 template <bool scaled, typename T, typename U>

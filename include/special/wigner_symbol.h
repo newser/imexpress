@@ -63,76 +63,14 @@ inline double wigner3j_impl(const int ja,
 }
 
 template <typename T>
-class wigner3j_functor
+double wigner3j(const ArrayBase<T> &c)
 {
-  public:
-    typedef Array<double,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    static_assert(TYPE_IS(typename T::Scalar, int) ||
+                      TYPE_IS(typename T::Scalar, unsigned int),
+                  "c can only be int or uint array");
+    eigen_assert((c.rows() == 2) && (c.cols() == 3));
 
-    wigner3j_functor(const T &ja,
-                     const T &jb,
-                     const T &jc,
-                     const T &ma,
-                     const T &mb,
-                     const T &mc)
-        : m_ja(ja)
-        , m_jb(jb)
-        , m_jc(jc)
-        , m_ma(ma)
-        , m_mb(mb)
-        , m_mc(mc)
-    {
-    }
-
-    const double operator()(Index i, Index j) const
-    {
-        return wigner3j_impl(m_ja(i, j),
-                             m_jb(i, j),
-                             m_jc(i, j),
-                             m_ma(i, j),
-                             m_mb(i, j),
-                             m_mc(i, j));
-    }
-
-  private:
-    const T &m_ja;
-    const T &m_jb;
-    const T &m_jc;
-    const T &m_ma;
-    const T &m_mb;
-    const T &m_mc;
-};
-
-template <typename T>
-inline CwiseNullaryOp<wigner3j_functor<T>,
-                      typename wigner3j_functor<T>::ArrayType>
-wigner3j(const ArrayBase<T> &ja,
-         const ArrayBase<T> &jb,
-         const ArrayBase<T> &jc,
-         const ArrayBase<T> &ma,
-         const ArrayBase<T> &mb,
-         const ArrayBase<T> &mc)
-{
-    eigen_assert(MATRIX_SAME_SIZE(ja, jb));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jc));
-    eigen_assert(MATRIX_SAME_SIZE(ja, ma));
-    eigen_assert(MATRIX_SAME_SIZE(ja, mb));
-    eigen_assert(MATRIX_SAME_SIZE(ja, mc));
-
-    typedef typename wigner3j_functor<T>::ArrayType ArrayType;
-    return ArrayType::NullaryExpr(ja.rows(),
-                                  ja.cols(),
-                                  wigner3j_functor<T>(ja.derived(),
-                                                      jb.derived(),
-                                                      jc.derived(),
-                                                      ma.derived(),
-                                                      mb.derived(),
-                                                      mc.derived()));
+    return wigner3j_impl(c(0, 0), c(0, 1), c(0, 2), c(1, 0), c(1, 1), c(1, 2));
 }
 
 template <typename T, typename U>
@@ -161,86 +99,24 @@ inline double wigner3j_e_impl(const int ja,
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("wigner3j"));
+    RETURN_NAN_OR_THROW(std::runtime_error("wigner3j"));
 }
 
-template <typename T, typename U>
-class wigner3j_e_functor
+template <typename T>
+double wigner3j(const ArrayBase<T> &c, double &e)
 {
-  public:
-    typedef Array<double,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    static_assert(TYPE_IS(typename T::Scalar, int) ||
+                      TYPE_IS(typename T::Scalar, unsigned int),
+                  "c can only be int or uint array");
+    eigen_assert((c.rows() == 2) && (c.cols() == 3));
 
-    wigner3j_e_functor(const T &ja,
-                       const T &jb,
-                       const T &jc,
-                       const T &ma,
-                       const T &mb,
-                       const T &mc,
-                       U &e)
-        : m_ja(ja)
-        , m_jb(jb)
-        , m_jc(jc)
-        , m_ma(ma)
-        , m_mb(mb)
-        , m_mc(mc)
-        , m_e(e)
-    {
-    }
-
-    const double operator()(Index i, Index j) const
-    {
-        return wigner3j_e_impl(m_ja(i, j),
-                               m_jb(i, j),
-                               m_jc(i, j),
-                               m_ma(i, j),
-                               m_mb(i, j),
-                               m_mc(i, j),
-                               m_e(i, j));
-    }
-
-  private:
-    const T &m_ja;
-    const T &m_jb;
-    const T &m_jc;
-    const T &m_ma;
-    const T &m_mb;
-    const T &m_mc;
-    U &m_e;
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<wigner3j_e_functor<T, U>,
-                      typename wigner3j_e_functor<T, U>::ArrayType>
-wigner3j(const ArrayBase<T> &ja,
-         const ArrayBase<T> &jb,
-         const ArrayBase<T> &jc,
-         const ArrayBase<T> &ma,
-         const ArrayBase<T> &mb,
-         const ArrayBase<T> &mc,
-         ArrayBase<U> &e)
-{
-    eigen_assert(MATRIX_SAME_SIZE(ja, jb));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jc));
-    eigen_assert(MATRIX_SAME_SIZE(ja, ma));
-    eigen_assert(MATRIX_SAME_SIZE(ja, mb));
-    eigen_assert(MATRIX_SAME_SIZE(ja, mc));
-
-    typedef typename wigner3j_e_functor<T, U>::ArrayType ArrayType;
-    return ArrayType::NullaryExpr(ja.rows(),
-                                  ja.cols(),
-                                  wigner3j_e_functor<T, U>(ja.derived(),
-                                                           jb.derived(),
-                                                           jc.derived(),
-                                                           ma.derived(),
-                                                           mb.derived(),
-                                                           mc.derived(),
-                                                           e.derived()));
+    return wigner3j_e_impl(c(0, 0),
+                           c(0, 1),
+                           c(0, 2),
+                           c(1, 0),
+                           c(1, 1),
+                           c(1, 2),
+                           e);
 }
 
 // ========================================
@@ -266,76 +142,14 @@ inline double wigner6j_impl(const int ja,
 }
 
 template <typename T>
-class wigner6j_functor
+double wigner6j(const ArrayBase<T> &c)
 {
-  public:
-    typedef Array<double,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    static_assert(TYPE_IS(typename T::Scalar, int) ||
+                      TYPE_IS(typename T::Scalar, unsigned int),
+                  "c can only be int or uint array");
+    eigen_assert((c.rows() == 2) && (c.cols() == 3));
 
-    wigner6j_functor(const T &ja,
-                     const T &jb,
-                     const T &jc,
-                     const T &jd,
-                     const T &je,
-                     const T &jf)
-        : m_ja(ja)
-        , m_jb(jb)
-        , m_jc(jc)
-        , m_jd(jd)
-        , m_je(je)
-        , m_jf(jf)
-    {
-    }
-
-    const double operator()(Index i, Index j) const
-    {
-        return wigner6j_impl(m_ja(i, j),
-                             m_jb(i, j),
-                             m_jc(i, j),
-                             m_jd(i, j),
-                             m_je(i, j),
-                             m_jf(i, j));
-    }
-
-  private:
-    const T &m_ja;
-    const T &m_jb;
-    const T &m_jc;
-    const T &m_jd;
-    const T &m_je;
-    const T &m_jf;
-};
-
-template <typename T>
-inline CwiseNullaryOp<wigner6j_functor<T>,
-                      typename wigner6j_functor<T>::ArrayType>
-wigner6j(const ArrayBase<T> &ja,
-         const ArrayBase<T> &jb,
-         const ArrayBase<T> &jc,
-         const ArrayBase<T> &jd,
-         const ArrayBase<T> &je,
-         const ArrayBase<T> &jf)
-{
-    eigen_assert(MATRIX_SAME_SIZE(ja, jb));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jc));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jd));
-    eigen_assert(MATRIX_SAME_SIZE(ja, je));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jf));
-
-    typedef typename wigner6j_functor<T>::ArrayType ArrayType;
-    return ArrayType::NullaryExpr(ja.rows(),
-                                  ja.cols(),
-                                  wigner6j_functor<T>(ja.derived(),
-                                                      jb.derived(),
-                                                      jc.derived(),
-                                                      jd.derived(),
-                                                      je.derived(),
-                                                      jf.derived()));
+    return wigner6j_impl(c(0, 0), c(0, 1), c(0, 2), c(1, 0), c(1, 1), c(1, 2));
 }
 
 template <typename T, typename U>
@@ -364,86 +178,24 @@ inline double wigner6j_e_impl(const int ja,
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("wigner6j"));
+    RETURN_NAN_OR_THROW(std::runtime_error("wigner6j"));
 }
 
-template <typename T, typename U>
-class wigner6j_e_functor
+template <typename T>
+double wigner6j(const ArrayBase<T> &c, double &e)
 {
-  public:
-    typedef Array<double,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    static_assert(TYPE_IS(typename T::Scalar, int) ||
+                      TYPE_IS(typename T::Scalar, unsigned int),
+                  "c can only be int or uint array");
+    eigen_assert((c.rows() == 2) && (c.cols() == 3));
 
-    wigner6j_e_functor(const T &ja,
-                       const T &jb,
-                       const T &jc,
-                       const T &jd,
-                       const T &je,
-                       const T &jf,
-                       U &e)
-        : m_ja(ja)
-        , m_jb(jb)
-        , m_jc(jc)
-        , m_jd(jd)
-        , m_je(je)
-        , m_jf(jf)
-        , m_e(e)
-    {
-    }
-
-    const double operator()(Index i, Index j) const
-    {
-        return wigner6j_e_impl(m_ja(i, j),
-                               m_jb(i, j),
-                               m_jc(i, j),
-                               m_jd(i, j),
-                               m_je(i, j),
-                               m_jf(i, j),
-                               m_e(i, j));
-    }
-
-  private:
-    const T &m_ja;
-    const T &m_jb;
-    const T &m_jc;
-    const T &m_jd;
-    const T &m_je;
-    const T &m_jf;
-    U &m_e;
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<wigner6j_e_functor<T, U>,
-                      typename wigner6j_e_functor<T, U>::ArrayType>
-wigner6j(const ArrayBase<T> &ja,
-         const ArrayBase<T> &jb,
-         const ArrayBase<T> &jc,
-         const ArrayBase<T> &jd,
-         const ArrayBase<T> &je,
-         const ArrayBase<T> &jf,
-         ArrayBase<U> &e)
-{
-    eigen_assert(MATRIX_SAME_SIZE(ja, jb));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jc));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jd));
-    eigen_assert(MATRIX_SAME_SIZE(ja, je));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jf));
-
-    typedef typename wigner6j_e_functor<T, U>::ArrayType ArrayType;
-    return ArrayType::NullaryExpr(ja.rows(),
-                                  ja.cols(),
-                                  wigner6j_e_functor<T, U>(ja.derived(),
-                                                           jb.derived(),
-                                                           jc.derived(),
-                                                           jd.derived(),
-                                                           je.derived(),
-                                                           jf.derived(),
-                                                           e.derived()));
+    return wigner6j_e_impl(c(0, 0),
+                           c(0, 1),
+                           c(0, 2),
+                           c(1, 0),
+                           c(1, 1),
+                           c(1, 2),
+                           e);
 }
 
 // ========================================
@@ -479,97 +231,22 @@ inline double wigner9j_impl(const int ja,
 }
 
 template <typename T>
-class wigner9j_functor
+double wigner9j(const ArrayBase<T> &c)
 {
-  public:
-    typedef Array<double,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    static_assert(TYPE_IS(typename T::Scalar, int) ||
+                      TYPE_IS(typename T::Scalar, unsigned int),
+                  "c can only be int or uint array");
+    eigen_assert((c.rows() == 3) && (c.cols() == 3));
 
-    wigner9j_functor(const T &ja,
-                     const T &jb,
-                     const T &jc,
-                     const T &jd,
-                     const T &je,
-                     const T &jf,
-                     const T &jg,
-                     const T &jh,
-                     const T &ji)
-        : m_ja(ja)
-        , m_jb(jb)
-        , m_jc(jc)
-        , m_jd(jd)
-        , m_je(je)
-        , m_jf(jf)
-        , m_jg(jg)
-        , m_jh(jh)
-        , m_ji(ji)
-    {
-    }
-
-    const double operator()(Index i, Index j) const
-    {
-        return wigner9j_impl(m_ja(i, j),
-                             m_jb(i, j),
-                             m_jc(i, j),
-                             m_jd(i, j),
-                             m_je(i, j),
-                             m_jf(i, j),
-                             m_jg(i, j),
-                             m_jh(i, j),
-                             m_ji(i, j));
-    }
-
-  private:
-    const T &m_ja;
-    const T &m_jb;
-    const T &m_jc;
-    const T &m_jd;
-    const T &m_je;
-    const T &m_jf;
-    const T &m_jg;
-    const T &m_jh;
-    const T &m_ji;
-};
-
-template <typename T>
-inline CwiseNullaryOp<wigner9j_functor<T>,
-                      typename wigner9j_functor<T>::ArrayType>
-wigner9j(const ArrayBase<T> &ja,
-         const ArrayBase<T> &jb,
-         const ArrayBase<T> &jc,
-         const ArrayBase<T> &jd,
-         const ArrayBase<T> &je,
-         const ArrayBase<T> &jf,
-         const ArrayBase<T> &jg,
-         const ArrayBase<T> &jh,
-         const ArrayBase<T> &ji)
-{
-    eigen_assert(MATRIX_SAME_SIZE(ja, jb));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jc));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jd));
-    eigen_assert(MATRIX_SAME_SIZE(ja, je));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jf));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jg));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jh));
-    eigen_assert(MATRIX_SAME_SIZE(ja, ji));
-
-    typedef typename wigner9j_functor<T>::ArrayType ArrayType;
-    return ArrayType::NullaryExpr(ja.rows(),
-                                  ja.cols(),
-                                  wigner9j_functor<T>(ja.derived(),
-                                                      jb.derived(),
-                                                      jc.derived(),
-                                                      jd.derived(),
-                                                      je.derived(),
-                                                      jf.derived(),
-                                                      jg.derived(),
-                                                      jh.derived(),
-                                                      ji.derived()));
+    return wigner9j_impl(c(0, 0),
+                         c(0, 1),
+                         c(0, 2),
+                         c(1, 0),
+                         c(1, 1),
+                         c(1, 2),
+                         c(2, 0),
+                         c(2, 1),
+                         c(2, 2));
 }
 
 template <typename T, typename U>
@@ -605,107 +282,27 @@ inline double wigner9j_e_impl(const int ja,
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("wigner9j"));
+    RETURN_NAN_OR_THROW(std::runtime_error("wigner9j"));
 }
 
-template <typename T, typename U>
-class wigner9j_e_functor
+template <typename T>
+double wigner9j(const ArrayBase<T> &c, double &e)
 {
-  public:
-    typedef Array<double,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    static_assert(TYPE_IS(typename T::Scalar, int) ||
+                      TYPE_IS(typename T::Scalar, unsigned int),
+                  "c can only be int or uint array");
+    eigen_assert((c.rows() == 3) && (c.cols() == 3));
 
-    wigner9j_e_functor(const T &ja,
-                       const T &jb,
-                       const T &jc,
-                       const T &jd,
-                       const T &je,
-                       const T &jf,
-                       const T &jg,
-                       const T &jh,
-                       const T &ji,
-                       U &e)
-        : m_ja(ja)
-        , m_jb(jb)
-        , m_jc(jc)
-        , m_jd(jd)
-        , m_je(je)
-        , m_jf(jf)
-        , m_jg(jg)
-        , m_jh(jh)
-        , m_ji(ji)
-        , m_e(e)
-    {
-    }
-
-    const double operator()(Index i, Index j) const
-    {
-        return wigner9j_e_impl(m_ja(i, j),
-                               m_jb(i, j),
-                               m_jc(i, j),
-                               m_jd(i, j),
-                               m_je(i, j),
-                               m_jf(i, j),
-                               m_jg(i, j),
-                               m_jh(i, j),
-                               m_ji(i, j),
-                               m_e(i, j));
-    }
-
-  private:
-    const T &m_ja;
-    const T &m_jb;
-    const T &m_jc;
-    const T &m_jd;
-    const T &m_je;
-    const T &m_jf;
-    const T &m_jg;
-    const T &m_jh;
-    const T &m_ji;
-    U &m_e;
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<wigner9j_e_functor<T, U>,
-                      typename wigner9j_e_functor<T, U>::ArrayType>
-wigner9j(const ArrayBase<T> &ja,
-         const ArrayBase<T> &jb,
-         const ArrayBase<T> &jc,
-         const ArrayBase<T> &jd,
-         const ArrayBase<T> &je,
-         const ArrayBase<T> &jf,
-         const ArrayBase<T> &jg,
-         const ArrayBase<T> &jh,
-         const ArrayBase<T> &ji,
-         ArrayBase<U> &e)
-{
-    eigen_assert(MATRIX_SAME_SIZE(ja, jb));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jc));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jd));
-    eigen_assert(MATRIX_SAME_SIZE(ja, je));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jf));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jg));
-    eigen_assert(MATRIX_SAME_SIZE(ja, jh));
-    eigen_assert(MATRIX_SAME_SIZE(ja, ji));
-
-    typedef typename wigner9j_e_functor<T, U>::ArrayType ArrayType;
-    return ArrayType::NullaryExpr(ja.rows(),
-                                  ja.cols(),
-                                  wigner9j_e_functor<T, U>(ja.derived(),
-                                                           jb.derived(),
-                                                           jc.derived(),
-                                                           jd.derived(),
-                                                           je.derived(),
-                                                           jf.derived(),
-                                                           jg.derived(),
-                                                           jh.derived(),
-                                                           ji.derived(),
-                                                           e.derived()));
+    return wigner9j_e_impl(c(0, 0),
+                           c(0, 1),
+                           c(0, 2),
+                           c(1, 0),
+                           c(1, 1),
+                           c(1, 2),
+                           c(2, 0),
+                           c(2, 1),
+                           c(2, 2),
+                           e);
 }
 
 ////////////////////////////////////////////////////////////

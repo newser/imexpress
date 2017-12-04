@@ -144,7 +144,7 @@ inline double cbessel_i_e_impl<false>(const int n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_i"));
+    RETURN_NAN_OR_THROW(std::runtime_error("cbessel_i"));
 }
 
 template <>
@@ -155,7 +155,7 @@ inline double cbessel_i_e_impl<true>(const int n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_i, scaled"));
+    RETURN_NAN_OR_THROW(std::runtime_error("cbessel_i, scaled"));
 }
 
 template <>
@@ -166,7 +166,7 @@ inline double cbessel_i_e_impl<false>(const double n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_i, fractional"));
+    RETURN_NAN_OR_THROW(std::runtime_error("cbessel_i, fractional"));
 }
 
 template <>
@@ -177,7 +177,7 @@ inline double cbessel_i_e_impl<true>(const double n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_i, scaled, fractional"));
+    RETURN_NAN_OR_THROW(std::runtime_error("cbessel_i, scaled, fractional"));
 }
 
 template <bool scaled, typename T, typename U, typename V>
@@ -315,7 +315,7 @@ inline double cbessel_k_e_impl<false>(const int n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_k"));
+    RETURN_NAN_OR_THROW(std::runtime_error("cbessel_k"));
 }
 
 template <>
@@ -326,7 +326,7 @@ inline double cbessel_k_e_impl<true>(const int n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_k, scaled"));
+    RETURN_NAN_OR_THROW(std::runtime_error("cbessel_k, scaled"));
 }
 
 template <>
@@ -337,7 +337,7 @@ inline double cbessel_k_e_impl<false>(const double n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_k, fractional"));
+    RETURN_NAN_OR_THROW(std::runtime_error("cbessel_k, fractional"));
 }
 
 template <>
@@ -348,7 +348,7 @@ inline double cbessel_k_e_impl<true>(const double n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_k, scaled, fractional"));
+    RETURN_NAN_OR_THROW(std::runtime_error("cbessel_k, scaled, fractional"));
 }
 
 template <bool scaled, typename T, typename U, typename V>

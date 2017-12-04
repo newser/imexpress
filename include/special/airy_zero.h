@@ -97,7 +97,7 @@ inline double airy_n0_Ai_e_impl(const unsigned int x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("airy_zero_Ai"));
+    RETURN_NAN_OR_THROW(std::runtime_error("airy_zero_Ai"));
 }
 
 template <typename T, typename U>
@@ -201,7 +201,7 @@ inline double airy_n0_Ai_deriv_e_impl(const unsigned int x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("airy_zero_Ai_deriv"));
+    RETURN_NAN_OR_THROW(std::runtime_error("airy_zero_Ai_deriv"));
 }
 
 template <typename T, typename U>
@@ -306,7 +306,7 @@ inline double airy_n0_Bi_e_impl(const unsigned int x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("airy_zero_Bi"));
+    RETURN_NAN_OR_THROW(std::runtime_error("airy_zero_Bi"));
 }
 
 template <typename T, typename U>
@@ -410,7 +410,7 @@ inline double airy_n0_Bi_deriv_e_impl(const unsigned int x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("airy_zero_Bi_deriv"));
+    RETURN_NAN_OR_THROW(std::runtime_error("airy_zero_Bi_deriv"));
 }
 
 template <typename T, typename U>

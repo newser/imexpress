@@ -111,7 +111,7 @@ inline double hydroR1_e_impl(const double z, const double r, double &e)
         e = ret.err;
         return ret.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("hydroR"));
+    RETURN_NAN_OR_THROW(std::runtime_error("hydroR"));
 }
 
 template <typename T, typename U>
@@ -252,7 +252,7 @@ inline double hydroR_e_impl(
         e = ret.err;
         return ret.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("hydroR"));
+    RETURN_NAN_OR_THROW(std::runtime_error("hydroR"));
 }
 
 template <typename T, typename U, typename V>

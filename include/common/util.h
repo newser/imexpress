@@ -44,7 +44,7 @@ IEXP_NS_BEGIN
 
 #define TYPE_CHOOSE(v, t1, t2) type_choose<v, t1, t2>::type
 
-#define THROW_OR_RETURN_NAN(t) throw(t)
+#define RETURN_NAN_OR_THROW(t) throw(t)
 
 #define IS_VEC(v) (((v).rows() == 1) || ((v).cols() == 1))
 

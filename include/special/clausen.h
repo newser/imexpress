@@ -103,7 +103,7 @@ inline double clausen_e_impl(const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("clausen"));
+    RETURN_NAN_OR_THROW(std::runtime_error("clausen"));
 }
 
 template <typename T, typename U>

@@ -102,7 +102,7 @@ inline double dawson_e_impl(const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("dawson"));
+    RETURN_NAN_OR_THROW(std::runtime_error("dawson"));
 }
 
 template <typename T, typename U>

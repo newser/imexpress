@@ -59,7 +59,7 @@ inline double coulw_f_impl(const double l, const double eta, const double x)
     if (s == GSL_SUCCESS) {
         return F.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("coulw_f"));
+    RETURN_NAN_OR_THROW(std::runtime_error("coulw_f"));
 }
 
 template <typename T>
@@ -127,7 +127,7 @@ inline double coulw_f_e_impl(const double l,
         e = F.err;
         return F.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("coulw_f"));
+    RETURN_NAN_OR_THROW(std::runtime_error("coulw_f"));
 }
 
 template <typename T, typename U>
@@ -202,7 +202,7 @@ inline double coulw_df_impl(const double l, const double eta, const double x)
     if (s == GSL_SUCCESS) {
         return Fp.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("coulw_df"));
+    RETURN_NAN_OR_THROW(std::runtime_error("coulw_df"));
 }
 
 template <typename T>
@@ -270,7 +270,7 @@ inline double coulw_df_e_impl(const double l,
         e = Fp.err;
         return Fp.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("coulw_df"));
+    RETURN_NAN_OR_THROW(std::runtime_error("coulw_df"));
 }
 
 template <typename T, typename U>
@@ -345,7 +345,7 @@ inline double coulw_g_impl(const double l, const double eta, const double x)
     if (s == GSL_SUCCESS) {
         return G.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("coulw_g"));
+    RETURN_NAN_OR_THROW(std::runtime_error("coulw_g"));
 }
 
 template <typename T>
@@ -413,7 +413,7 @@ inline double coulw_g_e_impl(const double l,
         e = G.err;
         return G.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("coulw_g"));
+    RETURN_NAN_OR_THROW(std::runtime_error("coulw_g"));
 }
 
 template <typename T, typename U>
@@ -488,7 +488,7 @@ inline double coulw_dg_impl(const double l, const double eta, const double x)
     if (s == GSL_SUCCESS) {
         return Gp.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("coulw_dg"));
+    RETURN_NAN_OR_THROW(std::runtime_error("coulw_dg"));
 }
 
 template <typename T>
@@ -556,7 +556,7 @@ inline double coulw_dg_e_impl(const double l,
         e = Gp.err;
         return Gp.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("coulw_dg"));
+    RETURN_NAN_OR_THROW(std::runtime_error("coulw_dg"));
 }
 
 template <typename T, typename U>
@@ -779,7 +779,7 @@ inline double coulw_cl_impl(const double l, const double eta)
     if (gsl_sf_coulomb_CL_e(l, eta, &r) == GSL_SUCCESS) {
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("coulw_cl"));
+    RETURN_NAN_OR_THROW(std::runtime_error("coulw_cl"));
 }
 
 template <typename T>
@@ -838,7 +838,7 @@ inline double coulw_cl_e_impl(const double l, const double eta, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("coulw_cl"));
+    RETURN_NAN_OR_THROW(std::runtime_error("coulw_cl"));
 }
 
 template <typename T, typename U>

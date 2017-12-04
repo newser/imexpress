@@ -115,7 +115,7 @@ inline double cbessel_j_e_impl(const int n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_j"));
+    RETURN_NAN_OR_THROW(std::runtime_error("cbessel_j"));
 }
 
 template <>
@@ -126,7 +126,7 @@ inline double cbessel_j_e_impl(const double n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_j"));
+    RETURN_NAN_OR_THROW(std::runtime_error("cbessel_j"));
 }
 
 template <typename T, typename U, typename V>
@@ -247,7 +247,7 @@ inline double cbessel_y_e_impl(const int n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_y"));
+    RETURN_NAN_OR_THROW(std::runtime_error("cbessel_y"));
 }
 
 template <>
@@ -258,7 +258,7 @@ inline double cbessel_y_e_impl(const double n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_y"));
+    RETURN_NAN_OR_THROW(std::runtime_error("cbessel_y"));
 }
 
 template <typename T, typename U, typename V>
@@ -322,7 +322,7 @@ inline double cbessel_n0_j_impl(const int n, const unsigned int x)
     } else if (n == 1) {
         return gsl_sf_bessel_zero_J1(x);
     } else {
-        THROW_OR_RETURN_NAN(std::invalid_argument("use 'n.0' instead"));
+        RETURN_NAN_OR_THROW(std::invalid_argument("use 'n.0' instead"));
     }
 }
 
@@ -391,13 +391,13 @@ inline double cbessel_n0_j_e_impl(const int n, const unsigned int x, double &e)
     } else if (n == 1) {
         s = gsl_sf_bessel_zero_J1_e(x, &r);
     } else {
-        THROW_OR_RETURN_NAN(std::invalid_argument("use 'n.0' instead"));
+        RETURN_NAN_OR_THROW(std::invalid_argument("use 'n.0' instead"));
     }
     if (s == GSL_SUCCESS) {
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_n0_j"));
+    RETURN_NAN_OR_THROW(std::runtime_error("cbessel_n0_j"));
 }
 
 template <>
@@ -410,7 +410,7 @@ inline double cbessel_n0_j_e_impl(const double n,
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("cbessel_n0_j"));
+    RETURN_NAN_OR_THROW(std::runtime_error("cbessel_n0_j"));
 }
 
 template <typename T, typename U, typename V>

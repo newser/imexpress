@@ -104,7 +104,7 @@ namespace sf {
             e = r.err;                                                         \
             return r.val;                                                      \
         }                                                                      \
-        THROW_OR_RETURN_NAN(std::runtime_error("debye##n##"));                 \
+        RETURN_NAN_OR_THROW(std::runtime_error("debye##n##"));                 \
     }                                                                          \
                                                                                \
     template <typename T, typename U>                                          \

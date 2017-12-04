@@ -129,7 +129,7 @@ inline double sbessel_j_e_impl(const int n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("sbessel_j"));
+    RETURN_NAN_OR_THROW(std::runtime_error("sbessel_j"));
 }
 
 template <typename T, typename U>
@@ -244,7 +244,7 @@ inline double sbessel_y_e_impl(const int n, const double x, double &e)
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("sbessel_y"));
+    RETURN_NAN_OR_THROW(std::runtime_error("sbessel_y"));
 }
 
 template <typename T, typename U>

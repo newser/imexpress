@@ -125,7 +125,7 @@ inline double sbessel_i_e_impl<true, double>(const int n,
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("sbessel_i, scaled"));
+    RETURN_NAN_OR_THROW(std::runtime_error("sbessel_i, scaled"));
 }
 
 template <bool scaled, typename T, typename U>
@@ -257,7 +257,7 @@ inline double sbessel_k_e_impl<true, double>(const int n,
         e = r.err;
         return r.val;
     }
-    THROW_OR_RETURN_NAN(std::runtime_error("sbessel_k, scaled"));
+    RETURN_NAN_OR_THROW(std::runtime_error("sbessel_k, scaled"));
 }
 
 template <bool scaled, typename T, typename U>
