@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_FFT_FFTW_PLAN_FLOAT__
-#define __IEXP_FFT_FFTW_PLAN_FLOAT__
+#ifndef __IEXP_FFT_FFTW_PLAN_SINGLE__
+#define __IEXP_FFT_FFTW_PLAN_SINGLE__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -275,4 +275,4 @@ class plan<float>
 
 IEXP_NS_END
 
-#endif /* __IEXP_FFT_FFTW_PLAN_FLOAT__ */
+#endif /* __IEXP_FFT_FFTW_PLAN_SINGLE__ */

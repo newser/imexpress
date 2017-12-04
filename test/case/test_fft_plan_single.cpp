@@ -1,5 +1,5 @@
 #include <catch.hpp>
-#include <fft/fftw/plan_float.h>
+#include <fft/fftw/plan_single.h>
 #include <iostream>
 #include <math/constant.h>
 #include <test_util.h>

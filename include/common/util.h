@@ -40,7 +40,7 @@ IEXP_NS_BEGIN
         }                                                                      \
     } while (0)
 
-#define TYPE_IS(t1, t2) type_is<t1, t2>::value
+#define TYPE_IS(t1, t2) std::is_same<t1, t2>::value
 
 #define TYPE_CHOOSE(v, t1, t2) type_choose<v, t1, t2>::type
 
@@ -54,12 +54,15 @@ IEXP_NS_BEGIN
 #define MATRIX_SAME_SIZE(m1, m2)                                               \
     (((m1).rows() == (m2).rows()) && ((m1).cols() == (m2).cols()))
 
-#define UNSUPPORTED_TYPE(T) throw std::invalid_argument(typeid(T).name())
+#define UNSUPPORTED_TYPE(t) throw std::invalid_argument(typeid(t).name())
+
+#define IS_COMPLEX(t) is_complex<t>::value
 
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
 
+/*
 template <typename T, typename U>
 struct type_is
 {
@@ -71,6 +74,7 @@ struct type_is<T, T>
 {
     static const bool value = true;
 };
+*/
 
 template <typename T>
 struct type_eval
@@ -94,6 +98,13 @@ template <typename T1, typename T2>
 struct type_choose<T1, T2, false>
 {
     typedef T2 type;
+};
+
+template <typename T>
+struct is_complex
+{
+    static const bool value = std::is_same<T, std::complex<float>>::value ||
+                              std::is_same<T, std::complex<double>>::value;
 };
 
 ////////////////////////////////////////////////////////////
