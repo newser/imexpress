@@ -24,6 +24,7 @@
 ////////////////////////////////////////////////////////////
 
 #include <common/common.h>
+
 #include <fft/type.h>
 
 #include <fftw3.h>

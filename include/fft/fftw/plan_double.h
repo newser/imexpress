@@ -23,8 +23,6 @@
 // import header files
 ////////////////////////////////////////////////////////////
 
-#include <common/common.h>
-
 #include <fft/fftw/plan.h>
 
 IEXP_NS_BEGIN
@@ -34,6 +32,17 @@ namespace fftw3 {
 ////////////////////////////////////////////////////////////
 // macro definition
 ////////////////////////////////////////////////////////////
+
+#define PLAN_LOCK                                                              \
+    if (m_lock != nullptr) {                                                   \
+        m_lock->lock();                                                        \
+    }                                                                          \
+    if (m_plan == nullptr) {
+#define PLAN_UNLOCK                                                            \
+    if (m_lock != nullptr) {                                                   \
+        m_lock->unlock();                                                      \
+    }                                                                          \
+    }
 
 ////////////////////////////////////////////////////////////
 // type definition
@@ -46,8 +55,9 @@ class plan<double>
     typedef double scalar_t;
     typedef std::complex<double> complex_t;
 
-    plan()
+    plan(std::mutex *lock = nullptr)
         : m_plan(nullptr)
+        , m_lock(lock)
     {
     }
 
@@ -65,12 +75,14 @@ class plan<double>
     void fwd(const int n, const complex_t *i, complex_t *o)
     {
         if (m_plan == nullptr) {
+            PLAN_LOCK
             m_plan = fftw_plan_dft_1d(n,
                                       (fftw_complex *)i,
                                       (fftw_complex *)o,
                                       FFTW_FORWARD,
                                       FFTW_ESTIMATE | FFTW_PRESERVE_INPUT);
             IEXP_NOT_NULLPTR(m_plan);
+            PLAN_UNLOCK
         }
 
         fftw_execute_dft(m_plan, (fftw_complex *)i, (fftw_complex *)o);
@@ -79,12 +91,14 @@ class plan<double>
     void inv(const int n, const complex_t *i, complex_t *o)
     {
         if (m_plan == nullptr) {
+            PLAN_LOCK
             m_plan = fftw_plan_dft_1d(n,
                                       (fftw_complex *)i,
                                       (fftw_complex *)o,
                                       FFTW_BACKWARD,
                                       FFTW_ESTIMATE | FFTW_PRESERVE_INPUT);
             IEXP_NOT_NULLPTR(m_plan);
+            PLAN_UNLOCK
         }
 
         fftw_execute_dft(m_plan, (fftw_complex *)i, (fftw_complex *)o);
@@ -93,6 +107,7 @@ class plan<double>
     void fwd(const int n0, const int n1, const complex_t *i, complex_t *o)
     {
         if (m_plan == nullptr) {
+            PLAN_LOCK
             m_plan = fftw_plan_dft_2d(n0,
                                       n1,
                                       (fftw_complex *)i,
@@ -100,6 +115,7 @@ class plan<double>
                                       FFTW_FORWARD,
                                       FFTW_ESTIMATE | FFTW_PRESERVE_INPUT);
             IEXP_NOT_NULLPTR(m_plan);
+            PLAN_UNLOCK
         }
 
         fftw_execute_dft(m_plan, (fftw_complex *)i, (fftw_complex *)o);
@@ -108,6 +124,7 @@ class plan<double>
     void inv(const int n0, const int n1, const complex_t *i, complex_t *o)
     {
         if (m_plan == nullptr) {
+            PLAN_LOCK
             m_plan = fftw_plan_dft_2d(n0,
                                       n1,
                                       (fftw_complex *)i,
@@ -115,6 +132,7 @@ class plan<double>
                                       FFTW_BACKWARD,
                                       FFTW_ESTIMATE | FFTW_PRESERVE_INPUT);
             IEXP_NOT_NULLPTR(m_plan);
+            PLAN_UNLOCK
         }
 
         fftw_execute_dft(m_plan, (fftw_complex *)i, (fftw_complex *)o);
@@ -129,11 +147,13 @@ class plan<double>
     void fwd(const int n, const scalar_t *i, complex_t *o)
     {
         if (m_plan == nullptr) {
+            PLAN_LOCK
             m_plan = fftw_plan_dft_r2c_1d(n,
                                           (scalar_t *)i,
                                           (fftw_complex *)o,
                                           FFTW_ESTIMATE | FFTW_PRESERVE_INPUT);
             IEXP_NOT_NULLPTR(m_plan);
+            PLAN_UNLOCK
         }
 
         fftw_execute_dft_r2c(m_plan, (scalar_t *)i, (fftw_complex *)o);
@@ -144,11 +164,13 @@ class plan<double>
     void inv(const int n, const complex_t *i, scalar_t *o)
     {
         if (m_plan == nullptr) {
+            PLAN_LOCK
             m_plan = fftw_plan_dft_c2r_1d(n,
                                           (fftw_complex *)i,
                                           o,
                                           FFTW_ESTIMATE | FFTW_PRESERVE_INPUT);
             IEXP_NOT_NULLPTR(m_plan);
+            PLAN_UNLOCK
         }
 
         fftw_execute_dft_c2r(m_plan, (fftw_complex *)i, o);
@@ -159,12 +181,14 @@ class plan<double>
     void fwd(const int n0, const int n1, const scalar_t *i, complex_t *o)
     {
         if (m_plan == nullptr) {
+            PLAN_LOCK
             m_plan = fftw_plan_dft_r2c_2d(n0,
                                           n1,
                                           (scalar_t *)i,
                                           (fftw_complex *)o,
                                           FFTW_ESTIMATE | FFTW_PRESERVE_INPUT);
             IEXP_NOT_NULLPTR(m_plan);
+            PLAN_UNLOCK
         }
 
         fftw_execute_dft_r2c(m_plan, (scalar_t *)i, (fftw_complex *)o);
@@ -175,6 +199,7 @@ class plan<double>
     void inv(const int n0, const int n1, const complex_t *i, scalar_t *o)
     {
         if (m_plan == nullptr) {
+            PLAN_LOCK
             // can not use FFTW_PRESERVE_INPUT for c2r
             fftw_complex *__i = new fftw_complex[n0 * n1];
             IEXP_NOT_NULLPTR(__i);
@@ -183,6 +208,7 @@ class plan<double>
             IEXP_NOT_NULLPTR(m_plan);
 
             delete[] __i;
+            PLAN_UNLOCK
         }
 
         // Note i would be modified!!!
@@ -197,12 +223,14 @@ class plan<double>
     void fwd(const int n, const scalar_t *i, scalar_t *o)
     {
         if (m_plan == nullptr) {
+            PLAN_LOCK
             m_plan = fftw_plan_r2r_1d(n,
                                       (scalar_t *)i,
                                       o,
                                       fwd_kind[k],
                                       FFTW_ESTIMATE | FFTW_PRESERVE_INPUT);
             IEXP_NOT_NULLPTR(m_plan);
+            PLAN_UNLOCK
         }
 
         fftw_execute_r2r(m_plan, (scalar_t *)i, o);
@@ -212,12 +240,14 @@ class plan<double>
     void inv(const int n, const scalar_t *i, scalar_t *o)
     {
         if (m_plan == nullptr) {
+            PLAN_LOCK
             m_plan = fftw_plan_r2r_1d(n,
                                       (scalar_t *)i,
                                       o,
                                       inv_kind[k],
                                       FFTW_ESTIMATE | FFTW_PRESERVE_INPUT);
             IEXP_NOT_NULLPTR(m_plan);
+            PLAN_UNLOCK
         }
 
         fftw_execute_r2r(m_plan, (scalar_t *)i, o);
@@ -227,6 +257,7 @@ class plan<double>
     void fwd(const int n0, const int n1, const scalar_t *i, scalar_t *o)
     {
         if (m_plan == nullptr) {
+            PLAN_LOCK
             m_plan = fftw_plan_r2r_2d(n0,
                                       n1,
                                       (scalar_t *)i,
@@ -235,6 +266,7 @@ class plan<double>
                                       fwd_kind[k1],
                                       FFTW_ESTIMATE | FFTW_PRESERVE_INPUT);
             IEXP_NOT_NULLPTR(m_plan);
+            PLAN_UNLOCK
         }
 
         fftw_execute_r2r(m_plan, (scalar_t *)i, o);
@@ -244,6 +276,7 @@ class plan<double>
     void inv(const int n0, const int n1, const scalar_t *i, scalar_t *o)
     {
         if (m_plan == nullptr) {
+            PLAN_LOCK
             m_plan = fftw_plan_r2r_2d(n0,
                                       n1,
                                       (scalar_t *)i,
@@ -252,16 +285,15 @@ class plan<double>
                                       inv_kind[k1],
                                       FFTW_ESTIMATE | FFTW_PRESERVE_INPUT);
             IEXP_NOT_NULLPTR(m_plan);
+            PLAN_UNLOCK
         }
 
         fftw_execute_r2r(m_plan, (scalar_t *)i, o);
     }
 
   private:
-    plan(const plan &) = delete;
-    plan &operator=(const plan &) = delete;
-
     fftw_plan m_plan;
+    std::mutex *m_lock;
 };
 
 ////////////////////////////////////////////////////////////
@@ -274,5 +306,8 @@ class plan<double>
 }
 
 IEXP_NS_END
+
+#undef PLAN_LOCK
+#undef PLAN_UNLOCK
 
 #endif /* __IEXP_FFT_FFTW_PLAN_DOUBLE__ */

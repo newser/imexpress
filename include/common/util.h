@@ -42,7 +42,7 @@ IEXP_NS_BEGIN
 
 #define TYPE_IS(t1, t2) std::is_same<t1, t2>::value
 
-#define TYPE_CHOOSE(v, t1, t2) type_choose<v, t1, t2>::type
+#define TYPE_CHOOSE(v, t1, t2) std::conditional<v, t1, t2>::type
 
 #define RETURN_NAN_OR_THROW(t) throw(t)
 
@@ -82,6 +82,7 @@ struct type_eval
     typedef typename Eigen::internal::eval<T>::type type;
 };
 
+/*
 template <typename T1, typename T2, bool V>
 struct type_choose
 {
@@ -99,6 +100,7 @@ struct type_choose<T1, T2, false>
 {
     typedef T2 type;
 };
+*/
 
 template <typename T>
 struct is_complex

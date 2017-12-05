@@ -24,8 +24,7 @@
 ////////////////////////////////////////////////////////////
 
 #include <common/common.h>
-#include <fft/fftw/plan_double.h>
-#include <fft/fftw/plan_float.h>
+#include <fft/fftw/plan.h>
 
 #include <map>
 #include <mutex>
@@ -42,124 +41,190 @@ namespace fftw3 {
 // type definition
 ////////////////////////////////////////////////////////////
 
+enum how
+{
+    MEASURE = FFTW_MEASURE,
+    PATIENT = FFTW_PATIENT,
+    EXHAUSTIVE = FFTW_EXHAUSTIVE,
+};
+
+enum scalar
+{
+    SINGLE,
+    DOUBLE,
+};
+
+enum io
+{
+    C2C,
+    R2C,
+    C2R,
+    R2R,
+};
+
+template <typename T, int dim>
+struct plan_traits
+{
+};
+
 template <typename T>
+struct plan_traits<T, 1>
+{
+    typedef plan<T> plan_t;
+    typedef int64_t key_t;
+    typedef std::map<key_t, plan_t> map_t;
+};
+
+template <typename T>
+struct plan_traits<T, 2>
+{
+    typedef plan<T> plan_t;
+    typedef std::tuple<int64_t, int64_t> key_t;
+    typedef std::map<key_t, plan_t> map_t;
+};
+
+template <typename I, typename O>
+struct io_traits
+{
+};
+
+template <>
+struct io_traits<std::complex<double>, std::complex<double>>
+{
+    using type = double;
+    static const scalar scalar = DOUBLE;
+    static const io io = C2C;
+};
+
+template <>
+struct io_traits<double, std::complex<double>>
+{
+    using type = double;
+    static const scalar scalar = DOUBLE;
+    static const io io = R2C;
+};
+
+template <>
+struct io_traits<std::complex<double>, double>
+{
+    using type = double;
+    static const scalar scalar = DOUBLE;
+    static const io io = C2R;
+};
+
+template <>
+struct io_traits<double, double>
+{
+    using type = double;
+    static const scalar scalar = DOUBLE;
+    static const io io = R2R;
+};
+
+template <>
+struct io_traits<std::complex<float>, std::complex<float>>
+{
+    using type = float;
+    static const scalar scalar = SINGLE;
+    static const io io = C2C;
+};
+
+template <>
+struct io_traits<float, std::complex<float>>
+{
+    using type = float;
+    static const scalar scalar = SINGLE;
+    static const io io = R2C;
+};
+
+template <>
+struct io_traits<std::complex<float>, float>
+{
+    using type = float;
+    static const scalar scalar = SINGLE;
+    static const io io = C2R;
+};
+
+template <>
+struct io_traits<float, float>
+{
+    using type = float;
+    static const scalar scalar = SINGLE;
+    static const io io = R2R;
+};
+
+template <typename T, int dim>
 class plan_cache
 {
   public:
-    typedef plan<T> plan_t;
-    typedef std::map<int64_t, plan_t> map1d_t;
-    typedef std::tuple<int64_t, int64_t> key2d_t;
-    typedef std::map<key2d_t, plan_t> map2d_t;
+    using plan_t = typename plan_traits<T, dim>::plan_t;
+    using key_t = typename plan_traits<T, dim>::key_t;
+    using map_t = typename plan_traits<T, dim>::map_t;
 
-    enum how
+    template <typename I, typename O>
+    plan_t &get(const int n,
+                const I *i,
+                const O *o,
+                const bool fwd,
+                const how h = MEASURE)
     {
-        MEASURE = FFTW_MEASURE,
-        PATIENT = FFTW_PATIENT,
-        EXHAUSTIVE = FFTW_EXHAUSTIVE,
-    };
+        static_assert(std::is_same<T, typename io_traits<I, O>::type>::value,
+                      "invalid type");
 
-    // ========================================
-    // 1d
-    // ========================================
-
-    void add(
-        const int n, const void *i, const void *o, const bool fwd, const how h)
-    {
         const int64_t k = key(n, i, o, fwd);
+        {
+            std::lock_guard<std::mutex> g(m_lock);
 
-        std::lock_guard<std::mutex> g(m_lock1d);
-        fftwl_plan p = m_plan_map1d[k];
-        if (p == nullptr) {
-            p = fftwl_plan_dft_1d(n,
-                                  i,
-                                  o,
-                                  fwd ? FFTW_FORWARD : FFTW_BACKWARD,
-                                  h);
-            IEXP_NOT_NULLPTR(p);
-            m_plan_map1d[k] = p;
+            auto r = m_plan_map.insert(
+                typename map_t::value_type(k, plan_t(&m_lock)));
+            return r.first->second;
         }
     }
 
-    fftwl_plan find(const int n, const void *i, const void *o, const bool fwd)
+    template <typename I, typename O>
+    plan_t &get(const int n0,
+                const int n1,
+                const I *i,
+                const O *o,
+                const bool fwd,
+                const how h = MEASURE)
     {
-        const int64_t k = key(n, i, o, fwd);
+        static_assert(std::is_same<T, typename io_traits<I, O>::type>::value,
+                      "invalid type");
 
-        std::lock_guard<std::mutex> g(m_lock1d);
-        return m_plan_map1d[k];
-    }
+        const key_t k = key(n0, n1, i, o, fwd);
+        {
+            std::lock_guard<std::mutex> g(m_lock);
 
-    // ========================================
-    // 2d
-    // ========================================
-
-    void add(const int n0,
-             const int n1,
-             const void *i,
-             const void *o,
-             const bool fwd,
-             const how h)
-    {
-        const key2d_t k = key(n0, n1, i, o, fwd);
-
-        std::lock_guard<std::mutex> g(m_lock2d);
-        fftwl_plan p = m_plan_map2d[k];
-        if (p == nullptr) {
-            p = fftwl_plan_dft_2d(n0,
-                                  n1,
-                                  i,
-                                  o,
-                                  fwd ? FFTW_FORWARD : FFTW_BACKWARD,
-                                  h);
-            IEXP_NOT_NULLPTR(p);
-            m_plan_map2d[k] = p;
+            auto r = m_plan_map.insert(
+                typename map_t::value_type(k, plan_t(&m_lock)));
+            return r.first->second;
         }
-    }
-
-    fftwl_plan find(const int n0,
-                    const int n1,
-                    const void *i,
-                    const void *o,
-                    const bool fwd)
-    {
-        const key2d_t k = key(n0, n1, i, o, fwd);
-
-        std::lock_guard<std::mutex> g(m_lock2d);
-        return m_plan_map2d[k];
     }
 
   private:
-    int64_t key(const int n, const void *i, const void *o, const bool fwd)
+    template <typename I, typename O>
+    key_t key(const int n, const I *i, const O *o, const bool fwd)
     {
-        const bool inplace(i == o);
-        // avx512 require 512bit alignment
-        const int i_align = reinterpret_cast<uintptr_t>(i) & 63;
-        const int o_align = reinterpret_cast<uintptr_t>(o) & 63;
+        const bool inplace((uintptr_t)i == (uintptr_t)o);
 
-        return int64_t(fwd | (inplace << 1) | (i_align << 2) | (o_align << 8) |
-                       ((int64_t)n << 32));
+        return key_t(fwd | (inplace << 1) | (io_traits<I, O>::scalar << 2) |
+                     (io_traits<I, O>::io << 4) | ((int64_t)n << 32));
     }
 
-    key2d_t key(const int n0,
-                const int n1,
-                const void *i,
-                const void *o,
-                const bool fwd)
+    template <typename I, typename O>
+    key_t key(
+        const int n0, const int n1, const I *i, const O *o, const bool fwd)
     {
-        const bool inplace(i == o);
-        // avx512 require 512bit alignment
-        const int i_align = reinterpret_cast<uintptr_t>(i) & 63;
-        const int o_align = reinterpret_cast<uintptr_t>(o) & 63;
+        const bool inplace((uintptr_t)i == (uintptr_t)o);
 
-        return key2d_t(int64_t(fwd | (inplace << 1) | (i_align << 2) |
-                               (o_align << 8) | ((int64_t)n0 << 32)),
-                       int64_t(n1));
+        return key_t(int64_t(fwd | (inplace << 1) |
+                             (io_traits<I, O>::scalar << 2) |
+                             (io_traits<I, O>::io << 4) | ((int64_t)n0 << 32)),
+                     int64_t(n1));
     }
 
-    map1d_t m_plan_map1d;
-    std::mutex m_lock1d;
-
-    map2d_t m_plan_map2d;
-    std::mutex m_lock2d;
+    map_t m_plan_map;
+    std::mutex m_lock;
 };
 
 ////////////////////////////////////////////////////////////
@@ -169,6 +234,26 @@ class plan_cache
 ////////////////////////////////////////////////////////////
 // indexerface declaration
 ////////////////////////////////////////////////////////////
+
+template <typename I, typename O>
+plan<typename io_traits<I, O>::type> &get_plan(
+    const int n, const I *i, const O *o, const bool fwd, const how h = MEASURE)
+{
+    static plan_cache<typename io_traits<I, O>::type, 1> cache;
+    return cache.get(n, i, o, fwd, h);
+}
+
+template <typename I, typename O>
+plan<typename io_traits<I, O>::type> &get_plan(const int n0,
+                                               const int n1,
+                                               const I *i,
+                                               const O *o,
+                                               const bool fwd,
+                                               const how h = MEASURE)
+{
+    static plan_cache<typename io_traits<I, O>::type, 2> cache;
+    return cache.get(n0, n1, i, o, fwd, h);
+}
 }
 
 IEXP_NS_END
