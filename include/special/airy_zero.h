@@ -53,13 +53,12 @@ template <typename T>
 class airy_n0_Ai_functor
 {
   public:
-    typedef Array<double,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<double,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_n0_Ai_functor(const T &x)
         : m_x(x)
@@ -84,7 +83,7 @@ airy_n0_Ai(const ArrayBase<T> &x)
                       TYPE_IS(typename T::Scalar, unsigned int),
                   "x can only be int or uint array");
 
-    typedef typename airy_n0_Ai_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename airy_n0_Ai_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   airy_n0_Ai_functor<T>(x.derived()));
@@ -104,13 +103,12 @@ template <typename T, typename U>
 class airy_n0_Ai_e_functor
 {
   public:
-    typedef Array<double,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<double,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_n0_Ai_e_functor(const T &x, U &e)
         : m_x(x)
@@ -137,7 +135,7 @@ airy_n0_Ai(const ArrayBase<T> &x, ArrayBase<U> &e)
                       TYPE_IS(typename T::Scalar, unsigned int),
                   "x can only be int or uint array");
 
-    typedef typename airy_n0_Ai_e_functor<T, U>::ArrayType ArrayType;
+    using ArrayType = typename airy_n0_Ai_e_functor<T, U>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   airy_n0_Ai_e_functor<T, U>(x.derived(),
@@ -157,13 +155,12 @@ template <typename T>
 class airy_n0_Ai_deriv_functor
 {
   public:
-    typedef Array<double,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<double,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_n0_Ai_deriv_functor(const T &x)
         : m_x(x)
@@ -188,7 +185,7 @@ airy_n0_Ai_deriv(const ArrayBase<T> &x)
                       TYPE_IS(typename T::Scalar, unsigned int),
                   "x can only be int or uint array");
 
-    typedef typename airy_n0_Ai_deriv_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename airy_n0_Ai_deriv_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   airy_n0_Ai_deriv_functor<T>(x.derived()));
@@ -208,13 +205,12 @@ template <typename T, typename U>
 class airy_n0_Ai_deriv_e_functor
 {
   public:
-    typedef Array<double,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<double,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_n0_Ai_deriv_e_functor(const T &x, U &e)
         : m_x(x)
@@ -241,7 +237,7 @@ airy_n0_Ai_deriv(const ArrayBase<T> &x, ArrayBase<U> &e)
                       TYPE_IS(typename T::Scalar, unsigned int),
                   "x can only be int or uint array");
 
-    typedef typename airy_n0_Ai_deriv_e_functor<T, U>::ArrayType ArrayType;
+    using ArrayType = typename airy_n0_Ai_deriv_e_functor<T, U>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   airy_n0_Ai_deriv_e_functor<T,
@@ -262,13 +258,12 @@ template <typename T>
 class airy_n0_Bi_functor
 {
   public:
-    typedef Array<double,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<double,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_n0_Bi_functor(const T &x)
         : m_x(x)
@@ -293,7 +288,7 @@ airy_n0_Bi(const ArrayBase<T> &x)
                       TYPE_IS(typename T::Scalar, unsigned int),
                   "x can only be int or uint array");
 
-    typedef typename airy_n0_Bi_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename airy_n0_Bi_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   airy_n0_Bi_functor<T>(x.derived()));
@@ -313,13 +308,12 @@ template <typename T, typename U>
 class airy_n0_Bi_e_functor
 {
   public:
-    typedef Array<double,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<double,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_n0_Bi_e_functor(const T &x, U &e)
         : m_x(x)
@@ -346,7 +340,7 @@ airy_n0_Bi(const ArrayBase<T> &x, ArrayBase<U> &e)
                       TYPE_IS(typename T::Scalar, unsigned int),
                   "x can only be int or uint array");
 
-    typedef typename airy_n0_Bi_e_functor<T, U>::ArrayType ArrayType;
+    using ArrayType = typename airy_n0_Bi_e_functor<T, U>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   airy_n0_Bi_e_functor<T, U>(x.derived(),
@@ -366,13 +360,12 @@ template <typename T>
 class airy_n0_Bi_deriv_functor
 {
   public:
-    typedef Array<double,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<double,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_n0_Bi_deriv_functor(const T &x)
         : m_x(x)
@@ -397,7 +390,7 @@ airy_n0_Bi_deriv(const ArrayBase<T> &x)
                       TYPE_IS(typename T::Scalar, unsigned int),
                   "x can only be int or uint array");
 
-    typedef typename airy_n0_Bi_deriv_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename airy_n0_Bi_deriv_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   airy_n0_Bi_deriv_functor<T>(x.derived()));
@@ -417,13 +410,12 @@ template <typename T, typename U>
 class airy_n0_Bi_deriv_e_functor
 {
   public:
-    typedef Array<double,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<double,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_n0_Bi_deriv_e_functor(const T &x, U &e)
         : m_x(x)
@@ -450,7 +442,7 @@ airy_n0_Bi_deriv(const ArrayBase<T> &x, ArrayBase<U> &e)
                       TYPE_IS(typename T::Scalar, unsigned int),
                   "x can only be int or uint array");
 
-    typedef typename airy_n0_Bi_deriv_e_functor<T, U>::ArrayType ArrayType;
+    using ArrayType = typename airy_n0_Bi_deriv_e_functor<T, U>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   airy_n0_Bi_deriv_e_functor<T,

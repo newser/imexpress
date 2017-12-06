@@ -65,13 +65,12 @@ template <typename T>
 class complex_solve_functor
 {
   public:
-    typedef Array<std::complex<double>,
-                  T::SizeAtCompileTime,
-                  1,
-                  ColMajor,
-                  T::SizeAtCompileTime,
-                  1>
-        ArrayType;
+    using ArrayType = Array<std::complex<double>,
+                            T::SizeAtCompileTime,
+                            1,
+                            ColMajor,
+                            T::SizeAtCompileTime,
+                            1>;
 
     complex_solve_functor(const T &a)
         : m_result(a.size() - 1, 1)
@@ -96,7 +95,7 @@ complex_solve(const ArrayBase<T> &a)
 {
     eigen_assert(IS_VEC(a));
 
-    typedef typename complex_solve_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename complex_solve_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(a.derived().size() - 1,
                                   complex_solve_functor<T>(a.derived()));
 }

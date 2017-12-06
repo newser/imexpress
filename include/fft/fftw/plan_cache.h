@@ -70,17 +70,17 @@ struct plan_traits
 template <typename T>
 struct plan_traits<T, 1>
 {
-    typedef plan<T> plan_t;
-    typedef int64_t key_t;
-    typedef std::map<key_t, plan_t> map_t;
+    using plan_t = plan<T>;
+    using key_t = int64_t;
+    using map_t = std::map<key_t, plan_t>;
 };
 
 template <typename T>
 struct plan_traits<T, 2>
 {
-    typedef plan<T> plan_t;
-    typedef std::tuple<int64_t, int64_t> key_t;
-    typedef std::map<key_t, plan_t> map_t;
+    using plan_t = plan<T>;
+    using key_t = std::tuple<int64_t, int64_t>;
+    using map_t = std::map<key_t, plan_t>;
 };
 
 template <typename I, typename O>

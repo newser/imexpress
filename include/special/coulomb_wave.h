@@ -66,13 +66,12 @@ template <typename T>
 class coulw_f_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     coulw_f_functor(const T &l, const T &eta, const T &x)
         : m_l(l)
@@ -100,7 +99,7 @@ coulw_f(const ArrayBase<T> &l, const ArrayBase<T> &eta, const ArrayBase<T> &x)
     eigen_assert(MATRIX_SAME_SIZE(l, eta));
     eigen_assert(MATRIX_SAME_SIZE(l, x));
 
-    typedef typename coulw_f_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename coulw_f_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(l.rows(),
                                   l.cols(),
                                   coulw_f_functor<T>(l.derived(),
@@ -134,13 +133,12 @@ template <typename T, typename U>
 class coulw_f_e_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     coulw_f_e_functor(const T &l, const T &eta, const T &x, U &e)
         : m_l(l)
@@ -174,7 +172,7 @@ coulw_f(const ArrayBase<T> &l,
     eigen_assert(MATRIX_SAME_SIZE(l, x));
     eigen_assert(MATRIX_SAME_SIZE(l, e));
 
-    typedef typename coulw_f_e_functor<T, U>::ArrayType ArrayType;
+    using ArrayType = typename coulw_f_e_functor<T, U>::ArrayType;
     return ArrayType::NullaryExpr(l.rows(),
                                   l.cols(),
                                   coulw_f_e_functor<T, U>(l.derived(),
@@ -209,13 +207,12 @@ template <typename T>
 class coulw_df_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     coulw_df_functor(const T &l, const T &eta, const T &x)
         : m_l(l)
@@ -243,7 +240,7 @@ coulw_df(const ArrayBase<T> &l, const ArrayBase<T> &eta, const ArrayBase<T> &x)
     eigen_assert(MATRIX_SAME_SIZE(l, eta));
     eigen_assert(MATRIX_SAME_SIZE(l, x));
 
-    typedef typename coulw_df_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename coulw_df_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(l.rows(),
                                   l.cols(),
                                   coulw_df_functor<T>(l.derived(),
@@ -277,13 +274,12 @@ template <typename T, typename U>
 class coulw_df_e_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     coulw_df_e_functor(const T &l, const T &eta, const T &x, U &e)
         : m_l(l)
@@ -317,7 +313,7 @@ coulw_df(const ArrayBase<T> &l,
     eigen_assert(MATRIX_SAME_SIZE(l, x));
     eigen_assert(MATRIX_SAME_SIZE(l, e));
 
-    typedef typename coulw_df_e_functor<T, U>::ArrayType ArrayType;
+    using ArrayType = typename coulw_df_e_functor<T, U>::ArrayType;
     return ArrayType::NullaryExpr(l.rows(),
                                   l.cols(),
                                   coulw_df_e_functor<T, U>(l.derived(),
@@ -352,13 +348,12 @@ template <typename T>
 class coulw_g_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     coulw_g_functor(const T &l, const T &eta, const T &x)
         : m_l(l)
@@ -386,7 +381,7 @@ coulw_g(const ArrayBase<T> &l, const ArrayBase<T> &eta, const ArrayBase<T> &x)
     eigen_assert(MATRIX_SAME_SIZE(l, eta));
     eigen_assert(MATRIX_SAME_SIZE(l, x));
 
-    typedef typename coulw_g_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename coulw_g_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(l.rows(),
                                   l.cols(),
                                   coulw_g_functor<T>(l.derived(),
@@ -420,13 +415,12 @@ template <typename T, typename U>
 class coulw_g_e_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     coulw_g_e_functor(const T &l, const T &eta, const T &x, U &e)
         : m_l(l)
@@ -460,7 +454,7 @@ coulw_g(const ArrayBase<T> &l,
     eigen_assert(MATRIX_SAME_SIZE(l, x));
     eigen_assert(MATRIX_SAME_SIZE(l, e));
 
-    typedef typename coulw_g_e_functor<T, U>::ArrayType ArrayType;
+    using ArrayType = typename coulw_g_e_functor<T, U>::ArrayType;
     return ArrayType::NullaryExpr(l.rows(),
                                   l.cols(),
                                   coulw_g_e_functor<T, U>(l.derived(),
@@ -495,13 +489,12 @@ template <typename T>
 class coulw_dg_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     coulw_dg_functor(const T &l, const T &eta, const T &x)
         : m_l(l)
@@ -529,7 +522,7 @@ coulw_dg(const ArrayBase<T> &l, const ArrayBase<T> &eta, const ArrayBase<T> &x)
     eigen_assert(MATRIX_SAME_SIZE(l, eta));
     eigen_assert(MATRIX_SAME_SIZE(l, x));
 
-    typedef typename coulw_dg_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename coulw_dg_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(l.rows(),
                                   l.cols(),
                                   coulw_dg_functor<T>(l.derived(),
@@ -563,13 +556,12 @@ template <typename T, typename U>
 class coulw_dg_e_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     coulw_dg_e_functor(const T &l, const T &eta, const T &x, U &e)
         : m_l(l)
@@ -603,7 +595,7 @@ coulw_dg(const ArrayBase<T> &l,
     eigen_assert(MATRIX_SAME_SIZE(l, x));
     eigen_assert(MATRIX_SAME_SIZE(l, e));
 
-    typedef typename coulw_dg_e_functor<T, U>::ArrayType ArrayType;
+    using ArrayType = typename coulw_dg_e_functor<T, U>::ArrayType;
     return ArrayType::NullaryExpr(l.rows(),
                                   l.cols(),
                                   coulw_dg_e_functor<T, U>(l.derived(),
@@ -786,13 +778,12 @@ template <typename T>
 class coulw_cl_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     coulw_cl_functor(const T &l, const T &eta)
         : m_l(l)
@@ -817,7 +808,7 @@ coulw_cl(const ArrayBase<T> &l, const ArrayBase<T> &eta)
 {
     eigen_assert(MATRIX_SAME_SIZE(l, eta));
 
-    typedef typename coulw_cl_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename coulw_cl_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(l.rows(),
                                   l.cols(),
                                   coulw_cl_functor<T>(l.derived(),
@@ -845,13 +836,12 @@ template <typename T, typename U>
 class coulw_cl_e_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     coulw_cl_e_functor(const T &l, const T &eta, U &e)
         : m_l(l)
@@ -879,7 +869,7 @@ coulw_cl(const ArrayBase<T> &l, const ArrayBase<T> &eta, ArrayBase<U> &e)
     eigen_assert(MATRIX_SAME_SIZE(l, eta));
     eigen_assert(MATRIX_SAME_SIZE(l, e));
 
-    typedef typename coulw_cl_e_functor<T, U>::ArrayType ArrayType;
+    using ArrayType = typename coulw_cl_e_functor<T, U>::ArrayType;
     return ArrayType::NullaryExpr(l.rows(),
                                   l.cols(),
                                   coulw_cl_e_functor<T, U>(l.derived(),

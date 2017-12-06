@@ -56,13 +56,12 @@ template <typename T>
 class dawson_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     dawson_functor(const T &x)
         : m_x(x)
@@ -82,7 +81,7 @@ template <typename T>
 inline CwiseNullaryOp<dawson_functor<T>, typename dawson_functor<T>::ArrayType>
 dawson(const ArrayBase<T> &x)
 {
-    typedef typename dawson_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename dawson_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   dawson_functor<T>(x.derived()));
@@ -109,13 +108,12 @@ template <typename T, typename U>
 class dawson_e_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     dawson_e_functor(const T &x, U &e)
         : m_x(x)
@@ -138,7 +136,7 @@ inline CwiseNullaryOp<dawson_e_functor<T, U>,
                       typename dawson_e_functor<T, U>::ArrayType>
 dawson(const ArrayBase<T> &x, ArrayBase<U> &e)
 {
-    typedef typename dawson_e_functor<T, U>::ArrayType ArrayType;
+    using ArrayType = typename dawson_e_functor<T, U>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   dawson_e_functor<T, U>(x.derived(),

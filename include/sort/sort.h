@@ -66,13 +66,12 @@ template <typename T>
 class sort_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     sort_functor(const T &v)
         : m_result(v.eval())
@@ -93,7 +92,7 @@ template <typename T>
 inline CwiseNullaryOp<sort_functor<T>, typename sort_functor<T>::ArrayType>
 sort(const ArrayBase<T> &v)
 {
-    typedef typename sort_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename sort_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(v.rows(),
                                   v.cols(),
                                   sort_functor<T>(v.derived()));
@@ -127,13 +126,12 @@ template <typename T>
 class sort2_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     sort2_functor(const T &v1, T &v2)
         : m_result(v1.eval())
@@ -156,7 +154,7 @@ sort(const ArrayBase<T> &v1, ArrayBase<T> &v2)
 {
     eigen_assert(MATRIX_SAME_SIZE(v1, v2));
 
-    typedef typename sort2_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename sort2_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(v1.rows(),
                                   v1.cols(),
                                   sort2_functor<T>(v1.derived(), v2.derived()));

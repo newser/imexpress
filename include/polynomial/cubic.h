@@ -66,7 +66,7 @@ template <typename T>
 class solve_cubic_functor
 {
   public:
-    typedef Array<double, 3, 1, ColMajor, 3, 1> ArrayType;
+    using ArrayType = Array<double, 3, 1, ColMajor, 3, 1>;
 
     solve_cubic_functor(const T &c)
         : m_result(IEXP_NAN, IEXP_NAN, IEXP_NAN)
@@ -96,7 +96,7 @@ solve_cubic(const ArrayBase<T> &c)
 {
     eigen_assert(IS_VEC(c) && (c.size() == 3));
 
-    typedef typename solve_cubic_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename solve_cubic_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(3, solve_cubic_functor<T>(c.derived()));
 }
 
@@ -135,7 +135,7 @@ template <typename T>
 class complex_solve_cubic_functor
 {
   public:
-    typedef Array<std::complex<double>, 3, 1, ColMajor, 3, 1> ArrayType;
+    using ArrayType = Array<std::complex<double>, 3, 1, ColMajor, 3, 1>;
 
     complex_solve_cubic_functor(const T &c)
         : m_result(IEXP_NAN, IEXP_NAN, IEXP_NAN)
@@ -165,7 +165,7 @@ complex_solve_cubic(const ArrayBase<T> &c)
 {
     eigen_assert(IS_VEC(c) && (c.size() == 3));
 
-    typedef typename complex_solve_cubic_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename complex_solve_cubic_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(3,
                                   complex_solve_cubic_functor<T>(c.derived()));
 }

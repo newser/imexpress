@@ -62,20 +62,18 @@ template <typename T>
 class sort_index_functor
 {
   public:
-    typedef Array<int,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
-    typedef Array<size_t,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        IndexArrayType;
+    using ArrayType = Array<int,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
+    using IndexArrayType = Array<size_t,
+                                 T::RowsAtCompileTime,
+                                 T::ColsAtCompileTime,
+                                 T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                                 T::MaxRowsAtCompileTime,
+                                 T::MaxColsAtCompileTime>;
 
     sort_index_functor(const T &v)
         : m_result(v.rows(), v.cols())
@@ -98,7 +96,7 @@ inline CwiseNullaryOp<sort_index_functor<T>,
                       typename sort_index_functor<T>::ArrayType>
 sort_index(const ArrayBase<T> &v)
 {
-    typedef typename sort_index_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename sort_index_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(v.rows(),
                                   v.cols(),
                                   sort_index_functor<T>(v.derived()));

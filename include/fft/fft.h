@@ -24,6 +24,9 @@
 ////////////////////////////////////////////////////////////
 
 #include <common/common.h>
+
+#include <fft/fftw/plan_cache.h>
+#include <fft/fftw/plan_double.h>
 #include <fft/fftw/plan_single.h>
 
 IEXP_NS_BEGIN
@@ -41,26 +44,17 @@ namespace fft {
 template <typename T, typename U>
 inline void fft_impl(const int n, const T *i, U *o)
 {
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline void fft_impl(const int n, const double *i, std::complex<double> *o)
-{
-    // fftw3::fwd
+    fftw3::get_plan(n, i, o, true).fwd(n, i, o);
 }
 
 template <typename T>
 class fft_functor
 {
   public:
-    typedef Array<typename std::complex<typename T::Scalar>,
-                  Dynamic,
-                  1,
-                  ColMajor,
-                  Dynamic,
-                  1>
-        ArrayType;
+    using Scalar = typename TYPE_CHOOSE(IS_COMPLEX(typename T::Scalar),
+                                        typename T::Scalar,
+                                        std::complex<typename T::Scalar>);
+    using ArrayType = Array<Scalar, Dynamic, 1, ColMajor, Dynamic, 1>;
 
     fft_functor(const T &x)
         : m_in_size(x.size())
@@ -68,9 +62,10 @@ class fft_functor
                                                     : ((m_in_size >> 1) + 1))
         , m_result(m_out_size)
     {
+        fft_impl(m_in_size, x.data(), m_result.data());
     }
 
-    const typename T::Scalar operator()(Index i) const
+    const Scalar operator()(Index i) const
     {
         if (i < m_out_size) {
             return m_result[i];
@@ -90,7 +85,7 @@ inline CwiseNullaryOp<fft_functor<T>, typename fft_functor<T>::ArrayType> fft(
 {
     eigen_assert(IS_VEC(x));
 
-    typedef typename fft_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename fft_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(x.size(), fft_functor<T>(x.derived()));
 }
 

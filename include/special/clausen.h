@@ -56,13 +56,12 @@ template <typename T>
 class clausen_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     clausen_functor(const T &x)
         : m_x(x)
@@ -83,7 +82,7 @@ inline CwiseNullaryOp<clausen_functor<T>,
                       typename clausen_functor<T>::ArrayType>
 clausen(const ArrayBase<T> &x)
 {
-    typedef typename clausen_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename clausen_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   clausen_functor<T>(x.derived()));
@@ -110,13 +109,12 @@ template <typename T, typename U>
 class clausen_e_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     clausen_e_functor(const T &x, U &e)
         : m_x(x)
@@ -139,7 +137,7 @@ inline CwiseNullaryOp<clausen_e_functor<T, U>,
                       typename clausen_e_functor<T, U>::ArrayType>
 clausen(const ArrayBase<T> &x, ArrayBase<U> &e)
 {
-    typedef typename clausen_e_functor<T, U>::ArrayType ArrayType;
+    using ArrayType = typename clausen_e_functor<T, U>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   clausen_e_functor<T, U>(x.derived(),

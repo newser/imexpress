@@ -40,7 +40,7 @@ IEXP_NS_BEGIN
 class combination
 {
   public:
-    typedef size_t index;
+    using index = size_t;
 
     enum class init
     {

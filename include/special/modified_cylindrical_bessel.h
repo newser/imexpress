@@ -85,13 +85,12 @@ template <bool scaled, typename T, typename V>
 class cbessel_i_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     cbessel_i_functor(const V n, const T &x)
         : m_n(n)
@@ -114,7 +113,7 @@ inline CwiseNullaryOp<cbessel_i_functor<scaled, T, V>,
                       typename cbessel_i_functor<scaled, T, V>::ArrayType>
 cbessel_i(const V n, const ArrayBase<T> &x)
 {
-    typedef typename cbessel_i_functor<scaled, T, V>::ArrayType ArrayType;
+    using ArrayType = typename cbessel_i_functor<scaled, T, V>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   cbessel_i_functor<scaled, T, V>(n,
@@ -184,13 +183,12 @@ template <bool scaled, typename T, typename U, typename V>
 class cbessel_i_e_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     cbessel_i_e_functor(const V n, const T &x, U &e)
         : m_n(n)
@@ -218,7 +216,7 @@ inline CwiseNullaryOp<cbessel_i_e_functor<scaled, T, U, V>,
                       typename cbessel_i_e_functor<scaled, T, U, V>::ArrayType>
 cbessel_i(const V n, const ArrayBase<T> &x, ArrayBase<U> &e)
 {
-    typedef typename cbessel_i_e_functor<scaled, T, U, V>::ArrayType ArrayType;
+    using ArrayType = typename cbessel_i_e_functor<scaled, T, U, V>::ArrayType;
     return ArrayType::
         NullaryExpr(x.rows(),
                     x.cols(),
@@ -265,13 +263,12 @@ template <bool scaled, typename T, typename V>
 class cbessel_k_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     cbessel_k_functor(const V n, const T &x)
         : m_n(n)
@@ -294,7 +291,7 @@ inline CwiseNullaryOp<cbessel_k_functor<scaled, T, V>,
                       typename cbessel_k_functor<scaled, T, V>::ArrayType>
 cbessel_k(const V n, const ArrayBase<T> &x)
 {
-    typedef typename cbessel_k_functor<scaled, T, V>::ArrayType ArrayType;
+    using ArrayType = typename cbessel_k_functor<scaled, T, V>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   cbessel_k_functor<scaled, T, V>(n,
@@ -355,13 +352,12 @@ template <bool scaled, typename T, typename U, typename V>
 class cbessel_k_e_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     cbessel_k_e_functor(const V n, const T &x, U &e)
         : m_n(n)
@@ -389,7 +385,7 @@ inline CwiseNullaryOp<cbessel_k_e_functor<scaled, T, U, V>,
                       typename cbessel_k_e_functor<scaled, T, U, V>::ArrayType>
 cbessel_k(const V n, const ArrayBase<T> &x, ArrayBase<U> &e)
 {
-    typedef typename cbessel_k_e_functor<scaled, T, U, V>::ArrayType ArrayType;
+    using ArrayType = typename cbessel_k_e_functor<scaled, T, U, V>::ArrayType;
     return ArrayType::
         NullaryExpr(x.rows(),
                     x.cols(),

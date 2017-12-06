@@ -66,13 +66,12 @@ template <bool scaled, typename T>
 class airy_Ai_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_Ai_functor(const T &x, precision p)
         : m_x(x)
@@ -95,7 +94,7 @@ inline CwiseNullaryOp<airy_Ai_functor<scaled, T>,
                       typename airy_Ai_functor<scaled, T>::ArrayType>
 airy_Ai(const ArrayBase<T> &x, const precision p = precision::DOUBLE)
 {
-    typedef typename airy_Ai_functor<scaled, T>::ArrayType ArrayType;
+    using ArrayType = typename airy_Ai_functor<scaled, T>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   airy_Ai_functor<scaled, T>(x.derived(), p));
@@ -137,13 +136,12 @@ template <bool scaled, typename T, typename U>
 class airy_Ai_e_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_Ai_e_functor(const T &x, precision p, U &e)
         : m_x(x)
@@ -170,7 +168,7 @@ airy_Ai(const ArrayBase<T> &x,
         ArrayBase<U> &e,
         const precision p = precision::DOUBLE)
 {
-    typedef typename airy_Ai_e_functor<scaled, T, U>::ArrayType ArrayType;
+    using ArrayType = typename airy_Ai_e_functor<scaled, T, U>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   airy_Ai_e_functor<scaled, T, U>(x.derived(),
@@ -206,13 +204,12 @@ template <bool scaled, typename T>
 class airy_Ai_deriv_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_Ai_deriv_functor(const T &x, precision p)
         : m_x(x)
@@ -235,7 +232,7 @@ inline CwiseNullaryOp<airy_Ai_deriv_functor<scaled, T>,
                       typename airy_Ai_deriv_functor<scaled, T>::ArrayType>
 airy_Ai_deriv(const ArrayBase<T> &x, const precision p = precision::DOUBLE)
 {
-    typedef typename airy_Ai_deriv_functor<scaled, T>::ArrayType ArrayType;
+    using ArrayType = typename airy_Ai_deriv_functor<scaled, T>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   airy_Ai_deriv_functor<scaled, T>(x.derived(),
@@ -278,13 +275,12 @@ template <bool scaled, typename T, typename U>
 class airy_Ai_deriv_e_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_Ai_deriv_e_functor(const T &x, precision p, U &e)
         : m_x(x)
@@ -311,7 +307,7 @@ airy_Ai_deriv(const ArrayBase<T> &x,
               ArrayBase<U> &e,
               const precision p = precision::DOUBLE)
 {
-    typedef typename airy_Ai_deriv_e_functor<scaled, T, U>::ArrayType ArrayType;
+    using ArrayType = typename airy_Ai_deriv_e_functor<scaled, T, U>::ArrayType;
     return ArrayType::
         NullaryExpr(x.rows(),
                     x.cols(),
@@ -346,13 +342,12 @@ template <bool scaled, typename T>
 class airy_Bi_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_Bi_functor(const T &x, precision p)
         : m_x(x)
@@ -375,7 +370,7 @@ inline CwiseNullaryOp<airy_Bi_functor<scaled, T>,
                       typename airy_Bi_functor<scaled, T>::ArrayType>
 airy_Bi(const ArrayBase<T> &x, const precision p = precision::DOUBLE)
 {
-    typedef typename airy_Bi_functor<scaled, T>::ArrayType ArrayType;
+    using ArrayType = typename airy_Bi_functor<scaled, T>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   airy_Bi_functor<scaled, T>(x.derived(), p));
@@ -417,13 +412,12 @@ template <bool scaled, typename T, typename U>
 class airy_Bi_e_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_Bi_e_functor(const T &x, precision p, U &e)
         : m_x(x)
@@ -450,7 +444,7 @@ airy_Bi(const ArrayBase<T> &x,
         ArrayBase<U> &e,
         const precision p = precision::DOUBLE)
 {
-    typedef typename airy_Bi_e_functor<scaled, T, U>::ArrayType ArrayType;
+    using ArrayType = typename airy_Bi_e_functor<scaled, T, U>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   airy_Bi_e_functor<scaled, T, U>(x.derived(),
@@ -486,13 +480,12 @@ template <bool scaled, typename T>
 class airy_Bi_deriv_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_Bi_deriv_functor(const T &x, precision p)
         : m_x(x)
@@ -515,7 +508,7 @@ inline CwiseNullaryOp<airy_Bi_deriv_functor<scaled, T>,
                       typename airy_Bi_deriv_functor<scaled, T>::ArrayType>
 airy_Bi_deriv(const ArrayBase<T> &x, const precision p = precision::DOUBLE)
 {
-    typedef typename airy_Bi_deriv_functor<scaled, T>::ArrayType ArrayType;
+    using ArrayType = typename airy_Bi_deriv_functor<scaled, T>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
                                   airy_Bi_deriv_functor<scaled, T>(x.derived(),
@@ -558,13 +551,12 @@ template <bool scaled, typename T, typename U>
 class airy_Bi_deriv_e_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     airy_Bi_deriv_e_functor(const T &x, precision p, U &e)
         : m_x(x)
@@ -591,7 +583,7 @@ airy_Bi_deriv(const ArrayBase<T> &x,
               ArrayBase<U> &e,
               const precision p = precision::DOUBLE)
 {
-    typedef typename airy_Bi_deriv_e_functor<scaled, T, U>::ArrayType ArrayType;
+    using ArrayType = typename airy_Bi_deriv_e_functor<scaled, T, U>::ArrayType;
     return ArrayType::
         NullaryExpr(x.rows(),
                     x.cols(),

@@ -62,13 +62,12 @@ template <typename T>
 class dd_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::SizeAtCompileTime,
-                  1,
-                  ColMajor,
-                  T::SizeAtCompileTime,
-                  1>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::SizeAtCompileTime,
+                            1,
+                            ColMajor,
+                            T::SizeAtCompileTime,
+                            1>;
 
     dd_functor(const T &xa, const T &ya)
         : m_result(xa.size(), 1)
@@ -92,7 +91,7 @@ inline CwiseNullaryOp<dd_functor<T>, typename dd_functor<T>::ArrayType> dd(
 {
     eigen_assert(VEC_SAME_SIZE(xa, ya));
 
-    typedef typename dd_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename dd_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(xa.derived().size(),
                                   dd_functor<T>(xa.derived(), ya.derived()));
 }
@@ -153,13 +152,12 @@ template <typename T>
 class dd_taylor_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::SizeAtCompileTime,
-                  1,
-                  ColMajor,
-                  T::SizeAtCompileTime,
-                  1>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::SizeAtCompileTime,
+                            1,
+                            ColMajor,
+                            T::SizeAtCompileTime,
+                            1>;
 
     dd_taylor_functor(typename T::Scalar xp, const T &dd, const T &xa)
         : m_result(dd.size(), 1)
@@ -190,7 +188,7 @@ dd_taylor(typename T::Scalar xp, const ArrayBase<T> &dd, const ArrayBase<T> &xa)
 {
     eigen_assert(VEC_SAME_SIZE(dd, xa));
 
-    typedef typename dd_taylor_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename dd_taylor_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(xa.derived().size(),
                                   dd_taylor_functor<T>(xp,
                                                        dd.derived(),
@@ -223,13 +221,12 @@ template <typename T>
 class dd_hermit_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::SizeAtCompileTime,
-                  1,
-                  ColMajor,
-                  T::MaxSizeAtCompileTime,
-                  1>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::SizeAtCompileTime,
+                            1,
+                            ColMajor,
+                            T::MaxSizeAtCompileTime,
+                            1>;
 
     dd_hermit_functor(const T &xa, const T &ya, const T &dya)
         : m_result(xa.size() << 1, 1)
@@ -264,7 +261,7 @@ dd_hermit(const ArrayBase<T> &xa,
     eigen_assert(VEC_SAME_SIZE(xa, ya));
     eigen_assert(VEC_SAME_SIZE(xa, dya));
 
-    typedef typename dd_hermit_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename dd_hermit_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(xa.derived().size() << 1,
                                   dd_hermit_functor<T>(xa.derived(),
                                                        ya.derived(),

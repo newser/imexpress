@@ -52,8 +52,8 @@ template <>
 class plan<float>
 {
   public:
-    typedef float scalar_t;
-    typedef std::complex<float> complex_t;
+    using scalar_t = float;
+    using complex_t = std::complex<float>;
 
     plan(std::mutex *lock = nullptr)
         : m_plan(nullptr)

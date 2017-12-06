@@ -71,13 +71,12 @@ template <typename T>
 class largest_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::SizeAtCompileTime,
-                  1,
-                  ColMajor,
-                  T::SizeAtCompileTime,
-                  1>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::SizeAtCompileTime,
+                            1,
+                            ColMajor,
+                            T::SizeAtCompileTime,
+                            1>;
 
     largest_functor(const int k, const T &v)
         : m_result(k)
@@ -102,7 +101,7 @@ largest(const int k, const ArrayBase<T> &v)
 {
     eigen_assert(IS_VEC(v));
 
-    typedef typename largest_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename largest_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(k, 1, largest_functor<T>(k, v.derived()));
 }
 
@@ -144,20 +143,14 @@ template <typename T>
 class largest_index_functor
 {
   public:
-    typedef Array<int,
-                  T::SizeAtCompileTime,
-                  1,
-                  ColMajor,
-                  T::SizeAtCompileTime,
-                  1>
-        ArrayType;
-    typedef Array<size_t,
-                  T::SizeAtCompileTime,
-                  1,
-                  ColMajor,
-                  T::SizeAtCompileTime,
-                  1>
-        IndexArrayType;
+    using ArrayType =
+        Array<int, T::SizeAtCompileTime, 1, ColMajor, T::SizeAtCompileTime, 1>;
+    using IndexArrayType = Array<size_t,
+                                 T::SizeAtCompileTime,
+                                 1,
+                                 ColMajor,
+                                 T::SizeAtCompileTime,
+                                 1>;
 
     largest_index_functor(const int k, const T &v)
         : m_result(k)
@@ -182,7 +175,7 @@ largest_index(const int k, const ArrayBase<T> &v)
 {
     eigen_assert(IS_VEC(v));
 
-    typedef typename largest_index_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename largest_index_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(k,
                                   1,
                                   largest_index_functor<T>(k, v.derived()));

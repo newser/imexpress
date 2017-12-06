@@ -52,8 +52,8 @@ template <>
 class plan<double>
 {
   public:
-    typedef double scalar_t;
-    typedef std::complex<double> complex_t;
+    using scalar_t = double;
+    using complex_t = std::complex<double>;
 
     plan(std::mutex *lock = nullptr)
         : m_plan(nullptr)

@@ -72,13 +72,12 @@ template <typename T>
 class smallest_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::SizeAtCompileTime,
-                  1,
-                  ColMajor,
-                  T::SizeAtCompileTime,
-                  1>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::SizeAtCompileTime,
+                            1,
+                            ColMajor,
+                            T::SizeAtCompileTime,
+                            1>;
 
     smallest_functor(const int k, const T &v)
         : m_result(k)
@@ -103,7 +102,7 @@ smallest(const int k, const ArrayBase<T> &v)
 {
     eigen_assert(IS_VEC(v));
 
-    typedef typename smallest_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename smallest_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(k, 1, smallest_functor<T>(k, v.derived()));
 }
 
@@ -144,20 +143,14 @@ template <typename T>
 class smallest_index_functor
 {
   public:
-    typedef Array<int,
-                  T::SizeAtCompileTime,
-                  1,
-                  ColMajor,
-                  T::SizeAtCompileTime,
-                  1>
-        ArrayType;
-    typedef Array<size_t,
-                  T::SizeAtCompileTime,
-                  1,
-                  ColMajor,
-                  T::SizeAtCompileTime,
-                  1>
-        IndexArrayType;
+    using ArrayType =
+        Array<int, T::SizeAtCompileTime, 1, ColMajor, T::SizeAtCompileTime, 1>;
+    using IndexArrayType = Array<size_t,
+                                 T::SizeAtCompileTime,
+                                 1,
+                                 ColMajor,
+                                 T::SizeAtCompileTime,
+                                 1>;
 
     smallest_index_functor(const int k, const T &v)
         : m_result(k)
@@ -182,7 +175,7 @@ smallest_index(const int k, const ArrayBase<T> &v)
 {
     eigen_assert(IS_VEC(v));
 
-    typedef typename smallest_index_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename smallest_index_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(k,
                                   1,
                                   smallest_index_functor<T>(k, v.derived()));

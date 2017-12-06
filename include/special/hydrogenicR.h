@@ -60,13 +60,12 @@ template <typename T>
 class hydroR1_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     hydroR1_functor(const T &z, const T &r)
         : m_z(z)
@@ -91,7 +90,7 @@ hydroR(const ArrayBase<T> &z, const ArrayBase<T> &r)
 {
     eigen_assert(MATRIX_SAME_SIZE(z, r));
 
-    typedef typename hydroR1_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename hydroR1_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(z.rows(),
                                   z.cols(),
                                   hydroR1_functor<T>(z.derived(), r.derived()));
@@ -118,13 +117,12 @@ template <typename T, typename U>
 class hydroR1_e_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     hydroR1_e_functor(const T &z, const T &r, U &e)
         : m_z(z)
@@ -151,7 +149,7 @@ hydroR(const ArrayBase<T> &z, const ArrayBase<T> &r, ArrayBase<U> &e)
 {
     eigen_assert(MATRIX_SAME_SIZE(z, r));
 
-    typedef typename hydroR1_e_functor<T, U>::ArrayType ArrayType;
+    using ArrayType = typename hydroR1_e_functor<T, U>::ArrayType;
     return ArrayType::NullaryExpr(z.rows(),
                                   z.cols(),
                                   hydroR1_e_functor<T, U>(z.derived(),
@@ -182,13 +180,12 @@ template <typename T, typename V>
 class hydroR_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     hydroR_functor(const V &n, const V &l, const T &z, const T &r)
         : m_n(n)
@@ -228,7 +225,7 @@ hydroR(const ArrayBase<V> &n,
     eigen_assert(MATRIX_SAME_SIZE(n, z));
     eigen_assert(MATRIX_SAME_SIZE(n, r));
 
-    typedef typename hydroR_functor<T, V>::ArrayType ArrayType;
+    using ArrayType = typename hydroR_functor<T, V>::ArrayType;
     return ArrayType::NullaryExpr(n.rows(),
                                   n.cols(),
                                   hydroR_functor<T, V>(n.derived(),
@@ -259,13 +256,12 @@ template <typename T, typename U, typename V>
 class hydroR_e_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
     hydroR_e_functor(const V &n, const V &l, const T &z, const T &r, U &e)
         : m_n(n)
@@ -309,7 +305,7 @@ hydroR(const ArrayBase<V> &n,
     eigen_assert(MATRIX_SAME_SIZE(n, z));
     eigen_assert(MATRIX_SAME_SIZE(n, r));
 
-    typedef typename hydroR_e_functor<T, U, V>::ArrayType ArrayType;
+    using ArrayType = typename hydroR_e_functor<T, U, V>::ArrayType;
     return ArrayType::NullaryExpr(n.rows(),
                                   n.cols(),
                                   hydroR_e_functor<T, U, V>(n.derived(),

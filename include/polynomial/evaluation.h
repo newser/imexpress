@@ -101,13 +101,12 @@ template <typename T>
 class eval_deriv_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::SizeAtCompileTime,
-                  1,
-                  ColMajor,
-                  T::SizeAtCompileTime,
-                  1>
-        ArrayType;
+    using ArrayType = Array<typename T::Scalar,
+                            T::SizeAtCompileTime,
+                            1,
+                            ColMajor,
+                            T::SizeAtCompileTime,
+                            1>;
 
     eval_deriv_functor(const T &c, typename T::Scalar x, int order)
         : m_result(order, 1)
@@ -139,7 +138,7 @@ eval_deriv(const ArrayBase<T> &c, typename T::Scalar x, int order)
     eigen_assert(order >= 0);
     ++order;
 
-    typedef typename eval_deriv_functor<T>::ArrayType ArrayType;
+    using ArrayType = typename eval_deriv_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(order,
                                   eval_deriv_functor<T>(c.derived(), x, order));
 }
