@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_CLAUSEN__
-#define __IEXP_CLAUSEN__
+#ifndef __IEXP_IFFT__
+#define __IEXP_IFFT__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -25,12 +25,13 @@
 
 #include <common/common.h>
 
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_sf_clausen.h>
+#include <fft/fftw/plan_cache.h>
+#include <fft/fftw/plan_double.h>
+#include <fft/fftw/plan_single.h>
 
 IEXP_NS_BEGIN
 
-namespace sf {
+namespace fft {
 
 ////////////////////////////////////////////////////////////
 // macro definition
@@ -40,110 +41,52 @@ namespace sf {
 // type definition
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-inline T clausen_impl(const T x)
+template <typename T, typename U>
+inline void ifft_impl(const int n, const T *i, U *o)
 {
-    UNSUPPORTED_TYPE(T);
+    fftw3::get_plan(n, i, o, false).inv(n, i, o);
 }
 
-template <>
-inline double clausen_impl(const double x)
-{
-    return gsl_sf_clausen(x);
-}
-
-template <typename T>
-class clausen_functor
+template <bool normalize, typename T>
+class ifft_functor
 {
   public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
+    using Scalar = typename TYPE_CHOOSE(IS_COMPLEX(typename T::Scalar),
+                                        typename T::Scalar,
+                                        std::complex<typename T::Scalar>);
+    using ArrayType = Array<Scalar, Dynamic, 1, ColMajor, Dynamic, 1>;
 
-    clausen_functor(const T &x)
-        : m_x(x)
+    ifft_functor(const T &x)
+        : m_result(x.size())
     {
+        typename type_eval<T>::type m_x(x.eval());
+        ifft_impl(m_x.size(), m_x.data(), m_result.data());
+
+        if (normalize) {
+            m_result /= m_x.size();
+        }
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    const Scalar operator()(Index i) const
     {
-        return clausen_impl(m_x(i, j));
+        return m_result[i];
     }
 
   private:
-    const T &m_x;
+    ArrayType m_result;
 };
 
-template <typename T>
-inline CwiseNullaryOp<clausen_functor<T>,
-                      typename clausen_functor<T>::ArrayType>
-clausen(const ArrayBase<T> &x)
+template <bool normalize = false, typename T = void>
+inline CwiseNullaryOp<ifft_functor<normalize, T>,
+                      typename ifft_functor<normalize, T>::ArrayType>
+ifft(const ArrayBase<T> &x)
 {
-    typedef typename clausen_functor<T>::ArrayType ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  clausen_functor<T>(x.derived()));
-}
+    eigen_assert(IS_VEC(x));
+    // if x is real, x[i](i > 0) should be conjudate with x[size - i]
 
-template <typename T>
-inline T clausen_e_impl(const T x, T &e)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double clausen_e_impl(const double x, double &e)
-{
-    gsl_sf_result r;
-    if (gsl_sf_clausen_e(x, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("clausen"));
-}
-
-template <typename T, typename U>
-class clausen_e_functor
-{
-  public:
-    typedef Array<typename T::Scalar,
-                  T::RowsAtCompileTime,
-                  T::ColsAtCompileTime,
-                  T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                  T::MaxRowsAtCompileTime,
-                  T::MaxColsAtCompileTime>
-        ArrayType;
-
-    clausen_e_functor(const T &x, U &e)
-        : m_x(x)
-        , m_e(e)
-    {
-    }
-
-    const typename T::Scalar operator()(Index i, Index j) const
-    {
-        return clausen_e_impl(m_x(i, j), m_e(i, j));
-    }
-
-  private:
-    const T &m_x;
-    U &m_e;
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<clausen_e_functor<T, U>,
-                      typename clausen_e_functor<T, U>::ArrayType>
-clausen(const ArrayBase<T> &x, ArrayBase<U> &e)
-{
-    typedef typename clausen_e_functor<T, U>::ArrayType ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  clausen_e_functor<T, U>(x.derived(),
-                                                          e.derived()));
+    using ArrayType = typename ifft_functor<normalize, T>::ArrayType;
+    return ArrayType::NullaryExpr(x.size(),
+                                  ifft_functor<normalize, T>(x.derived()));
 }
 
 ////////////////////////////////////////////////////////////
@@ -157,4 +100,4 @@ clausen(const ArrayBase<T> &x, ArrayBase<U> &e)
 
 IEXP_NS_END
 
-#endif /* __IEXP_CLAUSEN__ */
+#endif /* __IEXP_IFFT__ */
