@@ -52,6 +52,8 @@ IEXP_NS_BEGIN
 
 #define __F_EQ(a, b) __D_EQ_IN(a, b, std::numeric_limits<float>::epsilon())
 
+#define __F_EQ5(a, b) __D_EQ_IN(a, b, 0.00001)
+
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////

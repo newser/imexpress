@@ -79,7 +79,7 @@ class sort_functor
         sort_impl(m_result.data(), v.size());
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    const typename T::Scalar &operator()(Index i, Index j) const
     {
         return m_result(i, j);
     }
@@ -139,7 +139,7 @@ class sort2_functor
         sort2_impl(m_result.data(), v2.data(), v1.size());
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    const typename T::Scalar &operator()(Index i, Index j) const
     {
         return m_result(i, j);
     }

@@ -85,7 +85,7 @@ class largest_functor
         largest_impl(m_result.data(), k, m_v.data(), m_v.size());
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    const typename T::Scalar &operator()(Index i, Index j) const
     {
         return m_result(i, j);
     }

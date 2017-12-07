@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_IFFT__
-#define __IEXP_IFFT__
+#ifndef __IEXP_IFFT2__
+#define __IEXP_IFFT2__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -42,34 +42,41 @@ namespace fft {
 ////////////////////////////////////////////////////////////
 
 template <typename T, typename U>
-inline void ifft_impl(const int n, const T *i, U *o)
+inline void ifft2_impl(const int n0, const int n1, const T *i, U *o)
 {
-    fftw3::get_plan(n, i, o, false).inv(n, i, o);
+    fftw3::get_plan(n0, n1, i, o, false).inv(n0, n1, i, o);
 }
 
 template <bool normalize, typename T>
-class ifft_functor
+class ifft2_functor
 {
   public:
     using Scalar = typename TYPE_CHOOSE(IS_COMPLEX(typename T::Scalar),
                                         typename T::Scalar,
                                         std::complex<typename T::Scalar>);
-    using ArrayType = Array<Scalar, Dynamic, 1, ColMajor, Dynamic, 1>;
+    using ArrayType = Array<Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            RowMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
-    ifft_functor(const T &x)
-        : m_result(x.size())
+    ifft2_functor(const T &x)
+        : m_result(x.rows(), x.cols())
     {
+        static_assert(T::Flags & RowMajorBit, "must be row major matrix");
+
         typename type_eval<T>::type m_x(x.eval());
-        ifft_impl(m_x.size(), m_x.data(), m_result.data());
+        ifft2_impl(x.rows(), x.cols(), m_x.data(), m_result.data());
 
         if (normalize) {
             m_result /= m_x.size();
         }
     }
 
-    const Scalar &operator()(Index i) const
+    const Scalar &operator()(Index i, Index j) const
     {
-        return m_result[i];
+        return m_result(i, j);
     }
 
   private:
@@ -77,16 +84,14 @@ class ifft_functor
 };
 
 template <bool normalize = false, typename T = void>
-inline CwiseNullaryOp<ifft_functor<normalize, T>,
-                      typename ifft_functor<normalize, T>::ArrayType>
-ifft(const ArrayBase<T> &x)
+inline CwiseNullaryOp<ifft2_functor<normalize, T>,
+                      typename ifft2_functor<normalize, T>::ArrayType>
+ifft2(const ArrayBase<T> &x)
 {
-    eigen_assert(IS_VEC(x));
-    // if x is real, x[i](i > 0) should be conjudate with x[size - i]
-
-    using ArrayType = typename ifft_functor<normalize, T>::ArrayType;
-    return ArrayType::NullaryExpr(x.size(),
-                                  ifft_functor<normalize, T>(x.derived()));
+    using ArrayType = typename ifft2_functor<normalize, T>::ArrayType;
+    return ArrayType::NullaryExpr(x.rows(),
+                                  x.cols(),
+                                  ifft2_functor<normalize, T>(x.derived()));
 }
 
 ////////////////////////////////////////////////////////////
@@ -100,4 +105,4 @@ ifft(const ArrayBase<T> &x)
 
 IEXP_NS_END
 
-#endif /* __IEXP_IFFT__ */
+#endif /* __IEXP_IFFT2__ */
