@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_FFT_TYPE__
-#define __IEXP_FFT_TYPE__
+#ifndef __IEXP_DCT__
+#define __IEXP_DCT__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -25,42 +25,71 @@
 
 #include <common/common.h>
 
+#include <fft/fftw/plan_cache.h>
+#include <fft/fftw/plan_double.h>
+#include <fft/fftw/plan_single.h>
+
 IEXP_NS_BEGIN
+
+namespace fft {
 
 ////////////////////////////////////////////////////////////
 // macro definition
 ////////////////////////////////////////////////////////////
 
-#define IS_DCT(k) (((k) >= DCT_I) && ((k) <= DCT_IV))
-
-#define IS_DST(k) (((k) >= DST_I) && ((k) <= DST_IV))
-
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
 
-enum kind
+template <kind k, typename T>
+inline void dct_impl(const int n, const T *i, T *o)
 {
-    DCT_I,
-    DCT_II,
-    DCT_III,
-    DCT_IV,
-    DST_I,
-    DST_II,
-    DST_III,
-    DST_IV,
+    fftw3::get_plan(n, i, o, true).template fwd<k>(n, i, o);
+}
 
-    KIND_NUM
+template <kind k, typename T>
+class dct_functor
+{
+  public:
+    using ArrayType =
+        Array<typename T::Scalar, Dynamic, 1, ColMajor, Dynamic, 1>;
+
+    dct_functor(const T &x)
+        : m_result(x.size())
+    {
+        typename type_eval<T>::type m_x(x.eval());
+        dct_impl<k>(x.size(), m_x.data(), m_result.data());
+    }
+
+    const typename T::Scalar &operator()(Index i) const
+    {
+        return m_result[i];
+    }
+
+  private:
+    ArrayType m_result;
 };
+
+template <kind k = DCT_II, typename T = void>
+inline CwiseNullaryOp<dct_functor<k, T>, typename dct_functor<k, T>::ArrayType>
+dct(const ArrayBase<T> &x)
+{
+    static_assert(IS_DCT(k), "not dct kind");
+    eigen_assert(IS_VEC(x));
+
+    using ArrayType = typename dct_functor<k, T>::ArrayType;
+    return ArrayType::NullaryExpr(x.size(), dct_functor<k, T>(x.derived()));
+}
 
 ////////////////////////////////////////////////////////////
 // global variants
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
-// indexerface declaration
+// interface declaration
 ////////////////////////////////////////////////////////////
+}
 
 IEXP_NS_END
 
-#endif /* __IEXP_FFT_TYPE__ */
+#endif /* __IEXP_DCT__ */

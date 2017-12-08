@@ -33,6 +33,9 @@ include(${BUILD_PATH}/environment.cmake)
 include(${BUILD_PATH}/${ENV}.cmake)
 include(${BUILD_PATH}/util.cmake)
 
+option(DEVELOP_BUILD "build mode during developing" TRUE)
+mark_as_advanced(DEVELOP_BUILD)
+
 #
 # source file
 #
@@ -88,7 +91,13 @@ target_include_directories(imexpress PRIVATE ${LIBRARY_PATH}/fft/fftw/api)
 #
 
 # gsl
-add_subdirectory(${LIBRARY_PATH}/gsl gsl)
+check_exist(gsl_exist ${CMAKE_CURRENT_BINARY_DIR}/gsl "Debug;Release" "libgsl.a")
+if (gsl_exist)
+    add_library(gsl STATIC IMPORTED GLOBAL)
+    set_target_properties(gsl PROPERTIES IMPORTED_LOCATION ${gsl_exist})
+else ()
+    add_subdirectory(${LIBRARY_PATH}/gsl gsl)
+endif ()
 target_link_libraries(imexpress gsl)
 
 # fft
