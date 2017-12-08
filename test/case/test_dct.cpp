@@ -10,7 +10,6 @@ using namespace std;
 TEST_CASE("dct_float")
 {
     // r2r fwd
-    fftw3::plan<float> p_rr, q_rr;
     VectorXf i_rr(8), o_rr(8), o_rr2(8);
 
     i_rr << 0, 1, 2, 3, 4, 5, 6, 7;
@@ -57,7 +56,6 @@ TEST_CASE("dct_float")
 TEST_CASE("dct_double")
 {
     // r2r fwd
-    fftw3::plan<double> p_rr, q_rr;
     VectorXd i_rr(8), o_rr(8), o_rr2(8);
 
     i_rr << 0, 1, 2, 3, 4, 5, 6, 7;

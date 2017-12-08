@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_IDCT__
-#define __IEXP_IDCT__
+#ifndef __IEXP_DCT2__
+#define __IEXP_DCT2__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -41,62 +41,52 @@ namespace fft {
 // type definition
 ////////////////////////////////////////////////////////////
 
-template <kind k, typename T>
-inline void idct_impl(const int n, const T *i, T *o)
+template <kind k0, kind k1, typename T>
+inline void dct2_impl(const int n0, const int n1, const T *i, T *o)
 {
-    fftw3::get_plan(n, i, o, false).template inv<k>(n, i, o);
+    fftw3::get_plan(n0, n1, i, o, true).template fwd<k0, k1>(n0, n1, i, o);
 }
 
-template <kind k>
-inline size_t idct_scale(const size_t n)
-{
-    return n << 1;
-}
-
-template <>
-inline size_t idct_scale<DCT_I>(const size_t n)
-{
-    return (n - 1) << 1;
-}
-
-template <bool normalize, kind k, typename T>
-class idct_functor
+template <kind k0, kind k1, typename T>
+class dct2_functor
 {
   public:
-    using ArrayType =
-        Array<typename T::Scalar, Dynamic, 1, ColMajor, Dynamic, 1>;
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            RowMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
-    idct_functor(const T &x)
-        : m_result(x.size())
+    dct2_functor(const T &x)
+        : m_result(x.rows(), x.cols())
     {
-        typename type_eval<T>::type m_x(x.eval());
-        idct_impl<k>(m_x.size(), m_x.data(), m_result.data());
+        static_assert(T::Flags & RowMajorBit, "must be row major matrix");
 
-        if (normalize) {
-            m_result /= idct_scale<k>(m_x.size());
-        }
+        typename type_eval<T>::type m_x(x.eval());
+        dct2_impl<k0, k1>(m_x.rows(), m_x.cols(), m_x.data(), m_result.data());
     }
 
-    const typename T::Scalar &operator()(Index i) const
+    const typename T::Scalar &operator()(Index i, Index j) const
     {
-        return m_result[i];
+        return m_result(i, j);
     }
 
   private:
     ArrayType m_result;
 };
 
-template <bool normalize = false, kind k = DCT_II, typename T = void>
-inline CwiseNullaryOp<idct_functor<normalize, k, T>,
-                      typename idct_functor<normalize, k, T>::ArrayType>
-idct(const ArrayBase<T> &x)
+template <kind k0 = DCT_II, kind k1 = DCT_II, typename T = void>
+inline CwiseNullaryOp<dct2_functor<k0, k1, T>,
+                      typename dct2_functor<k0, k1, T>::ArrayType>
+dct2(const ArrayBase<T> &x)
 {
-    static_assert(IS_DCT(k), "not dct kind");
-    eigen_assert(IS_VEC(x));
+    static_assert(IS_DCT(k0) && IS_DCT(k1), "not dct kind");
 
-    using ArrayType = typename idct_functor<normalize, k, T>::ArrayType;
-    return ArrayType::NullaryExpr(x.size(),
-                                  idct_functor<normalize, k, T>(x.derived()));
+    using ArrayType = typename dct2_functor<k0, k1, T>::ArrayType;
+    return ArrayType::NullaryExpr(x.rows(),
+                                  x.cols(),
+                                  dct2_functor<k0, k1, T>(x.derived()));
 }
 
 ////////////////////////////////////////////////////////////
@@ -110,4 +100,4 @@ idct(const ArrayBase<T> &x)
 
 IEXP_NS_END
 
-#endif /* __IEXP_IDCT__ */
+#endif /* __IEXP_DCT2__ */
