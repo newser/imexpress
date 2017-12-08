@@ -152,7 +152,7 @@ struct io_traits<float, float>
     static const io io = R2R;
 };
 
-template <typename T, int dim>
+template <typename T, int dim, kind k0, kind k1>
 class plan_cache
 {
   public:
@@ -170,12 +170,12 @@ class plan_cache
         static_assert(std::is_same<T, typename io_traits<I, O>::type>::value,
                       "invalid type");
 
-        const int64_t k = key(n, i, o, fwd);
+        const int64_t kval = key(n, i, o, fwd);
         {
             std::lock_guard<std::mutex> g(m_lock);
 
             auto r = m_plan_map.insert(
-                typename map_t::value_type(k, plan_t(&m_lock)));
+                typename map_t::value_type(kval, plan_t(&m_lock)));
             return r.first->second;
         }
     }
@@ -191,12 +191,12 @@ class plan_cache
         static_assert(std::is_same<T, typename io_traits<I, O>::type>::value,
                       "invalid type");
 
-        const key_t k = key(n0, n1, i, o, fwd);
+        const key_t kval = key(n0, n1, i, o, fwd);
         {
             std::lock_guard<std::mutex> g(m_lock);
 
             auto r = m_plan_map.insert(
-                typename map_t::value_type(k, plan_t(&m_lock)));
+                typename map_t::value_type(kval, plan_t(&m_lock)));
             return r.first->second;
         }
     }
@@ -208,7 +208,8 @@ class plan_cache
         const bool inplace((uintptr_t)i == (uintptr_t)o);
 
         return key_t(fwd | (inplace << 1) | (io_traits<I, O>::scalar << 2) |
-                     (io_traits<I, O>::io << 4) | ((int64_t)n << 32));
+                     (io_traits<I, O>::io << 4) | (k0 << 8) |
+                     ((int64_t)n << 32));
     }
 
     template <typename I, typename O>
@@ -219,7 +220,8 @@ class plan_cache
 
         return key_t(int64_t(fwd | (inplace << 1) |
                              (io_traits<I, O>::scalar << 2) |
-                             (io_traits<I, O>::io << 4) | ((int64_t)n0 << 32)),
+                             (io_traits<I, O>::io << 4) | (k0 << 8) |
+                             (k1 << 12) | ((int64_t)n0 << 32)),
                      int64_t(n1));
     }
 
@@ -235,15 +237,18 @@ class plan_cache
 // indexerface declaration
 ////////////////////////////////////////////////////////////
 
-template <typename I, typename O>
+template <kind k = KIND_NUM, typename I = void, typename O = void>
 plan<typename io_traits<I, O>::type> &get_plan(
     const int n, const I *i, const O *o, const bool fwd, const how h = MEASURE)
 {
-    static plan_cache<typename io_traits<I, O>::type, 1> cache;
+    static plan_cache<typename io_traits<I, O>::type, 1, k, KIND_NUM> cache;
     return cache.get(n, i, o, fwd, h);
 }
 
-template <typename I, typename O>
+template <kind k0 = KIND_NUM,
+          kind k1 = KIND_NUM,
+          typename I = void,
+          typename O = void>
 plan<typename io_traits<I, O>::type> &get_plan(const int n0,
                                                const int n1,
                                                const I *i,
@@ -251,7 +256,7 @@ plan<typename io_traits<I, O>::type> &get_plan(const int n0,
                                                const bool fwd,
                                                const how h = MEASURE)
 {
-    static plan_cache<typename io_traits<I, O>::type, 2> cache;
+    static plan_cache<typename io_traits<I, O>::type, 2, k0, k1> cache;
     return cache.get(n0, n1, i, o, fwd, h);
 }
 }

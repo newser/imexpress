@@ -44,7 +44,7 @@ namespace fft {
 template <kind k, typename T>
 inline void dct_impl(const int n, const T *i, T *o)
 {
-    fftw3::get_plan(n, i, o, true).template fwd<k>(n, i, o);
+    fftw3::get_plan<k>(n, i, o, true).template fwd<k>(n, i, o);
 }
 
 template <kind k, typename T>

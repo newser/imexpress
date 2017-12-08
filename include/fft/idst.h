@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_IDCT__
-#define __IEXP_IDCT__
+#ifndef __IEXP_IDST__
+#define __IEXP_IDST__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -42,38 +42,38 @@ namespace fft {
 ////////////////////////////////////////////////////////////
 
 template <kind k, typename T>
-inline void idct_impl(const int n, const T *i, T *o)
+inline void idst_impl(const int n, const T *i, T *o)
 {
     fftw3::get_plan<k>(n, i, o, false).template inv<k>(n, i, o);
 }
 
 template <kind k>
-inline size_t idct_scale(const size_t n)
+inline size_t idst_scale(const size_t n)
 {
     return n << 1;
 }
 
 template <>
-inline size_t idct_scale<DCT_I>(const size_t n)
+inline size_t idst_scale<DST_I>(const size_t n)
 {
-    return (n - 1) << 1;
+    return (n + 1) << 1;
 }
 
 template <bool normalize, kind k, typename T>
-class idct_functor
+class idst_functor
 {
   public:
     using ArrayType =
         Array<typename T::Scalar, Dynamic, 1, ColMajor, Dynamic, 1>;
 
-    idct_functor(const T &x)
+    idst_functor(const T &x)
         : m_result(x.size())
     {
         typename type_eval<T>::type m_x(x.eval());
-        idct_impl<k>(m_x.size(), m_x.data(), m_result.data());
+        idst_impl<k>(m_x.size(), m_x.data(), m_result.data());
 
         if (normalize) {
-            m_result /= idct_scale<k>(m_x.size());
+            m_result /= idst_scale<k>(m_x.size());
         }
     }
 
@@ -86,17 +86,17 @@ class idct_functor
     ArrayType m_result;
 };
 
-template <bool normalize = false, kind k = DCT_II, typename T = void>
-inline CwiseNullaryOp<idct_functor<normalize, k, T>,
-                      typename idct_functor<normalize, k, T>::ArrayType>
-idct(const ArrayBase<T> &x)
+template <bool normalize = false, kind k = DST_I, typename T = void>
+inline CwiseNullaryOp<idst_functor<normalize, k, T>,
+                      typename idst_functor<normalize, k, T>::ArrayType>
+idst(const ArrayBase<T> &x)
 {
-    static_assert(IS_DCT(k), "not dct kind");
+    static_assert(IS_DST(k), "not dst kind");
     eigen_assert(IS_VEC(x));
 
-    using ArrayType = typename idct_functor<normalize, k, T>::ArrayType;
+    using ArrayType = typename idst_functor<normalize, k, T>::ArrayType;
     return ArrayType::NullaryExpr(x.size(),
-                                  idct_functor<normalize, k, T>(x.derived()));
+                                  idst_functor<normalize, k, T>(x.derived()));
 }
 
 ////////////////////////////////////////////////////////////
@@ -110,4 +110,4 @@ idct(const ArrayBase<T> &x)
 
 IEXP_NS_END
 
-#endif /* __IEXP_IDCT__ */
+#endif /* __IEXP_IDST__ */
