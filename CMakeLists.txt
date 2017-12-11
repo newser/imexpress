@@ -64,6 +64,7 @@ add_group(multiset ${ROOT_PATH}/include/multiset ${ROOT_PATH}/source/multiset IE
 add_group(sort ${ROOT_PATH}/include/sort ${ROOT_PATH}/source/sort IEXP_SOURCE)
 add_group(fft ${ROOT_PATH}/include/fft ${ROOT_PATH}/source/fft IEXP_SOURCE)
 add_group(fft ${ROOT_PATH}/include/fft/fftw ${ROOT_PATH}/source/fft/fftw IEXP_SOURCE)
+add_group(integral ${ROOT_PATH}/include/integral ${ROOT_PATH}/source/integral IEXP_SOURCE)
 
 #
 # build
