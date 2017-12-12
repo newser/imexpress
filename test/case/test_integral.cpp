@@ -1,5 +1,6 @@
 #include <catch.hpp>
 #include <integral/qag.h>
+#include <integral/qagi.h>
 #include <integral/qagp.h>
 #include <integral/qags.h>
 #include <integral/qng.h>
@@ -146,4 +147,70 @@ TEST_CASE("integral_qagp")
     REQUIRE(status == GSL_SUCCESS);
     REQUIRE(__D_EQ_IN(result, 5.274080611672716401E+01, 1E-14));
     REQUIRE(__D_EQ_IN(abserr, 1.755703848687062418E-04, 1E-5));
+}
+
+TEST_CASE("integral_qagi")
+{
+    int status;
+    double result, abserr;
+
+    integral::qagi q([](double x) { return exp(-x - x * x); },
+                     1.0e-7,
+                     0.0,
+                     1000);
+    status = q(&result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, 2.275875794468747770E+00, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 7.436490118267390744E-09, 1E-5));
+
+    REQUIRE(q.epsabs() == 1.0e-7);
+    REQUIRE(q.epsrel() == 0.0);
+
+    status = q(&result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, 2.275875794468747770E+00, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 7.436490118267390744E-09, 1E-5));
+}
+
+TEST_CASE("integral_qagil")
+{
+    int status;
+    double result, abserr;
+
+    integral::qagil q([](double x) { return exp(x); }, 1.0e-7, 0.0, 1000);
+    status = q(1.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, 2.718281828459044647E+00, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 1.588185109253204805E-10, 1E-5));
+
+    REQUIRE(q.epsabs() == 1.0e-7);
+    REQUIRE(q.epsrel() == 0.0);
+
+    status = q(1.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, 2.718281828459044647E+00, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 1.588185109253204805E-10, 1E-5));
+}
+
+TEST_CASE("integral_qagiu")
+{
+    int status;
+    double result, abserr;
+
+    integral::qagiu q([](double x) { return log(x) / (1.0 + 100.0 * x * x); },
+                      0.0,
+                      1.0e-3,
+                      1000);
+    status = q(0.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, -3.616892186127022568E-01, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 3.016716913328831851E-06, 1E-5));
+
+    REQUIRE(q.epsabs() == 0.0);
+    REQUIRE(q.epsrel() == 1.0e-3);
+
+    status = q(0.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, -3.616892186127022568E-01, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 3.016716913328831851E-06, 1E-5));
 }
