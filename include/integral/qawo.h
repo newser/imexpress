@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_INTEGRAL_QAWS__
-#define __IEXP_INTEGRAL_QAWS__
+#ifndef __IEXP_INTEGRAL_QAWO__
+#define __IEXP_INTEGRAL_QAWO__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -43,62 +43,81 @@ namespace integral {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-class qaws_table_t
+class qawo_table_t
 {
   public:
-    qaws_table_t(const T alpha, const T beta, const int mu, const int nu)
-        : m_alpha(alpha)
-        , m_beta(beta)
-        , m_mu(mu)
-        , m_nu(nu)
+    qawo_table_t(const T omega, const T length, const bool sine, const size_t n)
+        : m_omega(omega)
+        , m_length(length)
+        , m_sine(sine)
+        , m_n(n)
         , m_table(nullptr)
     {
     }
 
-    ~qaws_table_t()
+    ~qawo_table_t()
     {
         if (m_table != nullptr) {
-            gsl_integration_qaws_table_free(m_table);
+            gsl_integration_qawo_table_free(m_table);
         }
     }
 
-    gsl_integration_qaws_table *get()
+    gsl_integration_qawo_table *get()
     {
         if (m_table == nullptr) {
             m_table =
-                gsl_integration_qaws_table_alloc(m_alpha, m_beta, m_mu, m_nu);
+                gsl_integration_qawo_table_alloc(m_omega,
+                                                 m_length,
+                                                 m_sine ? GSL_INTEG_SINE
+                                                        : GSL_INTEG_COSINE,
+                                                 m_n);
             IEXP_NOT_NULLPTR(m_table);
         }
         return m_table;
     }
 
-    void set(const T alpha, const T beta, const int mu, const int nu)
+    void set(const T omega, const T length, const bool sine)
     {
         if (m_table != nullptr) {
             eigen_assert(
-                gsl_integration_qaws_table_set(m_table, alpha, beta, mu, nu) ==
+                gsl_integration_qawo_table_set(m_table,
+                                               omega,
+                                               length,
+                                               sine ? GSL_INTEG_SINE
+                                                    : GSL_INTEG_COSINE) ==
                 GSL_SUCCESS);
         }
 
-        m_alpha = alpha;
-        m_beta = beta;
-        m_mu = mu;
-        m_nu = nu;
+        m_omega = omega;
+        m_length = length;
+        m_sine = sine;
+    }
+
+    void set_length(const T length)
+    {
+        if (m_table != nullptr) {
+            eigen_assert(
+                gsl_integration_qawo_table_set_length(m_table, length) ==
+                GSL_SUCCESS);
+        }
+
+        m_length = length;
     }
 
   private:
-    T m_alpha, m_beta;
-    int m_mu, m_nu;
-    gsl_integration_qaws_table *m_table;
+    T m_omega, m_length;
+    bool m_sine;
+    size_t m_n;
+    gsl_integration_qawo_table *m_table;
 };
 
-typedef qaws_table_t<double> qaws_table;
+typedef qawo_table_t<double> qawo_table;
 
 template <typename T>
-class qaws_t
+class qawo_t
 {
   public:
-    qaws_t(const typename unary_func<T>::type &fn,
+    qawo_t(const typename unary_func<T>::type &fn,
            T epsabs,
            T epsrel,
            size_t limit)
@@ -110,16 +129,15 @@ class qaws_t
     {
     }
 
-    ~qaws_t()
+    ~qawo_t()
     {
         if (m_workspace != nullptr) {
             gsl_integration_workspace_free(m_workspace);
         }
     }
 
-    int operator()(qaws_table_t<T> &w,
+    int operator()(qawo_table_t<T> &w,
                    const T a,
-                   const T b,
                    T *result,
                    T *abserr = nullptr)
     {
@@ -137,8 +155,8 @@ class qaws_t
     }
 
   private:
-    qaws_t(const qaws_t &) = delete;
-    qaws_t &operator=(const qaws_t &) = delete;
+    qawo_t(const qawo_t &) = delete;
+    qawo_t &operator=(const qawo_t &) = delete;
 
     unary_func<T> m_fn;
     T m_epsabs, m_epsrel;
@@ -147,9 +165,8 @@ class qaws_t
 };
 
 template <>
-int qaws_t<double>::operator()(qaws_table_t<double> &w,
+int qawo_t<double>::operator()(qawo_table_t<double> &w,
                                const double a,
-                               const double b,
                                double *result,
                                double *abserr)
 {
@@ -159,19 +176,18 @@ int qaws_t<double>::operator()(qaws_table_t<double> &w,
     }
 
     double __abserr;
-    return gsl_integration_qaws((gsl_function *)m_fn.gsl(),
+    return gsl_integration_qawo((gsl_function *)m_fn.gsl(),
                                 a,
-                                b,
-                                w.get(),
                                 m_epsabs,
                                 m_epsrel,
                                 m_limit,
                                 m_workspace,
+                                w.get(),
                                 result,
                                 abserr != nullptr ? abserr : &__abserr);
 }
 
-typedef qaws_t<double> qaws;
+typedef qawo_t<double> qawo;
 
 ////////////////////////////////////////////////////////////
 // global variants
@@ -184,4 +200,4 @@ typedef qaws_t<double> qaws;
 
 IEXP_NS_END
 
-#endif /* __IEXP_INTEGRAL_QAWS__ */
+#endif /* __IEXP_INTEGRAL_QAWO__ */

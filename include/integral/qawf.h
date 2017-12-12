@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_INTEGRAL_QAWS__
-#define __IEXP_INTEGRAL_QAWS__
+#ifndef __IEXP_INTEGRAL_QAWF__
+#define __IEXP_INTEGRAL_QAWF__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -26,6 +26,7 @@
 #include <common/common.h>
 
 #include <integral/function.h>
+#include <integral/qawo.h>
 #include <integral/type.h>
 
 #include <gsl/gsl_integration.h>
@@ -43,83 +44,31 @@ namespace integral {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-class qaws_table_t
+class qawf_t
 {
   public:
-    qaws_table_t(const T alpha, const T beta, const int mu, const int nu)
-        : m_alpha(alpha)
-        , m_beta(beta)
-        , m_mu(mu)
-        , m_nu(nu)
-        , m_table(nullptr)
-    {
-    }
-
-    ~qaws_table_t()
-    {
-        if (m_table != nullptr) {
-            gsl_integration_qaws_table_free(m_table);
-        }
-    }
-
-    gsl_integration_qaws_table *get()
-    {
-        if (m_table == nullptr) {
-            m_table =
-                gsl_integration_qaws_table_alloc(m_alpha, m_beta, m_mu, m_nu);
-            IEXP_NOT_NULLPTR(m_table);
-        }
-        return m_table;
-    }
-
-    void set(const T alpha, const T beta, const int mu, const int nu)
-    {
-        if (m_table != nullptr) {
-            eigen_assert(
-                gsl_integration_qaws_table_set(m_table, alpha, beta, mu, nu) ==
-                GSL_SUCCESS);
-        }
-
-        m_alpha = alpha;
-        m_beta = beta;
-        m_mu = mu;
-        m_nu = nu;
-    }
-
-  private:
-    T m_alpha, m_beta;
-    int m_mu, m_nu;
-    gsl_integration_qaws_table *m_table;
-};
-
-typedef qaws_table_t<double> qaws_table;
-
-template <typename T>
-class qaws_t
-{
-  public:
-    qaws_t(const typename unary_func<T>::type &fn,
-           T epsabs,
-           T epsrel,
-           size_t limit)
+    qawf_t(const typename unary_func<T>::type &fn, T epsabs, size_t limit)
         : m_fn(fn)
         , m_epsabs(epsabs)
-        , m_epsrel(epsrel)
         , m_limit(limit)
         , m_workspace(nullptr)
+        , m_cycle_workspace(nullptr)
     {
     }
 
-    ~qaws_t()
+    ~qawf_t()
     {
         if (m_workspace != nullptr) {
             gsl_integration_workspace_free(m_workspace);
         }
+
+        if (m_cycle_workspace != nullptr) {
+            gsl_integration_workspace_free(m_cycle_workspace);
+        }
     }
 
-    int operator()(qaws_table_t<T> &w,
+    int operator()(qawo_table_t<T> &w,
                    const T a,
-                   const T b,
                    T *result,
                    T *abserr = nullptr)
     {
@@ -131,25 +80,19 @@ class qaws_t
         return m_epsabs;
     }
 
-    T &epsrel()
-    {
-        return m_epsrel;
-    }
-
   private:
-    qaws_t(const qaws_t &) = delete;
-    qaws_t &operator=(const qaws_t &) = delete;
+    qawf_t(const qawf_t &) = delete;
+    qawf_t &operator=(const qawf_t &) = delete;
 
     unary_func<T> m_fn;
-    T m_epsabs, m_epsrel;
+    T m_epsabs;
     size_t m_limit;
-    gsl_integration_workspace *m_workspace;
+    gsl_integration_workspace *m_workspace, *m_cycle_workspace;
 };
 
 template <>
-int qaws_t<double>::operator()(qaws_table_t<double> &w,
+int qawf_t<double>::operator()(qawo_table &w,
                                const double a,
-                               const double b,
                                double *result,
                                double *abserr)
 {
@@ -158,20 +101,24 @@ int qaws_t<double>::operator()(qaws_table_t<double> &w,
         IEXP_NOT_NULLPTR(m_workspace);
     }
 
+    if (m_cycle_workspace == nullptr) {
+        m_cycle_workspace = gsl_integration_workspace_alloc(m_limit);
+        IEXP_NOT_NULLPTR(m_workspace);
+    }
+
     double __abserr;
-    return gsl_integration_qaws((gsl_function *)m_fn.gsl(),
+    return gsl_integration_qawf((gsl_function *)m_fn.gsl(),
                                 a,
-                                b,
-                                w.get(),
                                 m_epsabs,
-                                m_epsrel,
                                 m_limit,
                                 m_workspace,
+                                m_cycle_workspace,
+                                w.get(),
                                 result,
                                 abserr != nullptr ? abserr : &__abserr);
 }
 
-typedef qaws_t<double> qaws;
+typedef qawf_t<double> qawf;
 
 ////////////////////////////////////////////////////////////
 // global variants
@@ -184,4 +131,4 @@ typedef qaws_t<double> qaws;
 
 IEXP_NS_END
 
-#endif /* __IEXP_INTEGRAL_QAWS__ */
+#endif /* __IEXP_INTEGRAL_QAWF__ */

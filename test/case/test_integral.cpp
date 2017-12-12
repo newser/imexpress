@@ -4,6 +4,8 @@
 #include <integral/qagp.h>
 #include <integral/qags.h>
 #include <integral/qawc.h>
+#include <integral/qawf.h>
+#include <integral/qawo.h>
 #include <integral/qaws.h>
 #include <integral/qng.h>
 #include <iostream>
@@ -274,4 +276,63 @@ TEST_CASE("integral_qaws")
     REQUIRE(status == GSL_SUCCESS);
     REQUIRE(__D_EQ_IN(result, 3.159922862811048172E-01, 1E-14));
     REQUIRE(__D_EQ_IN(abserr, 2.336183482198144595E-08, 1E-6));
+}
+
+TEST_CASE("integral_qawo")
+{
+    int status;
+    double result, abserr;
+
+    integral::qawo_table t(10.0 * M_PI, 1.0, true, 1000);
+
+    integral::qawo q(
+        [](double x) -> double {
+            if (x == 0.0) {
+                return 0.0;
+            }
+            return log(x);
+        },
+        0.0,
+        1e-7,
+        1000);
+    status = q(t, 0.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, -1.281368483991674190E-01, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 6.875028324415666248E-12, 1E-3));
+
+    t.set_length(-1.0);
+    q.epsabs() = 0.0;
+    q.epsrel() = 1.0e-7;
+
+    status = q(t, 1.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, 1.281368483991674190E-01, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 6.875028324415666248E-12, 1E-3));
+}
+
+TEST_CASE("integral_qawf")
+{
+    int status;
+    double result, abserr;
+
+    integral::qawo_table t(M_PI / 2.0, 1.0, false, 1000);
+
+    integral::qawf q(
+        [](double x) -> double {
+            if (x == 0.0) {
+                return 0;
+            }
+            return 1 / sqrt(x);
+        },
+        1e-7,
+        1000);
+    status = q(t, 0.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, 9.999999999279802765E-01, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 1.556289974669056164E-08, 1E-3));
+
+    status = q(t, 0.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, 9.999999999279802765E-01, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 1.556289974669056164E-08, 1E-3));
 }
