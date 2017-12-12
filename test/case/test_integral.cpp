@@ -1,5 +1,7 @@
 #include <catch.hpp>
 #include <integral/qag.h>
+#include <integral/qagp.h>
+#include <integral/qags.h>
 #include <integral/qng.h>
 #include <iostream>
 #include <test_util.h>
@@ -92,4 +94,56 @@ TEST_CASE("integral_qag")
     REQUIRE(status == GSL_SUCCESS);
     REQUIRE(__D_EQ_IN(result, -7.716049382715854665E-02, 1E-15));
     REQUIRE(__D_EQ_IN(abserr, 6.679384885865053037E-12, 1E-6));
+}
+
+TEST_CASE("integral_qags")
+{
+    int status;
+    double result, abserr;
+
+    integral::qags q([](double x) { return pow(x, 2.6) * log(1 / x); },
+                     0.0,
+                     1e-10,
+                     1000);
+    status = q(0.0, 1.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, 7.716049382715854665E-02, 1E-15));
+    REQUIRE(__D_EQ_IN(abserr, 6.679384885865053037E-12, 1E-6));
+
+    REQUIRE(q.epsabs() == 0.0);
+    REQUIRE(q.epsrel() == 1e-10);
+
+    status = q(1.0, 0.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, -7.716049382715854665E-02, 1E-15));
+    REQUIRE(__D_EQ_IN(abserr, 6.679384885865053037E-12, 1E-6));
+}
+
+TEST_CASE("integral_qagp")
+{
+    double pts[4] = {0.0, 1.0, sqrt(2.0), 3.0};
+    int status;
+    double result, abserr;
+
+    integral::qagp q(
+        [](double x) {
+            double x2 = x * x;
+            double x3 = x * x2;
+            return x3 * log(fabs((x2 - 1.0) * (x2 - 2.0)));
+        },
+        0.0,
+        1.0e-3,
+        1000);
+    status = q(pts, 4, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, 5.274080611672716401E+01, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 1.755703848687062418E-04, 1E-5));
+
+    REQUIRE(q.epsabs() == 0.0);
+    REQUIRE(q.epsrel() == 1.0e-3);
+
+    status = q(pts, 4, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, 5.274080611672716401E+01, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 1.755703848687062418E-04, 1E-5));
 }
