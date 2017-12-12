@@ -4,6 +4,7 @@
 #include <integral/qagp.h>
 #include <integral/qags.h>
 #include <integral/qawc.h>
+#include <integral/qaws.h>
 #include <integral/qng.h>
 #include <iostream>
 #include <test_util.h>
@@ -237,4 +238,40 @@ TEST_CASE("integral_qawc")
     REQUIRE(status == GSL_SUCCESS);
     REQUIRE(__D_EQ_IN(result, -8.994400695837000137E-02, 1E-14));
     REQUIRE(__D_EQ_IN(abserr, 1.185290176227023727E-06, 1E-6));
+}
+
+TEST_CASE("integral_qaws")
+{
+    int status;
+    double result, abserr;
+
+    integral::qaws_table t(0.0, 0.0, 1, 0);
+
+    integral::qaws q(
+        [](double x) -> double {
+            if (x == 0.0) {
+                return 0.0;
+            } else {
+                double u = log(x);
+                double v = 1 + u * u;
+
+                return 1.0 / (v * v);
+            }
+        },
+        0.0,
+        1.0e-7,
+        1000);
+    status = q(t, 0.0, 1.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, -1.892751853489401670E-01, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 1.129133712015747658E-08, 1E-6));
+
+    t.set(-0.5, -0.3, 1, 1);
+    q.epsabs() = 0.0;
+    q.epsrel() = 1.0e-7;
+
+    status = q(t, 0.0, 1.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, 3.159922862811048172E-01, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 2.336183482198144595E-08, 1E-6));
 }
