@@ -1,4 +1,5 @@
 #include <catch.hpp>
+#include <integral/qag.h>
 #include <integral/qng.h>
 #include <iostream>
 #include <test_util.h>
@@ -66,4 +67,29 @@ TEST_CASE("integral_qng")
     status = q(0, 1, &result);
     REQUIRE(status == GSL_SUCCESS);
     REQUIRE(__D_EQ9(result, 7.716049379303083211E-02));
+}
+
+TEST_CASE("integral_qag")
+{
+    int status;
+    double result, abserr;
+
+    integral::qag q([](double x) { return pow(x, 2.6) * log(1 / x); },
+                    0.0,
+                    1e-10,
+                    integral::GAUSS15,
+                    1000);
+    status = q(0.0, 1.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, 7.716049382715854665E-02, 1E-15));
+    REQUIRE(__D_EQ_IN(abserr, 6.679384885865053037E-12, 1E-6));
+
+    REQUIRE(q.epsabs() == 0.0);
+    REQUIRE(q.epsrel() == 1e-10);
+    REQUIRE(q.key() == integral::GAUSS15);
+
+    status = q(1.0, 0.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, -7.716049382715854665E-02, 1E-15));
+    REQUIRE(__D_EQ_IN(abserr, 6.679384885865053037E-12, 1E-6));
 }

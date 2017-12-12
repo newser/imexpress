@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_INTEGRAL_QNG__
-#define __IEXP_INTEGRAL_QNG__
+#ifndef __IEXP_INTEGRAL_QAG__
+#define __IEXP_INTEGRAL_QAG__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -43,21 +43,31 @@ namespace integral {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-class qng_t
+class qag_t
 {
   public:
-    qng_t(const typename unary_func<T>::type &fn, T epsabs, T epsrel)
+    qag_t(const typename unary_func<T>::type &fn,
+          T epsabs,
+          T epsrel,
+          key k,
+          size_t limit)
         : m_fn(fn)
         , m_epsabs(epsabs)
         , m_epsrel(epsrel)
+        , m_key(k)
+        , m_limit(limit)
+        , m_workspace(nullptr)
     {
     }
 
-    int operator()(const T a,
-                   const T b,
-                   T *result,
-                   T *abserr = nullptr,
-                   size_t *neval = nullptr)
+    ~qag_t()
+    {
+        if (m_workspace != nullptr) {
+            gsl_integration_workspace_free(m_workspace);
+        }
+    }
+
+    int operator()(const T a, const T b, T *result, T *abserr = nullptr)
     {
         UNSUPPORTED_TYPE(T);
     }
@@ -72,34 +82,47 @@ class qng_t
         return m_epsrel;
     }
 
+    enum key &key()
+    {
+        return m_key;
+    }
+
   private:
-    qng_t(const qng_t &) = delete;
-    qng_t &operator=(const qng_t &) = delete;
+    qag_t(const qag_t &) = delete;
+    qag_t &operator=(const qag_t &) = delete;
 
     unary_func<T> m_fn;
     T m_epsabs, m_epsrel;
+    enum key m_key;
+    size_t m_limit;
+    gsl_integration_workspace *m_workspace;
 };
 
 template <>
-int qng_t<double>::operator()(const double a,
+int qag_t<double>::operator()(const double a,
                               const double b,
                               double *result,
-                              double *abserr,
-                              size_t *neval)
+                              double *abserr)
 {
+    if (m_workspace == nullptr) {
+        m_workspace = gsl_integration_workspace_alloc(m_limit);
+        IEXP_NOT_NULLPTR(m_workspace);
+    }
+
     double __abserr;
-    size_t __neval;
-    return gsl_integration_qng(m_fn.gsl(),
+    return gsl_integration_qag(m_fn.gsl(),
                                a,
                                b,
                                m_epsabs,
                                m_epsrel,
+                               m_limit,
+                               m_key,
+                               m_workspace,
                                result,
-                               abserr != nullptr ? abserr : &__abserr,
-                               neval != nullptr ? neval : &__neval);
+                               abserr != nullptr ? abserr : &__abserr);
 }
 
-typedef qng_t<double> qng;
+typedef qag_t<double> qag;
 
 ////////////////////////////////////////////////////////////
 // global variants
@@ -112,4 +135,4 @@ typedef qng_t<double> qng;
 
 IEXP_NS_END
 
-#endif /* __IEXP_INTEGRAL_QNG__ */
+#endif /* __IEXP_INTEGRAL_QAG__ */
