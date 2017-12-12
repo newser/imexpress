@@ -3,6 +3,7 @@
 #include <integral/qagi.h>
 #include <integral/qagp.h>
 #include <integral/qags.h>
+#include <integral/qawc.h>
 #include <integral/qng.h>
 #include <iostream>
 #include <test_util.h>
@@ -213,4 +214,27 @@ TEST_CASE("integral_qagiu")
     REQUIRE(status == GSL_SUCCESS);
     REQUIRE(__D_EQ_IN(result, -3.616892186127022568E-01, 1E-14));
     REQUIRE(__D_EQ_IN(abserr, 3.016716913328831851E-06, 1E-5));
+}
+
+TEST_CASE("integral_qawc")
+{
+    int status;
+    double result, abserr;
+
+    integral::qawc q([](double x) { return 1.0 / (5.0 * x * x * x + 6.0); },
+                     0.0,
+                     1.0e-3,
+                     1000);
+    status = q(-1.0, 5.0, 0.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, -8.994400695837000137E-02, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 1.185290176227023727E-06, 1E-6));
+
+    REQUIRE(q.epsabs() == 0.0);
+    REQUIRE(q.epsrel() == 1.0e-3);
+
+    status = q(-1.0, 5.0, 0.0, &result, &abserr);
+    REQUIRE(status == GSL_SUCCESS);
+    REQUIRE(__D_EQ_IN(result, -8.994400695837000137E-02, 1E-14));
+    REQUIRE(__D_EQ_IN(abserr, 1.185290176227023727E-06, 1E-6));
 }
