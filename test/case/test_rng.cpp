@@ -1,6 +1,8 @@
 #include <catch.hpp>
 #include <iostream>
 #include <math/constant.h>
+#include <rand/qrand.h>
+#include <rand/qrng.h>
 #include <rand/rand.h>
 #include <rand/rng.h>
 #include <test_util.h>
@@ -30,6 +32,13 @@ TEST_CASE("test_rng")
 
     rand::rng r3;
     REQUIRE(strcmp("mt19937", r3.name()) == 0);
+
+    rand::rng r4(std::move(r3));
+    rand::rng r5 = std::move(r4);
+    r5 = rand::rng();
+
+    rand::rng r6;
+    r6 = r5;
 }
 
 TEST_CASE("test_rand")
@@ -50,4 +59,55 @@ TEST_CASE("test_rand")
 
     iexp::Matrix3i &wr = rand::rand(w);
     REQUIRE(&wr == &w);
+}
+
+TEST_CASE("test_qrng")
+{
+    double x[10];
+
+    rand::qrng r(rand::NIEDERREITER_2, 2);
+    REQUIRE(strcmp("niederreiter-base-2", r.name()) == 0);
+    r.next(x);
+
+    rand::qrng r2(rand::REVERSEHALTON, 3);
+    REQUIRE(strcmp("reversehalton", r2.name()) == 0);
+    r.next(x);
+
+    rand::qrng r3(rand::SOBOL, 10);
+    REQUIRE(strcmp("sobol", r3.name()) == 0);
+
+    rand::qrng r4(std::move(r3));
+    rand::qrng r5 = std::move(r4);
+    r5 = rand::qrng(rand::SOBOL, 10);
+
+    rand::qrng r6(rand::SOBOL, 10);
+    r6 = r5;
+}
+
+TEST_CASE("test_qrand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::qrand(v, rand::SOBOL);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::qrand(v, rand::SOBOL) + rand::qrand(v, rand::HALTON);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::qrand(w, rand::REVERSEHALTON);
+    w2 = rand::qrand(w, rand::REVERSEHALTON) + rand::qrand(w, rand::HALTON) +
+         rand::qrand(w, rand::SOBOL);
+
+    iexp::MatrixXd &wr = rand::qrand(w, rand::HALTON);
+    REQUIRE(&wr == &w);
+
+    iexp::MatrixXcd cw(3, 4), cw2(3, 4);
+    cw.fill(9.9999);
+    cw2 = rand::qrand(cw, rand::REVERSEHALTON);
+    cw2 = rand::qrand(cw, rand::REVERSEHALTON) + rand::qrand(cw, rand::HALTON) +
+          rand::qrand(cw, rand::SOBOL);
+
+    iexp::MatrixXcd &cwr = rand::qrand(cw, rand::HALTON);
+    REQUIRE(&cwr == &cw);
 }

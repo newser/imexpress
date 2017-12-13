@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_RAND__
-#define __IEXP_RAND__
+#ifndef __IEXP_QRAND__
+#define __IEXP_QRAND__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -25,7 +25,7 @@
 
 #include <common/common.h>
 
-#include <rand/rng.h>
+#include <rand/qrng.h>
 
 IEXP_NS_BEGIN
 
@@ -48,59 +48,32 @@ namespace rand {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline T rand_impl(const rng &r)
+inline void qrand_impl(const qrng &r, T x[])
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double rand_impl<double>(const rng &r)
+inline void qrand_impl<double>(const qrng &r, double x[])
 {
-    return r.uniform_double();
+    return r.next(x);
 }
 
 template <>
-inline unsigned long rand_impl<unsigned long>(const rng &r)
+inline void qrand_impl<std::complex<double>>(const qrng &r,
+                                             std::complex<double> x[])
 {
-    return r.uniform_ulong();
-}
-
-#define DEFINE_RAND_IMPL(t)                                                    \
-    template <>                                                                \
-    inline t rand_impl<t>(const rng &r)                                        \
-    {                                                                          \
-        return r.uniform_ulong(std::numeric_limits<t>::max() + 1);             \
-    }
-DEFINE_RAND_IMPL(long)
-DEFINE_RAND_IMPL(unsigned int)
-DEFINE_RAND_IMPL(int)
-DEFINE_RAND_IMPL(unsigned short)
-DEFINE_RAND_IMPL(short)
-DEFINE_RAND_IMPL(unsigned char)
-DEFINE_RAND_IMPL(char)
-#undef DEFINE_RAND_IMPL
-
-template <typename T>
-inline auto rand(DenseBase<T> &x,
-                 unsigned long seed = 0,
-                 rng_type type = MT19937) -> decltype(x.derived())
-{
-    rng r(type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        data[i] = rand_impl<typename T::Scalar>(r);
-    }
-
-    return x.derived();
+    return r.next((double *)x);
 }
 
 template <typename T>
-inline auto rand(DenseBase<T> &x, const rng &r) -> decltype(x.derived())
+inline auto qrand(DenseBase<T> &x, qrng_type type) -> decltype(x.derived())
 {
+    qrng r(type, is_complex<typename T::Scalar>::value ? 2 : 1);
+
     typename T::Scalar *data = x.derived().data();
     for (Index i = 0; i < x.size(); ++i) {
-        data[i] = rand_impl<typename T::Scalar>(r);
+        qrand_impl<typename T::Scalar>(r, &data[i]);
     }
 
     return x.derived();
@@ -109,4 +82,4 @@ inline auto rand(DenseBase<T> &x, const rng &r) -> decltype(x.derived())
 
 IEXP_NS_END
 
-#endif /* __IEXP_RAND__ */
+#endif /* __IEXP_QRAND__ */
