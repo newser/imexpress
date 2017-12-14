@@ -27,6 +27,10 @@
 
 #include <common/namespace.h>
 
+#ifdef IEXP_MGL2
+#include <mgl2/mgl.h>
+#endif
+
 IEXP_NS_BEGIN
 
 ////////////////////////////////////////////////////////////
