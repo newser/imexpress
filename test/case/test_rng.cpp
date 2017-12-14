@@ -1,10 +1,10 @@
 #include <catch.hpp>
 #include <iostream>
 #include <math/constant.h>
+#include <rand/normal.h>
 #include <rand/qrand.h>
 #include <rand/qrng.h>
 #include <rand/rand.h>
-#include <rand/rng.h>
 #include <test_util.h>
 
 using namespace std;
@@ -109,5 +109,35 @@ TEST_CASE("test_qrand")
           rand::qrand(cw, rand::SOBOL);
 
     iexp::MatrixXcd &cwr = rand::qrand(cw, rand::HALTON);
+    REQUIRE(&cwr == &cw);
+}
+
+TEST_CASE("test_normal_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::norm_rand(v);
+    REQUIRE(&vr == &v);
+
+    v2 =
+        rand::norm_rand(v, 2.0) + rand::norm_rand(v, 3.0, 1234, rand::BOROSH13);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::norm_rand(w);
+    w2 = rand::norm_rand(w) + rand::norm_rand(w, 2.0) +
+         rand::norm_rand(w, 3.0, 1234, rand::BOROSH13);
+
+    iexp::MatrixXd &wr = rand::norm_rand(w);
+    REQUIRE(&wr == &w);
+
+    iexp::MatrixXd cw(3, 4), cw2(3, 4);
+    cw.fill(9.9999);
+    cw2 = rand::norm_rand(cw, 2.0);
+    cw2 = rand::norm_rand(cw, 2.0) +
+          rand::norm_rand(cw, 3.0, 1234, rand::BOROSH13) +
+          rand::norm_rand(cw, 3.0, 1234, rand::BOROSH13);
+
+    iexp::MatrixXd &cwr = rand::norm_rand(cw, 3.0, 1234, rand::BOROSH13);
     REQUIRE(&cwr == &cw);
 }

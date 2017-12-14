@@ -191,6 +191,11 @@ class rng
         return gsl_rng_max(m_rng);
     }
 
+    gsl_rng *gsl()
+    {
+        return m_rng;
+    }
+
   private:
     gsl_rng *m_rng;
 };

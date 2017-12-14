@@ -66,6 +66,7 @@ add_group(fft ${ROOT_PATH}/include/fft ${ROOT_PATH}/source/fft IEXP_SOURCE)
 add_group(fft ${ROOT_PATH}/include/fft/fftw ${ROOT_PATH}/source/fft/fftw IEXP_SOURCE)
 add_group(integral ${ROOT_PATH}/include/integral ${ROOT_PATH}/source/integral IEXP_SOURCE)
 add_group(rand ${ROOT_PATH}/include/rand ${ROOT_PATH}/source/rand IEXP_SOURCE)
+add_group(randist ${ROOT_PATH}/include/randist ${ROOT_PATH}/source/randist IEXP_SOURCE)
 
 #
 # build
