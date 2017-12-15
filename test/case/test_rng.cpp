@@ -141,6 +141,19 @@ TEST_CASE("test_normal_rand")
 
     iexp::MatrixXd &cwr = rand::norm_rand(cw, 3.0, 1234, rand::BOROSH13);
     REQUIRE(&cwr == &cw);
+
+#ifdef IEXP_MGL2
+    iexp::VectorXd vv(100);
+    rand::norm_rand(vv);
+    mglData y(100);
+    y.Link(vv.data(), vv.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, 0, 2);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("normal_rand.png");
+#endif
 }
 
 TEST_CASE("test_normal_tail_rand")
@@ -171,19 +184,4 @@ TEST_CASE("test_normal_tail_rand")
 
     iexp::MatrixXd &cwr = rand::normt_rand(cw, 10, 3.0, 1234, rand::BOROSH13);
     REQUIRE(&cwr == &cw);
-
-#if 0 //#ifdef IEXP_MGL2
-    mglData dat(30, 40); // data to for plotting
-    for (long i = 0; i < 30; i++)
-        for (long j = 0; j < 40; j++)
-            dat.a[i + 30 * j] = 1 / (1 + (i - 15) * (i - 15) / 225. +
-                                     (j - 20) * (j - 20) / 400.);
-
-    mglGraph gr; // class for plot drawing
-    gr.Rotate(50, 60); // rotate axis
-    gr.Light(true); // enable lighting
-    gr.Surf(dat); // plot surface
-    gr.Axis(); // draw axis
-    gr.WriteFrame("sample.png"); // save it
-#endif
 }
