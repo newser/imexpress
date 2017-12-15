@@ -101,7 +101,7 @@ if (gsl_exist)
 else ()
     add_subdirectory(${LIBRARY_PATH}/gsl gsl)
 endif ()
-target_link_libraries(imexpress gsl)
+target_link_libraries(imexpress gsl gslcblas)
 
 # fft
 add_subdirectory(${LIBRARY_PATH}/fft fft)

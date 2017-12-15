@@ -58,6 +58,8 @@ IEXP_NS_BEGIN
 
 #define IS_COMPLEX(t) is_complex<t>::value
 
+#define SCALAR(t) std::conditional<is_complex<t>::value, t::value_type, t>::type
+
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
@@ -106,7 +108,8 @@ template <typename T>
 struct is_complex
 {
     static const bool value = std::is_same<T, std::complex<float>>::value ||
-                              std::is_same<T, std::complex<double>>::value;
+                              std::is_same<T, std::complex<double>>::value ||
+                              std::is_same<T, std::complex<long double>>::value;
 };
 
 ////////////////////////////////////////////////////////////

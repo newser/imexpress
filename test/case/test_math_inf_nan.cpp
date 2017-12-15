@@ -8,6 +8,10 @@ TEST_CASE("math_inf_nan")
     REQUIRE(IEXP_NEGINF == GSL_NEGINF);
     // REQUIRE(IEXP_NAN == GSL_NAN);
 
+    REQUIRE(std::isnan(IEXP_NAN) == true);
+    REQUIRE(std::isinf(IEXP_POSINF) == true);
+    REQUIRE(std::isinf(IEXP_NEGINF) == true);
+
     SECTION("pos inf")
     {
         iexp::Matrix2d m = iexp::Matrix2d::Zero();

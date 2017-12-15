@@ -1,6 +1,8 @@
 #include <catch.hpp>
 #include <iostream>
 #include <math/constant.h>
+#include <rand/bi_normal.h>
+#include <rand/mul_normal.h>
 #include <rand/normal.h>
 #include <rand/normal_tail.h>
 #include <rand/qrand.h>
@@ -142,7 +144,7 @@ TEST_CASE("test_normal_rand")
     iexp::MatrixXd &cwr = rand::norm_rand(cw, 3.0, 1234, rand::BOROSH13);
     REQUIRE(&cwr == &cw);
 
-#ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
     iexp::VectorXd vv(100);
     rand::norm_rand(vv);
     mglData y(100);
@@ -184,4 +186,78 @@ TEST_CASE("test_normal_tail_rand")
 
     iexp::MatrixXd &cwr = rand::normt_rand(cw, 10, 3.0, 1234, rand::BOROSH13);
     REQUIRE(&cwr == &cw);
+
+#if 0 // #ifdef IEXP_MGL2
+    iexp::VectorXd vv(100);
+    rand::normt_rand(vv, 3.0);
+    mglData y(100);
+    y.Link(vv.data(), vv.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, -5, 5);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("normalt_rand.png");
+#endif
+}
+
+TEST_CASE("test_bi_normal")
+{
+    iexp::VectorXcd v(10), v2(10);
+
+    iexp::VectorXcd &vr = rand::bnorm_rand(v, 1.0, 1.0, 0);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::bnorm_rand(v, 1.0, 1.0, 0) + rand::bnorm_rand(v, 1.0, 1.0, 0);
+
+    iexp::MatrixXcd m(10, 8), m2(10, 8);
+
+    iexp::MatrixXcd &mr = rand::bnorm_rand(m, 1.0, 1.0, 0);
+    REQUIRE(&mr == &m);
+
+    m2 = rand::bnorm_rand(m, 1.0, 2.0, 0) + rand::bnorm_rand(m, 3.0, 4.0, 0);
+
+#if 0 // #ifdef IEXP_MGL2
+    iexp::VectorXcd vv(100);
+    rand::bnorm_rand(vv, 1.0, 1.0, 0.9);
+    iexp::VectorXd vv1 = vv.real();
+    iexp::VectorXd vv2 = vv.imag();
+
+    mglData x(100), y(100);
+    x.Link(vv1.data(), vv1.size());
+    y.Link(vv2.data(), vv2.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(-3, 3, -3, 3);
+    gr.Axis();
+    gr.Plot(x, y, "+");
+    gr.WriteFrame("bi_norm_rand.png");
+#endif
+}
+
+TEST_CASE("test_mul_normal")
+{
+    double mu[2] = {1, 2};
+    double L[4] = {4, 2, 2, 3};
+    rand::mnorm_rng r(2, mu, L);
+
+    Matrix<double, 2, 100> result;
+    for (Index i = 0; i < 100; ++i) {
+        r.next(result.data() + i * 2);
+    }
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXd v1 = result.row(0);
+    VectorXd v2 = result.row(1);
+    
+    mglData x(100), y(100);
+    x.Link(v1.data(), v1.size());
+    y.Link(v2.data(), v2.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(-3, 3, -3, 3);
+    gr.Axis();
+    gr.Plot(x, y, "+");
+    gr.WriteFrame("mul_norm_rand.png");
+#endif
 }
