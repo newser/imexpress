@@ -5,6 +5,8 @@
 #include <rand/cauchy.h>
 #include <rand/exp.h>
 #include <rand/expow.h>
+#include <rand/landau.h>
+#include <rand/landau.h>
 #include <rand/laplace.h>
 #include <rand/mul_normal.h>
 #include <rand/normal.h>
@@ -463,5 +465,37 @@ TEST_CASE("test_rayleigh_tail_rand")
     gr.Axis();
     gr.Plot(y, "+");
     gr.WriteFrame("rayleigh_tail_rand.png");
+#endif
+}
+
+TEST_CASE("test_landau_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::landau_rand(v);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::landau_rand(v) + rand::landau_rand(v);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::landau_rand(w);
+    w2 = rand::landau_rand(w) + rand::landau_rand(w) + rand::landau_rand(w);
+
+    iexp::MatrixXd &wr = rand::landau_rand(w);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXd v1(100);
+    rand::landau_rand(v1);
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, -5, 5);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("landau_rand.png");
 #endif
 }
