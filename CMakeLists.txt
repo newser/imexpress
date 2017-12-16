@@ -95,9 +95,13 @@ target_include_directories(imexpress PRIVATE ${LIBRARY_PATH}/fft/fftw/api)
 
 # gsl
 check_exist(gsl_exist ${CMAKE_CURRENT_BINARY_DIR}/gsl "Debug;Release" "libgsl.a")
-if (gsl_exist)
+check_exist(gslcblas_exist ${CMAKE_CURRENT_BINARY_DIR}/gsl "Debug;Release" "libgslcblas.a")
+if (gsl_exist AND gslcblas_exist)
     add_library(gsl STATIC IMPORTED GLOBAL)
     set_target_properties(gsl PROPERTIES IMPORTED_LOCATION ${gsl_exist})
+
+    add_library(gslcblas STATIC IMPORTED GLOBAL)
+    set_target_properties(gslcblas PROPERTIES IMPORTED_LOCATION ${gslcblas_exist})
 else ()
     add_subdirectory(${LIBRARY_PATH}/gsl gsl)
 endif ()

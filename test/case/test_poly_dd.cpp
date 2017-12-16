@@ -1,8 +1,8 @@
 #include <../test/test_util.h>
 #include <catch.hpp>
 #include <iostream>
-#include <polynomial/divided_difference.h>
-#include <polynomial/evaluation.h>
+#include <poly/divided_difference.h>
+#include <poly/evaluation.h>
 
 TEST_CASE("poly_dd")
 {

@@ -1,7 +1,7 @@
 #include <../test/test_util.h>
 #include <catch.hpp>
 #include <iostream>
-#include <polynomial/cubic.h>
+#include <poly/cubic.h>
 
 TEST_CASE("poly_cubic")
 {

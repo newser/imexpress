@@ -1,7 +1,7 @@
 #include <../test/test_util.h>
 #include <catch.hpp>
 #include <iostream>
-#include <polynomial/evaluation.h>
+#include <poly/evaluation.h>
 
 TEST_CASE("poly_eval")
 {

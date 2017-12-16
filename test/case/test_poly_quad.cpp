@@ -1,7 +1,7 @@
 #include <../test/test_util.h>
 #include <catch.hpp>
 #include <iostream>
-#include <polynomial/quadratic.h>
+#include <poly/quadratic.h>
 
 TEST_CASE("poly_quadratic")
 {
