@@ -1,10 +1,13 @@
 #include <catch.hpp>
 #include <iostream>
 #include <math/constant.h>
+#include <rand/beta.h>
 #include <rand/bi_normal.h>
 #include <rand/cauchy.h>
 #include <rand/exp.h>
 #include <rand/expow.h>
+#include <rand/flat.h>
+#include <rand/gamma.h>
 #include <rand/landau.h>
 #include <rand/landau.h>
 #include <rand/laplace.h>
@@ -565,5 +568,104 @@ TEST_CASE("test_levy_skew_rand")
     gr.Axis();
     gr.Plot(y, "+");
     gr.WriteFrame("levysk_rand.png");
+#endif
+}
+
+TEST_CASE("test_flat_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::flat_rand(v, 1, 2);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::flat_rand(v, 2, 3) + rand::flat_rand(v, 2, 4);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::flat_rand(w, 2, 3);
+    w2 = rand::flat_rand(w, 2, 3) + rand::flat_rand(w, 2, 3) +
+         rand::flat_rand(w, 2, 3);
+
+    iexp::MatrixXd &wr = rand::flat_rand(w, 2, 3);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXd v1(100);
+    rand::flat_rand(v1, 1, 5);
+
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, 0, 6);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("flat_rand.png");
+#endif
+}
+
+TEST_CASE("test_gamma_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::gamma_rand(v, 1, 2);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::gamma_rand(v, 2, 3) + rand::gamma_rand(v, 2, 4);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::gamma_rand(w, 2, 3);
+    w2 = rand::gamma_rand(w, 2, 3) + rand::gamma_rand(w, 2, 3) +
+         rand::flat_rand(w, 2, 3);
+
+    iexp::MatrixXd &wr = rand::gamma_rand(w, 2, 3);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXd v1(100);
+    rand::gamma_rand(v1, 2, 1);
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, 0, 6);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("gamma_rand.png");
+#endif
+}
+
+TEST_CASE("test_beta_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::beta_rand(v, 1, 2);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::beta_rand(v, 2, 3) + rand::beta_rand(v, 2, 4);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::beta_rand(w, 2, 3);
+    w2 = rand::beta_rand(w, 2, 3) + rand::beta_rand(w, 2, 3) +
+         rand::flat_rand(w, 2, 3);
+
+    iexp::MatrixXd &wr = rand::beta_rand(w, 2, 3);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXd v1(100);
+    rand::beta_rand(v1, 2, 2);
+
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, 0, 1);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("beta_rand.png");
 #endif
 }
