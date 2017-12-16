@@ -2,6 +2,8 @@
 #include <iostream>
 #include <math/constant.h>
 #include <rand/bi_normal.h>
+#include <rand/exp.h>
+#include <rand/laplace.h>
 #include <rand/mul_normal.h>
 #include <rand/normal.h>
 #include <rand/normal_tail.h>
@@ -259,5 +261,71 @@ TEST_CASE("test_mul_normal")
     gr.Axis();
     gr.Plot(x, y, "+");
     gr.WriteFrame("mul_norm_rand.png");
+#endif
+}
+
+TEST_CASE("test_exp_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::exp_rand(v, 1.0);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::exp_rand(v, 2.0) + rand::exp_rand(v, 3.0);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::exp_rand(w, 2.0);
+    w2 = rand::exp_rand(w, 3.3) + rand::exp_rand(w, 4.4) +
+         rand::exp_rand(w, 5.5);
+
+    iexp::MatrixXd &wr = rand::exp_rand(w, 99);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXd v1(100);
+    rand::exp_rand(v1, 1.0);
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, -1, 10);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("exp_rand.png");
+#endif
+}
+
+TEST_CASE("test_laplace_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::laplace_rand(v, 1.0);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::laplace_rand(v, 2.0) + rand::laplace_rand(v, 3.0);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::laplace_rand(w, 2.0);
+    w2 = rand::laplace_rand(w, 3.3) + rand::laplace_rand(w, 4.4) +
+         rand::laplace_rand(w, 5.5);
+
+    iexp::MatrixXd &wr = rand::laplace_rand(w, 99);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXd v1(100);
+    rand::laplace_rand(v1, 1.0);
+
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, -10, 10);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("laplace_rand.png");
 #endif
 }
