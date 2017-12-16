@@ -8,6 +8,8 @@
 #include <rand/landau.h>
 #include <rand/landau.h>
 #include <rand/laplace.h>
+#include <rand/levy.h>
+#include <rand/levy_skew.h>
 #include <rand/mul_normal.h>
 #include <rand/normal.h>
 #include <rand/normal_tail.h>
@@ -497,5 +499,71 @@ TEST_CASE("test_landau_rand")
     gr.Axis();
     gr.Plot(y, "+");
     gr.WriteFrame("landau_rand.png");
+#endif
+}
+
+TEST_CASE("test_levy_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::levy_rand(v, 1, 1);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::levy_rand(v, 2, 3) + rand::levy_rand(v, 2, 4);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::levy_rand(w, 2, 3);
+    w2 = rand::levy_rand(w, 2, 3) + rand::levy_rand(w, 2, 3) +
+         rand::levy_rand(w, 2, 3);
+
+    iexp::MatrixXd &wr = rand::levy_rand(w, 2, 3);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXd v1(100);
+    rand::levy_rand(v1, 1, 1);
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, -5, 5);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("levy_rand.png");
+#endif
+}
+
+TEST_CASE("test_levy_skew_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::levysk_rand(v, 1, 1, 2);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::levysk_rand(v, 2, 3, 2) + rand::levysk_rand(v, 2, 4, 2);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::levysk_rand(w, 2, 3, 2);
+    w2 = rand::levysk_rand(w, 2, 3, 2) + rand::levysk_rand(w, 2, 3, 2) +
+         rand::levysk_rand(w, 2, 3, 2);
+
+    iexp::MatrixXd &wr = rand::levysk_rand(w, 2, 3, 2);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXd v1(100);
+    rand::levysk_rand(v1, 1, 1, 1);
+
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, -5, 5);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("levysk_rand.png");
 #endif
 }
