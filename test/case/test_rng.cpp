@@ -4,6 +4,7 @@
 #include <rand/beta.h>
 #include <rand/bi_normal.h>
 #include <rand/cauchy.h>
+#include <rand/chisq.h>
 #include <rand/exp.h>
 #include <rand/expow.h>
 #include <rand/flat.h>
@@ -13,6 +14,7 @@
 #include <rand/laplace.h>
 #include <rand/levy.h>
 #include <rand/levy_skew.h>
+#include <rand/lgnorm.h>
 #include <rand/mul_normal.h>
 #include <rand/normal.h>
 #include <rand/normal_tail.h>
@@ -667,5 +669,71 @@ TEST_CASE("test_beta_rand")
     gr.Axis();
     gr.Plot(y, "+");
     gr.WriteFrame("beta_rand.png");
+#endif
+}
+
+TEST_CASE("test_lgnorm_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::lgnorm_rand(v, 1, 2);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::lgnorm_rand(v, 2, 3) + rand::lgnorm_rand(v, 2, 4);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::lgnorm_rand(w, 2, 3);
+    w2 = rand::lgnorm_rand(w, 2, 3) + rand::lgnorm_rand(w, 2, 3) +
+         rand::flat_rand(w, 2, 3);
+
+    iexp::MatrixXd &wr = rand::lgnorm_rand(w, 2, 3);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXd v1(100);
+    rand::lgnorm_rand(v1, 0, 1);
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, 0, 1);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("lgnorm_rand.png");
+#endif
+}
+
+TEST_CASE("test_chisq_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::chisq_rand(v, 1.0);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::chisq_rand(v, 2.0) + rand::chisq_rand(v, 3.0);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::chisq_rand(w, 2.0);
+    w2 = rand::chisq_rand(w, 3.3) + rand::chisq_rand(w, 4.4) +
+         rand::chisq_rand(w, 5.5);
+
+    iexp::MatrixXd &wr = rand::chisq_rand(w, 99);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef Ichisq_MGL2
+    VectorXd v1(100);
+    rand::chisq_rand(v1, 1.0);
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, -1, 10);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("chisq_rand.png");
 #endif
 }
