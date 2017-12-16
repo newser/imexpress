@@ -7,6 +7,7 @@
 #include <rand/chisq.h>
 #include <rand/exp.h>
 #include <rand/expow.h>
+#include <rand/f.h>
 #include <rand/flat.h>
 #include <rand/gamma.h>
 #include <rand/landau.h>
@@ -23,6 +24,7 @@
 #include <rand/rand.h>
 #include <rand/rayleigh.h>
 #include <rand/rayleigh_tail.h>
+#include <rand/t.h>
 #include <test_util.h>
 
 using namespace std;
@@ -735,5 +737,70 @@ TEST_CASE("test_chisq_rand")
     gr.Axis();
     gr.Plot(y, "+");
     gr.WriteFrame("chisq_rand.png");
+#endif
+}
+
+TEST_CASE("test_f_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::f_rand(v, 1, 2);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::f_rand(v, 2, 3) + rand::f_rand(v, 2, 4);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::f_rand(w, 2, 3);
+    w2 = rand::f_rand(w, 2, 3) + rand::f_rand(w, 2, 3) +
+         rand::flat_rand(w, 2, 3);
+
+    iexp::MatrixXd &wr = rand::f_rand(w, 2, 3);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXd v1(100);
+    rand::f_rand(v1, 1, 1);
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, 0, 1);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("f_rand.png");
+#endif
+}
+
+TEST_CASE("test_t_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::t_rand(v, 1.0);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::t_rand(v, 2.0) + rand::t_rand(v, 3.0);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::t_rand(w, 2.0);
+    w2 = rand::t_rand(w, 3.3) + rand::t_rand(w, 4.4) + rand::t_rand(w, 5.5);
+
+    iexp::MatrixXd &wr = rand::t_rand(w, 99);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef It_MGL2
+    VectorXd v1(100);
+    rand::t_rand(v1, 5.0);
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, -4, 4);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("t_rand.png");
 #endif
 }
