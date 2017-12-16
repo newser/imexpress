@@ -12,6 +12,8 @@
 #include <rand/qrand.h>
 #include <rand/qrng.h>
 #include <rand/rand.h>
+#include <rand/rayleigh.h>
+#include <rand/rayleigh_tail.h>
 #include <test_util.h>
 
 using namespace std;
@@ -383,7 +385,7 @@ TEST_CASE("test_cauchy_rand")
     iexp::MatrixXd &wr = rand::cauchy_rand(w, 99);
     REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
     VectorXd v1(100);
     rand::cauchy_rand(v1, 1.0);
 
@@ -395,5 +397,71 @@ TEST_CASE("test_cauchy_rand")
     gr.Axis();
     gr.Plot(y, "+");
     gr.WriteFrame("cauchy_rand.png");
+#endif
+}
+
+TEST_CASE("test_rayleigh_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::rayl_rand(v, 1.0);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::rayl_rand(v, 2.0) + rand::rayl_rand(v, 3.0);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::rayl_rand(w, 2.0);
+    w2 = rand::rayl_rand(w, 3.3) + rand::rayl_rand(w, 4.4) +
+         rand::rayl_rand(w, 5.5);
+
+    iexp::MatrixXd &wr = rand::rayl_rand(w, 99);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXd v1(100);
+    rand::rayl_rand(v1, 1.0);
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, -5, 5);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("rayleigh_rand.png");
+#endif
+}
+
+TEST_CASE("test_rayleigh_tail_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::raylt_rand(v, 1.0, 1.0);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::raylt_rand(v, 1.0, 2.0) + rand::raylt_rand(v, 1.0, 3.0);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::raylt_rand(w, 1.0, 2.0);
+    w2 = rand::raylt_rand(w, 1.0, 3.3) + rand::raylt_rand(w, 1.0, 4.4) +
+         rand::raylt_rand(w, 1.0, 5.5);
+
+    iexp::MatrixXd &wr = rand::raylt_rand(w, 1.0, 99);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXd v1(100);
+    rand::raylt_rand(v1, 1.5, 1.0);
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, -5, 5);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("rayleigh_tail_rand.png");
 #endif
 }
