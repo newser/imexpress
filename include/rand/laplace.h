@@ -44,7 +44,7 @@ namespace rand {
 class laplace_rng
 {
   public:
-    laplace_rng(double a = 1.0, rng_type type = MT19937, unsigned long seed = 0)
+    laplace_rng(double a, rng_type type = MT19937, unsigned long seed = 0)
         : m_a(a)
         , m_rng(type, seed)
     {
@@ -67,7 +67,7 @@ class laplace_rng
 
 template <typename T>
 inline auto laplace_rand(DenseBase<T> &x,
-                         typename T::Scalar a = 1.0,
+                         typename T::Scalar a,
                          unsigned long seed = 0,
                          rng_type type = MT19937) -> decltype(x.derived())
 {
