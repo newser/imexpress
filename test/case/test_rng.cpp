@@ -25,6 +25,7 @@
 #include <rand/levy.h>
 #include <rand/levy_skew.h>
 #include <rand/lgnorm.h>
+#include <rand/log.h>
 #include <rand/logistic.h>
 #include <rand/mul_gauss.h>
 #include <rand/mul_nomial.h>
@@ -1306,7 +1307,7 @@ TEST_CASE("test_hgeo_rand")
     iexp::MatrixXi &wr = rand::hgeo_rand(w, 3, 10, 5);
     REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
     VectorXi vi(100);
     rand::hgeo_rand(vi, 5, 20, 3);
     VectorXd v1 = vi.cast<double>();
@@ -1319,5 +1320,39 @@ TEST_CASE("test_hgeo_rand")
     gr.Axis();
     gr.Plot(y, "+");
     gr.WriteFrame("hgeo_rand.png");
+#endif
+}
+
+TEST_CASE("test_log_rand")
+{
+    iexp::VectorXi v(10), v2(10);
+
+    iexp::VectorXi &vr = rand::log_rand(v, 0.7);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::log_rand(v, 0.7) + rand::log_rand(v, 0.7);
+
+    iexp::MatrixXi w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::log_rand(w, 0.7);
+    w2 = rand::log_rand(w, 0.7) + rand::log_rand(w, 0.7) +
+         rand::log_rand(w, 0.7);
+
+    iexp::MatrixXi &wr = rand::log_rand(w, 0.7);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXi vi(100);
+    rand::log_rand(vi, 0.7);
+    VectorXd v1 = vi.cast<double>();
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, 0, 5);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("log_rand.png");
 #endif
 }
