@@ -18,6 +18,7 @@
 #include <rand/geometric.h>
 #include <rand/gumbel1.h>
 #include <rand/gumbel2.h>
+#include <rand/hyper_geometric.h>
 #include <rand/landau.h>
 #include <rand/landau.h>
 #include <rand/laplace.h>
@@ -1284,5 +1285,39 @@ TEST_CASE("test_geo_rand")
     gr.Axis();
     gr.Plot(y, "+");
     gr.WriteFrame("geo_rand.png");
+#endif
+}
+
+TEST_CASE("test_hgeo_rand")
+{
+    iexp::VectorXi v(10), v2(10);
+
+    iexp::VectorXi &vr = rand::hgeo_rand(v, 3, 10, 5);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::hgeo_rand(v, 3, 10, 5) + rand::hgeo_rand(v, 3, 10, 5);
+
+    iexp::MatrixXi w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::hgeo_rand(w, 3, 10, 5);
+    w2 = rand::hgeo_rand(w, 3, 10, 5) + rand::hgeo_rand(w, 3, 10, 5) +
+         rand::hgeo_rand(w, 3, 10, 5);
+
+    iexp::MatrixXi &wr = rand::hgeo_rand(w, 3, 10, 5);
+    REQUIRE(&wr == &w);
+
+#if 1 // #ifdef IEXP_MGL2
+    VectorXi vi(100);
+    rand::hgeo_rand(vi, 5, 20, 3);
+    VectorXd v1 = vi.cast<double>();
+
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, 0, 5);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("hgeo_rand.png");
 #endif
 }
