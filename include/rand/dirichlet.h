@@ -94,7 +94,7 @@ inline auto drch_rand(DenseBase<T> &x,
 
     typename T::Scalar *data = x.derived().data();
     for (Index i = 0; i < x.size(); ++i) {
-        r.next((double *)data);
+        r.next((double *)&data[i]);
     }
 
     return x.derived();

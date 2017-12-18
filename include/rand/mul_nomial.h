@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_RAND_BI_GAUSS__
-#define __IEXP_RAND_BI_GAUSS__
+#ifndef __IEXP_RAND_MUL_NOMIAL__
+#define __IEXP_RAND_MUL_NOMIAL__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -41,19 +41,21 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class bgauss_rng
+class mnom_rng
 {
   public:
-    bgauss_rng(double sigma_x,
-               double sigma_y,
-               double rho,
-               rng_type type = DEFAULT_RNG,
-               unsigned long seed = 0)
-        : m_sigma_x(sigma_x)
-        , m_sigma_y(sigma_y)
-        , m_rho(rho)
+    mnom_rng(size_t K,
+             const double p[],
+             unsigned int N,
+             rng_type type = DEFAULT_RNG,
+             unsigned long seed = 0)
+        : m_K(K)
+        , m_p(new double[m_K])
+        , m_N(N)
         , m_rng(type, seed)
     {
+        IEXP_NOT_NULLPTR(m_p);
+        std::copy(&p[0], &p[K], m_p);
     }
 
     void seed(unsigned long seed)
@@ -61,41 +63,17 @@ class bgauss_rng
         m_rng.seed(seed);
     }
 
-    void next(double &x, double &y)
+    void next(unsigned int n[])
     {
-        return gsl_ran_bivariate_gaussian(m_rng.gsl(),
-                                          m_sigma_x,
-                                          m_sigma_y,
-                                          m_rho,
-                                          &x,
-                                          &y);
+        return gsl_ran_multinomial(m_rng.gsl(), m_K, m_N, m_p, n);
     }
 
   private:
-    double m_sigma_x, m_sigma_y, m_rho;
+    const size_t m_K;
+    double *m_p;
+    unsigned int m_N;
     rng m_rng;
 };
-
-template <typename T>
-inline auto bgauss_rand(DenseBase<T> &x,
-                        typename SCALAR(typename T::Scalar) sigma_x,
-                        typename SCALAR(typename T::Scalar) sigma_y,
-                        typename SCALAR(typename T::Scalar) rho,
-                        unsigned long seed = 0,
-                        rng_type type = DEFAULT_RNG) -> decltype(x.derived())
-{
-    static_assert(is_complex<typename T::Scalar>::value,
-                  "scalar can only be complex");
-
-    bgauss_rng r(sigma_x, sigma_y, rho, type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        r.next(((double *)&data[i])[0], ((double *)&data[i])[1]);
-    }
-
-    return x.derived();
-}
 
 ////////////////////////////////////////////////////////////
 // global variants
@@ -108,4 +86,4 @@ inline auto bgauss_rand(DenseBase<T> &x,
 
 IEXP_NS_END
 
-#endif /* __IEXP_RAND_BI_GAUSS__ */
+#endif /* __IEXP_RAND_MUL_NOMIAL__ */

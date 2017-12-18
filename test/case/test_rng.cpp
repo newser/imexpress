@@ -25,6 +25,7 @@
 #include <rand/lgnorm.h>
 #include <rand/logistic.h>
 #include <rand/mul_gauss.h>
+#include <rand/mul_nomial.h>
 #include <rand/neg_binomial.h>
 #include <rand/pareto.h>
 #include <rand/poisson.h>
@@ -229,25 +230,25 @@ TEST_CASE("test_normal_tail_rand")
 #endif
 }
 
-TEST_CASE("test_bi_normal")
+TEST_CASE("test_bi_gauss")
 {
     iexp::VectorXcd v(10), v2(10);
 
-    iexp::VectorXcd &vr = rand::bnorm_rand(v, 1.0, 1.0, 0);
+    iexp::VectorXcd &vr = rand::bgauss_rand(v, 1.0, 1.0, 0);
     REQUIRE(&vr == &v);
 
-    v2 = rand::bnorm_rand(v, 1.0, 1.0, 0) + rand::bnorm_rand(v, 1.0, 1.0, 0);
+    v2 = rand::bgauss_rand(v, 1.0, 1.0, 0) + rand::bgauss_rand(v, 1.0, 1.0, 0);
 
     iexp::MatrixXcd m(10, 8), m2(10, 8);
 
-    iexp::MatrixXcd &mr = rand::bnorm_rand(m, 1.0, 1.0, 0);
+    iexp::MatrixXcd &mr = rand::bgauss_rand(m, 1.0, 1.0, 0);
     REQUIRE(&mr == &m);
 
-    m2 = rand::bnorm_rand(m, 1.0, 2.0, 0) + rand::bnorm_rand(m, 3.0, 4.0, 0);
+    m2 = rand::bgauss_rand(m, 1.0, 2.0, 0) + rand::bgauss_rand(m, 3.0, 4.0, 0);
 
 #if 0 // #ifdef IEXP_MGL2
     iexp::VectorXcd vv(100);
-    rand::bnorm_rand(vv, 1.0, 1.0, 0.9);
+    rand::bgauss_rand(vv, 1.0, 1.0, 0.9);
     iexp::VectorXd vv1 = vv.real();
     iexp::VectorXd vv2 = vv.imag();
 
@@ -1187,5 +1188,31 @@ TEST_CASE("test_nbnom_rand")
     gr.Axis();
     gr.Plot(y, "+");
     gr.WriteFrame("nbnom_rand.png");
+#endif
+}
+
+TEST_CASE("test_multinomial")
+{
+    double p[2] = {1, 2};
+    rand::mnom_rng r(2, p, 6);
+
+    Matrix<unsigned int, 2, 100> result;
+    for (Index i = 0; i < 100; ++i) {
+        r.next(result.data() + i * 2);
+    }
+
+#if 1 // #ifdef IEXP_MGL2
+    VectorXd v1 = result.row(0).cast<double>();
+    VectorXd v2 = result.row(1).cast<double>();
+
+    mglData x(100), y(100);
+    x.Link(v1.data(), v1.size());
+    y.Link(v2.data(), v2.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 6, 0, 6);
+    gr.Axis();
+    gr.Plot(x, y, "+");
+    gr.WriteFrame("multinomial.png");
 #endif
 }
