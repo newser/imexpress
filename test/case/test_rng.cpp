@@ -5,6 +5,7 @@
 #include <rand/bi_normal.h>
 #include <rand/cauchy.h>
 #include <rand/chisq.h>
+#include <rand/dirichlet.h>
 #include <rand/exp.h>
 #include <rand/expow.h>
 #include <rand/f.h>
@@ -1008,5 +1009,42 @@ TEST_CASE("test_gbl2_rand")
     gr.Axis();
     gr.Plot(y, "+");
     gr.WriteFrame("gbl2_rand.png");
+#endif
+}
+
+TEST_CASE("test_drch_rand")
+{
+    double alpha[2] = {2.5, 5.5};
+    iexp::VectorXcd v(10), v2(10);
+
+    iexp::VectorXcd &vr = rand::drch_rand(v, 2, alpha);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::drch_rand(v, 2, alpha) + rand::drch_rand(v, 2, alpha);
+
+    iexp::MatrixXcd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::drch_rand(w, 2, alpha);
+    w2 = rand::drch_rand(w, 2, alpha) + rand::drch_rand(w, 2, alpha) +
+         rand::drch_rand(w, 2, alpha);
+
+    iexp::MatrixXcd &wr = rand::drch_rand(w, 2, alpha);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXcd v1(100);
+    rand::drch_rand(v1, 2, alpha);
+    VectorXd r = v1.real();
+    VectorXd i = v1.imag();
+    
+    mglData x(100), y(100);
+    x.Link(r.data(), r.size());
+    y.Link(i.data(), i.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(-1.5, 1.5, -1.5, 1.5);
+    gr.Axis();
+    gr.Plot(x, y, "+");
+    gr.WriteFrame("drch_rand.png");
 #endif
 }
