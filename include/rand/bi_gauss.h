@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_RAND_NORMAL__
-#define __IEXP_RAND_NORMAL__
+#ifndef __IEXP_RAND_BI_GAUSS__
+#define __IEXP_RAND_BI_GAUSS__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -41,13 +41,17 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class norm_rng
+class bgauss_rng
 {
   public:
-    norm_rng(double sigma = 1.0,
-             rng_type type = DEFAULT_RNG,
-             unsigned long seed = 0)
-        : m_sigma(sigma)
+    bgauss_rng(double sigma_x,
+               double sigma_y,
+               double rho,
+               rng_type type = DEFAULT_RNG,
+               unsigned long seed = 0)
+        : m_sigma_x(sigma_x)
+        , m_sigma_y(sigma_y)
+        , m_rho(rho)
         , m_rng(type, seed)
     {
     }
@@ -57,30 +61,37 @@ class norm_rng
         m_rng.seed(seed);
     }
 
-    double next()
+    void next(double &x, double &y)
     {
-        return gsl_ran_gaussian_ziggurat(m_rng.gsl(), m_sigma);
+        return gsl_ran_bivariate_gaussian(m_rng.gsl(),
+                                          m_sigma_x,
+                                          m_sigma_y,
+                                          m_rho,
+                                          &x,
+                                          &y);
     }
 
   private:
-    double m_sigma;
+    double m_sigma_x, m_sigma_y, m_rho;
     rng m_rng;
 };
 
 template <typename T>
-inline auto norm_rand(DenseBase<T> &x,
-                      typename T::Scalar sigma = 1.0,
-                      unsigned long seed = 0,
-                      rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+inline auto bnorm_rand(DenseBase<T> &x,
+                       typename SCALAR(typename T::Scalar) sigma_x,
+                       typename SCALAR(typename T::Scalar) sigma_y,
+                       typename SCALAR(typename T::Scalar) rho,
+                       unsigned long seed = 0,
+                       rng_type type = DEFAULT_RNG) -> decltype(x.derived())
 {
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "scalar can only be double");
+    static_assert(is_complex<typename T::Scalar>::value,
+                  "scalar can only be complex");
 
-    norm_rng r(sigma, type, seed);
+    bgauss_rng r(sigma_x, sigma_y, rho, type, seed);
 
     typename T::Scalar *data = x.derived().data();
     for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
+        r.next(((double *)&data[i])[0], ((double *)&data[i])[1]);
     }
 
     return x.derived();
@@ -97,4 +108,4 @@ inline auto norm_rand(DenseBase<T> &x,
 
 IEXP_NS_END
 
-#endif /* __IEXP_RAND_NORMAL__ */
+#endif /* __IEXP_RAND_BI_GAUSS__ */

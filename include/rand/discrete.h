@@ -85,9 +85,9 @@ inline auto discrete_rand(DenseBase<T> &x,
                           unsigned long seed = 0,
                           rng_type type = DEFAULT_RNG) -> decltype(x.derived())
 {
-    static_assert(!TYPE_IS(typename T::Scalar, double) &&
-                      !TYPE_IS(typename T::Scalar, float),
-                  "scalar can not be float");
+    static_assert(TYPE_IS(typename T::Scalar, int) ||
+                      TYPE_IS(typename T::Scalar, unsigned int),
+                  "scalar can only be int or unsigned int");
 
     discrete_rng r(K, P, type, seed);
 

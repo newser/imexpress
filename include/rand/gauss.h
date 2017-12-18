@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_RAND_LGNORM__
-#define __IEXP_RAND_LGNORM__
+#ifndef __IEXP_RAND_GAUSS__
+#define __IEXP_RAND_GAUSS__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -41,15 +41,13 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class lggauss_rng
+class gauss_rng
 {
   public:
-    lggauss_rng(double zeta,
-                double sigma,
-                rng_type type = DEFAULT_RNG,
-                unsigned long seed = 0)
-        : m_zeta(zeta)
-        , m_sigma(sigma)
+    gauss_rng(double sigma = 1.0,
+              rng_type type = DEFAULT_RNG,
+              unsigned long seed = 0)
+        : m_sigma(sigma)
         , m_rng(type, seed)
     {
     }
@@ -61,25 +59,24 @@ class lggauss_rng
 
     double next()
     {
-        return gsl_ran_lognormal(m_rng.gsl(), m_zeta, m_sigma);
+        return gsl_ran_gaussian_ziggurat(m_rng.gsl(), m_sigma);
     }
 
   private:
-    double m_zeta, m_sigma;
+    double m_sigma;
     rng m_rng;
 };
 
 template <typename T>
-inline auto lgnorm_rand(DenseBase<T> &x,
-                        typename T::Scalar zeta,
-                        typename T::Scalar sigma,
-                        unsigned long seed = 0,
-                        rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+inline auto norm_rand(DenseBase<T> &x,
+                      typename T::Scalar sigma = 1.0,
+                      unsigned long seed = 0,
+                      rng_type type = DEFAULT_RNG) -> decltype(x.derived())
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");
 
-    lggauss_rng r(zeta, sigma, type, seed);
+    gauss_rng r(sigma, type, seed);
 
     typename T::Scalar *data = x.derived().data();
     for (Index i = 0; i < x.size(); ++i) {
@@ -100,4 +97,4 @@ inline auto lgnorm_rand(DenseBase<T> &x,
 
 IEXP_NS_END
 
-#endif /* __IEXP_RAND_LGNORM__ */
+#endif /* __IEXP_RAND_GAUSS__ */

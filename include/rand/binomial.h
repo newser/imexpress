@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_RAND_LGNORM__
-#define __IEXP_RAND_LGNORM__
+#ifndef __IEXP_RAND_BINOMIAL__
+#define __IEXP_RAND_BINOMIAL__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -41,15 +41,15 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class lggauss_rng
+class bnom_rng
 {
   public:
-    lggauss_rng(double zeta,
-                double sigma,
-                rng_type type = DEFAULT_RNG,
-                unsigned long seed = 0)
-        : m_zeta(zeta)
-        , m_sigma(sigma)
+    bnom_rng(double p,
+             unsigned int n,
+             rng_type type = DEFAULT_RNG,
+             unsigned long seed = 0)
+        : m_p(p)
+        , m_n(n)
         , m_rng(type, seed)
     {
     }
@@ -59,27 +59,29 @@ class lggauss_rng
         m_rng.seed(seed);
     }
 
-    double next()
+    unsigned int next()
     {
-        return gsl_ran_lognormal(m_rng.gsl(), m_zeta, m_sigma);
+        return gsl_ran_binomial(m_rng.gsl(), m_p, m_n);
     }
 
   private:
-    double m_zeta, m_sigma;
+    double m_p;
+    unsigned int m_n;
     rng m_rng;
 };
 
 template <typename T>
-inline auto lgnorm_rand(DenseBase<T> &x,
-                        typename T::Scalar zeta,
-                        typename T::Scalar sigma,
-                        unsigned long seed = 0,
-                        rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+inline auto bnom_rand(DenseBase<T> &x,
+                      double p,
+                      unsigned int n,
+                      unsigned long seed = 0,
+                      rng_type type = DEFAULT_RNG) -> decltype(x.derived())
 {
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "scalar can only be double");
+    static_assert(TYPE_IS(typename T::Scalar, int) ||
+                      TYPE_IS(typename T::Scalar, unsigned int),
+                  "scalar can only be int or unsigned int");
 
-    lggauss_rng r(zeta, sigma, type, seed);
+    bnom_rng r(p, n, type, seed);
 
     typename T::Scalar *data = x.derived().data();
     for (Index i = 0; i < x.size(); ++i) {
@@ -100,4 +102,4 @@ inline auto lgnorm_rand(DenseBase<T> &x,
 
 IEXP_NS_END
 
-#endif /* __IEXP_RAND_LGNORM__ */
+#endif /* __IEXP_RAND_BINOMIAL__ */

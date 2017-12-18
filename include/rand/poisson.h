@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_RAND_MUL_NORMAL__
-#define __IEXP_RAND_MUL_NORMAL__
+#ifndef __IEXP_RAND_POISSON__
+#define __IEXP_RAND_POISSON__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -27,7 +27,6 @@
 
 #include <rand/rng.h>
 
-#include <gsl/gsl_linalg.h>
 #include <gsl/gsl_randist.h>
 
 IEXP_NS_BEGIN
@@ -42,36 +41,13 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class mnorm_rng
+class poiss_rng
 {
   public:
-    mnorm_rng(size_t k,
-              double mu[],
-              double cov[],
-              rng_type type = DEFAULT_RNG,
-              unsigned long seed = 0)
-        : m_mu_block{.size = k, .data = mu}
-        , m_mu{.size = k,
-               .stride = 1,
-               .data = mu,
-               .block = &m_mu_block,
-               .owner = 0}
+    poiss_rng(double mu, rng_type type = DEFAULT_RNG, unsigned long seed = 0)
+        : m_mu(mu)
         , m_rng(type, seed)
     {
-        m_L = gsl_matrix_alloc(k, k);
-        IEXP_NOT_NULLPTR(m_L);
-        for (size_t i = 0; i < k; ++i) {
-            for (size_t j = 0; j < k; ++j) {
-                gsl_matrix_set(m_L, i, j, cov[i * k + j]);
-            }
-        }
-
-        gsl_linalg_cholesky_decomp1(m_L);
-    }
-
-    ~mnorm_rng()
-    {
-        gsl_matrix_free(m_L);
     }
 
     void seed(unsigned long seed)
@@ -79,26 +55,35 @@ class mnorm_rng
         m_rng.seed(seed);
     }
 
-    void next(double x[])
+    unsigned int next()
     {
-        gsl_block b{.size = m_mu_block.size, .data = x};
-        gsl_vector result{.size = m_mu_block.size,
-                          .stride = 1,
-                          .data = x,
-                          .block = &b,
-                          .owner = 0};
-        gsl_ran_multivariate_gaussian(m_rng.gsl(), &m_mu, m_L, &result);
+        return gsl_ran_poisson(m_rng.gsl(), m_mu);
     }
 
   private:
-    mnorm_rng(const mnorm_rng &) = delete;
-    mnorm_rng &operator=(const mnorm_rng &other) = delete;
-
-    gsl_matrix *m_L;
-    gsl_block m_mu_block;
-    gsl_vector m_mu;
+    double m_mu;
     rng m_rng;
 };
+
+template <typename T>
+inline auto poiss_rand(DenseBase<T> &x,
+                       typename T::Scalar mu,
+                       unsigned long seed = 0,
+                       rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+{
+    static_assert(TYPE_IS(typename T::Scalar, int) ||
+                      TYPE_IS(typename T::Scalar, unsigned int),
+                  "scalar can only be int or unsigned int");
+
+    poiss_rng r(mu, type, seed);
+
+    typename T::Scalar *data = x.derived().data();
+    for (Index i = 0; i < x.size(); ++i) {
+        data[i] = r.next();
+    }
+
+    return x.derived();
+}
 
 ////////////////////////////////////////////////////////////
 // global variants
@@ -111,4 +96,4 @@ class mnorm_rng
 
 IEXP_NS_END
 
-#endif /* __IEXP_RAND_MUL_NORMAL__ */
+#endif /* __IEXP_RAND_POISSON__ */

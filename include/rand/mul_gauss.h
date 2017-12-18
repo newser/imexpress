@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_RAND_NORMAL_TAIL__
-#define __IEXP_RAND_NORMAL_TAIL__
+#ifndef __IEXP_RAND_MUL_GAUSS__
+#define __IEXP_RAND_MUL_GAUSS__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -27,6 +27,7 @@
 
 #include <rand/rng.h>
 
+#include <gsl/gsl_linalg.h>
 #include <gsl/gsl_randist.h>
 
 IEXP_NS_BEGIN
@@ -41,17 +42,36 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class normt_rng
+class mgauss_rng
 {
   public:
-    normt_rng(double a,
-              double sigma = 1.0,
-              rng_type type = DEFAULT_RNG,
-              unsigned long seed = 0)
-        : m_a(a)
-        , m_sigma(sigma)
+    mgauss_rng(size_t k,
+               double mu[],
+               double cov[],
+               rng_type type = DEFAULT_RNG,
+               unsigned long seed = 0)
+        : m_mu_block{.size = k, .data = mu}
+        , m_mu{.size = k,
+               .stride = 1,
+               .data = mu,
+               .block = &m_mu_block,
+               .owner = 0}
         , m_rng(type, seed)
     {
+        m_L = gsl_matrix_alloc(k, k);
+        IEXP_NOT_NULLPTR(m_L);
+        for (size_t i = 0; i < k; ++i) {
+            for (size_t j = 0; j < k; ++j) {
+                gsl_matrix_set(m_L, i, j, cov[i * k + j]);
+            }
+        }
+
+        gsl_linalg_cholesky_decomp1(m_L);
+    }
+
+    ~mgauss_rng()
+    {
+        gsl_matrix_free(m_L);
     }
 
     void seed(unsigned long seed)
@@ -59,35 +79,26 @@ class normt_rng
         m_rng.seed(seed);
     }
 
-    double next()
+    void next(double x[])
     {
-        return gsl_ran_gaussian_tail(m_rng.gsl(), m_a, m_sigma);
+        gsl_block b{.size = m_mu_block.size, .data = x};
+        gsl_vector result{.size = m_mu_block.size,
+                          .stride = 1,
+                          .data = x,
+                          .block = &b,
+                          .owner = 0};
+        gsl_ran_multivariate_gaussian(m_rng.gsl(), &m_mu, m_L, &result);
     }
 
   private:
-    double m_a, m_sigma;
+    mgauss_rng(const mgauss_rng &) = delete;
+    mgauss_rng &operator=(const mgauss_rng &other) = delete;
+
+    gsl_matrix *m_L;
+    gsl_block m_mu_block;
+    gsl_vector m_mu;
     rng m_rng;
 };
-
-template <typename T>
-inline auto normt_rand(DenseBase<T> &x,
-                       typename T::Scalar a,
-                       typename T::Scalar sigma = 1.0,
-                       unsigned long seed = 0,
-                       rng_type type = DEFAULT_RNG) -> decltype(x.derived())
-{
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "scalar can only be double");
-
-    normt_rng r(a, sigma, type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
-    }
-
-    return x.derived();
-}
 
 ////////////////////////////////////////////////////////////
 // global variants
@@ -100,4 +111,4 @@ inline auto normt_rand(DenseBase<T> &x,
 
 IEXP_NS_END
 
-#endif /* __IEXP_RAND_NORMAL_TAIL__ */
+#endif /* __IEXP_RAND_MUL_GAUSS__ */
