@@ -15,6 +15,7 @@
 #include <rand/gamma.h>
 #include <rand/gauss.h>
 #include <rand/gauss_tail.h>
+#include <rand/geometric.h>
 #include <rand/gumbel1.h>
 #include <rand/gumbel2.h>
 #include <rand/landau.h>
@@ -28,6 +29,7 @@
 #include <rand/mul_nomial.h>
 #include <rand/neg_binomial.h>
 #include <rand/pareto.h>
+#include <rand/pascal.h>
 #include <rand/poisson.h>
 #include <rand/qrand.h>
 #include <rand/qrng.h>
@@ -1201,7 +1203,7 @@ TEST_CASE("test_multinomial")
         r.next(result.data() + i * 2);
     }
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
     VectorXd v1 = result.row(0).cast<double>();
     VectorXd v2 = result.row(1).cast<double>();
 
@@ -1214,5 +1216,73 @@ TEST_CASE("test_multinomial")
     gr.Axis();
     gr.Plot(x, y, "+");
     gr.WriteFrame("multinomial.png");
+#endif
+}
+
+TEST_CASE("test_pascal_rand")
+{
+    iexp::VectorXi v(10), v2(10);
+
+    iexp::VectorXi &vr = rand::pascal_rand(v, 0.5, 9);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::pascal_rand(v, 0.5, 9) + rand::pascal_rand(v, 0.5, 9);
+
+    iexp::MatrixXi w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::pascal_rand(w, 0.5, 9);
+    w2 = rand::pascal_rand(w, 0.5, 9) + rand::pascal_rand(w, 0.5, 9) +
+         rand::pascal_rand(w, 0.5, 9);
+
+    iexp::MatrixXi &wr = rand::pascal_rand(w, 0.5, 9);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXi vi(100);
+    rand::pascal_rand(vi, 0.5, 3);
+    VectorXd v1 = vi.cast<double>();
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, 0, 10);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("pascal_rand.png");
+#endif
+}
+
+TEST_CASE("test_geo_rand")
+{
+    iexp::VectorXi v(10), v2(10);
+
+    iexp::VectorXi &vr = rand::geo_rand(v, 0.5);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::geo_rand(v, 0.5) + rand::geo_rand(v, 0.5);
+
+    iexp::MatrixXi w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::geo_rand(w, 0.5);
+    w2 = rand::geo_rand(w, 0.5) + rand::geo_rand(w, 0.5) +
+         rand::geo_rand(w, 0.5);
+
+    iexp::MatrixXi &wr = rand::geo_rand(w, 0.5);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXi vi(100);
+    rand::geo_rand(vi, 0.5);
+    VectorXd v1 = vi.cast<double>();
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, 0, 5);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("geo_rand.png");
 #endif
 }
