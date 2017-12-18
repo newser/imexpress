@@ -44,7 +44,7 @@ namespace rand {
 class rayl_rng
 {
   public:
-    rayl_rng(double sigma, rng_type type = MT19937, unsigned long seed = 0)
+    rayl_rng(double sigma, rng_type type = DEFAULT_RNG, unsigned long seed = 0)
         : m_sigma(sigma)
         , m_rng(type, seed)
     {

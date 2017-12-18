@@ -46,7 +46,7 @@ class raylt_rng
   public:
     raylt_rng(double a,
               double sigma,
-              rng_type type = MT19937,
+              rng_type type = DEFAULT_RNG,
               unsigned long seed = 0)
         : m_a(a)
         , m_sigma(sigma)

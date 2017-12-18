@@ -46,7 +46,7 @@ class flat_rng
   public:
     flat_rng(double a,
              double b,
-             rng_type type = MT19937,
+             rng_type type = DEFAULT_RNG,
              unsigned long seed = 0)
         : m_a(a)
         , m_b(b)

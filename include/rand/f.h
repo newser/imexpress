@@ -46,7 +46,7 @@ class f_rng
   public:
     f_rng(double nu1,
           double nu2,
-          rng_type type = MT19937,
+          rng_type type = DEFAULT_RNG,
           unsigned long seed = 0)
         : m_nu1(nu1)
         , m_nu2(nu2)

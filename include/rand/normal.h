@@ -45,7 +45,7 @@ class norm_rng
 {
   public:
     norm_rng(double sigma = 1.0,
-             rng_type type = MT19937,
+             rng_type type = DEFAULT_RNG,
              unsigned long seed = 0)
         : m_sigma(sigma)
         , m_rng(type, seed)

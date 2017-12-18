@@ -35,6 +35,8 @@ namespace rand {
 // macro definition
 ////////////////////////////////////////////////////////////
 
+#define DEFAULT_RNG MT19937
+
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
@@ -110,7 +112,7 @@ enum rng_type
 class rng
 {
   public:
-    rng(rng_type type = MT19937, unsigned long seed = 0);
+    rng(rng_type type = DEFAULT_RNG, unsigned long seed = 0);
 
     ~rng()
     {

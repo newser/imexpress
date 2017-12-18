@@ -44,7 +44,7 @@ namespace rand {
 class cauchy_rng
 {
   public:
-    cauchy_rng(double a, rng_type type = MT19937, unsigned long seed = 0)
+    cauchy_rng(double a, rng_type type = DEFAULT_RNG, unsigned long seed = 0)
         : m_a(a)
         , m_rng(type, seed)
     {

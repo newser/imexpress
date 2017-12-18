@@ -44,7 +44,7 @@ namespace rand {
 class t_rng
 {
   public:
-    t_rng(double nu, rng_type type = MT19937, unsigned long seed = 0)
+    t_rng(double nu, rng_type type = DEFAULT_RNG, unsigned long seed = 0)
         : m_nu(nu)
         , m_rng(type, seed)
     {

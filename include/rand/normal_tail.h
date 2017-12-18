@@ -46,7 +46,7 @@ class normt_rng
   public:
     normt_rng(double a,
               double sigma = 1.0,
-              rng_type type = MT19937,
+              rng_type type = DEFAULT_RNG,
               unsigned long seed = 0)
         : m_a(a)
         , m_sigma(sigma)

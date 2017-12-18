@@ -47,7 +47,7 @@ class levysk_rng
     levysk_rng(double c,
                double alpha,
                double beta,
-               rng_type type = MT19937,
+               rng_type type = DEFAULT_RNG,
                unsigned long seed = 0)
         : m_c(c)
         , m_alpha(alpha)

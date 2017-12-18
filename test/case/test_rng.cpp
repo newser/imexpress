@@ -16,9 +16,11 @@
 #include <rand/levy.h>
 #include <rand/levy_skew.h>
 #include <rand/lgnorm.h>
+#include <rand/logistic.h>
 #include <rand/mul_normal.h>
 #include <rand/normal.h>
 #include <rand/normal_tail.h>
+#include <rand/pareto.h>
 #include <rand/qrand.h>
 #include <rand/qrng.h>
 #include <rand/rand.h>
@@ -802,5 +804,71 @@ TEST_CASE("test_t_rand")
     gr.Axis();
     gr.Plot(y, "+");
     gr.WriteFrame("t_rand.png");
+#endif
+}
+
+TEST_CASE("test_logistic_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::logistic_rand(v, 1.0);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::logistic_rand(v, 2.0) + rand::logistic_rand(v, 3.0);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::logistic_rand(w, 2.0);
+    w2 = rand::logistic_rand(w, 3.3) + rand::logistic_rand(w, 4.4) +
+         rand::logistic_rand(w, 5.5);
+
+    iexp::MatrixXd &wr = rand::logistic_rand(w, 99);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef It_MGL2
+    VectorXd v1(100);
+    rand::logistic_rand(v1, 1);
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, -4, 4);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("logistic_rand.png");
+#endif
+}
+
+TEST_CASE("test_pareto_rand")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    iexp::VectorXd &vr = rand::pareto_rand(v, 1.0, 2.0);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::pareto_rand(v, 2.0, 100) + rand::pareto_rand(v, 3.0, 4.0);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::pareto_rand(w, 2.0, 3.3);
+    w2 = rand::pareto_rand(w, 3.3, 3.3) + rand::pareto_rand(w, 4.4, 3.3) +
+         rand::pareto_rand(w, 5.5, 3.3);
+
+    iexp::MatrixXd &wr = rand::pareto_rand(w, 99, 3.3);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXd v1(100);
+    rand::pareto_rand(v1, 3.0, 2.0);
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, 0, 5);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("pareto_rand.png");
 #endif
 }

@@ -47,7 +47,7 @@ class bnorm_rng
     bnorm_rng(double sigma_x,
               double sigma_y,
               double rho,
-              rng_type type = MT19937,
+              rng_type type = DEFAULT_RNG,
               unsigned long seed = 0)
         : m_sigma_x(sigma_x)
         , m_sigma_y(sigma_y)

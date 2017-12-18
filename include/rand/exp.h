@@ -44,7 +44,7 @@ namespace rand {
 class exp_rng
 {
   public:
-    exp_rng(double mu, rng_type type = MT19937, unsigned long seed = 0)
+    exp_rng(double mu, rng_type type = DEFAULT_RNG, unsigned long seed = 0)
         : m_mu(mu)
         , m_rng(type, seed)
     {

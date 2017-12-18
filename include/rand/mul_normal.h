@@ -48,7 +48,7 @@ class mnorm_rng
     mnorm_rng(size_t k,
               double mu[],
               double cov[],
-              rng_type type = MT19937,
+              rng_type type = DEFAULT_RNG,
               unsigned long seed = 0)
         : m_mu_block{.size = k, .data = mu}
         , m_mu{.size = k,

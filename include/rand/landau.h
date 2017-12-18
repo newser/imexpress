@@ -44,7 +44,7 @@ namespace rand {
 class landau_rng
 {
   public:
-    landau_rng(rng_type type = MT19937, unsigned long seed = 0)
+    landau_rng(rng_type type = DEFAULT_RNG, unsigned long seed = 0)
         : m_rng(type, seed)
     {
     }

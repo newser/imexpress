@@ -44,7 +44,7 @@ namespace rand {
 class chisq_rng
 {
   public:
-    chisq_rng(double nu, rng_type type = MT19937, unsigned long seed = 0)
+    chisq_rng(double nu, rng_type type = DEFAULT_RNG, unsigned long seed = 0)
         : m_nu(nu)
         , m_rng(type, seed)
     {

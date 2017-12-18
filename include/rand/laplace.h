@@ -44,7 +44,7 @@ namespace rand {
 class laplace_rng
 {
   public:
-    laplace_rng(double a, rng_type type = MT19937, unsigned long seed = 0)
+    laplace_rng(double a, rng_type type = DEFAULT_RNG, unsigned long seed = 0)
         : m_a(a)
         , m_rng(type, seed)
     {
