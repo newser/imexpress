@@ -26,6 +26,7 @@
 #include <rand/rand.h>
 #include <rand/rayleigh.h>
 #include <rand/rayleigh_tail.h>
+#include <rand/spherical.h>
 #include <rand/t.h>
 #include <test_util.h>
 
@@ -870,5 +871,40 @@ TEST_CASE("test_pareto_rand")
     gr.Axis();
     gr.Plot(y, "+");
     gr.WriteFrame("pareto_rand.png");
+#endif
+}
+
+TEST_CASE("test_sph2_rand")
+{
+    iexp::VectorXcd v(10), v2(10);
+
+    iexp::VectorXcd &vr = rand::sph2_rand(v);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::sph2_rand(v) + rand::sph2_rand(v);
+
+    iexp::MatrixXcd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::sph2_rand<true>(w);
+    w2 = rand::sph2_rand(w) + rand::sph2_rand(w) + rand::sph2_rand(w);
+
+    iexp::MatrixXcd &wr = rand::sph2_rand(w);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXcd v1(100);
+    rand::sph2_rand(v1);
+    VectorXd r = v1.real();
+    VectorXd i = v1.imag();
+    
+    mglData x(100), y(100);
+    x.Link(r.data(), r.size());
+    y.Link(i.data(), i.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(-1.5, 1.5, -1.5, 1.5);
+    gr.Axis();
+    gr.Plot(x, y, "+");
+    gr.WriteFrame("sph2_rand.png");
 #endif
 }
