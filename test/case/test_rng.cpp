@@ -6,6 +6,7 @@
 #include <rand/binomial.h>
 #include <rand/cauchy.h>
 #include <rand/chisq.h>
+#include <rand/choose.h>
 #include <rand/dirichlet.h>
 #include <rand/discrete.h>
 #include <rand/exp.h>
@@ -38,6 +39,8 @@
 #include <rand/rand.h>
 #include <rand/rayleigh.h>
 #include <rand/rayleigh_tail.h>
+#include <rand/sample.h>
+#include <rand/shuffle.h>
 #include <rand/spherical.h>
 #include <rand/t.h>
 #include <rand/weibull.h>
@@ -1355,4 +1358,47 @@ TEST_CASE("test_log_rand")
     gr.Plot(y, "+");
     gr.WriteFrame("log_rand.png");
 #endif
+}
+
+TEST_CASE("test_shuffle")
+{
+    iexp::VectorXi v(10), v2(10);
+
+    v = VectorXi::LinSpaced(10, 0, 9);
+    iexp::VectorXi &vr = rand::shuffle(v);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::shuffle(v, 0.7) + rand::shuffle(v);
+
+    iexp::MatrixXd w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::shuffle(w);
+    w2 = rand::shuffle(w) + rand::shuffle(w) + rand::shuffle(w);
+
+    iexp::MatrixXd &wr = rand::shuffle(w);
+    REQUIRE(&wr == &w);
+}
+
+TEST_CASE("test_choose")
+{
+    iexp::VectorXi v(10), v2(10);
+
+    v = VectorXi::LinSpaced(10, 0, 9);
+    iexp::VectorXi vr = rand::choose(v.array(), 5).matrix();
+    REQUIRE(vr.size() == 5);
+
+    v2 = rand::choose(rand::shuffle(v).array() + rand::shuffle(v).array(), 7);
+    REQUIRE(v2.size() == 7);
+}
+
+TEST_CASE("test_sample")
+{
+    iexp::VectorXd v(10), v2(10);
+
+    v = VectorXd::LinSpaced(10, 0, 9);
+    iexp::VectorXd vr = rand::sample(v.array(), 5).matrix();
+    REQUIRE(vr.size() == 5);
+
+    v2 = rand::sample(rand::shuffle(v).array() + rand::shuffle(v).array(), 7);
+    REQUIRE(v2.size() == 7);
 }
