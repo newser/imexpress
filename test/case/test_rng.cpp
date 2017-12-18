@@ -6,6 +6,7 @@
 #include <rand/cauchy.h>
 #include <rand/chisq.h>
 #include <rand/dirichlet.h>
+#include <rand/discrete.h>
 #include <rand/exp.h>
 #include <rand/expow.h>
 #include <rand/f.h>
@@ -1046,5 +1047,40 @@ TEST_CASE("test_drch_rand")
     gr.Axis();
     gr.Plot(x, y, "+");
     gr.WriteFrame("drch_rand.png");
+#endif
+}
+
+TEST_CASE("test_discrete_rand")
+{
+    const double p[4] = {0.1, 0.2, 0.3, 0.4};
+    iexp::VectorXi v(10), v2(10);
+
+    iexp::VectorXi &vr = rand::discrete_rand(v, 4, p);
+    REQUIRE(&vr == &v);
+
+    v2 = rand::discrete_rand(v, 4, p) + rand::discrete_rand(v, 4, p);
+
+    iexp::MatrixXi w(3, 4), w2(3, 4);
+    w.fill(9.9999);
+    w2 = rand::discrete_rand(w, 4, p);
+    w2 = rand::discrete_rand(w, 4, p) + rand::discrete_rand(w, 4, p) +
+         rand::discrete_rand(w, 4, p);
+
+    iexp::MatrixXi &wr = rand::discrete_rand(w, 4, p);
+    REQUIRE(&wr == &w);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXi vi(100);
+    rand::discrete_rand(vi, 4, p);
+    VectorXd v1 = vi.cast<double>();
+    
+    mglData y(100);
+    y.Link(v1.data(), v1.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 100, 0, 5);
+    gr.Axis();
+    gr.Plot(y, "+");
+    gr.WriteFrame("discrete_rand.png");
 #endif
 }

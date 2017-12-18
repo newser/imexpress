@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_RAND_LOGISTIC__
-#define __IEXP_RAND_LOGISTIC__
+#ifndef __IEXP_RAND_DISCRETE__
+#define __IEXP_RAND_DISCRETE__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -41,13 +41,23 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class lgst_rng
+class discrete_rng
 {
   public:
-    lgst_rng(double a, rng_type type = DEFAULT_RNG, unsigned long seed = 0)
-        : m_a(a)
+    discrete_rng(const size_t K,
+                 const double P[],
+                 rng_type type = DEFAULT_RNG,
+                 unsigned long seed = 0)
+        : m_g(nullptr)
         , m_rng(type, seed)
     {
+        m_g = gsl_ran_discrete_preproc(K, P);
+        IEXP_NOT_NULLPTR(m_g);
+    }
+
+    ~discrete_rng()
+    {
+        gsl_ran_discrete_free(m_g);
     }
 
     void seed(unsigned long seed)
@@ -55,26 +65,31 @@ class lgst_rng
         m_rng.seed(seed);
     }
 
-    double next()
+    size_t next()
     {
-        return gsl_ran_logistic(m_rng.gsl(), m_a);
+        return gsl_ran_discrete(m_rng.gsl(), m_g);
     }
 
   private:
-    double m_a;
+    discrete_rng(const discrete_rng &) = delete;
+    discrete_rng &operator=(const discrete_rng &other) = delete;
+
+    gsl_ran_discrete_t *m_g;
     rng m_rng;
 };
 
 template <typename T>
-inline auto lgst_rand(DenseBase<T> &x,
-                      typename T::Scalar a,
-                      unsigned long seed = 0,
-                      rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+inline auto discrete_rand(DenseBase<T> &x,
+                          const size_t K,
+                          const double P[],
+                          unsigned long seed = 0,
+                          rng_type type = DEFAULT_RNG) -> decltype(x.derived())
 {
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "scalar can only be double");
+    static_assert(!TYPE_IS(typename T::Scalar, double) &&
+                      !TYPE_IS(typename T::Scalar, float),
+                  "scalar can not be float");
 
-    lgst_rng r(a, type, seed);
+    discrete_rng r(K, P, type, seed);
 
     typename T::Scalar *data = x.derived().data();
     for (Index i = 0; i < x.size(); ++i) {
@@ -95,4 +110,4 @@ inline auto lgst_rand(DenseBase<T> &x,
 
 IEXP_NS_END
 
-#endif /* __IEXP_RAND_LOGISTIC__ */
+#endif /* __IEXP_RAND_DISCRETE__ */

@@ -82,7 +82,7 @@ inline auto bnorm_rand(DenseBase<T> &x,
                        typename SCALAR(typename T::Scalar) sigma_y,
                        typename SCALAR(typename T::Scalar) rho,
                        unsigned long seed = 0,
-                       rng_type type = MT19937) -> decltype(x.derived())
+                       rng_type type = DEFAULT_RNG) -> decltype(x.derived())
 {
     static_assert(is_complex<typename T::Scalar>::value,
                   "scalar can only be complex");

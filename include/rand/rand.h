@@ -83,7 +83,7 @@ DEFINE_RAND_IMPL(char)
 template <typename T>
 inline auto rand(DenseBase<T> &x,
                  unsigned long seed = 0,
-                 rng_type type = MT19937) -> decltype(x.derived())
+                 rng_type type = DEFAULT_RNG) -> decltype(x.derived())
 {
     rng r(type, seed);
 

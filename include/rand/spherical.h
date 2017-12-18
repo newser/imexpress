@@ -79,7 +79,7 @@ class sph2_rng
 template <bool trig = false, typename T = void>
 inline auto sph2_rand(DenseBase<T> &x,
                       unsigned long seed = 0,
-                      rng_type type = MT19937) -> decltype(x.derived())
+                      rng_type type = DEFAULT_RNG) -> decltype(x.derived())
 {
     static_assert(is_complex<typename T::Scalar>::value,
                   "scalar can only be complex");

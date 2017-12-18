@@ -44,7 +44,7 @@ namespace rand {
 class drch_rng
 {
   public:
-    drch_rng(size_t K,
+    drch_rng(const size_t K,
              const double alpha[],
              rng_type type = DEFAULT_RNG,
              unsigned long seed = 0)
@@ -72,6 +72,9 @@ class drch_rng
     }
 
   private:
+    drch_rng(const drch_rng &) = delete;
+    drch_rng &operator=(const drch_rng &other) = delete;
+
     size_t m_K;
     double *m_alpha;
     rng m_rng;
@@ -82,7 +85,7 @@ inline auto drch_rand(DenseBase<T> &x,
                       const size_t K,
                       typename SCALAR(typename T::Scalar) * alpha,
                       unsigned long seed = 0,
-                      rng_type type = MT19937) -> decltype(x.derived())
+                      rng_type type = DEFAULT_RNG) -> decltype(x.derived())
 {
     static_assert(is_complex<typename T::Scalar>::value,
                   "scalar can only be complex");

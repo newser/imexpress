@@ -69,7 +69,7 @@ template <typename T>
 inline auto chisq_rand(DenseBase<T> &x,
                        typename T::Scalar nu,
                        unsigned long seed = 0,
-                       rng_type type = MT19937) -> decltype(x.derived())
+                       rng_type type = DEFAULT_RNG) -> decltype(x.derived())
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");
