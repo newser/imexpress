@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_RAND_LOGISTIC__
-#define __IEXP_RAND_LOGISTIC__
+#ifndef __IEXP_RAND_GUMBEL1__
+#define __IEXP_RAND_GUMBEL1__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -41,11 +41,15 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class lgst_rng
+class gbl1_rng
 {
   public:
-    lgst_rng(double a, rng_type type = DEFAULT_RNG, unsigned long seed = 0)
+    gbl1_rng(double a,
+             double b,
+             rng_type type = DEFAULT_RNG,
+             unsigned long seed = 0)
         : m_a(a)
+        , m_b(b)
         , m_rng(type, seed)
     {
     }
@@ -57,24 +61,25 @@ class lgst_rng
 
     double next()
     {
-        return gsl_ran_logistic(m_rng.gsl(), m_a);
+        return gsl_ran_gumbel1(m_rng.gsl(), m_a, m_b);
     }
 
   private:
-    double m_a;
+    double m_a, m_b;
     rng m_rng;
 };
 
 template <typename T>
-inline auto lgst_rand(DenseBase<T> &x,
+inline auto gbl1_rand(DenseBase<T> &x,
                       typename T::Scalar a,
+                      typename T::Scalar b,
                       unsigned long seed = 0,
                       rng_type type = MT19937) -> decltype(x.derived())
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");
 
-    lgst_rng r(a, type, seed);
+    gbl1_rng r(a, b, type, seed);
 
     typename T::Scalar *data = x.derived().data();
     for (Index i = 0; i < x.size(); ++i) {
@@ -95,4 +100,4 @@ inline auto lgst_rand(DenseBase<T> &x,
 
 IEXP_NS_END
 
-#endif /* __IEXP_RAND_LOGISTIC__ */
+#endif /* __IEXP_RAND_GUMBEL1__ */
