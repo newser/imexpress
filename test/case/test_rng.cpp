@@ -155,34 +155,34 @@ TEST_CASE("test_normal_rand")
 {
     iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::norm_rand(v);
+    iexp::VectorXd &vr = rand::gauss_rand(v);
     REQUIRE(&vr == &v);
 
-    v2 =
-        rand::norm_rand(v, 2.0) + rand::norm_rand(v, 3.0, 1234, rand::BOROSH13);
+    v2 = rand::gauss_rand(v, 2.0) +
+         rand::gauss_rand(v, 3.0, 1234, rand::BOROSH13);
 
     iexp::MatrixXd w(3, 4), w2(3, 4);
     w.fill(9.9999);
-    w2 = rand::norm_rand(w);
-    w2 = rand::norm_rand(w) + rand::norm_rand(w, 2.0) +
-         rand::norm_rand(w, 3.0, 1234, rand::BOROSH13);
+    w2 = rand::gauss_rand(w);
+    w2 = rand::gauss_rand(w) + rand::gauss_rand(w, 2.0) +
+         rand::gauss_rand(w, 3.0, 1234, rand::BOROSH13);
 
-    iexp::MatrixXd &wr = rand::norm_rand(w);
+    iexp::MatrixXd &wr = rand::gauss_rand(w);
     REQUIRE(&wr == &w);
 
     iexp::MatrixXd cw(3, 4), cw2(3, 4);
     cw.fill(9.9999);
-    cw2 = rand::norm_rand(cw, 2.0);
-    cw2 = rand::norm_rand(cw, 2.0) +
-          rand::norm_rand(cw, 3.0, 1234, rand::BOROSH13) +
-          rand::norm_rand(cw, 3.0, 1234, rand::BOROSH13);
+    cw2 = rand::gauss_rand(cw, 2.0);
+    cw2 = rand::gauss_rand(cw, 2.0) +
+          rand::gauss_rand(cw, 3.0, 1234, rand::BOROSH13) +
+          rand::gauss_rand(cw, 3.0, 1234, rand::BOROSH13);
 
-    iexp::MatrixXd &cwr = rand::norm_rand(cw, 3.0, 1234, rand::BOROSH13);
+    iexp::MatrixXd &cwr = rand::gauss_rand(cw, 3.0, 1234, rand::BOROSH13);
     REQUIRE(&cwr == &cw);
 
 #if 0 // #ifdef IEXP_MGL2
     iexp::VectorXd vv(100);
-    rand::norm_rand(vv);
+    rand::gauss_rand(vv);
     mglData y(100);
     y.Link(vv.data(), vv.size());
     mglGraph gr;

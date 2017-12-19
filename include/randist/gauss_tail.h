@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_RAND_GAUSS__
-#define __IEXP_RAND_GAUSS__
+#ifndef __IEXP_RANDIST_GAUSS_TAIL__
+#define __IEXP_RANDIST_GAUSS_TAIL__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -25,13 +25,12 @@
 
 #include <common/common.h>
 
-#include <rand/rng.h>
-
+#include <gsl/gsl_cdf.h>
 #include <gsl/gsl_randist.h>
 
 IEXP_NS_BEGIN
 
-namespace rand {
+namespace rdist {
 
 ////////////////////////////////////////////////////////////
 // macro definition
@@ -41,49 +40,67 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class gauss_rng
+class gausst
 {
   public:
-    gauss_rng(double sigma = 1.0,
-              rng_type type = DEFAULT_RNG,
-              unsigned long seed = 0)
-        : m_sigma(sigma)
-        , m_rng(type, seed)
+    gausst(const double a, const double sigma = 1.0)
+        : m_a(a)
+        , m_sigma(sigma)
     {
     }
 
-    void seed(unsigned long seed)
+    double pdf(const double x) const
     {
-        m_rng.seed(seed);
-    }
-
-    double next()
-    {
-        return gsl_ran_gaussian_ziggurat(m_rng.gsl(), m_sigma);
+        return gsl_ran_gaussian_tail_pdf(x, m_a, m_sigma);
     }
 
   private:
-    double m_sigma;
-    rng m_rng;
+    const double m_a, m_sigma;
 };
 
 template <typename T>
-inline auto gauss_rand(DenseBase<T> &x,
-                       typename T::Scalar sigma = 1.0,
-                       unsigned long seed = 0,
-                       rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+class gausst_pdf_functor
+{
+  public:
+    using ArrayType = Array<typename T::Scalar,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
+
+    gausst_pdf_functor(const T &x,
+                       const typename T::Scalar a,
+                       const typename T::Scalar sigma)
+        : m_x(x)
+        , m_gausst(a, sigma)
+    {
+    }
+
+    typename T::Scalar operator()(Index i, Index j) const
+    {
+        return m_gausst.pdf(m_x(i, j));
+    }
+
+  private:
+    const T &m_x;
+    gausst m_gausst;
+};
+
+template <typename T>
+inline CwiseNullaryOp<gausst_pdf_functor<T>,
+                      typename gausst_pdf_functor<T>::ArrayType>
+gausst_pdf(const ArrayBase<T> &x,
+           const typename T::Scalar a,
+           const typename T::Scalar sigma)
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");
 
-    gauss_rng r(sigma, type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
-    }
-
-    return x.derived();
+    using ArrayType = typename gausst_pdf_functor<T>::ArrayType;
+    return ArrayType::NullaryExpr(x.rows(),
+                                  x.cols(),
+                                  gausst_pdf_functor<T>(x.derived(), a, sigma));
 }
 
 ////////////////////////////////////////////////////////////
@@ -97,4 +114,4 @@ inline auto gauss_rand(DenseBase<T> &x,
 
 IEXP_NS_END
 
-#endif /* __IEXP_RAND_GAUSS__ */
+#endif /* __IEXP_RANDIST_GAUSS_TAIL__ */
