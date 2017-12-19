@@ -3,6 +3,7 @@
 #include <rand/mul_gauss.h>
 #include <randist/bi_gauss.h>
 #include <randist/bi_gauss.h>
+#include <randist/exp.h>
 #include <randist/gauss.h>
 #include <randist/gauss_tail.h>
 #include <randist/mul_gauss.h>
@@ -143,4 +144,32 @@ TEST_CASE("randist_mgauss")
     }
     Matrix2d rcov = rdist::mgauss_cov(rm.array());
     // cout << rcov << endl;
+}
+
+TEST_CASE("randist_exp")
+{
+    VectorXd v = VectorXd::LinSpaced(10, 0, 3);
+    VectorXd v2 = rdist::exp_pdf(v.array(), 2.0);
+
+    Matrix2Xd m = Matrix2Xd::Random(2, 10);
+    Matrix2Xd m2 = rdist::exp_pdf(m.array(), 2.0);
+
+    // test compile
+    v2 = rdist::exp_pdf(v.array(), 2.0) + rdist::exp_pdf(v.array(), 2.0);
+    m2 = rdist::exp_pdf(m.array() + m.array(), 2.0);
+
+#if 0 // #ifdef IEXP_MGL2
+    VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
+    VectorXd vv2 = rdist::exp_pdf(vv.array(), 1.0);
+    
+    mglData x(100), y(100);
+    x.Link(vv.data(), vv.size());
+    y.Link(vv2.data(), vv2.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(-5, 5, 0, 1);
+    gr.Axis();
+    gr.Plot(x, y, "+");
+    gr.WriteFrame("exp_pdf.png");
+#endif
 }
