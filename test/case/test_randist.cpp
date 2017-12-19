@@ -1,7 +1,11 @@
 #include <catch.hpp>
 #include <iostream>
+#include <rand/mul_gauss.h>
+#include <randist/bi_gauss.h>
+#include <randist/bi_gauss.h>
 #include <randist/gauss.h>
 #include <randist/gauss_tail.h>
+#include <randist/mul_gauss.h>
 #include <test_util.h>
 
 using namespace iexp;
@@ -62,4 +66,81 @@ TEST_CASE("randist_gausst")
     gr.Plot(x, y, "+");
     gr.WriteFrame("gausst_pdf.png");
 #endif
+}
+
+TEST_CASE("randist_bgauss")
+{
+    VectorXd vv = VectorXd::LinSpaced(10, -2, 2);
+    double z[100];
+
+    rdist::bgauss bg(1, 1, 0.9);
+    for (int i = 0; i < vv.size(); ++i) {
+        for (int j = 0; j < vv.size(); ++j) {
+            z[i * vv.size() + j] = bg.pdf(vv[i], vv[j]);
+        }
+    }
+
+#if 0 // #ifdef IEXP_MGL2
+    mglData zz(100);
+    zz.Create(10, 10);
+    for (int i = 0; i < 10; ++i) {
+        for (int j = 0; j < 10; ++j) {
+            zz.a[i * 10 + j] = bg.pdf(vv[i], vv[j]);
+        }
+    }
+
+    mglGraph gr;
+    //gr.SetOrigin(0, 0);
+    //gr.SetRanges(-2, 2, -2, 2, -2, 2);
+    gr.Light(true);
+    gr.Rotate(50, 60);
+    gr.Box();
+    gr.Surf(zz);
+    gr.WriteFrame("bgauss_pdf.png");
+#endif
+}
+
+TEST_CASE("randist_mgauss")
+{
+    double x[2] = {0};
+    double mu[2] = {1, 2};
+    double cov[4] = {4, 2, 2, 3};
+
+    rdist::mgauss mg(2, mu, cov);
+    double p = mg.pdf(x);
+    REQUIRE(__D_EQ9(p, 0.028294217120391));
+
+    p = mg.lnpdf(x);
+    REQUIRE(__D_EQ9(p, log(0.028294217120391)));
+
+    rand::mgauss_rng r(2, mu, cov);
+    double sample[10 * 2], e_mu[2], e_cov[4];
+    for (int i = 0; i < 10; ++i) {
+        r.next(&sample[i * 2]);
+    }
+    rdist::mgauss::mean(10, 2, sample, e_mu);
+    // cout << e_mu[0] << " " << e_mu[1] << endl;
+    rdist::mgauss::cov(10, 2, sample, e_cov);
+    // cout << e_cov[0] << " " << e_cov[1] << endl;
+    // cout << e_cov[2] << " " << e_cov[3] << endl;
+
+    MatrixXd m(2, 100);
+    for (int i = 0; i < m.cols(); ++i) {
+        double s[2];
+        r.next(s);
+        m(0, i) = s[0];
+        m(1, i) = s[1];
+    }
+    Vector2d v = rdist::mgauss_mean(m.array());
+    // cout << v << endl;
+
+    Matrix<double, 100, 2, RowMajor> rm;
+    for (int i = 0; i < rm.rows(); ++i) {
+        double s[2];
+        r.next(s);
+        rm(i, 0) = s[0];
+        rm(i, 1) = s[1];
+    }
+    Matrix2d rcov = rdist::mgauss_cov(rm.array());
+    // cout << rcov << endl;
 }

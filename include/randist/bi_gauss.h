@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_RAND_DIRICHLET__
-#define __IEXP_RAND_DIRICHLET__
+#ifndef __IEXP_RANDIST_BI_GAUSS__
+#define __IEXP_RANDIST_BI_GAUSS__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -25,13 +25,12 @@
 
 #include <common/common.h>
 
-#include <rand/rng.h>
-
+#include <gsl/gsl_cdf.h>
 #include <gsl/gsl_randist.h>
 
 IEXP_NS_BEGIN
 
-namespace rand {
+namespace rdist {
 
 ////////////////////////////////////////////////////////////
 // macro definition
@@ -41,57 +40,28 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class drch_rng
+class bgauss
 {
   public:
-    drch_rng(const size_t K,
-             const double alpha[],
-             rng_type type = DEFAULT_RNG,
-             unsigned long seed = 0)
-        : m_K(K)
-        , m_alpha(alpha)
-        , m_rng(type, seed)
+    bgauss(const double sigma_x, const double sigma_y, const double rho)
+        : m_sigma_x(sigma_x)
+        , m_sigma_y(sigma_y)
+        , m_rho(rho)
     {
     }
 
-    void seed(unsigned long seed)
+    double pdf(const double x, const double y) const
     {
-        m_rng.seed(seed);
-    }
-
-    void next(double theta[])
-    {
-        gsl_ran_dirichlet(m_rng.gsl(), m_K, m_alpha, theta);
+        return gsl_ran_bivariate_gaussian_pdf(x,
+                                              y,
+                                              m_sigma_x,
+                                              m_sigma_y,
+                                              m_rho);
     }
 
   private:
-    drch_rng(const drch_rng &) = delete;
-    drch_rng &operator=(const drch_rng &other) = delete;
-
-    size_t m_K;
-    const double *m_alpha;
-    rng m_rng;
+    const double m_sigma_x, m_sigma_y, m_rho;
 };
-
-template <typename T>
-inline auto drch_rand(DenseBase<T> &x,
-                      const size_t K,
-                      typename SCALAR(typename T::Scalar) * alpha,
-                      unsigned long seed = 0,
-                      rng_type type = DEFAULT_RNG) -> decltype(x.derived())
-{
-    static_assert(is_complex<typename T::Scalar>::value,
-                  "scalar can only be complex");
-
-    drch_rng r(K, alpha, type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        r.next((double *)&data[i]);
-    }
-
-    return x.derived();
-}
 
 ////////////////////////////////////////////////////////////
 // global variants
@@ -104,4 +74,4 @@ inline auto drch_rand(DenseBase<T> &x,
 
 IEXP_NS_END
 
-#endif /* __IEXP_RAND_DIRICHLET__ */
+#endif /* __IEXP_RANDIST_BI_GAUSS__ */

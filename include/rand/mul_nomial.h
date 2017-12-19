@@ -50,12 +50,10 @@ class mnom_rng
              rng_type type = DEFAULT_RNG,
              unsigned long seed = 0)
         : m_K(K)
-        , m_p(new double[m_K])
+        , m_p(p)
         , m_N(N)
         , m_rng(type, seed)
     {
-        IEXP_NOT_NULLPTR(m_p);
-        std::copy(&p[0], &p[K], m_p);
     }
 
     void seed(unsigned long seed)
@@ -70,7 +68,7 @@ class mnom_rng
 
   private:
     const size_t m_K;
-    double *m_p;
+    const double *m_p;
     unsigned int m_N;
     rng m_rng;
 };

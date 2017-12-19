@@ -46,6 +46,8 @@ IEXP_NS_BEGIN
 
 #define RETURN_NAN_OR_THROW(t) throw(t)
 
+#define RETURN_OR_THROW(t) throw(t)
+
 #define IS_VEC(v) (((v).rows() == 1) || ((v).cols() == 1))
 
 #define VEC_SAME_SIZE(v1, v2)                                                  \
