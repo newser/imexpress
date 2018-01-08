@@ -6,6 +6,7 @@
 #include <randist/bi_gauss.h>
 #include <randist/cauchy.h>
 #include <randist/chisq.h>
+#include <randist/discrete.h>
 #include <randist/exp.h>
 #include <randist/expow.h>
 #include <randist/f.h>
@@ -698,4 +699,20 @@ TEST_CASE("randist_gumbel2")
     gr.Plot(x, y, "+");
     gr.WriteFrame("gbl2_pdf.png");
 #endif
+}
+
+TEST_CASE("randist_discrete")
+{
+    const double p[4] = {0.1, 0.2, 0.3, 0.4};
+
+    VectorXi v = VectorXi::LinSpaced(10, 0, 3);
+    VectorXd v2 = rdist::discrete_pdf(v.array(), 4, p);
+
+    Matrix2Xi m = Matrix2Xi::Random(2, 10);
+    Matrix2Xd m2 = rdist::discrete_pdf(m.array(), 4, p);
+
+    // test compile
+    v2 = rdist::discrete_pdf(v.array(), 4, p) +
+         rdist::discrete_pdf(v.array(), 4, p);
+    m2 = rdist::discrete_pdf(m.array() + m.array(), 4, p);
 }
