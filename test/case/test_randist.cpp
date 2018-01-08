@@ -3,7 +3,6 @@
 #include <rand/mul_gauss.h>
 #include <randist/beta.h>
 #include <randist/bi_gauss.h>
-#include <randist/bi_gauss.h>
 #include <randist/cauchy.h>
 #include <randist/chisq.h>
 #include <randist/discrete.h>
@@ -22,6 +21,7 @@
 #include <randist/logistic.h>
 #include <randist/mul_gauss.h>
 #include <randist/pareto.h>
+#include <randist/poisson.h>
 #include <randist/rayleigh.h>
 #include <randist/rayleigh_tail.h>
 #include <randist/t.h>
@@ -715,4 +715,32 @@ TEST_CASE("randist_discrete")
     v2 = rdist::discrete_pdf(v.array(), 4, p) +
          rdist::discrete_pdf(v.array(), 4, p);
     m2 = rdist::discrete_pdf(m.array() + m.array(), 4, p);
+}
+
+TEST_CASE("randist_poisson")
+{
+    VectorXd v = VectorXd::LinSpaced(10, 0, 3);
+    VectorXd v2 = rdist::poiss_pdf(v.array(), 2);
+
+    Matrix2Xd m = Matrix2Xd::Random(2, 10);
+    Matrix2Xd m2 = rdist::poiss_pdf(m.array(), 2);
+
+    // test compile
+    v2 = rdist::poiss_pdf(v.array(), 2) + rdist::poiss_pdf(v.array(), 2);
+    m2 = rdist::poiss_pdf(m.array() + m.array(), 2);
+
+#if 0 // #ifdef Icauchy_MGL2
+    VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
+    VectorXd vv2 = rdist::poiss_pdf(vv.array(), 2.5);
+    
+    mglData x(100), y(100);
+    x.Link(vv.data(), vv.size());
+    y.Link(vv2.data(), vv2.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 10, 0, 0.5);
+    gr.Axis();
+    gr.Plot(x, y, "+");
+    gr.WriteFrame("poiss_pdf.png");
+#endif
 }
