@@ -3,6 +3,7 @@
 #include <rand/mul_gauss.h>
 #include <randist/beta.h>
 #include <randist/bi_gauss.h>
+#include <randist/binomial.h>
 #include <randist/cauchy.h>
 #include <randist/chisq.h>
 #include <randist/discrete.h>
@@ -20,6 +21,8 @@
 #include <randist/log.h>
 #include <randist/logistic.h>
 #include <randist/mul_gauss.h>
+#include <randist/mul_nomial.h>
+#include <randist/neg_binomial.h>
 #include <randist/pareto.h>
 #include <randist/poisson.h>
 #include <randist/rayleigh.h>
@@ -742,5 +745,73 @@ TEST_CASE("randist_poisson")
     gr.Axis();
     gr.Plot(x, y, "+");
     gr.WriteFrame("poiss_pdf.png");
+#endif
+}
+
+TEST_CASE("randist_binomial")
+{
+    VectorXi v = VectorXi::LinSpaced(10, 0, 3);
+    VectorXd v2 = rdist::bnom_pdf(v.array(), 0.5, 2);
+
+    Matrix2Xi m = Matrix2Xi::Random(2, 10);
+    Matrix2Xd m2 = rdist::bnom_pdf(m.array(), 0.5, 2);
+
+    // test compile
+    v2 =
+        rdist::bnom_pdf(v.array(), 0.5, 2) + rdist::bnom_pdf(v.array(), 0.5, 2);
+    m2 = rdist::bnom_pdf(m.array() + m.array(), 0.5, 2);
+
+#if 0 // #ifdef Icauchy_MGL2
+    VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
+    VectorXd vv2 = rdist::bnom_pdf(vv.cast<unsigned int>().array(), 0.5, 9);
+    
+    mglData x(100), y(100);
+    x.Link(vv.data(), vv.size());
+    y.Link(vv2.data(), vv2.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 10, 0, 0.5);
+    gr.Axis();
+    gr.Plot(x, y, "+");
+    gr.WriteFrame("bnom_pdf.png");
+#endif
+}
+
+TEST_CASE("randist_multinomial")
+{
+    const double p[] = {0.1, 0.2, 0.3, 0.4};
+    rdist::mnom mn(4, p);
+
+    const unsigned int x[4] = {1, 2, 3, 4};
+    double p1 = mn.pdf(x);
+    double p2 = mn.lnpdf(x);
+}
+
+TEST_CASE("randist_neg_binomial")
+{
+    VectorXi v = VectorXi::LinSpaced(10, 0, 3);
+    VectorXd v2 = rdist::nbnom_pdf(v.array(), 0.5, 2);
+
+    Matrix2Xi m = Matrix2Xi::Random(2, 10);
+    Matrix2Xd m2 = rdist::nbnom_pdf(m.array(), 0.5, 2);
+
+    // test compile
+    v2 = rdist::nbnom_pdf(v.array(), 0.5, 2) +
+         rdist::bnom_pdf(v.array(), 0.5, 2);
+    m2 = rdist::nbnom_pdf(m.array() + m.array(), 0.5, 2);
+
+#if 1 // #ifdef Icauchy_MGL2
+    VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
+    VectorXd vv2 = rdist::nbnom_pdf(vv.cast<unsigned int>().array(), 0.5, 3.5);
+
+    mglData x(100), y(100);
+    x.Link(vv.data(), vv.size());
+    y.Link(vv2.data(), vv2.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 10, 0, 0.5);
+    gr.Axis();
+    gr.Plot(x, y, "+");
+    gr.WriteFrame("nbnom_pdf.png");
 #endif
 }
