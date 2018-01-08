@@ -13,6 +13,8 @@
 #include <randist/gamma.h>
 #include <randist/gauss.h>
 #include <randist/gauss_tail.h>
+#include <randist/gumbel1.h>
+#include <randist/gumbel2.h>
 #include <randist/landau.h>
 #include <randist/laplace.h>
 #include <randist/log.h>
@@ -22,6 +24,7 @@
 #include <randist/rayleigh.h>
 #include <randist/rayleigh_tail.h>
 #include <randist/t.h>
+#include <randist/weibull.h>
 #include <test_util.h>
 
 using namespace iexp;
@@ -610,5 +613,89 @@ TEST_CASE("randist_pareto")
     gr.Axis();
     gr.Plot(x, y, "+");
     gr.WriteFrame("pareto_pdf.png");
+#endif
+}
+
+TEST_CASE("randist_weibull")
+{
+    VectorXd v = VectorXd::LinSpaced(10, 0, 3);
+    VectorXd v2 = rdist::wbl_pdf(v.array(), 2, 3);
+
+    Matrix2Xd m = Matrix2Xd::Random(2, 10);
+    Matrix2Xd m2 = rdist::wbl_pdf(m.array(), 2, 3);
+
+    // test compile
+    v2 = rdist::wbl_pdf(v.array(), 2, 3) + rdist::wbl_pdf(v.array(), 2, 3);
+    m2 = rdist::wbl_pdf(m.array() + m.array(), 2, 3);
+
+#if 0 // #ifdef Icauchy_MGL2
+    VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
+    VectorXd vv2 = rdist::wbl_pdf(vv.array(), 1, 2);
+    
+    mglData x(100), y(100);
+    x.Link(vv.data(), vv.size());
+    y.Link(vv2.data(), vv2.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 5, 0, 1);
+    gr.Axis();
+    gr.Plot(x, y, "+");
+    gr.WriteFrame("wbl_pdf.png");
+#endif
+}
+
+TEST_CASE("randist_gumbel1")
+{
+    VectorXd v = VectorXd::LinSpaced(10, 0, 3);
+    VectorXd v2 = rdist::gbl1_pdf(v.array(), 2, 3);
+
+    Matrix2Xd m = Matrix2Xd::Random(2, 10);
+    Matrix2Xd m2 = rdist::gbl1_pdf(m.array(), 2, 3);
+
+    // test compile
+    v2 = rdist::gbl1_pdf(v.array(), 2, 3) + rdist::gbl1_pdf(v.array(), 2, 3);
+    m2 = rdist::gbl1_pdf(m.array() + m.array(), 2, 3);
+
+#if 0 // #ifdef Icauchy_MGL2
+    VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
+    VectorXd vv2 = rdist::gbl1_pdf(vv.array(), 1, 1);
+    
+    mglData x(100), y(100);
+    x.Link(vv.data(), vv.size());
+    y.Link(vv2.data(), vv2.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(-5, 5, 0, 1);
+    gr.Axis();
+    gr.Plot(x, y, "+");
+    gr.WriteFrame("gbl1_pdf.png");
+#endif
+}
+
+TEST_CASE("randist_gumbel2")
+{
+    VectorXd v = VectorXd::LinSpaced(10, 0, 3);
+    VectorXd v2 = rdist::gbl2_pdf(v.array(), 2, 3);
+
+    Matrix2Xd m = Matrix2Xd::Random(2, 10);
+    Matrix2Xd m2 = rdist::gbl2_pdf(m.array(), 2, 3);
+
+    // test compile
+    v2 = rdist::gbl2_pdf(v.array(), 2, 3) + rdist::gbl2_pdf(v.array(), 2, 3);
+    m2 = rdist::gbl2_pdf(m.array() + m.array(), 2, 3);
+
+#if 0 // #ifdef Icauchy_MGL2
+    VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
+    VectorXd vv2 = rdist::gbl2_pdf(vv.array(), 1, 1);
+
+    mglData x(100), y(100);
+    x.Link(vv.data(), vv.size());
+    y.Link(vv2.data(), vv2.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 5, 0, 1);
+    gr.Axis();
+    gr.Plot(x, y, "+");
+    gr.WriteFrame("gbl2_pdf.png");
 #endif
 }
