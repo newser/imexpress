@@ -63,7 +63,7 @@ class fft_functor
         , m_result(m_out_size)
     {
         typename type_eval<T>::type m_x(x.eval());
-        fft_impl(m_in_size, m_x.data(), m_result.data());
+        fft_impl((int)m_in_size, m_x.data(), m_result.data());
     }
 
     const Scalar operator()(Index i) const

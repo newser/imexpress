@@ -70,7 +70,7 @@ class fft2_functor
         static_assert(T::Flags & RowMajorBit, "must be row major matrix");
 
         typename type_eval<T>::type m_x(x.eval());
-        fft2_impl(x.rows(), m_in_n1, m_x.data(), m_result.data());
+        fft2_impl((int)x.rows(), (int)m_in_n1, m_x.data(), m_result.data());
     }
 
     const Scalar operator()(Index i, Index j) const

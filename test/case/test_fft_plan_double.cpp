@@ -17,7 +17,7 @@ TEST_CASE("fft_plan_double_1d")
     i << 0, complex<double>(1, 1), complex<double>(2, 2), complex<double>(3, 3),
         complex<double>(4, 4), complex<double>(5, 5), complex<double>(6, 6),
         complex<double>(7, 7);
-    p.fwd(i.size(), i.data(), o.data());
+    p.fwd((int)(int)i.size(), i.data(), o.data());
     REQUIRE(__F_EQ_IN(o[0].real(), 28, 0.0001));
     REQUIRE(__F_EQ_IN(o[0].imag(), 28, 0.0001));
     REQUIRE(__F_EQ_IN(o[1].real(), -13.6569, 0.0001));
@@ -26,12 +26,12 @@ TEST_CASE("fft_plan_double_1d")
     REQUIRE(__F_EQ_IN(o[7].imag(), -13.6569, 0.0001));
 
     // reuse
-    p.fwd(i.size(), i.data(), o.data());
+    p.fwd((int)(int)i.size(), i.data(), o.data());
     REQUIRE(__F_EQ_IN(o[7].real(), 5.65685, 0.00001));
     REQUIRE(__F_EQ_IN(o[7].imag(), -13.6569, 0.0001));
 
     // c2c inv
-    q.inv(i.size(), o.data(), o2.data());
+    q.inv((int)(int)i.size(), o.data(), o2.data());
     REQUIRE(__F_EQ_IN(o2[0].real(), 0 * 8, 0.0001));
     REQUIRE(__F_EQ_IN(o2[0].imag(), 0 * 8, 0.0001));
     REQUIRE(__F_EQ_IN(o2[1].real(), 1 * 8, 0.0001));
@@ -39,7 +39,7 @@ TEST_CASE("fft_plan_double_1d")
     REQUIRE(__F_EQ_IN(o2[7].real(), 7 * 8, 0.00001));
     REQUIRE(__F_EQ_IN(o2[7].imag(), 7 * 8, 0.0001));
 
-    q.inv(i.size(), o.data(), o2.data());
+    q.inv((int)(int)i.size(), o.data(), o2.data());
     REQUIRE(__F_EQ_IN(o2[7].real(), 7 * 8, 0.00001));
     REQUIRE(__F_EQ_IN(o2[7].imag(), 7 * 8, 0.0001));
 
@@ -48,7 +48,7 @@ TEST_CASE("fft_plan_double_1d")
     VectorXd i_r(8), o_r2(8);
 
     i_r << 0, 1, 2, 3, 4, 5, 6, 7;
-    p_r.fwd(i_r.size(), i_r.data(), o.data());
+    p_r.fwd((int)i_r.size(), i_r.data(), o.data());
     REQUIRE(__F_EQ_IN(o[0].real(), 28, 0.0001));
     REQUIRE(__F_EQ_IN(o[0].imag(), 0, 0.0001));
     REQUIRE(__F_EQ_IN(o[1].real(), -4, 0.0001));
@@ -56,17 +56,17 @@ TEST_CASE("fft_plan_double_1d")
     REQUIRE(__F_EQ_IN(o[4].real(), -4, 0.00001));
     REQUIRE(__F_EQ_IN(o[4].imag(), 0, 0.0001));
 
-    p_r.fwd(i_r.size(), i_r.data(), o.data());
+    p_r.fwd((int)(int)i_r.size(), i_r.data(), o.data());
     REQUIRE(__F_EQ_IN(o[4].real(), -4, 0.00001));
     REQUIRE(__F_EQ_IN(o[4].imag(), 0, 0.0001));
 
     // c2r inv
-    q_r.inv(o.size(), o.data(), o_r2.data());
+    q_r.inv((int)o.size(), o.data(), o_r2.data());
     REQUIRE(__F_EQ_IN(o_r2[0], 0 * 8, 0.0001));
     REQUIRE(__F_EQ_IN(o_r2[1], 1 * 8, 0.0001));
     REQUIRE(__F_EQ_IN(o_r2[7], 7 * 8, 0.00001));
 
-    q_r.inv(o.size(), o.data(), o_r2.data());
+    q_r.inv((int)o.size(), o.data(), o_r2.data());
     REQUIRE(__F_EQ_IN(o_r2[7], 7 * 8, 0.00001));
 
     // r2r fwd
@@ -74,7 +74,7 @@ TEST_CASE("fft_plan_double_1d")
     VectorXd i_rr(8), o_rr(8), o_rr2(8);
 
     i_rr << 0, 1, 2, 3, 4, 5, 6, 7;
-    p_rr.fwd<DCT_II>(i_rr.size(), i_rr.data(), o_rr.data());
+    p_rr.fwd<DCT_II>((int)i_rr.size(), i_rr.data(), o_rr.data());
     REQUIRE(__F_EQ_IN(o_rr[0], 56, 0.0001));
     REQUIRE(__F_EQ_IN(o_rr[1], -25.7693, 0.0001));
     REQUIRE(__F_EQ_IN(o_rr[7], -0.20281, 0.00001));
@@ -83,16 +83,16 @@ TEST_CASE("fft_plan_double_1d")
     // cout << o_rr[1] * std::sqrt(2.0/8)/2<< endl;
     // cout << o_rr[7] * std::sqrt(2.0/8)/2<< endl;
 
-    p_rr.fwd<DCT_II>(i_rr.size(), i_rr.data(), o_rr.data());
+    p_rr.fwd<DCT_II>((int)i_rr.size(), i_rr.data(), o_rr.data());
     REQUIRE(__F_EQ_IN(o_rr[7], -0.20281, 0.00001));
 
     // r2r inv
-    q_rr.inv<DCT_II>(o_rr.size(), o_rr.data(), o_rr2.data());
+    q_rr.inv<DCT_II>((int)o_rr.size(), o_rr.data(), o_rr2.data());
     REQUIRE(__F_EQ_IN(o_r2[0], 0 * 8, 0.0001));
     REQUIRE(__F_EQ_IN(o_r2[1], 1 * 8, 0.0001));
     REQUIRE(__F_EQ_IN(o_r2[7], 7 * 8, 0.00001));
 
-    q_rr.inv<DCT_II>(o_rr.size(), o_rr.data(), o_rr2.data());
+    q_rr.inv<DCT_II>((int)o_rr.size(), o_rr.data(), o_rr2.data());
     REQUIRE(__F_EQ_IN(o_r2[7], 7 * 8, 0.00001));
 }
 
@@ -200,8 +200,8 @@ TEST_CASE("fft_plan_cache_double_1d")
         complex<double>(4, 4), complex<double>(5, 5), complex<double>(6, 6),
         complex<double>(7, 7);
     fftw3::plan<double> &p =
-        fftw3::get_plan(i.size(), i.data(), o.data(), true);
-    p.fwd(i.size(), i.data(), o.data());
+        fftw3::get_plan((int)i.size(), i.data(), o.data(), true);
+    p.fwd((int)i.size(), i.data(), o.data());
     REQUIRE(__F_EQ_IN(o[0].real(), 28, 0.0001));
     REQUIRE(__F_EQ_IN(o[0].imag(), 28, 0.0001));
     REQUIRE(__F_EQ_IN(o[1].real(), -13.6569, 0.0001));
@@ -211,16 +211,16 @@ TEST_CASE("fft_plan_cache_double_1d")
 
     // reuse
     fftw3::plan<double> &p2 =
-        fftw3::get_plan(i.size(), i.data(), o.data(), true);
+        fftw3::get_plan((int)i.size(), i.data(), o.data(), true);
     REQUIRE(&p2 == &p);
-    p2.fwd(i.size(), i.data(), o.data());
+    p2.fwd((int)i.size(), i.data(), o.data());
     REQUIRE(__F_EQ_IN(o[7].real(), 5.65685, 0.00001));
     REQUIRE(__F_EQ_IN(o[7].imag(), -13.6569, 0.0001));
 
     // c2c inv
     fftw3::plan<double> &q =
-        fftw3::get_plan(i.size(), o.data(), o2.data(), false);
-    q.inv(i.size(), o.data(), o2.data());
+        fftw3::get_plan((int)i.size(), o.data(), o2.data(), false);
+    q.inv((int)i.size(), o.data(), o2.data());
     REQUIRE(__F_EQ_IN(o2[0].real(), 0 * 8, 0.0001));
     REQUIRE(__F_EQ_IN(o2[0].imag(), 0 * 8, 0.0001));
     REQUIRE(__F_EQ_IN(o2[1].real(), 1 * 8, 0.0001));
@@ -229,9 +229,9 @@ TEST_CASE("fft_plan_cache_double_1d")
     REQUIRE(__F_EQ_IN(o2[7].imag(), 7 * 8, 0.0001));
 
     fftw3::plan<double> &q2 =
-        fftw3::get_plan(i.size(), o.data(), o2.data(), false);
+        fftw3::get_plan((int)i.size(), o.data(), o2.data(), false);
     REQUIRE(&q2 == &q);
-    q2.inv(i.size(), o.data(), o2.data());
+    q2.inv((int)i.size(), o.data(), o2.data());
     REQUIRE(__F_EQ_IN(o2[7].real(), 7 * 8, 0.00001));
     REQUIRE(__F_EQ_IN(o2[7].imag(), 7 * 8, 0.0001));
 
@@ -240,8 +240,8 @@ TEST_CASE("fft_plan_cache_double_1d")
 
     i_r << 0, 1, 2, 3, 4, 5, 6, 7;
     fftw3::plan<double> &p_r =
-        fftw3::get_plan(i_r.size(), i_r.data(), o.data(), true);
-    p_r.fwd(i_r.size(), i_r.data(), o.data());
+        fftw3::get_plan((int)i_r.size(), i_r.data(), o.data(), true);
+    p_r.fwd((int)i_r.size(), i_r.data(), o.data());
     REQUIRE(__F_EQ_IN(o[0].real(), 28, 0.0001));
     REQUIRE(__F_EQ_IN(o[0].imag(), 0, 0.0001));
     REQUIRE(__F_EQ_IN(o[1].real(), -4, 0.0001));
@@ -250,24 +250,24 @@ TEST_CASE("fft_plan_cache_double_1d")
     REQUIRE(__F_EQ_IN(o[4].imag(), 0, 0.0001));
 
     fftw3::plan<double> &p_r2 =
-        fftw3::get_plan(i_r.size(), i_r.data(), o.data(), true);
+        fftw3::get_plan((int)i_r.size(), i_r.data(), o.data(), true);
     REQUIRE(&p_r2 == &p_r);
-    p_r2.fwd(i_r.size(), i_r.data(), o.data());
+    p_r2.fwd((int)i_r.size(), i_r.data(), o.data());
     REQUIRE(__F_EQ_IN(o[4].real(), -4, 0.00001));
     REQUIRE(__F_EQ_IN(o[4].imag(), 0, 0.0001));
 
     // c2r inv
     fftw3::plan<double> &q_r =
-        fftw3::get_plan(o.size(), o.data(), o_r2.data(), false);
-    q_r.inv(o.size(), o.data(), o_r2.data());
+        fftw3::get_plan((int)o.size(), o.data(), o_r2.data(), false);
+    q_r.inv((int)o.size(), o.data(), o_r2.data());
     REQUIRE(__F_EQ_IN(o_r2[0], 0 * 8, 0.0001));
     REQUIRE(__F_EQ_IN(o_r2[1], 1 * 8, 0.0001));
     REQUIRE(__F_EQ_IN(o_r2[7], 7 * 8, 0.00001));
 
     fftw3::plan<double> &q_r2 =
-        fftw3::get_plan(o.size(), o.data(), o_r2.data(), false);
+        fftw3::get_plan((int)o.size(), o.data(), o_r2.data(), false);
     REQUIRE(&q_r2 == &q_r);
-    q_r2.inv(o.size(), o.data(), o_r2.data());
+    q_r2.inv((int)o.size(), o.data(), o_r2.data());
     REQUIRE(__F_EQ_IN(o_r2[7], 7 * 8, 0.00001));
 
     // r2r fwd
@@ -275,8 +275,8 @@ TEST_CASE("fft_plan_cache_double_1d")
 
     i_rr << 0, 1, 2, 3, 4, 5, 6, 7;
     fftw3::plan<double> &p_rr =
-        fftw3::get_plan(i_rr.size(), i_rr.data(), o_rr.data(), true);
-    p_rr.fwd<DCT_II>(i_rr.size(), i_rr.data(), o_rr.data());
+        fftw3::get_plan((int)i_rr.size(), i_rr.data(), o_rr.data(), true);
+    p_rr.fwd<DCT_II>((int)i_rr.size(), i_rr.data(), o_rr.data());
     REQUIRE(__F_EQ_IN(o_rr[0], 56, 0.0001));
     REQUIRE(__F_EQ_IN(o_rr[1], -25.7693, 0.0001));
     REQUIRE(__F_EQ_IN(o_rr[7], -0.20281, 0.00001));
@@ -286,23 +286,23 @@ TEST_CASE("fft_plan_cache_double_1d")
     // cout << o_rr[7] * std::sqrt(2.0/8)/2<< endl;
 
     fftw3::plan<double> &p_rr2 =
-        fftw3::get_plan(i_rr.size(), i_rr.data(), o_rr.data(), true);
+        fftw3::get_plan((int)i_rr.size(), i_rr.data(), o_rr.data(), true);
     REQUIRE(&p_rr2 == &p_rr);
-    p_rr2.fwd<DCT_II>(i_rr.size(), i_rr.data(), o_rr.data());
+    p_rr2.fwd<DCT_II>((int)i_rr.size(), i_rr.data(), o_rr.data());
     REQUIRE(__F_EQ_IN(o_rr[7], -0.20281, 0.00001));
 
     // r2r inv
     fftw3::plan<double> &q_rr =
-        fftw3::get_plan(o_rr.size(), o_rr.data(), o_rr2.data(), false);
-    q_rr.inv<DCT_II>(o_rr.size(), o_rr.data(), o_rr2.data());
+        fftw3::get_plan((int)o_rr.size(), o_rr.data(), o_rr2.data(), false);
+    q_rr.inv<DCT_II>((int)o_rr.size(), o_rr.data(), o_rr2.data());
     REQUIRE(__F_EQ_IN(o_r2[0], 0 * 8, 0.0001));
     REQUIRE(__F_EQ_IN(o_r2[1], 1 * 8, 0.0001));
     REQUIRE(__F_EQ_IN(o_r2[7], 7 * 8, 0.00001));
 
     fftw3::plan<double> &q_rr2 =
-        fftw3::get_plan(o_rr.size(), o_rr.data(), o_rr2.data(), false);
+        fftw3::get_plan((int)o_rr.size(), o_rr.data(), o_rr2.data(), false);
     REQUIRE(&q_rr2 == &q_rr);
-    q_rr2.inv<DCT_II>(o_rr.size(), o_rr.data(), o_rr2.data());
+    q_rr2.inv<DCT_II>((int)o_rr.size(), o_rr.data(), o_rr2.data());
     REQUIRE(__F_EQ_IN(o_r2[7], 7 * 8, 0.00001));
 }
 

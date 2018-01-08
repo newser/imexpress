@@ -67,10 +67,10 @@ class ifft2_functor
         static_assert(T::Flags & RowMajorBit, "must be row major matrix");
 
         typename type_eval<T>::type m_x(x.eval());
-        ifft2_impl(x.rows(), x.cols(), m_x.data(), m_result.data());
+        ifft2_impl((int)x.rows(), (int)x.cols(), m_x.data(), m_result.data());
 
         if (normalize) {
-            m_result /= m_x.size();
+            m_result /= (T::Scalar)m_x.size();
         }
     }
 

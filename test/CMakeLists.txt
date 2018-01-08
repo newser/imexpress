@@ -52,7 +52,7 @@ target_include_directories(test_imexpress PRIVATE ${LIBRARY_PATH}/fft/fftw/api)
 target_include_directories(test_imexpress PRIVATE ${LIBRARY_PATH}/Catch2/single_include)
 
 # plot
-find_package(MathGL2)
+find_package(MathGL2 QUIET)
 if (MATHGL2_FOUND)
     target_include_directories(test_imexpress PRIVATE ${MATHGL2_INCLUDE_DIRS})
     target_compile_definitions(test_imexpress PRIVATE -DIEXP_MGL2)

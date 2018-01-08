@@ -70,10 +70,10 @@ class idct_functor
         : m_result(x.size())
     {
         typename type_eval<T>::type m_x(x.eval());
-        idct_impl<k>(m_x.size(), m_x.data(), m_result.data());
+        idct_impl<k>((int)m_x.size(), m_x.data(), m_result.data());
 
         if (normalize) {
-            m_result /= idct_scale<k>(m_x.size());
+            m_result /= (T::Scalar)idct_scale<k>(m_x.size());
         }
     }
 

@@ -58,7 +58,7 @@ class dct_functor
         : m_result(x.size())
     {
         typename type_eval<T>::type m_x(x.eval());
-        dct_impl<k>(x.size(), m_x.data(), m_result.data());
+        dct_impl<k>((int)x.size(), m_x.data(), m_result.data());
     }
 
     const typename T::Scalar &operator()(Index i) const

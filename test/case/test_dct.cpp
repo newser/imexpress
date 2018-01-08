@@ -14,7 +14,7 @@ TEST_CASE("dct_float")
 
     i_rr << 0, 1, 2, 3, 4, 5, 6, 7;
     o_rr.array() = fft::dct(i_rr.array());
-    REQUIRE(__F_EQ_IN(o_rr[0], 56, 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr[0], 56., 0.0001));
     REQUIRE(__F_EQ_IN(o_rr[1], -25.7693, 0.0001));
     REQUIRE(__F_EQ_IN(o_rr[7], -0.20281, 0.00001));
     // octave's dct:
@@ -24,33 +24,33 @@ TEST_CASE("dct_float")
 
     // again
     o_rr.array() = fft::dct(i_rr.array());
-    REQUIRE(__F_EQ_IN(o_rr[0], 56, 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr[0], 56., 0.0001));
     REQUIRE(__F_EQ_IN(o_rr[1], -25.7693, 0.0001));
     REQUIRE(__F_EQ_IN(o_rr[7], -0.20281, 0.00001));
 
     // inv
     o_rr2.array() = fft::idct(o_rr.array());
-    REQUIRE(__F_EQ_IN(o_rr2[0], 0, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[1], 1 * 16, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[7], 7 * 16, 0.00001));
+    REQUIRE(__F_EQ_IN(o_rr2[0], 0., 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[1], 1. * 16, 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[7], 7. * 16, 0.00001));
 
     // again
     o_rr2.array() = fft::idct(o_rr.array());
-    REQUIRE(__F_EQ_IN(o_rr2[0], 0, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[1], 1 * 16, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[7], 7 * 16, 0.00001));
+    REQUIRE(__F_EQ_IN(o_rr2[0], 0., 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[1], 1. * 16, 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[7], 7. * 16, 0.00001));
 
     // inv, normalize
     o_rr2.array() = fft::idct<true>(o_rr.array());
-    REQUIRE(__F_EQ_IN(o_rr2[0], 0, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[1], 1, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[7], 7, 0.00001));
+    REQUIRE(__F_EQ_IN(o_rr2[0], 0., 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[1], 1., 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[7], 7., 0.00001));
 
     // again
     o_rr2.array() = fft::idct<true>(o_rr.array());
-    REQUIRE(__F_EQ_IN(o_rr2[0], 0, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[1], 1, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[7], 7, 0.00001));
+    REQUIRE(__F_EQ_IN(o_rr2[0], 0., 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[1], 1., 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[7], 7., 0.00001));
 }
 
 TEST_CASE("dct_double")
@@ -60,7 +60,7 @@ TEST_CASE("dct_double")
 
     i_rr << 0, 1, 2, 3, 4, 5, 6, 7;
     o_rr.array() = fft::dct(i_rr.array());
-    REQUIRE(__F_EQ_IN(o_rr[0], 56, 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr[0], 56., 0.0001));
     REQUIRE(__F_EQ_IN(o_rr[1], -25.7693, 0.0001));
     REQUIRE(__F_EQ_IN(o_rr[7], -0.20281, 0.00001));
     // octave's dct:
@@ -70,31 +70,31 @@ TEST_CASE("dct_double")
 
     // again
     o_rr.array() = fft::dct(i_rr.array());
-    REQUIRE(__F_EQ_IN(o_rr[0], 56, 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr[0], 56., 0.0001));
     REQUIRE(__F_EQ_IN(o_rr[1], -25.7693, 0.0001));
     REQUIRE(__F_EQ_IN(o_rr[7], -0.20281, 0.00001));
 
     // inv
     o_rr2.array() = fft::idct(o_rr.array());
-    REQUIRE(__F_EQ_IN(o_rr2[0], 0, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[1], 1 * 16, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[7], 7 * 16, 0.00001));
+    REQUIRE(__F_EQ_IN(o_rr2[0], 0., 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[1], 1. * 16, 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[7], 7. * 16, 0.00001));
 
     // again
     o_rr2.array() = fft::idct(o_rr.array());
-    REQUIRE(__F_EQ_IN(o_rr2[0], 0, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[1], 1 * 16, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[7], 7 * 16, 0.00001));
+    REQUIRE(__F_EQ_IN(o_rr2[0], 0., 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[1], 1. * 16, 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[7], 7. * 16, 0.00001));
 
     // inv, normalize
     o_rr2.array() = fft::idct<true>(o_rr.array());
-    REQUIRE(__F_EQ_IN(o_rr2[0], 0, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[1], 1, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[7], 7, 0.00001));
+    REQUIRE(__F_EQ_IN(o_rr2[0], 0., 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[1], 1., 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[7], 7., 0.00001));
 
     // again
     o_rr2.array() = fft::idct<true>(o_rr.array());
-    REQUIRE(__F_EQ_IN(o_rr2[0], 0, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[1], 1, 0.0001));
-    REQUIRE(__F_EQ_IN(o_rr2[7], 7, 0.00001));
+    REQUIRE(__F_EQ_IN(o_rr2[0], 0., 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[1], 1., 0.0001));
+    REQUIRE(__F_EQ_IN(o_rr2[7], 7., 0.00001));
 }

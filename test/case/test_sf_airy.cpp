@@ -251,13 +251,13 @@ TEST_CASE("sf_airy_zero")
 
     {
         gsl_sf_result r;
-        gsl_sf_airy_zero_Ai(2);
+        gsl_sf_airy_zero_Ai_e(2, &r);
         REQUIRE(__D_EQ9(e(0, 0), r.err));
-        gsl_sf_airy_zero_Ai(50);
+        gsl_sf_airy_zero_Ai_e(50, &r);
         REQUIRE(__D_EQ9(e(0, 1), r.err));
-        gsl_sf_airy_zero_Ai(100);
+        gsl_sf_airy_zero_Ai_e(100, &r);
         REQUIRE(__D_EQ9(e(0, 2), r.err));
-        gsl_sf_airy_zero_Ai(110);
+        gsl_sf_airy_zero_Ai_e(110, &r);
         REQUIRE(__D_EQ9(e(0, 3), r.err));
     }
 
@@ -269,13 +269,13 @@ TEST_CASE("sf_airy_zero")
 
     {
         gsl_sf_result r;
-        gsl_sf_airy_zero_Bi(2);
+        gsl_sf_airy_zero_Bi_e(2, &r);
         REQUIRE(__D_EQ9(e(0, 0), r.err));
-        gsl_sf_airy_zero_Bi(50);
+        gsl_sf_airy_zero_Bi_e(50, &r);
         REQUIRE(__D_EQ9(e(0, 1), r.err));
-        gsl_sf_airy_zero_Bi(100);
+        gsl_sf_airy_zero_Bi_e(100, &r);
         REQUIRE(__D_EQ9(e(0, 2), r.err));
-        gsl_sf_airy_zero_Bi(110);
+        gsl_sf_airy_zero_Bi_e(110, &r);
         REQUIRE(__D_EQ9(e(0, 3), r.err));
     }
 }
@@ -306,13 +306,13 @@ TEST_CASE("sf_airy_zero_deriv")
 
     {
         gsl_sf_result r;
-        gsl_sf_airy_zero_Ai_deriv(2);
+        gsl_sf_airy_zero_Ai_deriv_e(2, &r);
         REQUIRE(__D_EQ9(e(0, 0), r.err));
-        gsl_sf_airy_zero_Ai_deriv(50);
+        gsl_sf_airy_zero_Ai_deriv_e(50, &r);
         REQUIRE(__D_EQ9(e(0, 1), r.err));
-        gsl_sf_airy_zero_Ai_deriv(100);
+        gsl_sf_airy_zero_Ai_deriv_e(100, &r);
         REQUIRE(__D_EQ9(e(0, 2), r.err));
-        gsl_sf_airy_zero_Ai_deriv(110);
+        gsl_sf_airy_zero_Ai_deriv_e(110, &r);
         REQUIRE(__D_EQ9(e(0, 3), r.err));
     }
 
@@ -324,13 +324,13 @@ TEST_CASE("sf_airy_zero_deriv")
 
     {
         gsl_sf_result r;
-        gsl_sf_airy_zero_Bi_deriv(2);
+        gsl_sf_airy_zero_Bi_deriv_e(2, &r);
         REQUIRE(__D_EQ9(e(0, 0), r.err));
-        gsl_sf_airy_zero_Bi_deriv(50);
+        gsl_sf_airy_zero_Bi_deriv_e(50, &r);
         REQUIRE(__D_EQ9(e(0, 1), r.err));
-        gsl_sf_airy_zero_Bi_deriv(100);
+        gsl_sf_airy_zero_Bi_deriv_e(100, &r);
         REQUIRE(__D_EQ9(e(0, 2), r.err));
-        gsl_sf_airy_zero_Bi_deriv(110);
+        gsl_sf_airy_zero_Bi_deriv_e(110, &r);
         REQUIRE(__D_EQ9(e(0, 3), r.err));
     }
 }

@@ -207,7 +207,7 @@ class plan_cache
     {
         const bool inplace((uintptr_t)i == (uintptr_t)o);
 
-        return key_t(fwd | (inplace << 1) | (io_traits<I, O>::scalar << 2) |
+        return key_t(fwd | ((int)inplace << 1) | (io_traits<I, O>::scalar << 2) |
                      (io_traits<I, O>::io << 4) | (k0 << 8) |
                      ((int64_t)n << 32));
     }
@@ -218,7 +218,7 @@ class plan_cache
     {
         const bool inplace((uintptr_t)i == (uintptr_t)o);
 
-        return key_t(int64_t(fwd | (inplace << 1) |
+        return key_t(int64_t(fwd | ((int)inplace << 1) |
                              (io_traits<I, O>::scalar << 2) |
                              (io_traits<I, O>::io << 4) | (k0 << 8) |
                              (k1 << 12) | ((int64_t)n0 << 32)),

@@ -46,12 +46,12 @@ class mgauss
 {
   public:
     mgauss(size_t k, double mu[], double cov[])
-        : m_mu_block{.size = k, .data = mu}
-        , m_mu{.size = k,
-               .stride = 1,
-               .data = mu,
-               .block = &m_mu_block,
-               .owner = 0}
+        : m_mu_block{k, mu}
+        , m_mu{k,
+               1,
+               mu,
+               &m_mu_block,
+               0}
     {
         m_work = gsl_vector_alloc(k);
         IEXP_NOT_NULLPTR(m_work);
@@ -75,12 +75,12 @@ class mgauss
 
     double pdf(const double x[]) const
     {
-        gsl_block xb{.size = m_mu_block.size, .data = (double *)x};
-        gsl_vector xv{.size = m_mu_block.size,
-                      .stride = 1,
-                      .data = (double *)x,
-                      .block = &xb,
-                      .owner = 0};
+        gsl_block xb{m_mu_block.size, (double *)x};
+        gsl_vector xv{m_mu_block.size,
+                      1,
+                      (double *)x,
+                      &xb,
+                      0};
 
         // due to m_work, it's not reentrant
         double result;
@@ -96,12 +96,12 @@ class mgauss
 
     double lnpdf(const double x[]) const
     {
-        gsl_block xb{.size = m_mu_block.size, .data = (double *)x};
-        gsl_vector xv{.size = m_mu_block.size,
-                      .stride = 1,
-                      .data = (double *)x,
-                      .block = &xb,
-                      .owner = 0};
+        gsl_block xb{m_mu_block.size, (double *)x};
+        gsl_vector xv{m_mu_block.size,
+                      1,
+                      (double *)x,
+                      &xb,
+                      0};
 
         // due to m_work, it's not reentrant
         double result;
@@ -121,20 +121,20 @@ class mgauss
                      const double *x,
                      double *mu)
     {
-        gsl_block xb{.size = n * k, .data = (double *)x};
-        gsl_matrix xm{.size1 = n,
-                      .size2 = k,
-                      .tda = k,
-                      .data = (double *)x,
-                      .block = &xb,
-                      .owner = 0};
+        gsl_block xb{n * k, (double *)x};
+        gsl_matrix xm{n,
+                      k,
+                      k,
+                      (double *)x,
+                      &xb,
+                      0};
 
-        gsl_block mb{.size = k, .data = mu};
-        gsl_vector mv{.size = k,
-                      .stride = 1,
-                      .data = mu,
-                      .block = &mb,
-                      .owner = 0};
+        gsl_block mb{k, mu};
+        gsl_vector mv{k,
+                      1,
+                      mu,
+                      &mb,
+                      0};
 
         if (gsl_ran_multivariate_gaussian_mean(&xm, &mv) != GSL_SUCCESS) {
             RETURN_OR_THROW(std::runtime_error("mgauss mean"));
@@ -147,21 +147,21 @@ class mgauss
                     const double *x,
                     double *cov)
     {
-        gsl_block xb{.size = n * k, .data = (double *)x};
-        gsl_matrix xm{.size1 = n,
-                      .size2 = k,
-                      .tda = k,
-                      .data = (double *)x,
-                      .block = &xb,
-                      .owner = 0};
+        gsl_block xb{n * k, (double *)x};
+        gsl_matrix xm{n,
+                      k,
+                      k,
+                      (double *)x,
+                      &xb,
+                      0};
 
-        gsl_block cb{.size = k * k, .data = cov};
-        gsl_matrix cm{.size1 = k,
-                      .size2 = k,
-                      .tda = k,
-                      .data = cov,
-                      .block = &cb,
-                      .owner = 0};
+        gsl_block cb{k * k, cov};
+        gsl_matrix cm{k,
+                      k,
+                      k,
+                      cov,
+                      &cb,
+                      0};
 
         if (gsl_ran_multivariate_gaussian_vcov(&xm, &cm) != GSL_SUCCESS) {
             RETURN_OR_THROW(std::runtime_error("mgauss cov"));

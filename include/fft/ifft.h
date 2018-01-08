@@ -60,10 +60,10 @@ class ifft_functor
         : m_result(x.size())
     {
         typename type_eval<T>::type m_x(x.eval());
-        ifft_impl(m_x.size(), m_x.data(), m_result.data());
+        ifft_impl((int)m_x.size(), m_x.data(), m_result.data());
 
         if (normalize) {
-            m_result /= m_x.size();
+            m_result /= (T::Scalar)m_x.size();
         }
     }
 

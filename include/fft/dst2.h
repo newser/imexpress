@@ -65,7 +65,7 @@ class dst2_functor
         static_assert(T::Flags & RowMajorBit, "must be row major matrix");
 
         typename type_eval<T>::type m_x(x.eval());
-        dst2_impl<k0, k1>(m_x.rows(), m_x.cols(), m_x.data(), m_result.data());
+        dst2_impl<k0, k1>((int)m_x.rows(), (int)m_x.cols(), m_x.data(), m_result.data());
     }
 
     const typename T::Scalar &operator()(Index i, Index j) const

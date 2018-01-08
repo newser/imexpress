@@ -52,8 +52,8 @@ class unary_func
 
     unary_func(const type &f)
         : m_fn(f)
-        , m_gsl_fn{.function = s_func,
-                   .params = const_cast<void *>(
+        , m_gsl_fn{s_func,
+                   const_cast<void *>(
                        reinterpret_cast<const void *>(&m_fn))}
     {
         static_assert(TYPE_IS(T, double), "only support double now");
@@ -65,7 +65,8 @@ class unary_func
     }
 
   private:
-    const type &m_fn;
+    // m_fn can not be reference, msvc requires copying it
+    const type m_fn;
     const gsl_function m_gsl_fn;
 };
 

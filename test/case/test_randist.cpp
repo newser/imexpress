@@ -800,7 +800,7 @@ TEST_CASE("randist_neg_binomial")
          rdist::bnom_pdf(v.array(), 0.5, 2);
     m2 = rdist::nbnom_pdf(m.array() + m.array(), 0.5, 2);
 
-#if 1 // #ifdef Icauchy_MGL2
+#if 0 // #ifdef Icauchy_MGL2
     VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
     VectorXd vv2 = rdist::nbnom_pdf(vv.cast<unsigned int>().array(), 0.5, 3.5);
 

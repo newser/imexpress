@@ -36,7 +36,7 @@ hide(ENABLE_QUAD_PRECISION BOOL OFF)
 hide(ENABLE_SSE BOOL ON)
 hide(ENABLE_SSE2 BOOL ON)
 hide(ENABLE_AVX BOOL ON)
-hide(ENABLE_AVX2 BOOL ON)
+hide(ENABLE_AVX2 BOOL OFF)
 
 # todo: if enabled float
 if (1)

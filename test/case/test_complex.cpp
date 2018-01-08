@@ -7,8 +7,8 @@
 TEST_CASE("complex")
 {
     std::complex<double> a(1, 2);
-    REQUIRE(__D_EQ(std::real(a), 1));
-    REQUIRE(__D_EQ(std::imag(a), 2));
+    REQUIRE(__D_EQ(std::real(a), 1.));
+    REQUIRE(__D_EQ(std::imag(a), 2.));
 
     auto b = std::polar<double>(1, IEXP_PI_4);
     REQUIRE(__D_EQ(std::real(b), std::cos(IEXP_PI_4)));
@@ -18,8 +18,8 @@ TEST_CASE("complex")
     a.imag(std::sin(IEXP_PI_4));
     REQUIRE(a == b);
     REQUIRE(__D_EQ(std::arg(a), IEXP_PI_4));
-    REQUIRE(__D_EQ(std::abs(a), 1));
-    REQUIRE(__D_EQ(std::norm(a), 1));
+    REQUIRE(__D_EQ(std::abs(a), 1.));
+    REQUIRE(__D_EQ(std::norm(a), 1.));
 
     std::complex<double> c = a + b;
     REQUIRE(__D_EQ(c.real(), a.real() + b.real()));

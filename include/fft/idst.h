@@ -70,10 +70,10 @@ class idst_functor
         : m_result(x.size())
     {
         typename type_eval<T>::type m_x(x.eval());
-        idst_impl<k>(m_x.size(), m_x.data(), m_result.data());
+        idst_impl<k>((int)m_x.size(), m_x.data(), m_result.data());
 
         if (normalize) {
-            m_result /= idst_scale<k>(m_x.size());
+            m_result /= (T::Scalar)idst_scale<k>(m_x.size());
         }
     }
 
