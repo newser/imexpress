@@ -73,10 +73,14 @@ class idst2_functor
         static_assert(T::Flags & RowMajorBit, "must be row major matrix");
 
         typename type_eval<T>::type m_x(x.eval());
-        idst2_impl<k0, k1>((int)m_x.rows(), (int)m_x.cols(), m_x.data(), m_result.data());
+        idst2_impl<k0, k1>((int)m_x.rows(),
+                           (int)m_x.cols(),
+                           m_x.data(),
+                           m_result.data());
 
         if (normalize) {
-            m_result /= (T::Scalar)idst2_scale<k0, k1>(m_x.rows(), m_x.cols());
+            m_result /=
+                (typename T::Scalar)idst2_scale<k0, k1>(m_x.rows(), m_x.cols());
         }
     }
 

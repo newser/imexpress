@@ -73,7 +73,7 @@ class idst_functor
         idst_impl<k>((int)m_x.size(), m_x.data(), m_result.data());
 
         if (normalize) {
-            m_result /= (T::Scalar)idst_scale<k>(m_x.size());
+            m_result /= (typename T::Scalar)idst_scale<k>(m_x.size());
         }
     }
 

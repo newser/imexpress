@@ -47,11 +47,7 @@ class mgauss
   public:
     mgauss(size_t k, double mu[], double cov[])
         : m_mu_block{k, mu}
-        , m_mu{k,
-               1,
-               mu,
-               &m_mu_block,
-               0}
+        , m_mu{k, 1, mu, &m_mu_block, 0}
     {
         m_work = gsl_vector_alloc(k);
         IEXP_NOT_NULLPTR(m_work);
@@ -76,11 +72,7 @@ class mgauss
     double pdf(const double x[]) const
     {
         gsl_block xb{m_mu_block.size, (double *)x};
-        gsl_vector xv{m_mu_block.size,
-                      1,
-                      (double *)x,
-                      &xb,
-                      0};
+        gsl_vector xv{m_mu_block.size, 1, (double *)x, &xb, 0};
 
         // due to m_work, it's not reentrant
         double result;
@@ -97,11 +89,7 @@ class mgauss
     double lnpdf(const double x[]) const
     {
         gsl_block xb{m_mu_block.size, (double *)x};
-        gsl_vector xv{m_mu_block.size,
-                      1,
-                      (double *)x,
-                      &xb,
-                      0};
+        gsl_vector xv{m_mu_block.size, 1, (double *)x, &xb, 0};
 
         // due to m_work, it's not reentrant
         double result;
@@ -122,19 +110,10 @@ class mgauss
                      double *mu)
     {
         gsl_block xb{n * k, (double *)x};
-        gsl_matrix xm{n,
-                      k,
-                      k,
-                      (double *)x,
-                      &xb,
-                      0};
+        gsl_matrix xm{n, k, k, (double *)x, &xb, 0};
 
         gsl_block mb{k, mu};
-        gsl_vector mv{k,
-                      1,
-                      mu,
-                      &mb,
-                      0};
+        gsl_vector mv{k, 1, mu, &mb, 0};
 
         if (gsl_ran_multivariate_gaussian_mean(&xm, &mv) != GSL_SUCCESS) {
             RETURN_OR_THROW(std::runtime_error("mgauss mean"));
@@ -148,20 +127,10 @@ class mgauss
                     double *cov)
     {
         gsl_block xb{n * k, (double *)x};
-        gsl_matrix xm{n,
-                      k,
-                      k,
-                      (double *)x,
-                      &xb,
-                      0};
+        gsl_matrix xm{n, k, k, (double *)x, &xb, 0};
 
         gsl_block cb{k * k, cov};
-        gsl_matrix cm{k,
-                      k,
-                      k,
-                      cov,
-                      &cb,
-                      0};
+        gsl_matrix cm{k, k, k, cov, &cb, 0};
 
         if (gsl_ran_multivariate_gaussian_vcov(&xm, &cm) != GSL_SUCCESS) {
             RETURN_OR_THROW(std::runtime_error("mgauss cov"));

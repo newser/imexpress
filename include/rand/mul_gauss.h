@@ -51,11 +51,7 @@ class mgauss_rng
                rng_type type = DEFAULT_RNG,
                unsigned long seed = 0)
         : m_mu_block{k, mu}
-        , m_mu{k,
-               1,
-               mu,
-               &m_mu_block,
-               0}
+        , m_mu{k, 1, mu, &m_mu_block, 0}
         , m_rng(type, seed)
     {
         m_L = gsl_matrix_alloc(k, k);
@@ -82,11 +78,7 @@ class mgauss_rng
     void next(double x[])
     {
         gsl_block b{m_mu_block.size, x};
-        gsl_vector result{m_mu_block.size,
-                          1,
-                          x,
-                          &b,
-                          0};
+        gsl_vector result{m_mu_block.size, 1, x, &b, 0};
         gsl_ran_multivariate_gaussian(m_rng.gsl(), &m_mu, m_L, &result);
     }
 

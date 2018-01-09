@@ -24,6 +24,7 @@
 #include <randist/mul_nomial.h>
 #include <randist/neg_binomial.h>
 #include <randist/pareto.h>
+#include <randist/pascal.h>
 #include <randist/poisson.h>
 #include <randist/rayleigh.h>
 #include <randist/rayleigh_tail.h>
@@ -813,5 +814,34 @@ TEST_CASE("randist_neg_binomial")
     gr.Axis();
     gr.Plot(x, y, "+");
     gr.WriteFrame("nbnom_pdf.png");
+#endif
+}
+
+TEST_CASE("randist_pascal")
+{
+    VectorXi v = VectorXi::LinSpaced(10, 0, 3);
+    VectorXd v2 = rdist::pascal_pdf(v.array(), 0.5, 2);
+
+    Matrix2Xi m = Matrix2Xi::Random(2, 10);
+    Matrix2Xd m2 = rdist::pascal_pdf(m.array(), 0.5, 2);
+
+    // test compile
+    v2 = rdist::pascal_pdf(v.array(), 0.5, 2) +
+         rdist::pascal_pdf(v.array(), 0.5, 2);
+    m2 = rdist::pascal_pdf(m.array() + m.array(), 0.5, 2);
+
+#if 0 // #ifdef Icauchy_MGL2
+    VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
+    VectorXd vv2 = rdist::pascal_pdf(vv.cast<unsigned int>().array(), 0.5, 3);
+    
+    mglData x(100), y(100);
+    x.Link(vv.data(), vv.size());
+    y.Link(vv2.data(), vv2.size());
+    mglGraph gr;
+    gr.SetOrigin(0, 0);
+    gr.SetRanges(0, 10, 0, 0.5);
+    gr.Axis();
+    gr.Plot(x, y, "+");
+    gr.WriteFrame("pascal_pdf.png");
 #endif
 }

@@ -207,9 +207,9 @@ class plan_cache
     {
         const bool inplace((uintptr_t)i == (uintptr_t)o);
 
-        return key_t(fwd | ((int)inplace << 1) | (io_traits<I, O>::scalar << 2) |
-                     (io_traits<I, O>::io << 4) | (k0 << 8) |
-                     ((int64_t)n << 32));
+        return key_t(
+            fwd | ((int)inplace << 1) | (io_traits<I, O>::scalar << 2) |
+            (io_traits<I, O>::io << 4) | (k0 << 8) | ((int64_t)n << 32));
     }
 
     template <typename I, typename O>

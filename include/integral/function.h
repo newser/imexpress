@@ -53,8 +53,7 @@ class unary_func
     unary_func(const type &f)
         : m_fn(f)
         , m_gsl_fn{s_func,
-                   const_cast<void *>(
-                       reinterpret_cast<const void *>(&m_fn))}
+                   const_cast<void *>(reinterpret_cast<const void *>(&m_fn))}
     {
         static_assert(TYPE_IS(T, double), "only support double now");
     }

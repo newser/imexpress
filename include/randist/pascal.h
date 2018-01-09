@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_DCT2__
-#define __IEXP_DCT2__
+#ifndef __IEXP_RANDIST_PASCAL__
+#define __IEXP_RANDIST_PASCAL__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -25,13 +25,12 @@
 
 #include <common/common.h>
 
-#include <fft/fftw/plan_cache.h>
-#include <fft/fftw/plan_double.h>
-#include <fft/fftw/plan_single.h>
+#include <gsl/gsl_cdf.h>
+#include <gsl/gsl_randist.h>
 
 IEXP_NS_BEGIN
 
-namespace fft {
+namespace rdist {
 
 ////////////////////////////////////////////////////////////
 // macro definition
@@ -41,56 +40,75 @@ namespace fft {
 // type definition
 ////////////////////////////////////////////////////////////
 
-template <kind k0, kind k1, typename T>
-inline void dct2_impl(const int n0, const int n1, const T *i, T *o)
-{
-    fftw3::get_plan<k0, k1>(n0, n1, i, o, true)
-        .template fwd<k0, k1>(n0, n1, i, o);
-}
-
-template <kind k0, kind k1, typename T>
-class dct2_functor
+class pascal
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            RowMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
-    dct2_functor(const T &x)
-        : m_result(x.rows(), x.cols())
+    pascal(const double p, const unsigned int n)
+        : m_p(p)
+        , m_n(n)
     {
-        static_assert(T::Flags & RowMajorBit, "must be row major matrix");
-
-        typename type_eval<T>::type m_x(x.eval());
-        dct2_impl<k0, k1>((int)m_x.rows(),
-                          (int)m_x.cols(),
-                          m_x.data(),
-                          m_result.data());
     }
 
-    const typename T::Scalar &operator()(Index i, Index j) const
+    double pdf(const unsigned int x) const
     {
-        return m_result(i, j);
+        return gsl_ran_pascal_pdf(x, m_p, m_n);
+    }
+
+    double p(const unsigned int x) const
+    {
+        return gsl_cdf_pascal_P(x, m_p, m_n);
+    }
+
+    double q(const unsigned int x) const
+    {
+        return gsl_cdf_pascal_Q(x, m_p, m_n);
     }
 
   private:
-    ArrayType m_result;
+    const double m_p;
+    const unsigned int m_n;
 };
 
-template <kind k0 = DCT_II, kind k1 = DCT_II, typename T = void>
-inline CwiseNullaryOp<dct2_functor<k0, k1, T>,
-                      typename dct2_functor<k0, k1, T>::ArrayType>
-dct2(const ArrayBase<T> &x)
+template <typename T>
+class pascal_pdf_functor
 {
-    static_assert(IS_DCT(k0) && IS_DCT(k1), "not dct kind");
+  public:
+    using ArrayType = Array<double,
+                            T::RowsAtCompileTime,
+                            T::ColsAtCompileTime,
+                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
+                            T::MaxRowsAtCompileTime,
+                            T::MaxColsAtCompileTime>;
 
-    using ArrayType = typename dct2_functor<k0, k1, T>::ArrayType;
+    pascal_pdf_functor(const T &x, const double p, const unsigned int n)
+        : m_x(x)
+        , m_pascal(p, n)
+    {
+    }
+
+    double operator()(Index i, Index j) const
+    {
+        return m_pascal.pdf(m_x(i, j));
+    }
+
+  private:
+    const T &m_x;
+    pascal m_pascal;
+};
+
+template <typename T>
+inline CwiseNullaryOp<pascal_pdf_functor<T>,
+                      typename pascal_pdf_functor<T>::ArrayType>
+pascal_pdf(const ArrayBase<T> &x, const double p, const unsigned int n)
+{
+    static_assert(TYPE_IS(typename T::Scalar, int) ||
+                      TYPE_IS(typename T::Scalar, unsigned int),
+                  "scalar can only be int or unsigned int");
+
+    using ArrayType = typename pascal_pdf_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
-                                  dct2_functor<k0, k1, T>(x.derived()));
+                                  pascal_pdf_functor<T>(x.derived(), p, n));
 }
 
 ////////////////////////////////////////////////////////////
@@ -98,10 +116,10 @@ dct2(const ArrayBase<T> &x)
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
-// interface declaration
+// indexerface declaration
 ////////////////////////////////////////////////////////////
 }
 
 IEXP_NS_END
 
-#endif /* __IEXP_DCT2__ */
+#endif /* __IEXP_RANDIST_PASCAL__ */

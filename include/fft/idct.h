@@ -73,7 +73,7 @@ class idct_functor
         idct_impl<k>((int)m_x.size(), m_x.data(), m_result.data());
 
         if (normalize) {
-            m_result /= (T::Scalar)idct_scale<k>(m_x.size());
+            m_result /= (typename T::Scalar)idct_scale<k>(m_x.size());
         }
     }
 

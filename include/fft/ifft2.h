@@ -70,7 +70,7 @@ class ifft2_functor
         ifft2_impl((int)x.rows(), (int)x.cols(), m_x.data(), m_result.data());
 
         if (normalize) {
-            m_result /= (T::Scalar)m_x.size();
+            m_result /= (typename T::Scalar)m_x.size();
         }
     }
 

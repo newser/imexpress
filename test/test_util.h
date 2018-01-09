@@ -38,7 +38,8 @@ IEXP_NS_BEGIN
 ////////////////////////////////////////////////////////////
 
 #define __D_EQ_IN(a, b, e)                                                     \
-    ((std::abs((a) - (b)) < (e)) || (std::isnan((double)(a)) && std::isnan((double)(b))))
+    ((std::abs((a) - (b)) < (e)) ||                                            \
+     (std::isnan((double)(a)) && std::isnan((double)(b))))
 
 #define __D_EQ(a, b) __D_EQ_IN(a, b, std::numeric_limits<double>::epsilon())
 
@@ -52,7 +53,8 @@ IEXP_NS_BEGIN
     __D_EQ_IN(a, b, (n)*std::numeric_limits<double>::epsilon())
 
 #define __F_EQ_IN(a, b, e)                                                     \
-    ((std::abs((a) - (b)) < (e)) || (std::isnan((float)(a)) && std::isnan((float)(b))))
+    ((std::abs((a) - (b)) < (e)) ||                                            \
+     (std::isnan((float)(a)) && std::isnan((float)(b))))
 
 #define __F_EQ(a, b) __D_EQ_IN(a, b, std::numeric_limits<float>::epsilon())
 
