@@ -43,7 +43,7 @@ namespace rdist {
 class geo
 {
   public:
-    geo(const double p)
+    geo(double p)
         : m_p(p)
     {
     }
@@ -64,7 +64,7 @@ class geo
     }
 
   private:
-    const double m_p;
+    double m_p;
 };
 
 template <typename T>
@@ -78,7 +78,7 @@ class geo_pdf_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    geo_pdf_functor(const T &x, const double p)
+    geo_pdf_functor(const T &x, double p)
         : m_x(x)
         , m_geo(p)
     {
@@ -97,7 +97,7 @@ class geo_pdf_functor
 template <typename T>
 inline CwiseNullaryOp<geo_pdf_functor<T>,
                       typename geo_pdf_functor<T>::ArrayType>
-geo_pdf(const ArrayBase<T> &x, const double p)
+geo_pdf(const ArrayBase<T> &x, double p)
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),

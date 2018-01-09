@@ -104,10 +104,7 @@ class mgauss
     }
 
     // n sample, each has k dim
-    static void mean(const size_t n,
-                     const size_t k,
-                     const double *x,
-                     double *mu)
+    static void mean(size_t n, size_t k, const double *x, double *mu)
     {
         gsl_block xb{n * k, (double *)x};
         gsl_matrix xm{n, k, k, (double *)x, &xb, 0};
@@ -121,10 +118,7 @@ class mgauss
     }
 
     // n sample, each has k dim
-    static void cov(const size_t n,
-                    const size_t k,
-                    const double *x,
-                    double *cov)
+    static void cov(size_t n, size_t k, const double *x, double *cov)
     {
         gsl_block xb{n * k, (double *)x};
         gsl_matrix xm{n, k, k, (double *)x, &xb, 0};

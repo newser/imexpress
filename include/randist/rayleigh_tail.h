@@ -43,19 +43,19 @@ namespace rdist {
 class raylt
 {
   public:
-    raylt(const double a, const double sigma = 1.0)
+    raylt(double a, double sigma = 1.0)
         : m_a(a)
         , m_sigma(sigma)
     {
     }
 
-    double pdf(const double x) const
+    double pdf(double x) const
     {
         return gsl_ran_rayleigh_tail_pdf(x, m_a, m_sigma);
     }
 
   private:
-    const double m_a, m_sigma;
+    double m_a, m_sigma;
 };
 
 template <typename T>
@@ -70,8 +70,8 @@ class raylt_pdf_functor
                             T::MaxColsAtCompileTime>;
 
     raylt_pdf_functor(const T &x,
-                      const typename T::Scalar a,
-                      const typename T::Scalar sigma)
+                      typename T::Scalar a,
+                      typename T::Scalar sigma)
         : m_x(x)
         , m_raylt(a, sigma)
     {
@@ -90,9 +90,7 @@ class raylt_pdf_functor
 template <typename T>
 inline CwiseNullaryOp<raylt_pdf_functor<T>,
                       typename raylt_pdf_functor<T>::ArrayType>
-raylt_pdf(const ArrayBase<T> &x,
-          const typename T::Scalar a,
-          const typename T::Scalar sigma)
+raylt_pdf(const ArrayBase<T> &x, typename T::Scalar a, typename T::Scalar sigma)
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");

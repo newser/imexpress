@@ -43,39 +43,39 @@ namespace rdist {
 class wbl
 {
   public:
-    wbl(const double a, const double b)
+    wbl(double a, double b)
         : m_a(a)
         , m_b(b)
     {
     }
 
-    double pdf(const double x) const
+    double pdf(double x) const
     {
         return gsl_ran_weibull_pdf(x, m_a, m_b);
     }
 
-    double p(const double x) const
+    double p(double x) const
     {
         return gsl_cdf_weibull_P(x, m_a, m_b);
     }
 
-    double invp(const double x) const
+    double invp(double x) const
     {
         return gsl_cdf_weibull_Pinv(x, m_a, m_b);
     }
 
-    double q(const double x) const
+    double q(double x) const
     {
         return gsl_cdf_weibull_Q(x, m_a, m_b);
     }
 
-    double invq(const double x) const
+    double invq(double x) const
     {
         return gsl_cdf_weibull_Qinv(x, m_a, m_b);
     }
 
   private:
-    const double m_a, m_b;
+    double m_a, m_b;
 };
 
 template <typename T>
@@ -89,9 +89,7 @@ class wbl_pdf_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    wbl_pdf_functor(const T &x,
-                    const typename T::Scalar a,
-                    const typename T::Scalar b)
+    wbl_pdf_functor(const T &x, typename T::Scalar a, typename T::Scalar b)
         : m_x(x)
         , m_wbl(a, b)
     {
@@ -110,9 +108,7 @@ class wbl_pdf_functor
 template <typename T>
 inline CwiseNullaryOp<wbl_pdf_functor<T>,
                       typename wbl_pdf_functor<T>::ArrayType>
-wbl_pdf(const ArrayBase<T> &x,
-        const typename T::Scalar a,
-        const typename T::Scalar b)
+wbl_pdf(const ArrayBase<T> &x, typename T::Scalar a, typename T::Scalar b)
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");

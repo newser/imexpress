@@ -43,39 +43,39 @@ namespace rdist {
 class f
 {
   public:
-    f(const double nu1, const double nu2)
+    f(double nu1, double nu2)
         : m_nu1(nu1)
         , m_nu2(nu2)
     {
     }
 
-    double pdf(const double x) const
+    double pdf(double x) const
     {
         return gsl_ran_fdist_pdf(x, m_nu1, m_nu2);
     }
 
-    double p(const double x) const
+    double p(double x) const
     {
         return gsl_cdf_fdist_P(x, m_nu1, m_nu2);
     }
 
-    double invp(const double x) const
+    double invp(double x) const
     {
         return gsl_cdf_fdist_Pinv(x, m_nu1, m_nu2);
     }
 
-    double q(const double x) const
+    double q(double x) const
     {
         return gsl_cdf_fdist_Q(x, m_nu1, m_nu2);
     }
 
-    double invq(const double x) const
+    double invq(double x) const
     {
         return gsl_cdf_fdist_Qinv(x, m_nu1, m_nu2);
     }
 
   private:
-    const double m_nu1, m_nu2;
+    double m_nu1, m_nu2;
 };
 
 template <typename T>
@@ -89,9 +89,7 @@ class f_pdf_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    f_pdf_functor(const T &x,
-                  const typename T::Scalar nu1,
-                  const typename T::Scalar nu2)
+    f_pdf_functor(const T &x, typename T::Scalar nu1, typename T::Scalar nu2)
         : m_x(x)
         , m_f(nu1, nu2)
     {
@@ -109,9 +107,7 @@ class f_pdf_functor
 
 template <typename T>
 inline CwiseNullaryOp<f_pdf_functor<T>, typename f_pdf_functor<T>::ArrayType>
-f_pdf(const ArrayBase<T> &x,
-      const typename T::Scalar nu1,
-      const typename T::Scalar nu2)
+f_pdf(const ArrayBase<T> &x, typename T::Scalar nu1, typename T::Scalar nu2)
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");

@@ -52,10 +52,7 @@ class choose_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    choose_functor(const T &x,
-                   const size_t k,
-                   unsigned long seed,
-                   rng_type type)
+    choose_functor(const T &x, size_t k, unsigned long seed, rng_type type)
         : m_result(k)
     {
         rng r(type, seed);
@@ -80,7 +77,7 @@ class choose_functor
 template <typename T>
 inline CwiseNullaryOp<choose_functor<T>, typename choose_functor<T>::ArrayType>
 choose(const ArrayBase<T> &x,
-       const size_t k,
+       size_t k,
        unsigned long seed = 0,
        rng_type type = DEFAULT_RNG)
 {

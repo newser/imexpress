@@ -66,7 +66,7 @@ class hgeo
     }
 
   private:
-    const unsigned int m_n1, m_n2, m_t;
+    unsigned int m_n1, m_n2, m_t;
 };
 
 template <typename T>

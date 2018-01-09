@@ -43,29 +43,29 @@ namespace rdist {
 class expow
 {
   public:
-    expow(const double a, const double b)
+    expow(double a, double b)
         : m_a(a)
         , m_b(b)
     {
     }
 
-    double pdf(const double x) const
+    double pdf(double x) const
     {
         return gsl_ran_exppow_pdf(x, m_a, m_b);
     }
 
-    double p(const double x) const
+    double p(double x) const
     {
         return gsl_cdf_exppow_P(x, m_a, m_b);
     }
 
-    double q(const double x) const
+    double q(double x) const
     {
         return gsl_cdf_exppow_Q(x, m_a, m_b);
     }
 
   private:
-    const double m_a, m_b;
+    double m_a, m_b;
 };
 
 template <typename T>
@@ -79,9 +79,7 @@ class expow_pdf_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    expow_pdf_functor(const T &x,
-                      const typename T::Scalar a,
-                      const typename T::Scalar b)
+    expow_pdf_functor(const T &x, typename T::Scalar a, typename T::Scalar b)
         : m_x(x)
         , m_expow(a, b)
     {
@@ -100,9 +98,7 @@ class expow_pdf_functor
 template <typename T>
 inline CwiseNullaryOp<expow_pdf_functor<T>,
                       typename expow_pdf_functor<T>::ArrayType>
-expow_pdf(const ArrayBase<T> &x,
-          const typename T::Scalar a,
-          const typename T::Scalar b)
+expow_pdf(const ArrayBase<T> &x, typename T::Scalar a, typename T::Scalar b)
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");

@@ -44,7 +44,7 @@ namespace rand {
 class discrete_rng
 {
   public:
-    discrete_rng(const size_t K,
+    discrete_rng(size_t K,
                  const double P[],
                  rng_type type = DEFAULT_RNG,
                  unsigned long seed = 0)
@@ -80,7 +80,7 @@ class discrete_rng
 
 template <typename T>
 inline auto discrete_rand(DenseBase<T> &x,
-                          const size_t K,
+                          size_t K,
                           const double P[],
                           unsigned long seed = 0,
                           rng_type type = DEFAULT_RNG) -> decltype(x.derived())

@@ -44,7 +44,7 @@ namespace rand {
 class drch_rng
 {
   public:
-    drch_rng(const size_t K,
+    drch_rng(size_t K,
              const double alpha[],
              rng_type type = DEFAULT_RNG,
              unsigned long seed = 0)
@@ -75,7 +75,7 @@ class drch_rng
 
 template <typename T>
 inline auto drch_rand(DenseBase<T> &x,
-                      const size_t K,
+                      size_t K,
                       typename SCALAR(typename T::Scalar) * alpha,
                       unsigned long seed = 0,
                       rng_type type = DEFAULT_RNG) -> decltype(x.derived())

@@ -47,7 +47,7 @@ class laudau
     {
     }
 
-    double pdf(const double x) const
+    double pdf(double x) const
     {
         return gsl_ran_landau_pdf(x);
     }

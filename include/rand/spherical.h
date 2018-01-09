@@ -136,7 +136,7 @@ class sphn_rng
     }
 
   private:
-    const size_t m_n;
+    size_t m_n;
     rng m_rng;
 };
 

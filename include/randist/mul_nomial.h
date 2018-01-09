@@ -43,7 +43,7 @@ namespace rdist {
 class mnom
 {
   public:
-    mnom(const size_t K, const double p[])
+    mnom(size_t K, const double p[])
         : m_k(K)
         , m_p(p)
     {
@@ -60,7 +60,7 @@ class mnom
     }
 
   private:
-    const size_t m_k;
+    size_t m_k;
     const double *m_p;
 };
 
@@ -76,7 +76,7 @@ class mnom_pdf_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    mnom_pdf_functor(const T &x, const size_t K,
+    mnom_pdf_functor(const T &x, size_t K,
                      const double p[])
         : m_x(x)
         , m_mnom(K, p)
@@ -96,7 +96,7 @@ class mnom_pdf_functor
 template <typename T>
 inline CwiseNullaryOp<mnom_pdf_functor<T>,
                       typename mnom_pdf_functor<T>::ArrayType>
-    mnom_pdf(const ArrayBase<T> &x, const size_t K,
+    mnom_pdf(const ArrayBase<T> &x, size_t K,
              const double p[])
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||

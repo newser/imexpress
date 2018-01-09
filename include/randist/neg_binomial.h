@@ -43,30 +43,30 @@ namespace rdist {
 class nbnom
 {
   public:
-    nbnom(const double p, const unsigned int n)
+    nbnom(double p, unsigned int n)
         : m_p(p)
         , m_n(n)
     {
     }
 
-    double pdf(const double x) const
+    double pdf(double x) const
     {
         return gsl_ran_negative_binomial_pdf(x, m_p, m_n);
     }
 
-    double p(const double x) const
+    double p(double x) const
     {
         return gsl_cdf_negative_binomial_P(x, m_p, m_n);
     }
 
-    double q(const double x) const
+    double q(double x) const
     {
         return gsl_cdf_negative_binomial_Q(x, m_p, m_n);
     }
 
   private:
-    const double m_p;
-    const unsigned int m_n;
+    double m_p;
+    unsigned int m_n;
 };
 
 template <typename T>
@@ -80,7 +80,7 @@ class nbnom_pdf_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    nbnom_pdf_functor(const T &x, const double p, const unsigned int n)
+    nbnom_pdf_functor(const T &x, double p, unsigned int n)
         : m_x(x)
         , m_nbnom(p, n)
     {
@@ -99,7 +99,7 @@ class nbnom_pdf_functor
 template <typename T>
 inline CwiseNullaryOp<nbnom_pdf_functor<T>,
                       typename nbnom_pdf_functor<T>::ArrayType>
-nbnom_pdf(const ArrayBase<T> &x, const double p, const unsigned int n)
+nbnom_pdf(const ArrayBase<T> &x, double p, unsigned int n)
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),

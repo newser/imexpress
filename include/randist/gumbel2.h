@@ -43,39 +43,39 @@ namespace rdist {
 class gbl2
 {
   public:
-    gbl2(const double a, const double b)
+    gbl2(double a, double b)
         : m_a(a)
         , m_b(b)
     {
     }
 
-    double pdf(const double x) const
+    double pdf(double x) const
     {
         return gsl_ran_gumbel2_pdf(x, m_a, m_b);
     }
 
-    double p(const double x) const
+    double p(double x) const
     {
         return gsl_cdf_gumbel2_P(x, m_a, m_b);
     }
 
-    double invp(const double x) const
+    double invp(double x) const
     {
         return gsl_cdf_gumbel2_Pinv(x, m_a, m_b);
     }
 
-    double q(const double x) const
+    double q(double x) const
     {
         return gsl_cdf_gumbel2_Q(x, m_a, m_b);
     }
 
-    double invq(const double x) const
+    double invq(double x) const
     {
         return gsl_cdf_gumbel2_Qinv(x, m_a, m_b);
     }
 
   private:
-    const double m_a, m_b;
+    double m_a, m_b;
 };
 
 template <typename T>
@@ -89,9 +89,7 @@ class gbl2_pdf_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    gbl2_pdf_functor(const T &x,
-                     const typename T::Scalar a,
-                     const typename T::Scalar b)
+    gbl2_pdf_functor(const T &x, typename T::Scalar a, typename T::Scalar b)
         : m_x(x)
         , m_gbl2(a, b)
     {
@@ -110,9 +108,7 @@ class gbl2_pdf_functor
 template <typename T>
 inline CwiseNullaryOp<gbl2_pdf_functor<T>,
                       typename gbl2_pdf_functor<T>::ArrayType>
-gbl2_pdf(const ArrayBase<T> &x,
-         const typename T::Scalar a,
-         const typename T::Scalar b)
+gbl2_pdf(const ArrayBase<T> &x, typename T::Scalar a, typename T::Scalar b)
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");

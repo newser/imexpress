@@ -43,7 +43,7 @@ namespace rdist {
 class discrete
 {
   public:
-    discrete(const size_t K, const double P[])
+    discrete(size_t K, const double P[])
         : m_g(nullptr)
     {
         m_g = gsl_ran_discrete_preproc(K, P);
@@ -55,7 +55,7 @@ class discrete
         gsl_ran_discrete_free(m_g);
     }
 
-    double pdf(const size_t x) const
+    double pdf(size_t x) const
     {
         return gsl_ran_discrete_pdf(x, m_g);
     }
@@ -78,7 +78,7 @@ class discrete_pdf_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    discrete_pdf_functor(const T &x, const size_t K, const double P[])
+    discrete_pdf_functor(const T &x, size_t K, const double P[])
         : m_x(x)
         , m_discrete(new discrete(K, P))
     {
@@ -97,7 +97,7 @@ class discrete_pdf_functor
 template <typename T>
 inline CwiseNullaryOp<discrete_pdf_functor<T>,
                       typename discrete_pdf_functor<T>::ArrayType>
-discrete_pdf(const ArrayBase<T> &x, const size_t K, const double P[])
+discrete_pdf(const ArrayBase<T> &x, size_t K, const double P[])
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),

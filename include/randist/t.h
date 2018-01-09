@@ -43,38 +43,38 @@ namespace rdist {
 class t
 {
   public:
-    t(const double nu)
+    t(double nu)
         : m_nu(nu)
     {
     }
 
-    double pdf(const double x) const
+    double pdf(double x) const
     {
         return gsl_ran_tdist_pdf(x, m_nu);
     }
 
-    double p(const double x) const
+    double p(double x) const
     {
         return gsl_cdf_tdist_P(x, m_nu);
     }
 
-    double invp(const double x) const
+    double invp(double x) const
     {
         return gsl_cdf_tdist_Pinv(x, m_nu);
     }
 
-    double q(const double x) const
+    double q(double x) const
     {
         return gsl_cdf_tdist_Q(x, m_nu);
     }
 
-    double invq(const double x) const
+    double invq(double x) const
     {
         return gsl_cdf_tdist_Qinv(x, m_nu);
     }
 
   private:
-    const double m_nu;
+    double m_nu;
 };
 
 template <typename T>
@@ -88,7 +88,7 @@ class t_pdf_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    t_pdf_functor(const T &x, const typename T::Scalar nu)
+    t_pdf_functor(const T &x, typename T::Scalar nu)
         : m_x(x)
         , m_t(nu)
     {
@@ -106,7 +106,7 @@ class t_pdf_functor
 
 template <typename T>
 inline CwiseNullaryOp<t_pdf_functor<T>, typename t_pdf_functor<T>::ArrayType>
-t_pdf(const ArrayBase<T> &x, const typename T::Scalar nu)
+t_pdf(const ArrayBase<T> &x, typename T::Scalar nu)
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");

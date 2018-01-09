@@ -43,30 +43,30 @@ namespace rdist {
 class pascal
 {
   public:
-    pascal(const double p, const unsigned int n)
+    pascal(double p, unsigned int n)
         : m_p(p)
         , m_n(n)
     {
     }
 
-    double pdf(const unsigned int x) const
+    double pdf(unsigned int x) const
     {
         return gsl_ran_pascal_pdf(x, m_p, m_n);
     }
 
-    double p(const unsigned int x) const
+    double p(unsigned int x) const
     {
         return gsl_cdf_pascal_P(x, m_p, m_n);
     }
 
-    double q(const unsigned int x) const
+    double q(unsigned int x) const
     {
         return gsl_cdf_pascal_Q(x, m_p, m_n);
     }
 
   private:
-    const double m_p;
-    const unsigned int m_n;
+    double m_p;
+    unsigned int m_n;
 };
 
 template <typename T>
@@ -80,7 +80,7 @@ class pascal_pdf_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    pascal_pdf_functor(const T &x, const double p, const unsigned int n)
+    pascal_pdf_functor(const T &x, double p, unsigned int n)
         : m_x(x)
         , m_pascal(p, n)
     {
@@ -99,7 +99,7 @@ class pascal_pdf_functor
 template <typename T>
 inline CwiseNullaryOp<pascal_pdf_functor<T>,
                       typename pascal_pdf_functor<T>::ArrayType>
-pascal_pdf(const ArrayBase<T> &x, const double p, const unsigned int n)
+pascal_pdf(const ArrayBase<T> &x, double p, unsigned int n)
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),

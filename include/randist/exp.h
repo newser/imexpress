@@ -43,38 +43,38 @@ namespace rdist {
 class exp
 {
   public:
-    exp(const double mu)
+    exp(double mu)
         : m_mu(mu)
     {
     }
 
-    double pdf(const double x) const
+    double pdf(double x) const
     {
         return gsl_ran_exponential_pdf(x, m_mu);
     }
 
-    double p(const double x) const
+    double p(double x) const
     {
         return gsl_cdf_exponential_P(x, m_mu);
     }
 
-    double invp(const double x) const
+    double invp(double x) const
     {
         return gsl_cdf_exponential_Pinv(x, m_mu);
     }
 
-    double q(const double x) const
+    double q(double x) const
     {
         return gsl_cdf_exponential_Q(x, m_mu);
     }
 
-    double invq(const double x) const
+    double invq(double x) const
     {
         return gsl_cdf_exponential_Qinv(x, m_mu);
     }
 
   private:
-    const double m_mu;
+    double m_mu;
 };
 
 template <typename T>
@@ -88,7 +88,7 @@ class exp_pdf_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    exp_pdf_functor(const T &x, const typename T::Scalar mu)
+    exp_pdf_functor(const T &x, typename T::Scalar mu)
         : m_x(x)
         , m_exp(mu)
     {
@@ -107,7 +107,7 @@ class exp_pdf_functor
 template <typename T>
 inline CwiseNullaryOp<exp_pdf_functor<T>,
                       typename exp_pdf_functor<T>::ArrayType>
-exp_pdf(const ArrayBase<T> &x, const typename T::Scalar mu)
+exp_pdf(const ArrayBase<T> &x, typename T::Scalar mu)
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");

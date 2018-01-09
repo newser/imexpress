@@ -67,7 +67,7 @@ class mnom_rng
     }
 
   private:
-    const size_t m_K;
+    size_t m_K;
     const double *m_p;
     unsigned int m_N;
     rng m_rng;

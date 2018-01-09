@@ -43,19 +43,19 @@ namespace rdist {
 class gausst
 {
   public:
-    gausst(const double a, const double sigma = 1.0)
+    gausst(double a, double sigma = 1.0)
         : m_a(a)
         , m_sigma(sigma)
     {
     }
 
-    double pdf(const double x) const
+    double pdf(double x) const
     {
         return gsl_ran_gaussian_tail_pdf(x, m_a, m_sigma);
     }
 
   private:
-    const double m_a, m_sigma;
+    double m_a, m_sigma;
 };
 
 template <typename T>
@@ -70,8 +70,8 @@ class gausst_pdf_functor
                             T::MaxColsAtCompileTime>;
 
     gausst_pdf_functor(const T &x,
-                       const typename T::Scalar a,
-                       const typename T::Scalar sigma)
+                       typename T::Scalar a,
+                       typename T::Scalar sigma)
         : m_x(x)
         , m_gausst(a, sigma)
     {
@@ -91,8 +91,8 @@ template <typename T>
 inline CwiseNullaryOp<gausst_pdf_functor<T>,
                       typename gausst_pdf_functor<T>::ArrayType>
 gausst_pdf(const ArrayBase<T> &x,
-           const typename T::Scalar a,
-           const typename T::Scalar sigma)
+           typename T::Scalar a,
+           typename T::Scalar sigma)
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");

@@ -52,10 +52,7 @@ class sample_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    sample_functor(const T &x,
-                   const size_t k,
-                   unsigned long seed,
-                   rng_type type)
+    sample_functor(const T &x, size_t k, unsigned long seed, rng_type type)
         : m_result(k)
     {
         rng r(type, seed);
@@ -80,7 +77,7 @@ class sample_functor
 template <typename T>
 inline CwiseNullaryOp<sample_functor<T>, typename sample_functor<T>::ArrayType>
 sample(const ArrayBase<T> &x,
-       const size_t k,
+       size_t k,
        unsigned long seed = 0,
        rng_type type = DEFAULT_RNG)
 {

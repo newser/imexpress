@@ -43,39 +43,39 @@ namespace rdist {
 class lgnorm
 {
   public:
-    lgnorm(const double zeta, const double sigma)
+    lgnorm(double zeta, double sigma)
         : m_zeta(zeta)
         , m_sigma(sigma)
     {
     }
 
-    double pdf(const double x) const
+    double pdf(double x) const
     {
         return gsl_ran_lognormal_pdf(x, m_zeta, m_sigma);
     }
 
-    double p(const double x) const
+    double p(double x) const
     {
         return gsl_cdf_lognormal_P(x, m_zeta, m_sigma);
     }
 
-    double invp(const double x) const
+    double invp(double x) const
     {
         return gsl_cdf_lognormal_Pinv(x, m_zeta, m_sigma);
     }
 
-    double q(const double x) const
+    double q(double x) const
     {
         return gsl_cdf_lognormal_Q(x, m_zeta, m_sigma);
     }
 
-    double invq(const double x) const
+    double invq(double x) const
     {
         return gsl_cdf_lognormal_Qinv(x, m_zeta, m_sigma);
     }
 
   private:
-    const double m_zeta, m_sigma;
+    double m_zeta, m_sigma;
 };
 
 template <typename T>
@@ -90,8 +90,8 @@ class lgnorm_pdf_functor
                             T::MaxColsAtCompileTime>;
 
     lgnorm_pdf_functor(const T &x,
-                       const typename T::Scalar zeta,
-                       const typename T::Scalar sigma)
+                       typename T::Scalar zeta,
+                       typename T::Scalar sigma)
         : m_x(x)
         , m_lgnorm(zeta, sigma)
     {
@@ -111,8 +111,8 @@ template <typename T>
 inline CwiseNullaryOp<lgnorm_pdf_functor<T>,
                       typename lgnorm_pdf_functor<T>::ArrayType>
 lgnorm_pdf(const ArrayBase<T> &x,
-           const typename T::Scalar zeta,
-           const typename T::Scalar sigma)
+           typename T::Scalar zeta,
+           typename T::Scalar sigma)
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");

@@ -43,14 +43,14 @@ namespace rdist {
 class bgauss
 {
   public:
-    bgauss(const double sigma_x, const double sigma_y, const double rho)
+    bgauss(double sigma_x, double sigma_y, double rho)
         : m_sigma_x(sigma_x)
         , m_sigma_y(sigma_y)
         , m_rho(rho)
     {
     }
 
-    double pdf(const double x, const double y) const
+    double pdf(double x, double y) const
     {
         return gsl_ran_bivariate_gaussian_pdf(x,
                                               y,
@@ -60,7 +60,7 @@ class bgauss
     }
 
   private:
-    const double m_sigma_x, m_sigma_y, m_rho;
+    double m_sigma_x, m_sigma_y, m_rho;
 };
 
 ////////////////////////////////////////////////////////////

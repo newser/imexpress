@@ -43,38 +43,38 @@ namespace rdist {
 class gauss
 {
   public:
-    gauss(const double sigma = 1.0)
+    gauss(double sigma = 1.0)
         : m_sigma(sigma)
     {
     }
 
-    double pdf(const double x) const
+    double pdf(double x) const
     {
         return gsl_ran_gaussian_pdf(x, m_sigma);
     }
 
-    double p(const double x) const
+    double p(double x) const
     {
         return gsl_cdf_gaussian_P(x, m_sigma);
     }
 
-    double invp(const double x) const
+    double invp(double x) const
     {
         return gsl_cdf_gaussian_Pinv(x, m_sigma);
     }
 
-    double q(const double x) const
+    double q(double x) const
     {
         return gsl_cdf_gaussian_Q(x, m_sigma);
     }
 
-    double invq(const double x) const
+    double invq(double x) const
     {
         return gsl_cdf_gaussian_Qinv(x, m_sigma);
     }
 
   private:
-    const double m_sigma;
+    double m_sigma;
 };
 
 template <typename T>
@@ -88,7 +88,7 @@ class gauss_pdf_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    gauss_pdf_functor(const T &x, const typename T::Scalar sigma)
+    gauss_pdf_functor(const T &x, typename T::Scalar sigma)
         : m_x(x)
         , m_gauss(sigma)
     {
@@ -107,7 +107,7 @@ class gauss_pdf_functor
 template <typename T>
 inline CwiseNullaryOp<gauss_pdf_functor<T>,
                       typename gauss_pdf_functor<T>::ArrayType>
-gauss_pdf(const ArrayBase<T> &x, const typename T::Scalar sigma)
+gauss_pdf(const ArrayBase<T> &x, typename T::Scalar sigma)
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");

@@ -43,38 +43,38 @@ namespace rdist {
 class lgst
 {
   public:
-    lgst(const double a)
+    lgst(double a)
         : m_a(a)
     {
     }
 
-    double pdf(const double x) const
+    double pdf(double x) const
     {
         return gsl_ran_logistic_pdf(x, m_a);
     }
 
-    double p(const double x) const
+    double p(double x) const
     {
         return gsl_cdf_logistic_P(x, m_a);
     }
 
-    double invp(const double x) const
+    double invp(double x) const
     {
         return gsl_cdf_logistic_Pinv(x, m_a);
     }
 
-    double q(const double x) const
+    double q(double x) const
     {
         return gsl_cdf_logistic_Q(x, m_a);
     }
 
-    double invq(const double x) const
+    double invq(double x) const
     {
         return gsl_cdf_logistic_Qinv(x, m_a);
     }
 
   private:
-    const double m_a;
+    double m_a;
 };
 
 template <typename T>
@@ -88,7 +88,7 @@ class lgst_pdf_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    lgst_pdf_functor(const T &x, const typename T::Scalar a)
+    lgst_pdf_functor(const T &x, typename T::Scalar a)
         : m_x(x)
         , m_lgst(a)
     {
@@ -107,7 +107,7 @@ class lgst_pdf_functor
 template <typename T>
 inline CwiseNullaryOp<lgst_pdf_functor<T>,
                       typename lgst_pdf_functor<T>::ArrayType>
-lgst_pdf(const ArrayBase<T> &x, const typename T::Scalar a)
+lgst_pdf(const ArrayBase<T> &x, typename T::Scalar a)
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");
