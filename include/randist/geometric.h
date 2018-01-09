@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_RANDIST_LOG__
-#define __IEXP_RANDIST_LOG__
+#ifndef __IEXP_RANDIST_GEOMETRIC__
+#define __IEXP_RANDIST_GEOMETRIC__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -40,25 +40,35 @@ namespace rdist {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class log
+class geo
 {
   public:
-    log(double p)
+    geo(const double p)
         : m_p(p)
     {
     }
 
     double pdf(unsigned int x) const
     {
-        return gsl_ran_logarithmic_pdf(x, m_p);
+        return gsl_ran_geometric_pdf(x, m_p);
+    }
+
+    double p(unsigned int x) const
+    {
+        return gsl_cdf_geometric_P(x, m_p);
+    }
+
+    double q(unsigned int x) const
+    {
+        return gsl_cdf_geometric_Q(x, m_p);
     }
 
   private:
-    double m_p;
+    const double m_p;
 };
 
 template <typename T>
-class log_pdf_functor
+class geo_pdf_functor
 {
   public:
     using ArrayType = Array<double,
@@ -68,35 +78,35 @@ class log_pdf_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    log_pdf_functor(const T &x, double p)
+    geo_pdf_functor(const T &x, const double p)
         : m_x(x)
-        , m_log(p)
+        , m_geo(p)
     {
     }
 
     double operator()(Index i, Index j) const
     {
-        return m_log.pdf(m_x(i, j));
+        return m_geo.pdf(m_x(i, j));
     }
 
   private:
     const T &m_x;
-    log m_log;
+    geo m_geo;
 };
 
 template <typename T>
-inline CwiseNullaryOp<log_pdf_functor<T>,
-                      typename log_pdf_functor<T>::ArrayType>
-log_pdf(const ArrayBase<T> &x, double p)
+inline CwiseNullaryOp<geo_pdf_functor<T>,
+                      typename geo_pdf_functor<T>::ArrayType>
+geo_pdf(const ArrayBase<T> &x, const double p)
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),
                   "scalar can only be int or unsigned int");
 
-    using ArrayType = typename log_pdf_functor<T>::ArrayType;
+    using ArrayType = typename geo_pdf_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
-                                  log_pdf_functor<T>(x.derived(), p));
+                                  geo_pdf_functor<T>(x.derived(), p));
 }
 
 ////////////////////////////////////////////////////////////
@@ -110,4 +120,4 @@ log_pdf(const ArrayBase<T> &x, double p)
 
 IEXP_NS_END
 
-#endif /* __IEXP_RANDIST_LOG__ */
+#endif /* __IEXP_RANDIST_GEOMETRIC__ */

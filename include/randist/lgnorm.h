@@ -10,14 +10,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received zeta copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
  * USA.
  */
 
-#ifndef __IEXP_RANDIST_LOG__
-#define __IEXP_RANDIST_LOG__
+#ifndef __IEXP_RANDIST_LGNORM__
+#define __IEXP_RANDIST_LGNORM__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -40,63 +40,89 @@ namespace rdist {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class log
+class lgnorm
 {
   public:
-    log(double p)
-        : m_p(p)
+    lgnorm(const double zeta, const double sigma)
+        : m_zeta(zeta)
+        , m_sigma(sigma)
     {
     }
 
-    double pdf(unsigned int x) const
+    double pdf(const double x) const
     {
-        return gsl_ran_logarithmic_pdf(x, m_p);
+        return gsl_ran_lognormal_pdf(x, m_zeta, m_sigma);
+    }
+
+    double p(const double x) const
+    {
+        return gsl_cdf_lognormal_P(x, m_zeta, m_sigma);
+    }
+
+    double invp(const double x) const
+    {
+        return gsl_cdf_lognormal_Pinv(x, m_zeta, m_sigma);
+    }
+
+    double q(const double x) const
+    {
+        return gsl_cdf_lognormal_Q(x, m_zeta, m_sigma);
+    }
+
+    double invq(const double x) const
+    {
+        return gsl_cdf_lognormal_Qinv(x, m_zeta, m_sigma);
     }
 
   private:
-    double m_p;
+    const double m_zeta, m_sigma;
 };
 
 template <typename T>
-class log_pdf_functor
+class lgnorm_pdf_functor
 {
   public:
-    using ArrayType = Array<double,
+    using ArrayType = Array<typename T::Scalar,
                             T::RowsAtCompileTime,
                             T::ColsAtCompileTime,
                             T::Flags & RowMajorBit ? RowMajor : ColMajor,
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    log_pdf_functor(const T &x, double p)
+    lgnorm_pdf_functor(const T &x,
+                       const typename T::Scalar zeta,
+                       const typename T::Scalar sigma)
         : m_x(x)
-        , m_log(p)
+        , m_lgnorm(zeta, sigma)
     {
     }
 
-    double operator()(Index i, Index j) const
+    typename T::Scalar operator()(Index i, Index j) const
     {
-        return m_log.pdf(m_x(i, j));
+        return m_lgnorm.pdf(m_x(i, j));
     }
 
   private:
     const T &m_x;
-    log m_log;
+    lgnorm m_lgnorm;
 };
 
 template <typename T>
-inline CwiseNullaryOp<log_pdf_functor<T>,
-                      typename log_pdf_functor<T>::ArrayType>
-log_pdf(const ArrayBase<T> &x, double p)
+inline CwiseNullaryOp<lgnorm_pdf_functor<T>,
+                      typename lgnorm_pdf_functor<T>::ArrayType>
+lgnorm_pdf(const ArrayBase<T> &x,
+           const typename T::Scalar zeta,
+           const typename T::Scalar sigma)
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "scalar can only be int or unsigned int");
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "scalar can only be double");
 
-    using ArrayType = typename log_pdf_functor<T>::ArrayType;
+    using ArrayType = typename lgnorm_pdf_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
-                                  log_pdf_functor<T>(x.derived(), p));
+                                  lgnorm_pdf_functor<T>(x.derived(),
+                                                        zeta,
+                                                        sigma));
 }
 
 ////////////////////////////////////////////////////////////
@@ -110,4 +136,4 @@ log_pdf(const ArrayBase<T> &x, double p)
 
 IEXP_NS_END
 
-#endif /* __IEXP_RANDIST_LOG__ */
+#endif /* __IEXP_RANDIST_LGNORM__ */

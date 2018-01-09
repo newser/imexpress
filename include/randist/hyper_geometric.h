@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_RANDIST_LOG__
-#define __IEXP_RANDIST_LOG__
+#ifndef __IEXP_RANDIST_HYPER_GEOMETRIC__
+#define __IEXP_RANDIST_HYPER_GEOMETRIC__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -40,25 +40,37 @@ namespace rdist {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class log
+class hgeo
 {
   public:
-    log(double p)
-        : m_p(p)
+    hgeo(unsigned int n1, unsigned int n2, unsigned int t)
+        : m_n1(n1)
+        , m_n2(n2)
+        , m_t(t)
     {
     }
 
     double pdf(unsigned int x) const
     {
-        return gsl_ran_logarithmic_pdf(x, m_p);
+        return gsl_ran_hypergeometric_pdf(x, m_n1, m_n2, m_t);
+    }
+
+    double p(unsigned int x) const
+    {
+        return gsl_cdf_hypergeometric_P(x, m_n1, m_n2, m_t);
+    }
+
+    double q(unsigned int x) const
+    {
+        return gsl_cdf_hypergeometric_Q(x, m_n1, m_n2, m_t);
     }
 
   private:
-    double m_p;
+    const unsigned int m_n1, m_n2, m_t;
 };
 
 template <typename T>
-class log_pdf_functor
+class hgeo_pdf_functor
 {
   public:
     using ArrayType = Array<double,
@@ -68,35 +80,41 @@ class log_pdf_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    log_pdf_functor(const T &x, double p)
+    hgeo_pdf_functor(const T &x,
+                     unsigned int n1,
+                     unsigned int n2,
+                     unsigned int t)
         : m_x(x)
-        , m_log(p)
+        , m_hgeo(n1, n2, t)
     {
     }
 
     double operator()(Index i, Index j) const
     {
-        return m_log.pdf(m_x(i, j));
+        return m_hgeo.pdf(m_x(i, j));
     }
 
   private:
     const T &m_x;
-    log m_log;
+    hgeo m_hgeo;
 };
 
 template <typename T>
-inline CwiseNullaryOp<log_pdf_functor<T>,
-                      typename log_pdf_functor<T>::ArrayType>
-log_pdf(const ArrayBase<T> &x, double p)
+inline CwiseNullaryOp<hgeo_pdf_functor<T>,
+                      typename hgeo_pdf_functor<T>::ArrayType>
+hgeo_pdf(const ArrayBase<T> &x,
+         unsigned int n1,
+         unsigned int n2,
+         unsigned int t)
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),
                   "scalar can only be int or unsigned int");
 
-    using ArrayType = typename log_pdf_functor<T>::ArrayType;
+    using ArrayType = typename hgeo_pdf_functor<T>::ArrayType;
     return ArrayType::NullaryExpr(x.rows(),
                                   x.cols(),
-                                  log_pdf_functor<T>(x.derived(), p));
+                                  hgeo_pdf_functor<T>(x.derived(), n1, n2, t));
 }
 
 ////////////////////////////////////////////////////////////
@@ -110,4 +128,4 @@ log_pdf(const ArrayBase<T> &x, double p)
 
 IEXP_NS_END
 
-#endif /* __IEXP_RANDIST_LOG__ */
+#endif /* __IEXP_RANDIST_HYPER_GEOMETRIC__ */
