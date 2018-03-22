@@ -55,21 +55,21 @@ inline double std_impl(const double data[], size_t n)
     return gsl_stats_sd(data, 1, n);
 }
 
-#define DEFINE_VAR(type, name)                                                 \
+#define DEFINE_STD(type, name)                                                 \
     template <>                                                                \
     inline double std_impl(const type data[], size_t n)                        \
     {                                                                          \
         return gsl_stats_##name##_sd(data, 1, n);                              \
     }
-DEFINE_VAR(char, char)
-DEFINE_VAR(unsigned char, uchar)
-DEFINE_VAR(short, short)
-DEFINE_VAR(unsigned short, ushort)
-DEFINE_VAR(int, int)
-DEFINE_VAR(unsigned int, uint)
-DEFINE_VAR(float, float)
-DEFINE_VAR(long double, long_double)
-#undef DEFINE_VAR
+DEFINE_STD(char, char)
+DEFINE_STD(unsigned char, uchar)
+DEFINE_STD(short, short)
+DEFINE_STD(unsigned short, ushort)
+DEFINE_STD(int, int)
+DEFINE_STD(unsigned int, uint)
+DEFINE_STD(float, float)
+DEFINE_STD(long double, long_double)
+#undef DEFINE_STD
 
 template <typename T>
 inline double std(const ArrayBase<T> &data)
@@ -96,21 +96,21 @@ inline double std_m_impl(const double data[], size_t n, double mean)
     return gsl_stats_sd_m(data, 1, n, mean);
 }
 
-#define DEFINE_VAR_M(type, name)                                               \
+#define DEFINE_STD_M(type, name)                                               \
     template <>                                                                \
     inline double std_m_impl(const type data[], size_t n, double mean)         \
     {                                                                          \
         return gsl_stats_##name##_sd_m(data, 1, n, mean);                      \
     }
-DEFINE_VAR_M(char, char)
-DEFINE_VAR_M(unsigned char, uchar)
-DEFINE_VAR_M(short, short)
-DEFINE_VAR_M(unsigned short, ushort)
-DEFINE_VAR_M(int, int)
-DEFINE_VAR_M(unsigned int, uint)
-DEFINE_VAR_M(float, float)
-DEFINE_VAR_M(long double, long_double)
-#undef DEFINE_VAR_M
+DEFINE_STD_M(char, char)
+DEFINE_STD_M(unsigned char, uchar)
+DEFINE_STD_M(short, short)
+DEFINE_STD_M(unsigned short, ushort)
+DEFINE_STD_M(int, int)
+DEFINE_STD_M(unsigned int, uint)
+DEFINE_STD_M(float, float)
+DEFINE_STD_M(long double, long_double)
+#undef DEFINE_STD_M
 
 template <typename T>
 inline double std(const ArrayBase<T> &data, double mean)
@@ -119,6 +119,44 @@ inline double std(const ArrayBase<T> &data, double mean)
 
     typename type_eval<T>::type m_data(data.eval());
     return std_m_impl(m_data.data(), m_data.size(), mean);
+}
+
+// ========================================
+// unbiased standard deviation
+// ========================================
+
+template <typename T>
+inline double ustd_m_impl(const T data[], size_t n, double mean)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double ustd_m_impl(const double data[], size_t n, double mean)
+{
+    return gsl_stats_sd_with_fixed_mean(data, 1, n, mean);
+}
+
+#define DEFINE_Uustd_M(type, name)                                             \
+    template <>                                                                \
+    inline double ustd_m_impl(const type data[], size_t n, double mean)        \
+    {                                                                          \
+        return gsl_stats_##name##_sd_with_fixed_mean(data, 1, n, mean);        \
+    }
+DEFINE_Uustd_M(char, char) DEFINE_Uustd_M(unsigned char, uchar)
+    DEFINE_Uustd_M(short, short) DEFINE_Uustd_M(unsigned short, ushort)
+        DEFINE_Uustd_M(int, int) DEFINE_Uustd_M(unsigned int, uint)
+            DEFINE_Uustd_M(float, float)
+                DEFINE_Uustd_M(long double, long_double)
+#undef DEFINE_Uustd_M
+
+                    template <typename T>
+                    inline double ustd(const ArrayBase<T> &data, double mean)
+{
+    eigen_assert(IS_VEC(data));
+
+    typename type_eval<T>::type m_data(data.eval());
+    return ustd_m_impl(m_data.data(), m_data.size(), mean);
 }
 
 ////////////////////////////////////////////////////////////

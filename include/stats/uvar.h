@@ -121,47 +121,6 @@ inline double var(const ArrayBase<T> &data, double mean)
     return var_m_impl(m_data.data(), m_data.size(), mean);
 }
 
-// ========================================
-// unbiased variance
-// ========================================
-
-template <typename T>
-inline double uvar_impl(const T data[], size_t n, double mean)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double uvar_impl(const double data[], size_t n, double mean)
-{
-    return gsl_stats_variance_with_fixed_mean(data, 1, n, mean);
-}
-
-#define DEFINE_UVAR_M(type, name)                                              \
-    template <>                                                                \
-    inline double uvar_impl(const type data[], size_t n, double mean)          \
-    {                                                                          \
-        return gsl_stats_##name##_variance_with_fixed_mean(data, 1, n, mean);  \
-    }
-DEFINE_UVAR_M(char, char)
-DEFINE_UVAR_M(unsigned char, uchar)
-DEFINE_UVAR_M(short, short)
-DEFINE_UVAR_M(unsigned short, ushort)
-DEFINE_UVAR_M(int, int)
-DEFINE_UVAR_M(unsigned int, uint)
-DEFINE_UVAR_M(float, float)
-DEFINE_UVAR_M(long double, long_double)
-#undef DEFINE_UVAR_M
-
-template <typename T>
-inline double uvar(const ArrayBase<T> &data, double mean)
-{
-    eigen_assert(IS_VEC(data));
-
-    typename type_eval<T>::type m_data(data.eval());
-    return uvar_impl(m_data.data(), m_data.size(), mean);
-}
-
 ////////////////////////////////////////////////////////////
 // global variants
 ////////////////////////////////////////////////////////////
