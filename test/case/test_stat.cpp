@@ -2,6 +2,7 @@
 #include <catch.hpp>
 #include <iostream>
 #include <stats/autocorr.h>
+#include <stats/cov.h>
 #include <stats/kurtosis.h>
 #include <stats/mean.h>
 #include <stats/skewness.h>
@@ -248,4 +249,38 @@ TEST_CASE("stat_autocorr")
 
     // compile
     v = iexp::stats::mean(c + c2.cast<double>());
+}
+
+TEST_CASE("stat_cov")
+{
+    double v, g;
+
+    iexp::ArrayXd c, d;
+    c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::cov(c, d);
+    g = gsl_stats_covariance(c.data(), 1, d.data(), 1, c.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    iexp::ArrayXi c2, d2;
+    c2 = iexp::ArrayXi::Random(10);
+    d2 = iexp::ArrayXi::Random(10);
+    v = iexp::stats::cov(c2, d2);
+    g = gsl_stats_int_covariance(c2.data(), 1, d2.data(), 1, c2.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::cov(c, d, 1, 2);
+    g = gsl_stats_covariance_m(c.data(), 1, d.data(), 1, c.size(), 1, 2);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c2 = iexp::ArrayXi::Random(10);
+    d2 = iexp::ArrayXi::Random(10);
+    v = iexp::stats::cov(c2, d2, 3, 4);
+    g = gsl_stats_int_covariance_m(c2.data(), 1, d2.data(), 1, c2.size(), 3, 4);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    // compile
+    v = iexp::stats::cov(c + c2.cast<double>(), d + d2.cast<double>());
 }
