@@ -87,6 +87,16 @@ TEST_CASE("stat_std")
     g = gsl_stats_sd_with_fixed_mean(c.data(), 1, c.size(), 1);
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
+    c = iexp::ArrayXd::Random(10);
+    v = iexp::stats::abstd(c);
+    g = gsl_stats_absdev(c.data(), 1, c.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
+    v = iexp::stats::abstd(c, 2);
+    g = gsl_stats_absdev_m(c.data(), 1, c.size(), 2);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
     iexp::ArrayXi c2;
     c2 = iexp::ArrayXi::Random(10);
     v = iexp::stats::std(c2);
@@ -101,6 +111,16 @@ TEST_CASE("stat_std")
     c2 = iexp::ArrayXi::Random(10);
     v = iexp::stats::ustd(c2, 2);
     g = gsl_stats_int_sd_with_fixed_mean(c2.data(), 1, c2.size(), 2);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c2 = iexp::ArrayXi::Random(10);
+    v = iexp::stats::abstd(c2);
+    g = gsl_stats_int_absdev(c2.data(), 1, c2.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c2 = iexp::ArrayXi::Random(10);
+    v = iexp::stats::abstd(c2, 2);
+    g = gsl_stats_int_absdev_m(c2.data(), 1, c2.size(), 2);
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     // compile

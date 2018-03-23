@@ -159,6 +159,88 @@ DEFINE_Uustd_M(char, char) DEFINE_Uustd_M(unsigned char, uchar)
     return ustd_m_impl(m_data.data(), m_data.size(), mean);
 }
 
+// ========================================
+// absolute standard deviation
+// ========================================
+
+template <typename T>
+inline double abstd_impl(const T data[], size_t n)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double abstd_impl(const double data[], size_t n)
+{
+    return gsl_stats_absdev(data, 1, n);
+}
+
+#define DEFINE_ABSTD(type, name)                                               \
+    template <>                                                                \
+    inline double abstd_impl(const type data[], size_t n)                      \
+    {                                                                          \
+        return gsl_stats_##name##_absdev(data, 1, n);                          \
+    }
+DEFINE_ABSTD(char, char)
+DEFINE_ABSTD(unsigned char, uchar)
+DEFINE_ABSTD(short, short)
+DEFINE_ABSTD(unsigned short, ushort)
+DEFINE_ABSTD(int, int)
+DEFINE_ABSTD(unsigned int, uint)
+DEFINE_ABSTD(float, float)
+DEFINE_ABSTD(long double, long_double)
+#undef DEFINE_ABSTD
+
+template <typename T>
+inline double abstd(const ArrayBase<T> &data)
+{
+    eigen_assert(IS_VEC(data));
+
+    typename type_eval<T>::type m_data(data.eval());
+    return abstd_impl(m_data.data(), m_data.size());
+}
+
+// ========================================
+// absolute standard deviation relative to specified mean
+// ========================================
+
+template <typename T>
+inline double abstd_m_impl(const T data[], size_t n, double mean)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double abstd_m_impl(const double data[], size_t n, double mean)
+{
+    return gsl_stats_absdev_m(data, 1, n, mean);
+}
+
+#define DEFINE_ABSTD_M(type, name)                                             \
+    template <>                                                                \
+    inline double abstd_m_impl(const type data[], size_t n, double mean)       \
+    {                                                                          \
+        return gsl_stats_##name##_absdev_m(data, 1, n, mean);                  \
+    }
+DEFINE_ABSTD_M(char, char)
+DEFINE_ABSTD_M(unsigned char, uchar)
+DEFINE_ABSTD_M(short, short)
+DEFINE_ABSTD_M(unsigned short, ushort)
+DEFINE_ABSTD_M(int, int)
+DEFINE_ABSTD_M(unsigned int, uint)
+DEFINE_ABSTD_M(float, float)
+DEFINE_ABSTD_M(long double, long_double)
+#undef DEFINE_ABSTD_M
+
+template <typename T>
+inline double abstd(const ArrayBase<T> &data, double mean)
+{
+    eigen_assert(IS_VEC(data));
+
+    typename type_eval<T>::type m_data(data.eval());
+    return abstd_m_impl(m_data.data(), m_data.size(), mean);
+}
+
 ////////////////////////////////////////////////////////////
 // global variants
 ////////////////////////////////////////////////////////////
