@@ -57,7 +57,7 @@ set(IEXP_SOURCE)
 add_group(common ${ROOT_PATH}/include/common ${ROOT_PATH}/source/common IEXP_SOURCE)
 add_group(math ${ROOT_PATH}/include/math ${ROOT_PATH}/source/math IEXP_SOURCE)
 add_group(complex ${ROOT_PATH}/include/complex ${ROOT_PATH}/source/complex IEXP_SOURCE)
-add_group(polynomial ${ROOT_PATH}/include/polynomial ${ROOT_PATH}/source/polynomial IEXP_SOURCE)
+add_group(poly ${ROOT_PATH}/include/poly ${ROOT_PATH}/source/poly IEXP_SOURCE)
 add_group(special ${ROOT_PATH}/include/special ${ROOT_PATH}/source/special IEXP_SOURCE)
 add_group(combination ${ROOT_PATH}/include/combination ${ROOT_PATH}/source/combination IEXP_SOURCE)
 add_group(multiset ${ROOT_PATH}/include/multiset ${ROOT_PATH}/source/multiset IEXP_SOURCE)
@@ -67,6 +67,7 @@ add_group(fft ${ROOT_PATH}/include/fft/fftw ${ROOT_PATH}/source/fft/fftw IEXP_SO
 add_group(integral ${ROOT_PATH}/include/integral ${ROOT_PATH}/source/integral IEXP_SOURCE)
 add_group(rand ${ROOT_PATH}/include/rand ${ROOT_PATH}/source/rand IEXP_SOURCE)
 add_group(randist ${ROOT_PATH}/include/randist ${ROOT_PATH}/source/randist IEXP_SOURCE)
+add_group(stats ${ROOT_PATH}/include/stats ${ROOT_PATH}/source/stats IEXP_SOURCE)
 
 #
 # build

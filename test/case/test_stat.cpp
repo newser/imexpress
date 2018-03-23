@@ -2,6 +2,7 @@
 #include <catch.hpp>
 #include <iostream>
 #include <stats/autocorr.h>
+#include <stats/corrcoef.h>
 #include <stats/cov.h>
 #include <stats/kurtosis.h>
 #include <stats/mean.h>
@@ -283,4 +284,40 @@ TEST_CASE("stat_cov")
 
     // compile
     v = iexp::stats::cov(c + c2.cast<double>(), d + d2.cast<double>());
+}
+
+TEST_CASE("stat_corrcoef")
+{
+    double v, g;
+    double work[20];
+
+    iexp::ArrayXd c, d;
+    c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::corrcoef(c, d);
+    g = gsl_stats_correlation(c.data(), 1, d.data(), 1, c.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    iexp::ArrayXi c2, d2;
+    c2 = iexp::ArrayXi::Random(10);
+    d2 = iexp::ArrayXi::Random(10);
+    v = iexp::stats::corrcoef(c2, d2);
+    g = gsl_stats_int_correlation(c2.data(), 1, d2.data(), 1, c2.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::spearman(c, d);
+    g = gsl_stats_spearman(c.data(), 1, d.data(), 1, c.size(), work);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c2 = iexp::ArrayXi::Random(10);
+    d2 = iexp::ArrayXi::Random(10);
+    v = iexp::stats::spearman(c2, d2);
+    g = gsl_stats_int_spearman(c2.data(), 1, d2.data(), 1, c2.size(), work);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    // compile
+    v = iexp::stats::corrcoef(c + c2.cast<double>(), d + d2.cast<double>());
+    v = iexp::stats::spearman(c + c2.cast<double>(), d + d2.cast<double>());
 }
