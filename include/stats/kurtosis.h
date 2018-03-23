@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_STATS_VAR__
-#define __IEXP_STATS_VAR__
+#ifndef __IEXP_STATS_KURTOSIS__
+#define __IEXP_STATS_KURTOSIS__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -40,130 +40,98 @@ namespace stats {
 ////////////////////////////////////////////////////////////
 
 // ========================================
-// variance
+// kurtosis
 // ========================================
 
 template <typename T>
-inline double var_impl(const T data[], size_t n)
+inline double kurtosis_impl(const T data[], size_t n)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double var_impl(const double data[], size_t n)
+inline double kurtosis_impl(const double data[], size_t n)
 {
-    return gsl_stats_variance(data, 1, n);
+    return gsl_stats_kurtosis(data, 1, n);
 }
 
-#define DEFINE_VAR(type, name)                                                 \
+#define DEFINE_KURTOSIS(type, name)                                            \
     template <>                                                                \
-    inline double var_impl(const type data[], size_t n)                        \
+    inline double kurtosis_impl(const type data[], size_t n)                   \
     {                                                                          \
-        return gsl_stats_##name##_variance(data, 1, n);                        \
+        return gsl_stats_##name##_kurtosis(data, 1, n);                        \
     }
-DEFINE_VAR(char, char)
-DEFINE_VAR(unsigned char, uchar)
-DEFINE_VAR(short, short)
-DEFINE_VAR(unsigned short, ushort)
-DEFINE_VAR(int, int)
-DEFINE_VAR(unsigned int, uint)
-DEFINE_VAR(float, float)
-DEFINE_VAR(long double, long_double)
-#undef DEFINE_VAR
+DEFINE_KURTOSIS(char, char)
+DEFINE_KURTOSIS(unsigned char, uchar)
+DEFINE_KURTOSIS(short, short)
+DEFINE_KURTOSIS(unsigned short, ushort)
+DEFINE_KURTOSIS(int, int)
+DEFINE_KURTOSIS(unsigned int, uint)
+DEFINE_KURTOSIS(float, float)
+DEFINE_KURTOSIS(long double, long_double)
+#undef DEFINE_KURTOSIS
 
 template <typename T>
-inline double var(const ArrayBase<T> &data)
+inline double kurtosis(const ArrayBase<T> &data)
 {
     eigen_assert(IS_VEC(data));
 
     typename type_eval<T>::type m_data(data.eval());
-    return var_impl(m_data.data(), m_data.size());
+    return kurtosis_impl(m_data.data(), m_data.size());
 }
 
 // ========================================
-// variance relative to specified mean
+// kurtosis with specified mean and std
 // ========================================
 
 template <typename T>
-inline double var_m_impl(const T data[], size_t n, double mean)
+inline double kurtosis_mv_impl(const T data[],
+                               size_t n,
+                               double mean,
+                               double std)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double var_m_impl(const double data[], size_t n, double mean)
+inline double kurtosis_mv_impl(const double data[],
+                               size_t n,
+                               double mean,
+                               double std)
 {
-    return gsl_stats_variance_m(data, 1, n, mean);
+    return gsl_stats_kurtosis_m_sd(data, 1, n, mean, std);
 }
 
-#define DEFINE_VAR_M(type, name)                                               \
+#define DEFINE_KURTOSIS_MV(type, name)                                         \
     template <>                                                                \
-    inline double var_m_impl(const type data[], size_t n, double mean)         \
+    inline double kurtosis_mv_impl(const type data[],                          \
+                                   size_t n,                                   \
+                                   double mean,                                \
+                                   double std)                                 \
     {                                                                          \
-        return gsl_stats_##name##_variance_m(data, 1, n, mean);                \
+        return gsl_stats_##name##_kurtosis_m_sd(data, 1, n, mean, std);        \
     }
-DEFINE_VAR_M(char, char)
-DEFINE_VAR_M(unsigned char, uchar)
-DEFINE_VAR_M(short, short)
-DEFINE_VAR_M(unsigned short, ushort)
-DEFINE_VAR_M(int, int)
-DEFINE_VAR_M(unsigned int, uint)
-DEFINE_VAR_M(float, float)
-DEFINE_VAR_M(long double, long_double)
-#undef DEFINE_VAR_M
+DEFINE_KURTOSIS_MV(char, char)
+DEFINE_KURTOSIS_MV(unsigned char, uchar)
+DEFINE_KURTOSIS_MV(short, short)
+DEFINE_KURTOSIS_MV(unsigned short, ushort)
+DEFINE_KURTOSIS_MV(int, int)
+DEFINE_KURTOSIS_MV(unsigned int, uint)
+DEFINE_KURTOSIS_MV(float, float)
+DEFINE_KURTOSIS_MV(long double, long_double)
+#undef DEFINE_KURTOSIS_MV
 
 template <typename T>
-inline double var(const ArrayBase<T> &data, double mean)
+inline double kurtosis(const ArrayBase<T> &data, double mean, double std)
 {
     eigen_assert(IS_VEC(data));
 
     typename type_eval<T>::type m_data(data.eval());
-    return var_m_impl(m_data.data(), m_data.size(), mean);
-}
-
-// ========================================
-// unbiased variance
-// ========================================
-
-template <typename T>
-inline double uvar_impl(const T data[], size_t n, double mean)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double uvar_impl(const double data[], size_t n, double mean)
-{
-    return gsl_stats_variance_with_fixed_mean(data, 1, n, mean);
-}
-
-#define DEFINE_UVAR_M(type, name)                                              \
-    template <>                                                                \
-    inline double uvar_impl(const type data[], size_t n, double mean)          \
-    {                                                                          \
-        return gsl_stats_##name##_variance_with_fixed_mean(data, 1, n, mean);  \
-    }
-DEFINE_UVAR_M(char, char)
-DEFINE_UVAR_M(unsigned char, uchar)
-DEFINE_UVAR_M(short, short)
-DEFINE_UVAR_M(unsigned short, ushort)
-DEFINE_UVAR_M(int, int)
-DEFINE_UVAR_M(unsigned int, uint)
-DEFINE_UVAR_M(float, float)
-DEFINE_UVAR_M(long double, long_double)
-#undef DEFINE_UVAR_M
-
-template <typename T>
-inline double uvar(const ArrayBase<T> &data, double mean)
-{
-    eigen_assert(IS_VEC(data));
-
-    typename type_eval<T>::type m_data(data.eval());
-    return uvar_impl(m_data.data(), m_data.size(), mean);
+    return kurtosis_mv_impl(m_data.data(), m_data.size(), mean, std);
 }
 
 ////////////////////////////////////////////////////////////
-// global variants
+// global kurtosisiants
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
@@ -173,4 +141,4 @@ inline double uvar(const ArrayBase<T> &data, double mean)
 
 IEXP_NS_END
 
-#endif /* __IEXP_STATS_VAR__ */
+#endif /* __IEXP_STATS_KURTOSIS__ */
