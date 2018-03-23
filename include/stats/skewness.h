@@ -130,6 +130,124 @@ inline double skewness(const ArrayBase<T> &data, double mean, double std)
     return skewness_mv_impl(m_data.data(), m_data.size(), mean, std);
 }
 
+// ========================================
+// weighted skewness
+// ========================================
+
+template <typename T>
+inline double wskewness_impl(const T data[], const T w[], size_t n)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double wskewness_impl(const double data[], const double w[], size_t n)
+{
+    return gsl_stats_wskew(w, 1, data, 1, n);
+}
+
+template <typename T>
+inline double wskewness(const ArrayBase<T> &data, const ArrayBase<T> &weight)
+{
+    eigen_assert(IS_VEC(data));
+
+    typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
+    return wskewness_impl(m_data.data(), m_w.data(), m_data.size());
+}
+
+// ========================================
+// weighted skewness with specified mean and std
+// ========================================
+
+template <typename T>
+inline double wskewness_mv_impl(
+    const T data[], const T w[], size_t n, double mean, double std)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double wskewness_mv_impl(
+    const double data[], const double w[], size_t n, double mean, double std)
+{
+    return gsl_stats_wskew_m_sd(w, 1, data, 1, n, mean, std);
+}
+
+template <typename T>
+inline double wskewness(const ArrayBase<T> &data,
+                        const ArrayBase<T> &weight,
+                        double mean,
+                        double std)
+{
+    eigen_assert(IS_VEC(data));
+
+    typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
+    return wskewness_mv_impl(m_data.data(),
+                             m_w.data(),
+                             m_data.size(),
+                             mean,
+                             std);
+}
+
+// ========================================
+// weighted kurtosis
+// ========================================
+
+template <typename T>
+inline double wkurtosis_impl(const T data[], const T w[], size_t n)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double wkurtosis_impl(const double data[], const double w[], size_t n)
+{
+    return gsl_stats_wkurtosis(w, 1, data, 1, n);
+}
+
+template <typename T>
+inline double wkurtosis(const ArrayBase<T> &data, const ArrayBase<T> &weight)
+{
+    eigen_assert(IS_VEC(data));
+
+    typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
+    return wkurtosis_impl(m_data.data(), m_w.data(), m_data.size());
+}
+
+// ========================================
+// weighted kurtosis with specified mean and std
+// ========================================
+
+template <typename T>
+inline double wkurtosis_mv_impl(
+    const T data[], const T w[], size_t n, double mean, double std)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double wkurtosis_mv_impl(
+    const double data[], const double w[], size_t n, double mean, double std)
+{
+    return gsl_stats_wkurtosis_m_sd(w, 1, data, 1, n, mean, std);
+}
+
+template <typename T>
+inline double wkurtosis(const ArrayBase<T> &data,
+                        const ArrayBase<T> &weight,
+                        double mean,
+                        double std)
+{
+    eigen_assert(IS_VEC(data));
+
+    typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
+    return wkurtosis_mv_impl(m_data.data(),
+                             m_w.data(),
+                             m_data.size(),
+                             mean,
+                             std);
+}
+
 ////////////////////////////////////////////////////////////
 // global skewnessiants
 ////////////////////////////////////////////////////////////

@@ -121,6 +121,63 @@ inline double tss(const ArrayBase<T> &data, double mean)
     return tss_m_impl(m_data.data(), m_data.size(), mean);
 }
 
+// ========================================
+// weighted tss
+// ========================================
+
+template <typename T>
+inline double wtss_impl(const T data[], const T w[], size_t n)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double wtss_impl(const double data[], const double w[], size_t n)
+{
+    return gsl_stats_wtss(w, 1, data, 1, n);
+}
+
+template <typename T>
+inline double wtss(const ArrayBase<T> &data, const ArrayBase<T> &weight)
+{
+    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
+                 (data.size() == weight.size()));
+
+    typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
+    return wtss_impl(m_data.data(), m_w.data(), m_data.size());
+}
+
+// ========================================
+// weighted tss relative to specified mean
+// ========================================
+
+template <typename T>
+inline double wtss_impl(const T data[], const T w[], size_t n, double mean)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double wtss_impl(const double data[],
+                        const double w[],
+                        size_t n,
+                        double mean)
+{
+    return gsl_stats_wtss_m(w, 1, data, 1, n, mean);
+}
+
+template <typename T>
+inline double wtss(const ArrayBase<T> &data,
+                   const ArrayBase<T> &weight,
+                   double mean)
+{
+    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
+                 (data.size() == weight.size()));
+
+    typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
+    return wtss_impl(m_data.data(), m_w.data(), m_data.size(), mean);
+}
+
 ////////////////////////////////////////////////////////////
 // global variants
 ////////////////////////////////////////////////////////////

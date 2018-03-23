@@ -162,6 +162,94 @@ inline double uvar(const ArrayBase<T> &data, double mean)
     return uvar_impl(m_data.data(), m_data.size(), mean);
 }
 
+// ========================================
+// weighted variance
+// ========================================
+
+template <typename T>
+inline double wvar_impl(const T data[], const T w[], size_t n)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double wvar_impl(const double data[], const double w[], size_t n)
+{
+    return gsl_stats_wvariance(w, 1, data, 1, n);
+}
+
+template <typename T>
+inline double wvar(const ArrayBase<T> &data, const ArrayBase<T> &weight)
+{
+    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
+                 (data.size() == weight.size()));
+
+    typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
+    return wvar_impl(m_data.data(), m_w.data(), m_data.size());
+}
+
+// ========================================
+// weighted variance relative to specified mean
+// ========================================
+
+template <typename T>
+inline double wvar_impl(const T data[], const T w[], size_t n, double mean)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double wvar_impl(const double data[],
+                        const double w[],
+                        size_t n,
+                        double mean)
+{
+    return gsl_stats_wvariance_m(w, 1, data, 1, n, mean);
+}
+
+template <typename T>
+inline double wvar(const ArrayBase<T> &data,
+                   const ArrayBase<T> &weight,
+                   double mean)
+{
+    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
+                 (data.size() == weight.size()));
+
+    typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
+    return wvar_impl(m_data.data(), m_w.data(), m_data.size(), mean);
+}
+
+// ========================================
+// unbiased weighted variance
+// ========================================
+
+template <typename T>
+inline double wuvar_impl(const T data[], const T w[], size_t n, double mean)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double wuvar_impl(const double data[],
+                         const double w[],
+                         size_t n,
+                         double mean)
+{
+    return gsl_stats_wvariance_with_fixed_mean(w, 1, data, 1, n, mean);
+}
+
+template <typename T>
+inline double wuvar(const ArrayBase<T> &data,
+                    const ArrayBase<T> &weight,
+                    double mean)
+{
+    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
+                 (data.size() == weight.size()));
+
+    typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
+    return wuvar_impl(m_data.data(), m_w.data(), m_data.size(), mean);
+}
+
 ////////////////////////////////////////////////////////////
 // global variants
 ////////////////////////////////////////////////////////////

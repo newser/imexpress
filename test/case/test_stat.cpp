@@ -15,7 +15,7 @@ TEST_CASE("stat_mean")
 {
     double v, g;
 
-    iexp::ArrayXd c;
+    iexp::ArrayXd c, w;
     c = iexp::ArrayXd::Random(10);
     v = iexp::stats::mean(c);
     g = gsl_stats_mean(c.data(), 1, c.size());
@@ -29,16 +29,31 @@ TEST_CASE("stat_mean")
 
     // compile
     v = iexp::stats::mean(c + c2.cast<double>());
+
+    c = iexp::ArrayXd::Random(10);
+    w = iexp::ArrayXd::Random(10);
+    v = iexp::stats::wmean(c, w);
+    g = gsl_stats_wmean(w.data(), 1, c.data(), 1, c.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    // compile
+    v = iexp::stats::wmean(c + c2.cast<double>(), c + c2.cast<double>());
 }
 
 TEST_CASE("stat_var")
 {
     double v, g;
 
-    iexp::ArrayXd c;
+    iexp::ArrayXd c, d;
     c = iexp::ArrayXd::Random(10);
     v = iexp::stats::var(c);
     g = gsl_stats_variance(c.data(), 1, c.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::wvar(c, d);
+    g = gsl_stats_wvariance(d.data(), 1, c.data(), 1, c.size());
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     c = iexp::ArrayXd::Random(10);
@@ -47,8 +62,25 @@ TEST_CASE("stat_var")
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::wvar(c, d, 2);
+    g = gsl_stats_wvariance_m(d.data(), 1, c.data(), 1, c.size(), 2);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
     v = iexp::stats::uvar(c, 1);
     g = gsl_stats_variance_with_fixed_mean(c.data(), 1, c.size(), 1);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::wuvar(c, d, 2);
+    g = gsl_stats_wvariance_with_fixed_mean(d.data(),
+                                            1,
+                                            c.data(),
+                                            1,
+                                            c.size(),
+                                            2);
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     iexp::ArrayXi c2;
@@ -76,10 +108,16 @@ TEST_CASE("stat_std")
 {
     double v, g;
 
-    iexp::ArrayXd c;
+    iexp::ArrayXd c, d;
     c = iexp::ArrayXd::Random(10);
     v = iexp::stats::std(c);
     g = gsl_stats_sd(c.data(), 1, c.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::wstd(c, d);
+    g = gsl_stats_wsd(d.data(), 1, c.data(), 1, c.size());
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     c = iexp::ArrayXd::Random(10);
@@ -88,8 +126,20 @@ TEST_CASE("stat_std")
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::wstd(c, d, 2);
+    g = gsl_stats_wsd_m(d.data(), 1, c.data(), 1, c.size(), 2);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
     v = iexp::stats::ustd(c, 1);
     g = gsl_stats_sd_with_fixed_mean(c.data(), 1, c.size(), 1);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::wustd(c, d, 2);
+    g = gsl_stats_wsd_with_fixed_mean(d.data(), 1, c.data(), 1, c.size(), 2);
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     c = iexp::ArrayXd::Random(10);
@@ -98,8 +148,20 @@ TEST_CASE("stat_std")
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::wabstd(c, d);
+    g = gsl_stats_wabsdev(d.data(), 1, c.data(), 1, c.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
     v = iexp::stats::abstd(c, 2);
     g = gsl_stats_absdev_m(c.data(), 1, c.size(), 2);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::wabstd(c, d, 2);
+    g = gsl_stats_wabsdev_m(d.data(), 1, c.data(), 1, c.size(), 2);
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     iexp::ArrayXi c2;
@@ -136,15 +198,27 @@ TEST_CASE("stat_tss")
 {
     double v, g;
 
-    iexp::ArrayXd c;
+    iexp::ArrayXd c, d;
     c = iexp::ArrayXd::Random(10);
     v = iexp::stats::tss(c);
     g = gsl_stats_tss(c.data(), 1, c.size());
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::wtss(c, d);
+    g = gsl_stats_wtss(d.data(), 1, c.data(), 1, c.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
     v = iexp::stats::tss(c, 1);
     g = gsl_stats_tss_m(c.data(), 1, c.size(), 1);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::wtss(c, d, 2);
+    g = gsl_stats_wtss_m(d.data(), 1, c.data(), 1, c.size(), 2);
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     iexp::ArrayXi c2;
@@ -166,15 +240,27 @@ TEST_CASE("stat_skew")
 {
     double v, g;
 
-    iexp::ArrayXd c;
+    iexp::ArrayXd c, d;
     c = iexp::ArrayXd::Random(10);
     v = iexp::stats::skewness(c);
     g = gsl_stats_skew(c.data(), 1, c.size());
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::wskewness(c, d);
+    g = gsl_stats_wskew(d.data(), 1, c.data(), 1, c.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
     v = iexp::stats::skewness(c, 1, 2);
     g = gsl_stats_skew_m_sd(c.data(), 1, c.size(), 1, 2);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::wskewness(c, d, 2, 3);
+    g = gsl_stats_wskew_m_sd(d.data(), 1, c.data(), 1, c.size(), 2, 3);
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     iexp::ArrayXi c2;
@@ -196,15 +282,27 @@ TEST_CASE("stat_kurtosis")
 {
     double v, g;
 
-    iexp::ArrayXd c;
+    iexp::ArrayXd c, d;
     c = iexp::ArrayXd::Random(10);
     v = iexp::stats::kurtosis(c);
     g = gsl_stats_kurtosis(c.data(), 1, c.size());
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::wkurtosis(c, d);
+    g = gsl_stats_wkurtosis(d.data(), 1, c.data(), 1, c.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
     v = iexp::stats::kurtosis(c, 1, 2);
     g = gsl_stats_kurtosis_m_sd(c.data(), 1, c.size(), 1, 2);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
+    d = iexp::ArrayXd::Random(10);
+    v = iexp::stats::wkurtosis(c, d, 3, 4);
+    g = gsl_stats_wkurtosis_m_sd(d.data(), 1, c.data(), 1, c.size(), 3, 4);
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     iexp::ArrayXi c2;

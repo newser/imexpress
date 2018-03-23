@@ -39,6 +39,10 @@ namespace stats {
 // type definition
 ////////////////////////////////////////////////////////////
 
+// ========================================
+// mean
+// ========================================
+
 template <typename T>
 inline double mean_impl(const T data[], const size_t n)
 {
@@ -74,6 +78,32 @@ inline double mean(const ArrayBase<T> &data)
 
     typename type_eval<T>::type m_data(data.eval());
     return mean_impl(m_data.data(), m_data.size());
+}
+
+// ========================================
+// weighted mean
+// ========================================
+
+template <typename T>
+inline double wmean_impl(const T data[], const T w[], const size_t n)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double wmean_impl(const double data[], const double w[], const size_t n)
+{
+    return gsl_stats_wmean(w, 1, data, 1, n);
+}
+
+template <typename T>
+inline double wmean(const ArrayBase<T> &data, const ArrayBase<T> &weight)
+{
+    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
+                 (data.size() == weight.size()));
+
+    typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
+    return wmean_impl(m_data.data(), m_w.data(), m_data.size());
 }
 
 ////////////////////////////////////////////////////////////

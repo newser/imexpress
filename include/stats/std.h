@@ -137,21 +137,24 @@ inline double ustd_m_impl(const double data[], size_t n, double mean)
     return gsl_stats_sd_with_fixed_mean(data, 1, n, mean);
 }
 
-#define DEFINE_Uustd_M(type, name)                                             \
+#define DEFINE_USTD_M(type, name)                                              \
     template <>                                                                \
     inline double ustd_m_impl(const type data[], size_t n, double mean)        \
     {                                                                          \
         return gsl_stats_##name##_sd_with_fixed_mean(data, 1, n, mean);        \
     }
-DEFINE_Uustd_M(char, char) DEFINE_Uustd_M(unsigned char, uchar)
-    DEFINE_Uustd_M(short, short) DEFINE_Uustd_M(unsigned short, ushort)
-        DEFINE_Uustd_M(int, int) DEFINE_Uustd_M(unsigned int, uint)
-            DEFINE_Uustd_M(float, float)
-                DEFINE_Uustd_M(long double, long_double)
-#undef DEFINE_Uustd_M
+DEFINE_USTD_M(char, char)
+DEFINE_USTD_M(unsigned char, uchar)
+DEFINE_USTD_M(short, short)
+DEFINE_USTD_M(unsigned short, ushort)
+DEFINE_USTD_M(int, int)
+DEFINE_USTD_M(unsigned int, uint)
+DEFINE_USTD_M(float, float)
+DEFINE_USTD_M(long double, long_double)
+#undef DEFINE_USTD_M
 
-                    template <typename T>
-                    inline double ustd(const ArrayBase<T> &data, double mean)
+template <typename T>
+inline double ustd(const ArrayBase<T> &data, double mean)
 {
     eigen_assert(IS_VEC(data));
 
@@ -239,6 +242,151 @@ inline double abstd(const ArrayBase<T> &data, double mean)
 
     typename type_eval<T>::type m_data(data.eval());
     return abstd_m_impl(m_data.data(), m_data.size(), mean);
+}
+
+// ========================================
+// weighted std
+// ========================================
+
+template <typename T>
+inline double wstd_impl(const T data[], const T w[], size_t n)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double wstd_impl(const double data[], const double w[], size_t n)
+{
+    return gsl_stats_wsd(w, 1, data, 1, n);
+}
+
+template <typename T>
+inline double wstd(const ArrayBase<T> &data, const ArrayBase<T> &weight)
+{
+    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
+                 (data.size() == weight.size()));
+
+    typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
+    return wstd_impl(m_data.data(), m_w.data(), m_data.size());
+}
+
+// ========================================
+// weighted std relative to specified mean
+// ========================================
+
+template <typename T>
+inline double wstd_impl(const T data[], const T w[], size_t n, double mean)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double wstd_impl(const double data[],
+                        const double w[],
+                        size_t n,
+                        double mean)
+{
+    return gsl_stats_wsd_m(w, 1, data, 1, n, mean);
+}
+
+template <typename T>
+inline double wstd(const ArrayBase<T> &data,
+                   const ArrayBase<T> &weight,
+                   double mean)
+{
+    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
+                 (data.size() == weight.size()));
+
+    typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
+    return wstd_impl(m_data.data(), m_w.data(), m_data.size(), mean);
+}
+
+// ========================================
+// unbiased weighted std
+// ========================================
+
+template <typename T>
+inline double wustd_impl(const T data[], const T w[], size_t n, double mean)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double wustd_impl(const double data[],
+                         const double w[],
+                         size_t n,
+                         double mean)
+{
+    return gsl_stats_wsd_with_fixed_mean(w, 1, data, 1, n, mean);
+}
+
+template <typename T>
+inline double wustd(const ArrayBase<T> &data,
+                    const ArrayBase<T> &weight,
+                    double mean)
+{
+    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
+                 (data.size() == weight.size()));
+
+    typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
+    return wustd_impl(m_data.data(), m_w.data(), m_data.size(), mean);
+}
+
+// ========================================
+// weighted std
+// ========================================
+
+template <typename T>
+inline double wabstd_impl(const T data[], const T w[], size_t n)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double wabstd_impl(const double data[], const double w[], size_t n)
+{
+    return gsl_stats_wabsdev(w, 1, data, 1, n);
+}
+
+template <typename T>
+inline double wabstd(const ArrayBase<T> &data, const ArrayBase<T> &weight)
+{
+    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
+                 (data.size() == weight.size()));
+
+    typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
+    return wabstd_impl(m_data.data(), m_w.data(), m_data.size());
+}
+
+// ========================================
+// weighted std relative to specified mean
+// ========================================
+
+template <typename T>
+inline double wabstd_impl(const T data[], const T w[], size_t n, double mean)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <>
+inline double wabstd_impl(const double data[],
+                          const double w[],
+                          size_t n,
+                          double mean)
+{
+    return gsl_stats_wabsdev_m(w, 1, data, 1, n, mean);
+}
+
+template <typename T>
+inline double wabstd(const ArrayBase<T> &data,
+                     const ArrayBase<T> &weight,
+                     double mean)
+{
+    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
+                 (data.size() == weight.size()));
+
+    typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
+    return wabstd_impl(m_data.data(), m_w.data(), m_data.size(), mean);
 }
 
 ////////////////////////////////////////////////////////////
