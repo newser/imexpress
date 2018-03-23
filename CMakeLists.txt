@@ -68,6 +68,7 @@ add_group(integral ${ROOT_PATH}/include/integral ${ROOT_PATH}/source/integral IE
 add_group(rand ${ROOT_PATH}/include/rand ${ROOT_PATH}/source/rand IEXP_SOURCE)
 add_group(randist ${ROOT_PATH}/include/randist ${ROOT_PATH}/source/randist IEXP_SOURCE)
 add_group(stats ${ROOT_PATH}/include/stats ${ROOT_PATH}/source/stats IEXP_SOURCE)
+add_group(rstat ${ROOT_PATH}/include/rstat ${ROOT_PATH}/source/rstat IEXP_SOURCE)
 
 #
 # build
