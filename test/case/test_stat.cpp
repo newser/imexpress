@@ -1,7 +1,9 @@
 #include <../test/test_util.h>
 #include <catch.hpp>
 #include <iostream>
+#include <stats/kurtosis.h>
 #include <stats/mean.h>
+#include <stats/skewness.h>
 #include <stats/std.h>
 #include <stats/tss.h>
 #include <stats/var.h>
@@ -155,4 +157,34 @@ TEST_CASE("stat_tss")
 
     // compile
     v = iexp::stats::tss(c + c2.cast<double>());
+}
+
+TEST_CASE("stat_skew")
+{
+    double v, g;
+
+    iexp::ArrayXd c;
+    c = iexp::ArrayXd::Random(10);
+    v = iexp::stats::skewness(c);
+    g = gsl_stats_skew(c.data(), 1, c.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c = iexp::ArrayXd::Random(10);
+    v = iexp::stats::skewness(c, 1, 2);
+    g = gsl_stats_skew_m_sd(c.data(), 1, c.size(), 1, 2);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    iexp::ArrayXi c2;
+    c2 = iexp::ArrayXi::Random(10);
+    v = iexp::stats::skewness(c2);
+    g = gsl_stats_int_skew(c2.data(), 1, c2.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    c2 = iexp::ArrayXi::Random(10);
+    v = iexp::stats::skewness(c2, 2, 3);
+    g = gsl_stats_int_skew_m_sd(c2.data(), 1, c2.size(), 2, 3);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    // compile
+    v = iexp::stats::skewness(c + c2.cast<double>());
 }
