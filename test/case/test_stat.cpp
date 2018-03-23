@@ -1,11 +1,14 @@
 #include <../test/test_util.h>
 #include <catch.hpp>
 #include <iostream>
+#include <sort/sort.h>
 #include <stats/autocorr.h>
 #include <stats/corrcoef.h>
 #include <stats/cov.h>
 #include <stats/kurtosis.h>
 #include <stats/mean.h>
+#include <stats/median.h>
+#include <stats/quantile.h>
 #include <stats/skewness.h>
 #include <stats/std.h>
 #include <stats/tss.h>
@@ -418,4 +421,44 @@ TEST_CASE("stat_corrcoef")
     // compile
     v = iexp::stats::corrcoef(c + c2.cast<double>(), d + d2.cast<double>());
     v = iexp::stats::spearman(c + c2.cast<double>(), d + d2.cast<double>());
+}
+
+TEST_CASE("stat_median")
+{
+    double v, g;
+    double work[20];
+
+    iexp::ArrayXd c, d;
+    c = iexp::ArrayXd::Random(10);
+    v = iexp::stats::median(iexp::sort(c));
+    d = sort(c);
+    g = gsl_stats_median_from_sorted_data(d.data(), 1, d.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    iexp::ArrayXi c2, d2;
+    c2 = iexp::ArrayXi::Random(10);
+    v = iexp::stats::median(iexp::sort(c2));
+    d2 = sort(c2);
+    g = gsl_stats_int_median_from_sorted_data(d2.data(), 1, d2.size());
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+}
+
+TEST_CASE("stat_qunatile")
+{
+    double v, g;
+    double work[20];
+
+    iexp::ArrayXd c, d;
+    c = iexp::ArrayXd::Random(10);
+    v = iexp::stats::quantile(iexp::sort(c), 0.93);
+    d = sort(c);
+    g = gsl_stats_quantile_from_sorted_data(d.data(), 1, d.size(), 0.93);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
+
+    iexp::ArrayXi c2, d2;
+    c2 = iexp::ArrayXi::Random(10);
+    v = iexp::stats::quantile(iexp::sort(c2), 0.88);
+    d2 = sort(c2);
+    g = gsl_stats_int_quantile_from_sorted_data(d2.data(), 1, d2.size(), 0.88);
+    REQUIRE(__D_EQ_IN(v, g, 1e-9));
 }
