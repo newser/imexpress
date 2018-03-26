@@ -1,6 +1,7 @@
 #include <../test/test_util.h>
 #include <catch.hpp>
 #include <histogram/hist.h>
+#include <histogram/histpdf.h>
 
 using namespace iexp;
 
@@ -40,7 +41,7 @@ TEST_CASE("hist_empty")
     test_empty(h3);
 
     hist h4 = h3;
-    test_empty(h3);
+    test_empty(h4);
 
     hist h5 = std::move(h4);
     test_empty(h5);
@@ -103,7 +104,7 @@ TEST_CASE("hist_val")
     test_val(h3);
 
     hist h4 = h3;
-    test_val(h3);
+    test_val(h4);
 
     hist h5 = std::move(h4);
     test_val(h5);
@@ -129,4 +130,9 @@ TEST_CASE("hist_val")
     test_val(h);
     h /= 1.0;
     test_val(h);
+
+    h.reset();
+    histpdf hp(h);
+    hp.next();
+    hp.next();
 }

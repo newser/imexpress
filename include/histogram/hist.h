@@ -37,8 +37,12 @@ IEXP_NS_BEGIN
 // type definition
 ////////////////////////////////////////////////////////////
 
+class histpdf;
+
 class hist
 {
+    friend class histpdf;
+
   public:
     hist(const double range[], const size_t n)
     {
@@ -176,28 +180,28 @@ class hist
         return gsl_histogram_accumulate(m_gh, x, weight) == GSL_SUCCESS;
     }
 
-    void range(size_t i, double &lower, double &upper)
+    void range(size_t i, double &lower, double &upper) const
     {
         eigen_assert(i < gsl_histogram_bins(m_gh));
         gsl_histogram_get_range(m_gh, i, &lower, &upper);
     }
 
-    double max()
+    double max() const
     {
         return gsl_histogram_max(m_gh);
     }
 
-    double min()
+    double min() const
     {
         return gsl_histogram_min(m_gh);
     }
 
-    double size()
+    double size() const
     {
         return gsl_histogram_bins(m_gh);
     }
 
-    size_t find(double x)
+    size_t find(double x) const
     {
         size_t i;
         if (gsl_histogram_find(m_gh, x, &i) == GSL_SUCCESS) {
@@ -207,37 +211,37 @@ class hist
         }
     }
 
-    double max_val()
+    double max_val() const
     {
         return gsl_histogram_max_val(m_gh);
     }
 
-    size_t max_idx()
+    size_t max_idx() const
     {
         return gsl_histogram_max_bin(m_gh);
     }
 
-    double min_val()
+    double min_val() const
     {
         return gsl_histogram_min_val(m_gh);
     }
 
-    size_t min_idx()
+    size_t min_idx() const
     {
         return gsl_histogram_min_bin(m_gh);
     }
 
-    double mean()
+    double mean() const
     {
         return gsl_histogram_mean(m_gh);
     }
 
-    double std()
+    double std() const
     {
         return gsl_histogram_sigma(m_gh);
     }
 
-    double sum()
+    double sum() const
     {
         return gsl_histogram_sum(m_gh);
     }
