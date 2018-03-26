@@ -44,7 +44,7 @@ class hist
     friend class histpdf;
 
   public:
-    hist(const double range[], const size_t n)
+    hist(const double range[], size_t n)
     {
         eigen_assert(n > 1);
         m_gh = gsl_histogram_alloc(n - 1);
@@ -55,7 +55,7 @@ class hist
         }
     }
 
-    hist(const size_t n, double min, double max)
+    hist(size_t n, double min, double max)
     {
         m_gh = gsl_histogram_alloc(n);
         IEXP_NOT_NULLPTR(m_gh);
@@ -196,7 +196,7 @@ class hist
         return gsl_histogram_min(m_gh);
     }
 
-    double size() const
+    size_t size() const
     {
         return gsl_histogram_bins(m_gh);
     }
