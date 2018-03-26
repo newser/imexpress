@@ -49,7 +49,7 @@ class combination
         LAST,
     };
 
-    combination(const index n, const index k, init i = init::NONE)
+    combination(index n, index k, init i = init::NONE)
     {
         m_gc = gsl_combination_alloc(n, k);
         IEXP_NOT_NULLPTR(m_gc);
@@ -75,7 +75,9 @@ class combination
 
     ~combination()
     {
-        gsl_combination_free(m_gc);
+        if (m_gc != nullptr) {
+            gsl_combination_free(m_gc);
+        }
     }
 
     combination &operator=(const combination &c)
@@ -85,20 +87,23 @@ class combination
         return *this;
     }
 
-    combination &operator=(const combination &&c)
+    combination &operator=(combination &&c)
     {
-        memcpy(m_gc, c.m_gc, sizeof(gsl_combination));
-        memset(c.m_gc, 0, sizeof(gsl_combination));
+        if (m_gc != nullptr) {
+            gsl_combination_free(m_gc);
+        }
+        m_gc = c.m_gc;
+        c.m_gc = nullptr;
         return *this;
     }
 
-    index &operator[](const index i)
+    index &operator[](index i)
     {
         eigen_assert(i < k());
         return *(&gsl_combination_data(m_gc)[i]);
     }
 
-    index &operator()(const index i)
+    index &operator()(index i)
     {
         eigen_assert(i < k());
         return *(&gsl_combination_data(m_gc)[i]);
