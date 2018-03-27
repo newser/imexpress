@@ -75,7 +75,7 @@ class monte_func
 {
   public:
     using type_1d = std::function<T(T)>;
-    using type_nd = std::function<T(T *)>;
+    using type_nd = std::function<T(T *, size_t)>;
 
     static T s_func_1d(T *x, size_t dim, void *param)
     {
@@ -84,23 +84,25 @@ class monte_func
 
     static T s_func_nd(T *x, size_t dim, void *param)
     {
-        return ((type_nd *)param)->operator()(x);
+        return ((type_nd *)param)->operator()(x, dim);
     }
 
     monte_func(const type_1d &f)
-        : m_fn_1d(f)
+        : m_fn(f)
         , m_gsl_fn{s_func_1d,
                    1,
-                   const_cast<void *>(reinterpret_cast<const void *>(&m_fn_1d))}
+                   const_cast<void *>(
+                       reinterpret_cast<const void *>(&m_fn._1d))}
     {
         static_assert(TYPE_IS(T, double), "only support double now");
     }
 
     monte_func(size_t dim, const type_nd &f)
-        : m_fn_nd(f)
+        : m_fn(f)
         , m_gsl_fn{s_func_nd,
                    dim,
-                   const_cast<void *>(reinterpret_cast<const void *>(&m_fn_nd))}
+                   const_cast<void *>(
+                       reinterpret_cast<const void *>(&m_fn._nd))}
     {
         static_assert(TYPE_IS(T, double), "only support double now");
 
@@ -111,9 +113,9 @@ class monte_func
     ~monte_func()
     {
         if (m_gsl_fn.dim == 1) {
-            m_fn_1d.~type_1d();
+            m_fn._1d.~type_1d();
         } else {
-            m_fn_nd.~type_nd();
+            m_fn._nd.~type_nd();
         }
     }
 
@@ -124,11 +126,23 @@ class monte_func
 
   private:
     // m_fn can not be reference, msvc requires copying it
-    union
+    union fn
     {
-        const type_1d m_fn_1d;
-        const type_nd m_fn_nd;
-    };
+        fn(const type_1d &f)
+            : _1d(f)
+        {
+        }
+        fn(const type_nd &f)
+            : _nd(f)
+        {
+        }
+        ~fn()
+        {
+        }
+
+        const type_1d _1d;
+        const type_nd _nd;
+    } m_fn;
     const gsl_monte_function m_gsl_fn;
 };
 

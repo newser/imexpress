@@ -57,14 +57,6 @@ class monte_t
         IEXP_NOT_NULLPTR(m_state);
     }
 
-    monte_t(rand::rng_type type = rand::MT19937, unsigned long seed = 0)
-        : m_state(nullptr)
-        , m_rng(type, seed)
-    {
-        m_state = gsl_monte_plain_alloc(1);
-        IEXP_NOT_NULLPTR(m_state);
-    }
-
     ~monte_t()
     {
         gsl_monte_plain_free(m_state);
@@ -82,6 +74,7 @@ class monte_t
     T operator()(const typename monte_func<T>::type_nd &fn,
                  const T a[],
                  const T b[],
+                 size_t dim,
                  size_t calls,
                  T *abserr = nullptr)
     {
@@ -95,7 +88,6 @@ class monte_t
     gsl_monte_plain_state *m_state;
     rand::rng m_rng;
 };
-
 
 template <>
 double monte_t<double>::operator()(
@@ -126,17 +118,20 @@ double monte_t<double>::operator()(
     const typename monte_func<double>::type_nd &fn,
     const double a[],
     const double b[],
+    size_t dim,
     size_t calls,
     double *abserr)
 {
+    eigen_assert(dim == m_state->dim);
+
     gsl_monte_plain_init(m_state);
 
-    monte_func<double> m_fn(m_state->dim, fn);
+    monte_func<double> m_fn(dim, fn);
     double result, __abserr;
     gsl_monte_plain_integrate(m_fn.gsl(),
                               a,
                               b,
-                              m_state->dim,
+                              dim,
                               calls,
                               m_rng.gsl(),
                               m_state,

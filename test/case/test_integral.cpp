@@ -343,8 +343,9 @@ static double foo_1d(double x)
     return x * 3;
 }
 
-static double foo_2d(double *x)
+static double foo_2d(double *x, size_t d)
 {
+    REQUIRE(d == 2);
     return x[0] + 3 * x[1];
 }
 
@@ -379,7 +380,8 @@ TEST_CASE("integral_monte_func")
     // 2d
     ////////////////////////////
 
-    integral::monte_func<double> f(2, [](double *x) -> double {
+    integral::monte_func<double> f(2, [](double *x, size_t d) -> double {
+        REQUIRE(d == 2);
         return 3 * x[0] * x[0] + 2 * x[0] * x[1] + x[1] * x[1];
     });
     v = f.gsl()->f(d, 2, f.gsl()->params);
@@ -390,8 +392,9 @@ TEST_CASE("integral_monte_func")
     class t_op
     {
       public:
-        double operator()(double *x)
+        double operator()(double *x, size_t d)
         {
+            REQUIRE(d == 2);
             return x[0] + 2 * x[1];
         }
     };
@@ -402,4 +405,101 @@ TEST_CASE("integral_monte_func")
     integral::monte_func<double> f3(2, foo_2d);
     v = f3.gsl()->f(d, 2, f3.gsl()->params);
     REQUIRE(v == 33);
+}
+
+TEST_CASE("integral_monte")
+{
+    double xl[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    double xu[11] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+
+    // 2d
+
+    integral::monte m(2);
+    double e;
+    double v = m(
+        [](double *x, size_t d) -> double {
+            double prod = 1.0;
+            unsigned int i;
+
+            for (i = 0; i < d; ++i) {
+                prod *= 2.0 * x[i];
+            }
+
+            return prod;
+        },
+        xl,
+        xu,
+        2,
+        3333,
+        &e);
+    REQUIRE(__D_EQ2(v, 1.0));
+    REQUIRE(__D_EQ2(e, 0.01));
+
+    v = m([](double *x,
+             size_t d) -> double { return (x[0] > 0.1 && x[0] < 0.9) ? 1 : 0; },
+          xl,
+          xu,
+          2,
+          100000,
+          &e);
+    REQUIRE(__D_EQ_IN(v, 0.8, 0.1));
+    REQUIRE(__D_EQ_IN(e, 1.264e-3, 1e-3));
+
+    // nd
+
+    integral::monte m_n(4);
+    v = m_n(
+        [](double *x, size_t d) -> double {
+            double prod = 1.0;
+            unsigned int i;
+
+            for (i = 0; i < d; ++i) {
+                prod *= 2.0 * x[i];
+            }
+
+            return prod;
+        },
+        xl,
+        xu,
+        4,
+        21604,
+        &e);
+    REQUIRE(__D_EQ2(v, 1.0));
+    REQUIRE(__D_EQ2(e, 0.01));
+
+    v = m_n([](double *x, size_t d)
+                -> double { return (x[0] > 0.1 && x[0] < 0.9) ? 1 : 0; },
+            xl,
+            xu,
+            4,
+            100000,
+            &e);
+    REQUIRE(__D_EQ_IN(v, 0.8, 0.1));
+    REQUIRE(__D_EQ_IN(e, 1.264e-3, 1e-3));
+
+    // 1d
+
+    integral::monte m_1(1);
+    v = m_1(
+        [](double x) -> double {
+            double prod = 1.0;
+
+            prod *= 2.0 * x;
+
+            return prod;
+        },
+        xl[0],
+        xu[0],
+        21604,
+        &e);
+    REQUIRE(__D_EQ2(v, 1.0));
+    REQUIRE(__D_EQ2(e, 0.01));
+
+    v = m_1([](double x) -> double { return (x > 0.1 && x < 0.9) ? 1 : 0; },
+            xl[0],
+            xu[0],
+            100000,
+            &e);
+    REQUIRE(__D_EQ_IN(v, 0.8, 0.1));
+    REQUIRE(__D_EQ_IN(e, 1.264e-3, 1e-3));
 }

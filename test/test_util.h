@@ -49,6 +49,8 @@ IEXP_NS_BEGIN
 
 #define __D_EQ6(a, b) __D_EQ_IN(a, b, 1e-6)
 
+#define __D_EQ2(a, b) __D_EQ_IN(a, b, 1e-2)
+
 #define __D_EQ_Nep(a, b, n)                                                    \
     __D_EQ_IN(a, b, (n)*std::numeric_limits<double>::epsilon())
 
