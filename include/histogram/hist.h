@@ -55,6 +55,18 @@ class hist
         }
     }
 
+    hist(const std::initializer_list<double> &range)
+    {
+        eigen_assert(range.size() > 1);
+        m_gh = gsl_histogram_alloc(range.size() - 1);
+        IEXP_NOT_NULLPTR(m_gh);
+
+        if (gsl_histogram_set_ranges(m_gh, range.begin(), range.size()) !=
+            GSL_SUCCESS) {
+            RETURN_OR_THROW(std::runtime_error("hist"));
+        }
+    }
+
     hist(size_t n, double min, double max)
     {
         m_gh = gsl_histogram_alloc(n);

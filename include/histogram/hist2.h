@@ -56,6 +56,22 @@ class hist2
         }
     }
 
+    hist2(const std::initializer_list<double> &xrange,
+          const std::initializer_list<double> &yrange)
+    {
+        eigen_assert((xrange.size() > 1) && (yrange.size() > 1));
+        m_gh2 = gsl_histogram2d_alloc(xrange.size() - 1, yrange.size() - 1);
+        IEXP_NOT_NULLPTR(m_gh2);
+
+        if (gsl_histogram2d_set_ranges(m_gh2,
+                                       xrange.begin(),
+                                       xrange.size(),
+                                       yrange.begin(),
+                                       yrange.size()) != GSL_SUCCESS) {
+            RETURN_OR_THROW(std::runtime_error("hist2"));
+        }
+    }
+
     hist2(size_t nx,
           double xmin,
           double xmax,
