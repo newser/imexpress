@@ -26,6 +26,7 @@
 #include <common/common.h>
 
 #include <gsl/gsl_math.h>
+#include <gsl/gsl_monte.h>
 
 IEXP_NS_BEGIN
 
@@ -67,6 +68,68 @@ class unary_func
     // m_fn can not be reference, msvc requires copying it
     const type m_fn;
     const gsl_function m_gsl_fn;
+};
+
+template <typename T>
+class monte_func
+{
+  public:
+    using type_1d = std::function<T(T)>;
+    using type_nd = std::function<T(T *)>;
+
+    static T s_func_1d(T *x, size_t dim, void *param)
+    {
+        return ((type_1d *)param)->operator()(x[0]);
+    }
+
+    static T s_func_nd(T *x, size_t dim, void *param)
+    {
+        return ((type_nd *)param)->operator()(x);
+    }
+
+    monte_func(const type_1d &f)
+        : m_fn_1d(f)
+        , m_gsl_fn{s_func_1d,
+                   1,
+                   const_cast<void *>(reinterpret_cast<const void *>(&m_fn_1d))}
+    {
+        static_assert(TYPE_IS(T, double), "only support double now");
+    }
+
+    monte_func(size_t dim, const type_nd &f)
+        : m_fn_nd(f)
+        , m_gsl_fn{s_func_nd,
+                   dim,
+                   const_cast<void *>(reinterpret_cast<const void *>(&m_fn_nd))}
+    {
+        static_assert(TYPE_IS(T, double), "only support double now");
+
+        // dim must be large than 1, or destructor does not work correctly
+        eigen_assert(dim > 1);
+    }
+
+    ~monte_func()
+    {
+        if (m_gsl_fn.dim == 1) {
+            m_fn_1d.~type_1d();
+        } else {
+            m_fn_nd.~type_nd();
+        }
+    }
+
+    const gsl_monte_function *gsl()
+    {
+        return &m_gsl_fn;
+    }
+
+  private:
+    // m_fn can not be reference, msvc requires copying it
+    union
+    {
+        const type_1d m_fn_1d;
+        const type_nd m_fn_nd;
+    };
+    const gsl_monte_function m_gsl_fn;
 };
 
 ////////////////////////////////////////////////////////////

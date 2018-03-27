@@ -1,4 +1,5 @@
 #include <catch.hpp>
+#include <integral/monte.h>
 #include <integral/qag.h>
 #include <integral/qagi.h>
 #include <integral/qagp.h>
@@ -335,4 +336,70 @@ TEST_CASE("integral_qawf")
     REQUIRE(status == GSL_SUCCESS);
     REQUIRE(__D_EQ_IN(result, 9.999999999279802765E-01, 1E-14));
     REQUIRE(__D_EQ_IN(abserr, 1.556289974669056164E-08, 1E-3));
+}
+
+static double foo_1d(double x)
+{
+    return x * 3;
+}
+
+static double foo_2d(double *x)
+{
+    return x[0] + 3 * x[1];
+}
+
+TEST_CASE("integral_monte_func")
+{
+    ////////////////////////////
+    // 1d
+    ////////////////////////////
+
+    integral::monte_func<double> f_1d([](double x) -> double { return 5 * x; });
+    double d[2]{9, 8};
+    double v = f_1d.gsl()->f(d, 1, f_1d.gsl()->params);
+    REQUIRE(v == 45);
+
+    class t_op2
+    {
+      public:
+        double operator()(double x)
+        {
+            return 4 * x;
+        }
+    };
+    integral::monte_func<double> f2_1d((t_op2()));
+    v = f2_1d.gsl()->f(d, 2, f2_1d.gsl()->params);
+    REQUIRE(v == 36);
+
+    integral::monte_func<double> f3_1d(foo_1d);
+    v = f3_1d.gsl()->f(d, 2, f3_1d.gsl()->params);
+    REQUIRE(v == 27);
+
+    ////////////////////////////
+    // 2d
+    ////////////////////////////
+
+    integral::monte_func<double> f(2, [](double *x) -> double {
+        return 3 * x[0] * x[0] + 2 * x[0] * x[1] + x[1] * x[1];
+    });
+    v = f.gsl()->f(d, 2, f.gsl()->params);
+    REQUIRE(v == 451);
+
+    // integral::unary_func<double> f2([](float x) -> float { return x; });
+
+    class t_op
+    {
+      public:
+        double operator()(double *x)
+        {
+            return x[0] + 2 * x[1];
+        }
+    };
+    integral::monte_func<double> f2(2, t_op());
+    v = f2.gsl()->f(d, 2, f2.gsl()->params);
+    REQUIRE(v == 25);
+
+    integral::monte_func<double> f3(2, foo_2d);
+    v = f3.gsl()->f(d, 2, f3.gsl()->params);
+    REQUIRE(v == 33);
 }
