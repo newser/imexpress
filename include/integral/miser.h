@@ -88,12 +88,14 @@ class miser_t
         return p.estimate_frac;
     }
 
-    void estimate_frac(double frac)
+    miser_t &estimate_frac(double frac)
     {
         gsl_monte_miser_params p;
         gsl_monte_miser_params_get(m_state, &p);
         p.estimate_frac = frac;
         gsl_monte_miser_params_set(m_state, &p);
+
+        return *this;
     }
 
     size_t min_calls()
@@ -103,12 +105,14 @@ class miser_t
         return p.min_calls;
     }
 
-    void min_calls(size_t calls)
+    miser_t &min_calls(size_t calls)
     {
         gsl_monte_miser_params p;
         gsl_monte_miser_params_get(m_state, &p);
         p.min_calls = calls;
         gsl_monte_miser_params_set(m_state, &p);
+
+        return *this;
     }
 
     size_t min_calls_per_bisection()
@@ -118,12 +122,14 @@ class miser_t
         return p.min_calls_per_bisection;
     }
 
-    void min_calls_per_bisection(size_t calls)
+    miser_t &min_calls_per_bisection(size_t calls)
     {
         gsl_monte_miser_params p;
         gsl_monte_miser_params_get(m_state, &p);
         p.min_calls_per_bisection = calls;
         gsl_monte_miser_params_set(m_state, &p);
+
+        return *this;
     }
 
     double alpha()
@@ -133,12 +139,14 @@ class miser_t
         return p.alpha;
     }
 
-    void alpha(double alpha)
+    miser_t &alpha(double alpha)
     {
         gsl_monte_miser_params p;
         gsl_monte_miser_params_get(m_state, &p);
         p.alpha = alpha;
         gsl_monte_miser_params_set(m_state, &p);
+
+        return *this;
     }
 
     double dither()
@@ -148,12 +156,14 @@ class miser_t
         return p.dither;
     }
 
-    void dither(double dither)
+    miser_t &dither(double dither)
     {
         gsl_monte_miser_params p;
         gsl_monte_miser_params_get(m_state, &p);
         p.dither = dither;
         gsl_monte_miser_params_set(m_state, &p);
+
+        return *this;
     }
 
   private:

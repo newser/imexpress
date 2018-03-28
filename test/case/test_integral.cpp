@@ -601,6 +601,8 @@ TEST_CASE("integral_miser")
             &e);
     REQUIRE(__D_EQ_IN(v, 0.8, 0.1));
     REQUIRE(e < 5 * 1.264e-3);
+
+    m_1.alpha(0.1).min_calls(10);
 }
 
 TEST_CASE("integral_vegas")
@@ -698,4 +700,6 @@ TEST_CASE("integral_vegas")
             &e);
     REQUIRE(__D_EQ_IN(v, 0.8, 0.1));
     REQUIRE(e < 5 * 1.264e-3);
+
+    m_1.alpha(0.1).iterations(10);
 }

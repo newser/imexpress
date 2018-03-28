@@ -100,12 +100,14 @@ class vegas_t
         return p.alpha;
     }
 
-    void alpha(double v)
+    vegas_t &alpha(double v)
     {
         gsl_monte_vegas_params p;
         gsl_monte_vegas_params_get(m_state, &p);
         p.alpha = v;
         gsl_monte_vegas_params_set(m_state, &p);
+
+        return *this;
     }
 
     size_t iterations()
@@ -115,12 +117,14 @@ class vegas_t
         return p.iterations;
     }
 
-    void iterations(size_t iterations)
+    vegas_t &iterations(size_t iterations)
     {
         gsl_monte_vegas_params p;
         gsl_monte_vegas_params_get(m_state, &p);
         p.iterations = iterations;
         gsl_monte_vegas_params_set(m_state, &p);
+
+        return *this;
     }
 
     int stage()
@@ -130,12 +134,14 @@ class vegas_t
         return p.stage;
     }
 
-    void stage(int stage)
+    vegas_t &stage(int stage)
     {
         gsl_monte_vegas_params p;
         gsl_monte_vegas_params_get(m_state, &p);
         p.stage = stage;
         gsl_monte_vegas_params_set(m_state, &p);
+
+        return *this;
     }
 
     vegas_mode mode()
@@ -145,12 +151,14 @@ class vegas_t
         return (vegas_mode)p.mode;
     }
 
-    void mode(vegas_mode mode)
+    vegas_t &mode(vegas_mode mode)
     {
         gsl_monte_vegas_params p;
         gsl_monte_vegas_params_get(m_state, &p);
         p.mode = mode;
         gsl_monte_vegas_params_set(m_state, &p);
+
+        return *this;
     }
 
   private:
