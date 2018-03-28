@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_INTEGRAL_MISER__
-#define __IEXP_INTEGRAL_MISER__
+#ifndef __IEXP_INTEGRAL_VEGAS__
+#define __IEXP_INTEGRAL_VEGAS__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -29,7 +29,7 @@
 #include <integral/type.h>
 #include <rand/rng.h>
 
-#include <gsl/gsl_monte_miser.h>
+#include <gsl/gsl_monte_vegas.h>
 
 IEXP_NS_BEGIN
 
@@ -43,23 +43,30 @@ namespace integral {
 // type definition
 ////////////////////////////////////////////////////////////
 
+enum vegas_mode
+{
+    IMPORTANCE = GSL_VEGAS_MODE_IMPORTANCE,
+    IMPORTANCE_ONLY = GSL_VEGAS_MODE_IMPORTANCE_ONLY,
+    STRATIFIED = GSL_VEGAS_MODE_STRATIFIED,
+};
+
 template <typename T>
-class miser_t
+class vegas_t
 {
   public:
-    miser_t(size_t dim,
+    vegas_t(size_t dim,
             rand::rng_type type = rand::MT19937,
             unsigned long seed = 0)
         : m_state(nullptr)
         , m_rng(type, seed)
     {
-        m_state = gsl_monte_miser_alloc(dim);
+        m_state = gsl_monte_vegas_alloc(dim);
         IEXP_NOT_NULLPTR(m_state);
     }
 
-    ~miser_t()
+    ~vegas_t()
     {
-        gsl_monte_miser_free(m_state);
+        gsl_monte_vegas_free(m_state);
     }
 
     T operator()(const typename monte_func<T>::type_1d &fn,
@@ -81,102 +88,92 @@ class miser_t
         UNSUPPORTED_TYPE(T);
     }
 
-    double estimate_frac()
+    double chisq()
     {
-        gsl_monte_miser_params p;
-        gsl_monte_miser_params_get(m_state, &p);
-        return p.estimate_frac;
-    }
-
-    void estimate_frac(double frac)
-    {
-        gsl_monte_miser_params p;
-        gsl_monte_miser_params_get(m_state, &p);
-        p.estimate_frac = frac;
-        gsl_monte_miser_params_set(m_state, &p);
-    }
-
-    size_t min_calls()
-    {
-        gsl_monte_miser_params p;
-        gsl_monte_miser_params_get(m_state, &p);
-        return p.min_calls;
-    }
-
-    void min_calls(size_t calls)
-    {
-        gsl_monte_miser_params p;
-        gsl_monte_miser_params_get(m_state, &p);
-        p.min_calls = calls;
-        gsl_monte_miser_params_set(m_state, &p);
-    }
-
-    size_t min_calls_per_bisection()
-    {
-        gsl_monte_miser_params p;
-        gsl_monte_miser_params_get(m_state, &p);
-        return p.min_calls_per_bisection;
-    }
-
-    void min_calls_per_bisection(size_t calls)
-    {
-        gsl_monte_miser_params p;
-        gsl_monte_miser_params_get(m_state, &p);
-        p.min_calls_per_bisection = calls;
-        gsl_monte_miser_params_set(m_state, &p);
+        return gsl_monte_vegas_chisq(m_state);
     }
 
     double alpha()
     {
-        gsl_monte_miser_params p;
-        gsl_monte_miser_params_get(m_state, &p);
+        gsl_monte_vegas_params p;
+        gsl_monte_vegas_params_get(m_state, &p);
         return p.alpha;
     }
 
-    void alpha(double alpha)
+    void alpha(double v)
     {
-        gsl_monte_miser_params p;
-        gsl_monte_miser_params_get(m_state, &p);
-        p.alpha = alpha;
-        gsl_monte_miser_params_set(m_state, &p);
+        gsl_monte_vegas_params p;
+        gsl_monte_vegas_params_get(m_state, &p);
+        p.alpha = v;
+        gsl_monte_vegas_params_set(m_state, &p);
     }
 
-    double dither()
+    size_t iterations()
     {
-        gsl_monte_miser_params p;
-        gsl_monte_miser_params_get(m_state, &p);
-        return p.dither;
+        gsl_monte_vegas_params p;
+        gsl_monte_vegas_params_get(m_state, &p);
+        return p.iterations;
     }
 
-    void dither(double dither)
+    void iterations(size_t iterations)
     {
-        gsl_monte_miser_params p;
-        gsl_monte_miser_params_get(m_state, &p);
-        p.dither = dither;
-        gsl_monte_miser_params_set(m_state, &p);
+        gsl_monte_vegas_params p;
+        gsl_monte_vegas_params_get(m_state, &p);
+        p.iterations = iterations;
+        gsl_monte_vegas_params_set(m_state, &p);
+    }
+
+    int stage()
+    {
+        gsl_monte_vegas_params p;
+        gsl_monte_vegas_params_get(m_state, &p);
+        return p.stage;
+    }
+
+    void stage(int stage)
+    {
+        gsl_monte_vegas_params p;
+        gsl_monte_vegas_params_get(m_state, &p);
+        p.stage = stage;
+        gsl_monte_vegas_params_set(m_state, &p);
+    }
+
+    vegas_mode mode()
+    {
+        gsl_monte_vegas_params p;
+        gsl_monte_vegas_params_get(m_state, &p);
+        return (vegas_mode)p.mode;
+    }
+
+    void mode(vegas_mode mode)
+    {
+        gsl_monte_vegas_params p;
+        gsl_monte_vegas_params_get(m_state, &p);
+        p.mode = mode;
+        gsl_monte_vegas_params_set(m_state, &p);
     }
 
   private:
-    miser_t(const miser_t &) = delete;
-    miser_t &operator=(const miser_t &) = delete;
+    vegas_t(const vegas_t &) = delete;
+    vegas_t &operator=(const vegas_t &) = delete;
 
-    gsl_monte_miser_state *m_state;
+    gsl_monte_vegas_state *m_state;
     rand::rng m_rng;
 };
 
 template <>
-double miser_t<double>::operator()(
+double vegas_t<double>::operator()(
     const typename monte_func<double>::type_1d &fn,
     double a,
     double b,
     size_t calls,
     double *abserr)
 {
-    gsl_monte_miser_init(m_state);
+    gsl_monte_vegas_init(m_state);
 
     monte_func<double> m_fn(fn);
     double result, __abserr;
-    gsl_monte_miser_integrate(const_cast<gsl_monte_function *>(m_fn.gsl()),
+    gsl_monte_vegas_integrate(const_cast<gsl_monte_function *>(m_fn.gsl()),
                               &a,
                               &b,
                               1,
@@ -189,7 +186,7 @@ double miser_t<double>::operator()(
 }
 
 template <>
-double miser_t<double>::operator()(
+double vegas_t<double>::operator()(
     const typename monte_func<double>::type_nd &fn,
     const double a[],
     const double b[],
@@ -199,13 +196,13 @@ double miser_t<double>::operator()(
 {
     eigen_assert(dim == m_state->dim);
 
-    gsl_monte_miser_init(m_state);
+    gsl_monte_vegas_init(m_state);
 
     monte_func<double> m_fn(dim, fn);
     double result, __abserr;
-    gsl_monte_miser_integrate(const_cast<gsl_monte_function *>(m_fn.gsl()),
-                              a,
-                              b,
+    gsl_monte_vegas_integrate(const_cast<gsl_monte_function *>(m_fn.gsl()),
+                              const_cast<double *>(a),
+                              const_cast<double *>(b),
                               dim,
                               calls,
                               m_rng.gsl(),
@@ -215,7 +212,7 @@ double miser_t<double>::operator()(
     return result;
 }
 
-typedef miser_t<double> miser;
+typedef vegas_t<double> vegas;
 
 ////////////////////////////////////////////////////////////
 // global variants
@@ -228,4 +225,4 @@ typedef miser_t<double> miser;
 
 IEXP_NS_END
 
-#endif /* __IEXP_INTEGRAL_MISER__ */
+#endif /* __IEXP_INTEGRAL_VEGAS__ */

@@ -10,6 +10,7 @@
 #include <integral/qawo.h>
 #include <integral/qaws.h>
 #include <integral/qng.h>
+#include <integral/vegas.h>
 #include <iostream>
 #include <test_util.h>
 
@@ -578,6 +579,103 @@ TEST_CASE("integral_miser")
     // 1d
 
     integral::miser m_1(1);
+    v = m_1(
+        [](double x) -> double {
+            double prod = 1.0;
+
+            prod *= 2.0 * x;
+
+            return prod;
+        },
+        xl[0],
+        xu[0],
+        21604,
+        &e);
+    REQUIRE(__D_EQ2(v, 1.0));
+    REQUIRE(__D_EQ2(e, 0.01));
+
+    v = m_1([](double x) -> double { return (x > 0.1 && x < 0.9) ? 1 : 0; },
+            xl[0],
+            xu[0],
+            100000,
+            &e);
+    REQUIRE(__D_EQ_IN(v, 0.8, 0.1));
+    REQUIRE(e < 5 * 1.264e-3);
+}
+
+TEST_CASE("integral_vegas")
+{
+    double xl[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    double xu[11] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+
+    // 2d
+
+    integral::vegas m(2);
+    double e;
+    double v = m(
+        [](double *x, size_t d) -> double {
+            double prod = 1.0;
+            unsigned int i;
+
+            for (i = 0; i < d; ++i) {
+                prod *= 2.0 * x[i];
+            }
+
+            return prod;
+        },
+        xl,
+        xu,
+        2,
+        3333,
+        &e);
+    REQUIRE(__D_EQ2(v, 1.0));
+    REQUIRE(__D_EQ2(e, 0.01));
+
+    v = m([](double *x,
+             size_t d) -> double { return (x[0] > 0.1 && x[0] < 0.9) ? 1 : 0; },
+          xl,
+          xu,
+          2,
+          100000,
+          &e);
+    REQUIRE(__D_EQ_IN(v, 0.8, 0.1));
+    REQUIRE(e < 5 * 1.264e-3);
+
+    // nd
+
+    integral::vegas m_n(4);
+    v = m_n(
+        [](double *x, size_t d) -> double {
+            double prod = 1.0;
+            unsigned int i;
+
+            for (i = 0; i < d; ++i) {
+                prod *= 2.0 * x[i];
+            }
+
+            return prod;
+        },
+        xl,
+        xu,
+        4,
+        21604,
+        &e);
+    REQUIRE(__D_EQ2(v, 1.0));
+    REQUIRE(__D_EQ2(e, 0.01));
+
+    v = m_n([](double *x, size_t d)
+                -> double { return (x[0] > 0.1 && x[0] < 0.9) ? 1 : 0; },
+            xl,
+            xu,
+            4,
+            100000,
+            &e);
+    REQUIRE(__D_EQ_IN(v, 0.8, 0.1));
+    REQUIRE(__D_EQ_IN(e, 1.264e-3, 1e-3));
+
+    // 1d
+
+    integral::vegas m_1(1);
     v = m_1(
         [](double x) -> double {
             double prod = 1.0;
