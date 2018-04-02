@@ -67,8 +67,7 @@ class siman_test
 
     static void test_copy()
     {
-        siman<int> s1([](const int &s, int &d) { d = s; },
-                      [](const int &s) -> int & { return *(new int(s)); });
+        siman<int> s1;
 
         std::shared_ptr<siman<int>::state> p(
             new siman<int>::state(s1, new int(1)));
@@ -88,8 +87,7 @@ class siman_test
         s1.s_destroy(ps);
 
         // object
-        siman<to> s2([](const to &s, to &d) { d = s; },
-                     [](const to &s) -> to & { return *(new to(s)); });
+        siman<to> s2;
         std::shared_ptr<siman<to>::state> q(
             new siman<to>::state(s2, new to(1)));
         std::shared_ptr<siman<to>::state> q2(
@@ -142,4 +140,45 @@ TEST_CASE("siman")
 
     siman_test::test_copy();
     REQUIRE(dtor == 3);
+}
+
+double square(double x)
+{
+    return x * x;
+}
+
+TEST_CASE("siman_solve")
+{
+    siman<double> s;
+
+    s.n_tries(200);
+    s.iters_fixed_T(1000);
+    s.cooling(1.0, 0.008, 1.003, 2.0e-6);
+    s.step_size(1.0);
+
+    s.energy([](const double &x) {
+        return exp(-square(x - 1)) * sin(8 * x) - exp(-square(x - 1000)) * 0.89;
+    });
+    s.step([](rand::rng &r, double &x, double step_size) {
+        x = r.uniform_double() * 2 * step_size - step_size + x;
+    });
+    s.metric(
+        [](const double &x, const double &y) -> double { return fabs(x - y); });
+    // s.print([](const double &x) { printf(" %12g ", x);});
+
+    /* The function tested here has multiple mimima.
+     The global minimum is at    x = 1.36312999, (f = -0.87287)
+     There is a local minimum at x = 0.60146196, (f = -0.84893) */
+
+    double x = -10.0;
+    s.solve(x);
+    REQUIRE(__D_EQ7(x, 1.36312999));
+
+    x = 10.0;
+    s.solve(x);
+    REQUIRE(__D_EQ3(x, 1.36312999));
+
+    x = 0.6;
+    s.solve(x);
+    REQUIRE(__D_EQ3(x, 1.36312999));
 }

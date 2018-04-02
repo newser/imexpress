@@ -61,18 +61,6 @@ class siman
     {
     }
 
-    siman(const f_copy &copy,
-          const f_copy_construct &copy_ctor,
-          rand::rng_type type = rand::MT19937,
-          unsigned long seed = 0)
-        : m_rng(type, seed)
-        , m_copy(copy)
-        , m_copy_construct(copy_ctor)
-    {
-        eigen_assert(m_copy != nullptr);
-        eigen_assert(m_copy_construct != nullptr);
-    }
-
     siman &energy(const f_energy &e)
     {
         m_energy = e;
@@ -124,6 +112,32 @@ class siman
         return *this;
     }
 
+    void solve(C &init)
+    {
+        state st(*this, &init);
+        gsl_siman_params_t params{m_n_tries,
+                                  m_iters_fixed_T,
+                                  m_step_size,
+                                  m_k,
+                                  m_t_initial,
+                                  m_mu_t,
+                                  m_t_min};
+        gsl_siman_solve(m_rng.gsl(),
+                        &st,
+                        s_Efunc,
+                        s_step,
+                        s_metric,
+                        m_print != nullptr ? s_print : nullptr,
+                        s_copy,
+                        s_copy_construct,
+                        s_destroy,
+                        0,
+                        params);
+
+        // need not destroy passed param
+        st.m_cfg = nullptr;
+    }
+
   private:
     rand::rng m_rng;
     f_energy m_energy{nullptr};
@@ -147,7 +161,6 @@ class siman
             : m_siman(s)
             , m_cfg(cfg)
         {
-            eigen_assert(m_cfg != nullptr);
         }
 
         ~state()
