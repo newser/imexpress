@@ -48,6 +48,9 @@ target_include_directories(test_imexpress PRIVATE ${LIBRARY_PATH}/eigen)
 # fft
 target_include_directories(test_imexpress PRIVATE ${LIBRARY_PATH}/fft/fftw/api)
 
+# ode
+target_include_directories(test_imexpress PRIVATE ${LIBRARY_PATH}/ode/sundials/include)
+
 # catch
 target_include_directories(test_imexpress PRIVATE ${LIBRARY_PATH}/Catch2/single_include)
 

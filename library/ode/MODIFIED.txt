@@ -1,0 +1,2 @@
+- removed directories: doc, examples, test
+- removed INSTALL_GUIDE.pdf

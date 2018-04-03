@@ -118,6 +118,10 @@ if (FFT_FLOAT_LIB)
 endif ()
 target_link_libraries(imexpress ${FFT_LIB})
 
+# ode
+add_subdirectory(${LIBRARY_PATH}/ode ode)
+target_link_libraries(imexpress ${ODE_LIB})
+
 # test
 add_subdirectory(${ROOT_PATH}/test test)
 
