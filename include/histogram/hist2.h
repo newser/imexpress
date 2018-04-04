@@ -25,8 +25,8 @@
 
 #include <common/common.h>
 
-#include <gsl/gsl_histogram2d.h>
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_histogram2d.h>
 
 IEXP_NS_BEGIN
 

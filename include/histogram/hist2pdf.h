@@ -23,7 +23,7 @@
 // import header files
 ////////////////////////////////////////////////////////////
 
-#include <histogram/hist.h>
+#include <histogram/hist2.h>
 #include <rand/rng.h>
 
 IEXP_NS_BEGIN
