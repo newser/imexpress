@@ -19,7 +19,7 @@ TEST_CASE("complex")
     REQUIRE(a == b);
     REQUIRE(__D_EQ(std::arg(a), IEXP_PI_4));
     REQUIRE(__D_EQ(std::abs(a), 1.));
-    REQUIRE(__D_EQ(std::norm(a), 1.));
+    REQUIRE(__D_EQ9(std::norm(a), 1.));
 
     std::complex<double> c = a + b;
     REQUIRE(__D_EQ(c.real(), a.real() + b.real()));

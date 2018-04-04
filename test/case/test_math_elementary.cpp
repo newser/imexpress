@@ -12,8 +12,8 @@ TEST_CASE("math_elementary")
         iexp::Matrix2d m = iexp::Matrix2d::Random();
         iexp::Matrix2d m2 = iexp::log1p(m.array());
         REQUIRE(::gsl_log1p(m(0, 0)) == m2(0, 0));
-        REQUIRE(::gsl_log1p(m(0, 1)) == m2(0, 1));
-        REQUIRE(::gsl_log1p(m(1, 0)) == m2(1, 0));
+        REQUIRE(__D_EQ9(::gsl_log1p(m(0, 1)), m2(0, 1)));
+        REQUIRE(__D_EQ9(::gsl_log1p(m(1, 0)), m2(1, 0)));
         REQUIRE(::gsl_log1p(m(1, 1)) == m2(1, 1));
 
         m2 = iexp::exp(m.array());
