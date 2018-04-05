@@ -64,6 +64,21 @@ IEXP_NS_BEGIN
 
 #define __F_EQ5(a, b) __D_EQ_IN(a, b, 0.00001)
 
+// clang-format off
+#define except_begin()                                                         \
+    do {                                                                       \
+        bool ok = false;                                                       \
+        try
+
+#define except_str(str)                                                        \
+        catch (std::exception & e) {                                           \
+            ok = (e.what() != nullptr) && (strcmp(e.what(), (str)) == 0);      \
+            REQUIRE(ok);                                                       \
+        }                                                                      \
+    }                                                                          \
+    while (0)
+// clang-format on
+
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////

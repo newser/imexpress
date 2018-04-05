@@ -16,14 +16,15 @@
  * USA.
  */
 
-#ifndef __IEXP_TYPE__
-#define __IEXP_TYPE__
+#ifndef __IEXP_DEF__
+#define __IEXP_DEF__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
-#include <limits>
+#include <gsl/config.h>
+#include <gsl/gsl_mode.h>
 
 IEXP_NS_BEGIN
 
@@ -31,11 +32,24 @@ IEXP_NS_BEGIN
 // macro definition
 ////////////////////////////////////////////////////////////
 
-#define IS_INTEGER(t) std::numeric_limits<t>::is_integer
+#define DEFINE_TYPE_SUFFIX(def)                                                \
+    def(char, char) def(unsigned char, uchar) def(short, short)                \
+        def(unsigned short, ushort) def(int, int) def(unsigned int, uint)      \
+            def(long, long) def(unsigned long, ulong) def(float, float)
 
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
+
+enum class precision
+{
+    // Double-precision, a relative accuracy of approximately 2 * 10^{-16}.
+    DOUBLE = GSL_PREC_DOUBLE,
+    // Single-precision, a relative accuracy of approximately 10^{-7}.
+    SINGLE = GSL_PREC_SINGLE,
+    // Approximate values, a relative accuracy of approximately 5 * 10^{-4}.
+    APPROX = GSL_PREC_APPROX,
+};
 
 ////////////////////////////////////////////////////////////
 // global variants
@@ -47,4 +61,4 @@ IEXP_NS_BEGIN
 
 IEXP_NS_END
 
-#endif /* __IEXP_TYPE__ */
+#endif /* __IEXP_DEF__ */

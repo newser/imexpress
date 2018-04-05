@@ -23,15 +23,25 @@
 // import header files
 ////////////////////////////////////////////////////////////
 
+// clang-format off
+
+// environment must be first
 #include <common/environment.h>
 
+// define namespace
 #include <common/namespace.h>
 
+// library: eigen
 #include <common/eigen_config.h>
-#include <common/type.h>
-#include <common/util.h>
+#include <Eigen/Dense>
 
+// library: gsl
 #include <gsl/config.h>
+
+// clang-format on
+
+#include <common/def.h>
+#include <common/util.h>
 
 IEXP_NS_BEGIN
 

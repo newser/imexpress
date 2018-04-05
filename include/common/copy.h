@@ -16,14 +16,16 @@
  * USA.
  */
 
-#ifndef __IEXP_TYPE__
-#define __IEXP_TYPE__
+#ifndef __IEXP_COPY__
+#define __IEXP_COPY__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
-#include <limits>
+#include <common/common.h>
+
+#include <string.h>
 
 IEXP_NS_BEGIN
 
@@ -31,11 +33,29 @@ IEXP_NS_BEGIN
 // macro definition
 ////////////////////////////////////////////////////////////
 
-#define IS_INTEGER(t) std::numeric_limits<t>::is_integer
-
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
+
+template <typename DST, typename SRC>
+struct copy
+{
+    copy(DST *d, const SRC *s, size_t n)
+    {
+        for (size_t i = 0; i < n; ++i) {
+            d[i] = static_cast<DST>(s[i]);
+        }
+    }
+};
+
+template <typename T>
+struct copy<T, T>
+{
+    copy(T *d, const T *s, size_t n)
+    {
+        ::memcpy(d, s, sizeof(T) * n);
+    }
+};
 
 ////////////////////////////////////////////////////////////
 // global variants
@@ -47,4 +67,4 @@ IEXP_NS_BEGIN
 
 IEXP_NS_END
 
-#endif /* __IEXP_TYPE__ */
+#endif /* __IEXP_COPY__ */
