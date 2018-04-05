@@ -68,6 +68,22 @@ class hist2pdf
                                    &y);
     }
 
+    template <typename T, typename U>
+    void next(DenseBase<T> &x, DenseBase<U> &y)
+    {
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "T must be double type");
+        static_assert(TYPE_IS(typename U::Scalar, double),
+                      "U must be double type");
+
+        eigen_assert(MATRIX_SAME_SIZE(x, y));
+        for (Index i = 0; i < x.rows(); ++i) {
+            for (Index j = 0; j < x.cols(); ++j) {
+                next(x(i, j), y(i, j));
+            }
+        }
+    }
+
   private:
     hist2pdf(const hist2pdf &h) = delete;
     hist2pdf(hist2pdf &&h) = delete;

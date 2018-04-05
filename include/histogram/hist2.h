@@ -25,7 +25,6 @@
 
 #include <common/common.h>
 
-#include <gsl/gsl_errno.h>
 #include <gsl/gsl_histogram2d.h>
 
 IEXP_NS_BEGIN
@@ -51,10 +50,7 @@ class hist2
         m_gh2 = gsl_histogram2d_alloc(nx - 1, ny - 1);
         IEXP_NOT_NULLPTR(m_gh2);
 
-        if (gsl_histogram2d_set_ranges(m_gh2, xrange, nx, yrange, ny) !=
-            GSL_SUCCESS) {
-            RETURN_OR_THROW(std::runtime_error("hist2"));
-        }
+        gsl_histogram2d_set_ranges(m_gh2, xrange, nx, yrange, ny);
     }
 
     hist2(const std::initializer_list<double> &xrange,
@@ -64,13 +60,32 @@ class hist2
         m_gh2 = gsl_histogram2d_alloc(xrange.size() - 1, yrange.size() - 1);
         IEXP_NOT_NULLPTR(m_gh2);
 
-        if (gsl_histogram2d_set_ranges(m_gh2,
-                                       xrange.begin(),
-                                       xrange.size(),
-                                       yrange.begin(),
-                                       yrange.size()) != GSL_SUCCESS) {
-            RETURN_OR_THROW(std::runtime_error("hist2"));
-        }
+        gsl_histogram2d_set_ranges(m_gh2,
+                                   xrange.begin(),
+                                   xrange.size(),
+                                   yrange.begin(),
+                                   yrange.size());
+    }
+
+    template <typename T, typename U>
+    hist2(const DenseBase<T> &xrange, const DenseBase<U> &yrange)
+    {
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "T must be double type");
+        static_assert(TYPE_IS(typename U::Scalar, double),
+                      "U must be double type");
+
+        eigen_assert((xrange.size() > 1) && (yrange.size() > 1));
+        m_gh2 = gsl_histogram2d_alloc(xrange.size() - 1, yrange.size() - 1);
+        IEXP_NOT_NULLPTR(m_gh2);
+
+        typename type_eval<T>::type e_xr(xrange.eval());
+        typename type_eval<U>::type e_yr(yrange.eval());
+        gsl_histogram2d_set_ranges(m_gh2,
+                                   e_xr.data(),
+                                   e_xr.size(),
+                                   e_yr.data(),
+                                   e_yr.size());
     }
 
     hist2(size_t nx,
@@ -83,10 +98,7 @@ class hist2
         m_gh2 = gsl_histogram2d_alloc(nx, ny);
         IEXP_NOT_NULLPTR(m_gh2);
 
-        if (gsl_histogram2d_set_ranges_uniform(m_gh2, xmin, xmax, ymin, ymax) !=
-            GSL_SUCCESS) {
-            RETURN_OR_THROW(std::runtime_error("hist2"));
-        }
+        gsl_histogram2d_set_ranges_uniform(m_gh2, xmin, xmax, ymin, ymax);
     }
 
     hist2(const hist2 &h)
@@ -199,9 +211,49 @@ class hist2
         return gsl_histogram2d_get(m_gh2, i, j);
     }
 
-    bool add(double x, double y, double weight = 1.0)
+    void add(double x, double y, double weight = 1.0)
     {
-        return gsl_histogram2d_accumulate(m_gh2, x, y, weight) == GSL_SUCCESS;
+        gsl_histogram2d_accumulate(m_gh2, x, y, weight);
+    }
+
+    template <typename T, typename U>
+    void add(const DenseBase<T> &x, const DenseBase<U> &y)
+    {
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "T must be double type");
+        static_assert(TYPE_IS(typename U::Scalar, double),
+                      "U must be double type");
+
+        eigen_assert((x.rows() == y.rows()) && (x.cols() == y.cols()));
+        for (Index i = 0; i < x.rows(); ++i) {
+            for (Index j = 0; j < x.cols(); ++j) {
+                gsl_histogram2d_accumulate(m_gh2, x(i, j), y(i, j), 1.0);
+            }
+        }
+    }
+
+    template <typename T, typename U, typename V>
+    void add(const DenseBase<T> &x,
+             const DenseBase<U> &y,
+             const DenseBase<V> &weight)
+    {
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "T must be double type");
+        static_assert(TYPE_IS(typename U::Scalar, double),
+                      "U must be double type");
+        static_assert(TYPE_IS(typename V::Scalar, double),
+                      "V must be double type");
+
+        eigen_assert(MATRIX_SAME_SIZE(x, y));
+        eigen_assert(MATRIX_SAME_SIZE(x, weight));
+        for (Index i = 0; i < x.rows(); ++i) {
+            for (Index j = 0; j < x.cols(); ++j) {
+                gsl_histogram2d_accumulate(m_gh2,
+                                           x(i, j),
+                                           y(i, j),
+                                           weight(i, j));
+            }
+        }
     }
 
     void xrange(size_t i, double &lower, double &upper) const
@@ -248,7 +300,12 @@ class hist2
 
     bool find(double x, double y, size_t &i, size_t &j) const
     {
-        return gsl_histogram2d_find(m_gh2, x, y, &i, &j) == GSL_SUCCESS;
+        try {
+            gsl_histogram2d_find(m_gh2, x, y, &i, &j);
+            return true;
+        } catch (...) {
+            return false;
+        }
     }
 
     double max_val() const

@@ -25,7 +25,6 @@
 
 #include <common/common.h>
 
-#include <gsl/gsl_errno.h>
 #include <gsl/gsl_histogram.h>
 
 IEXP_NS_BEGIN
@@ -51,9 +50,7 @@ class hist
         m_gh = gsl_histogram_alloc(n - 1);
         IEXP_NOT_NULLPTR(m_gh);
 
-        if (gsl_histogram_set_ranges(m_gh, range, n) != GSL_SUCCESS) {
-            RETURN_OR_THROW(std::runtime_error("hist"));
-        }
+        gsl_histogram_set_ranges(m_gh, range, n);
     }
 
     hist(const std::initializer_list<double> &range)
@@ -62,10 +59,21 @@ class hist
         m_gh = gsl_histogram_alloc(range.size() - 1);
         IEXP_NOT_NULLPTR(m_gh);
 
-        if (gsl_histogram_set_ranges(m_gh, range.begin(), range.size()) !=
-            GSL_SUCCESS) {
-            RETURN_OR_THROW(std::runtime_error("hist"));
-        }
+        gsl_histogram_set_ranges(m_gh, range.begin(), range.size());
+    }
+
+    template <typename T>
+    hist(const DenseBase<T> &range)
+    {
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "must be double type");
+
+        eigen_assert(range.size() > 1);
+        m_gh = gsl_histogram_alloc(range.size() - 1);
+        IEXP_NOT_NULLPTR(m_gh);
+
+        typename type_eval<T>::type e_r(range.eval());
+        gsl_histogram_set_ranges(m_gh, e_r.data(), e_r.size());
     }
 
     hist(size_t n, double min, double max)
@@ -73,9 +81,7 @@ class hist
         m_gh = gsl_histogram_alloc(n);
         IEXP_NOT_NULLPTR(m_gh);
 
-        if (gsl_histogram_set_ranges_uniform(m_gh, min, max) != GSL_SUCCESS) {
-            RETURN_OR_THROW(std::runtime_error("hist"));
-        }
+        gsl_histogram_set_ranges_uniform(m_gh, min, max);
     }
 
     hist(const hist &h)
@@ -128,6 +134,13 @@ class hist
     hist &operator<<(double x)
     {
         gsl_histogram_increment(m_gh, x);
+        return *this;
+    }
+
+    template <typename T>
+    hist &operator<<(const DenseBase<T> &x)
+    {
+        add(x);
         return *this;
     }
 
@@ -188,9 +201,39 @@ class hist
         gsl_histogram_reset(m_gh);
     }
 
-    bool add(double x, double weight = 1.0)
+    void add(double x, double weight = 1.0)
     {
-        return gsl_histogram_accumulate(m_gh, x, weight) == GSL_SUCCESS;
+        gsl_histogram_accumulate(m_gh, x, weight);
+    }
+
+    template <typename T>
+    void add(const DenseBase<T> &x)
+    {
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "must be double type");
+
+        for (Index i = 0; i < x.rows(); ++i) {
+            for (Index j = 0; j < x.cols(); ++j) {
+                gsl_histogram_accumulate(m_gh, x(i, j), 1.0);
+            }
+        }
+    }
+
+    template <typename T, typename U>
+    void add(const DenseBase<T> &x, const DenseBase<U> &weight)
+    {
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "T must be double type");
+        static_assert(TYPE_IS(typename U::Scalar, double),
+                      "U must be double type");
+
+        eigen_assert((x.rows() == weight.rows()) &&
+                     (x.cols() == weight.cols()));
+        for (Index i = 0; i < x.rows(); ++i) {
+            for (Index j = 0; j < x.cols(); ++j) {
+                gsl_histogram_accumulate(m_gh, x(i, j), weight(i, j));
+            }
+        }
     }
 
     void range(size_t i, double &lower, double &upper) const
@@ -216,10 +259,11 @@ class hist
 
     size_t find(double x) const
     {
-        size_t i;
-        if (gsl_histogram_find(m_gh, x, &i) == GSL_SUCCESS) {
+        try {
+            size_t i;
+            gsl_histogram_find(m_gh, x, &i);
             return i;
-        } else {
+        } catch (...) {
             return (size_t)-1;
         }
     }

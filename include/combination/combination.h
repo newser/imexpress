@@ -74,9 +74,7 @@ class combination
         copy<size_t, const typename T::Scalar>(gsl_combination_data(m_gc),
                                                e_v.data(),
                                                e_v.size());
-        if (gsl_combination_valid(m_gc) != GSL_SUCCESS) {
-            throw std::invalid_argument("not a valid combination");
-        }
+        gsl_combination_valid(m_gc);
     }
 
     combination(const combination &rhs)
@@ -132,9 +130,7 @@ class combination
             copy<size_t, const typename T::Scalar>(gsl_combination_data(m_gc),
                                                    e_v.data(),
                                                    k);
-            if (gsl_combination_valid(m_gc) != GSL_SUCCESS) {
-                throw std::invalid_argument("not a valid combination");
-            }
+            gsl_combination_valid(m_gc);
         } else {
             // rvalue assignment
             *this = combination(n, v);
@@ -186,7 +182,12 @@ class combination
 
     bool valid() const
     {
-        return bool(gsl_combination_valid(m_gc) == GSL_SUCCESS);
+        try {
+            gsl_combination_valid(m_gc);
+            return true;
+        } catch (...) {
+            return false;
+        }
     }
 
   private:

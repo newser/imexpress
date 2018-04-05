@@ -48,9 +48,7 @@ class histpdf
         m_ghp = gsl_histogram_pdf_alloc(h.size());
         IEXP_NOT_NULLPTR(m_ghp);
 
-        if (gsl_histogram_pdf_init(m_ghp, h.m_gh) != GSL_SUCCESS) {
-            RETURN_OR_THROW(std::runtime_error("histpdf"));
-        }
+        gsl_histogram_pdf_init(m_ghp, h.m_gh);
     }
 
     ~histpdf()
@@ -61,6 +59,20 @@ class histpdf
     double next()
     {
         return gsl_histogram_pdf_sample(m_ghp, m_rng.uniform_double());
+    }
+
+    template <typename T>
+    void next(DenseBase<T> &x)
+    {
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "must be double type");
+        // static_assert(IS_LREF(decltype(x(0, 0))), "not lvalue");
+
+        for (Index i = 0; i < x.rows(); ++i) {
+            for (Index j = 0; j < x.cols(); ++j) {
+                x(i, j) = next();
+            }
+        }
     }
 
   private:

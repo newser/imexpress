@@ -36,6 +36,10 @@ IEXP_NS_BEGIN
 
 #define IS_COMPLEX(t) is_complex<t>::value
 
+#define IS_LREF(t) std::is_lvalue_reference<t>::value
+
+#define IS_RREF(t) std::is_rvalue_reference<t>::value
+
 #define TYPE_IS(t1, t2) std::is_same<t1, t2>::value
 
 #define TYPE_CHOOSE(v, t1, t2) std::conditional<v, t1, t2>::type

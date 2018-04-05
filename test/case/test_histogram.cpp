@@ -147,6 +147,54 @@ TEST_CASE("hist_val")
     histpdf hp(h);
     hp.next();
     hp.next();
+
+    VectorXd v(10);
+    hp.next(v);
+    // hp.next(v + v);
+}
+
+TEST_CASE("hist_vec")
+{
+    // matrix
+    {
+        Matrix<double, 1, 11> m;
+        m << 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0;
+        hist h(m);
+
+        VectorXd x(6);
+        x << 0.5, 1.5, 2.5, 3.5, 4.5, 5.5;
+        h << x;
+
+        h << 0.5;
+        h.add(9.9, -1);
+        test_val(h);
+
+        size_t i = h.find(100);
+        REQUIRE(i == -1);
+
+        hist h2(m + m);
+    }
+
+    // array
+    {
+        Array<double, 11, 1> a;
+        a << 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0;
+        hist h(a);
+
+        VectorXd x(6), w(6);
+        x << 0.5, 1.5, 2.5, 3.5, 4.5, 5.5;
+        w.setOnes();
+        h.add(x, w);
+
+        h << 0.5;
+        h.add(9.9, -1);
+        test_val(h);
+
+        size_t i = h.find(100);
+        REQUIRE(i == -1);
+
+        hist h2(a + a);
+    }
 }
 
 void test_empty2(hist2 &h)
@@ -358,4 +406,53 @@ TEST_CASE("hist2_val")
     double x1, y1;
     hp.next(x1, y1);
     hp.next(x1, y1);
+
+    Matrix<double, 2, 3> mx;
+    Array<double, 2, 3> ay;
+    hp.next(mx, ay);
+}
+
+TEST_CASE("hist2_vec")
+{
+    // matrix
+    {
+        Matrix<double, 1, 11> m;
+        m << 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0;
+        Array<double, 6, 1> my;
+        my << 90.0, 91.0, 92.0, 93.0, 94.0, 95.0;
+        hist2 h(m, my);
+
+        VectorXd x(10), y(10);
+        x << 0.1, 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 8.1, 9.1;
+        y << 90.1, 90.9, 91.1, 91.9, 92.1, 92.9, 93.1, 93.9, 94.1, 94.9;
+        h.add(x, y);
+        h.add(4.1, 92.1, -3.0);
+        h.add(5.1, 92.9, 2.2);
+        test_val2(h);
+
+        size_t i, j;
+        REQUIRE(!h.find(9, 99, i, j));
+
+        hist h2(m + m);
+    }
+
+    // array
+    {
+        Array<double, 11, 1> a;
+        a << 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0;
+        Matrix<double, 6, 1> ay;
+        ay << 90.0, 91.0, 92.0, 93.0, 94.0, 95.0;
+        hist2 h(a, ay);
+
+        VectorXd x(10);
+        ArrayXd y(10);
+        x << 0.1, 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 8.1, 9.1;
+        y << 90.1, 90.9, 91.1, 91.9, 92.1, 92.9, 93.1, 93.9, 94.1, 94.9;
+        h.add(x, y);
+        h.add(4.1, 92.1, -3.0);
+        h.add(5.1, 92.9, 2.2);
+        test_val2(h);
+
+        hist h2(a + a);
+    }
 }
