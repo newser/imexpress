@@ -24,6 +24,7 @@
 ////////////////////////////////////////////////////////////
 
 #include <common/common.h>
+
 #include <math/inf_nan.h>
 
 #include <gsl/gsl_poly.h>

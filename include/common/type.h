@@ -23,6 +23,7 @@
 // import header files
 ////////////////////////////////////////////////////////////
 
+#include <complex>
 #include <limits>
 
 IEXP_NS_BEGIN
@@ -33,9 +34,36 @@ IEXP_NS_BEGIN
 
 #define IS_INTEGER(t) std::numeric_limits<t>::is_integer
 
+#define IS_COMPLEX(t) is_complex<t>::value
+
+#define TYPE_IS(t1, t2) std::is_same<t1, t2>::value
+
+#define TYPE_CHOOSE(v, t1, t2) std::conditional<v, t1, t2>::type
+
+#define DEFINE_TYPE_SUFFIX(def)                                                \
+    def(char, char) def(unsigned char, uchar) def(short, short)                \
+        def(unsigned short, ushort) def(int, int) def(unsigned int, uint)      \
+            def(long, long) def(unsigned long, ulong) def(float, float)
+
+#define UNSUPPORTED_TYPE(t) throw std::invalid_argument(typeid(t).name())
+
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
+
+template <typename T>
+struct is_complex
+{
+    static const bool value = std::is_same<T, std::complex<float>>::value ||
+                              std::is_same<T, std::complex<double>>::value ||
+                              std::is_same<T, std::complex<long double>>::value;
+};
+
+template <typename T>
+struct type_eval
+{
+    typedef typename Eigen::internal::eval<T>::type type;
+};
 
 ////////////////////////////////////////////////////////////
 // global variants

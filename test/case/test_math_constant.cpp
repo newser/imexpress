@@ -1,5 +1,23 @@
 #include <catch.hpp>
+#include <gsl/gsl_errno.h>
+#include <iostream>
 #include <math/constant.h>
+
+TEST_CASE("error")
+{
+    bool ok = false;
+
+    try {
+        GSL_ERROR("test", GSL_ERANGE);
+    } catch (std::exception &e) {
+        if (strncmp(e.what(),
+                    "output range error:test",
+                    sizeof("output range error:test") - 1) == 0) {
+            ok = true;
+        }
+    }
+    REQUIRE(ok);
+}
 
 TEST_CASE("math_constant")
 {

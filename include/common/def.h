@@ -23,7 +23,6 @@
 // import header files
 ////////////////////////////////////////////////////////////
 
-#include <gsl/config.h>
 #include <gsl/gsl_mode.h>
 
 IEXP_NS_BEGIN
@@ -31,11 +30,6 @@ IEXP_NS_BEGIN
 ////////////////////////////////////////////////////////////
 // macro definition
 ////////////////////////////////////////////////////////////
-
-#define DEFINE_TYPE_SUFFIX(def)                                                \
-    def(char, char) def(unsigned char, uchar) def(short, short)                \
-        def(unsigned short, ushort) def(int, int) def(unsigned int, uint)      \
-            def(long, long) def(unsigned long, ulong) def(float, float)
 
 ////////////////////////////////////////////////////////////
 // type definition

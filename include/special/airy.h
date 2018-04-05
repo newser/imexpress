@@ -25,6 +25,8 @@
 
 #include <common/common.h>
 
+#include <common/def.h>
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_sf_airy.h>
 

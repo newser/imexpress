@@ -40,7 +40,9 @@
 
 // clang-format on
 
+#include <common/copy.h>
 #include <common/def.h>
+#include <common/type.h>
 #include <common/util.h>
 
 IEXP_NS_BEGIN

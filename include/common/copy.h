@@ -23,8 +23,6 @@
 // import header files
 ////////////////////////////////////////////////////////////
 
-#include <common/common.h>
-
 #include <string.h>
 
 IEXP_NS_BEGIN

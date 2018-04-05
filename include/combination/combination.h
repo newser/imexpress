@@ -25,8 +25,8 @@
 
 #include <common/common.h>
 
+#include <common/common.h>
 #include <common/copy.h>
-#include <common/type.h>
 
 #include <gsl/gsl_combination.h>
 

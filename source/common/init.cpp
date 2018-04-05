@@ -20,7 +20,13 @@
 // import header files
 ////////////////////////////////////////////////////////////
 
-#include <common/common.h>
+#include <common/init.h>
+
+#include <gsl/gsl_errno.h>
+
+#include <string>
+
+IEXP_NS_BEGIN
 
 ////////////////////////////////////////////////////////////
 // internal macro
@@ -42,6 +48,43 @@
 // interface declaration
 ////////////////////////////////////////////////////////////
 
+static void iexp_gsl_error_handler(const char *reason,
+                                   const char *file,
+                                   int line,
+                                   int gsl_errno);
+
 ////////////////////////////////////////////////////////////
 // interface implementation
 ////////////////////////////////////////////////////////////
+
+bool init()
+{
+    gsl_set_error_handler(iexp_gsl_error_handler);
+
+    return true;
+}
+
+void exit()
+{
+}
+
+void iexp_gsl_error_handler(const char *reason,
+                            const char *file,
+                            int line,
+                            int gsl_errno)
+{
+    std::string es;
+    es.reserve(256);
+    es.append(gsl_strerror(gsl_errno));
+    es.append(":");
+    es.append(reason);
+    es.append(" at [");
+    es.append(file);
+    es.append(":");
+    es.append(std::to_string(line));
+    es.append("]");
+
+    throw std::runtime_error(es);
+}
+
+IEXP_NS_END

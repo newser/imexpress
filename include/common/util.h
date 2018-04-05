@@ -23,10 +23,6 @@
 // import header files
 ////////////////////////////////////////////////////////////
 
-#include <common/namespace.h>
-
-#include <Eigen/Dense>
-
 IEXP_NS_BEGIN
 
 ////////////////////////////////////////////////////////////
@@ -40,10 +36,6 @@ IEXP_NS_BEGIN
         }                                                                      \
     } while (0)
 
-#define TYPE_IS(t1, t2) std::is_same<t1, t2>::value
-
-#define TYPE_CHOOSE(v, t1, t2) std::conditional<v, t1, t2>::type
-
 #define RETURN_NAN_OR_THROW(t) throw(t)
 
 #define RETURN_OR_THROW(t) throw(t)
@@ -56,63 +48,11 @@ IEXP_NS_BEGIN
 #define MATRIX_SAME_SIZE(m1, m2)                                               \
     (((m1).rows() == (m2).rows()) && ((m1).cols() == (m2).cols()))
 
-#define UNSUPPORTED_TYPE(t) throw std::invalid_argument(typeid(t).name())
-
-#define IS_COMPLEX(t) is_complex<t>::value
-
 #define SCALAR(t) std::conditional<is_complex<t>::value, t::value_type, t>::type
 
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
-
-/*
-template <typename T, typename U>
-struct type_is
-{
-    static const bool value = false;
-};
-
-template <typename T>
-struct type_is<T, T>
-{
-    static const bool value = true;
-};
-*/
-
-template <typename T>
-struct type_eval
-{
-    typedef typename Eigen::internal::eval<T>::type type;
-};
-
-/*
-template <typename T1, typename T2, bool V>
-struct type_choose
-{
-    typedef void type;
-};
-
-template <typename T1, typename T2>
-struct type_choose<T1, T2, true>
-{
-    typedef T1 type;
-};
-
-template <typename T1, typename T2>
-struct type_choose<T1, T2, false>
-{
-    typedef T2 type;
-};
-*/
-
-template <typename T>
-struct is_complex
-{
-    static const bool value = std::is_same<T, std::complex<float>>::value ||
-                              std::is_same<T, std::complex<double>>::value ||
-                              std::is_same<T, std::complex<long double>>::value;
-};
 
 ////////////////////////////////////////////////////////////
 // global variants
