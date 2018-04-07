@@ -25,7 +25,7 @@
 
 #include <common/common.h>
 
-#include <fft/type.h>
+#include <fft/def.h>
 
 #include <fftw3.h>
 
@@ -50,9 +50,9 @@ class plan
 // global variants
 ////////////////////////////////////////////////////////////
 
-extern fftw_r2r_kind fwd_kind[KIND_NUM];
+extern fftw_r2r_kind fwd_kind[fft::KIND_NUM];
 
-extern fftw_r2r_kind inv_kind[KIND_NUM];
+extern fftw_r2r_kind inv_kind[fft::KIND_NUM];
 
 ////////////////////////////////////////////////////////////
 // indexerface declaration

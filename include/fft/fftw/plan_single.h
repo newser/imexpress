@@ -37,11 +37,12 @@ namespace fftw3 {
     if (m_lock != nullptr) {                                                   \
         m_lock->lock();                                                        \
     }                                                                          \
+    /* check again, as another thread may already create it */                 \
     if (m_plan == nullptr) {
 #define PLAN_UNLOCK                                                            \
+    }                                                                          \
     if (m_lock != nullptr) {                                                   \
         m_lock->unlock();                                                      \
-    }                                                                          \
     }
 
 ////////////////////////////////////////////////////////////
@@ -72,7 +73,7 @@ class plan<float>
     // c2c
     // ========================================
 
-    void fwd(const int n, const complex_t *i, complex_t *o)
+    void fwd(int n, const complex_t *i, complex_t *o)
     {
         if (m_plan == nullptr) {
             PLAN_LOCK
@@ -88,7 +89,7 @@ class plan<float>
         fftwf_execute_dft(m_plan, (fftwf_complex *)i, (fftwf_complex *)o);
     }
 
-    void inv(const int n, const complex_t *i, complex_t *o)
+    void inv(int n, const complex_t *i, complex_t *o)
     {
         if (m_plan == nullptr) {
             PLAN_LOCK
@@ -104,7 +105,7 @@ class plan<float>
         fftwf_execute_dft(m_plan, (fftwf_complex *)i, (fftwf_complex *)o);
     }
 
-    void fwd(const int n0, const int n1, const complex_t *i, complex_t *o)
+    void fwd(int n0, int n1, const complex_t *i, complex_t *o)
     {
         if (m_plan == nullptr) {
             PLAN_LOCK
@@ -121,7 +122,7 @@ class plan<float>
         fftwf_execute_dft(m_plan, (fftwf_complex *)i, (fftwf_complex *)o);
     }
 
-    void inv(const int n0, const int n1, const complex_t *i, complex_t *o)
+    void inv(int n0, int n1, const complex_t *i, complex_t *o)
     {
         if (m_plan == nullptr) {
             PLAN_LOCK
@@ -144,7 +145,7 @@ class plan<float>
 
     // num of i: n
     // num of o: (n/2 + 1)
-    void fwd(const int n, const scalar_t *i, complex_t *o)
+    void fwd(int n, const scalar_t *i, complex_t *o)
     {
         if (m_plan == nullptr) {
             PLAN_LOCK
@@ -161,7 +162,7 @@ class plan<float>
 
     // num of i: (n/2 + 1)
     // num of o: n
-    void inv(const int n, const complex_t *i, scalar_t *o)
+    void inv(int n, const complex_t *i, scalar_t *o)
     {
         if (m_plan == nullptr) {
             PLAN_LOCK
@@ -178,7 +179,7 @@ class plan<float>
 
     // num of i: n0 * n1
     // num of o: n0 * (n1/2 + 1)
-    void fwd(const int n0, const int n1, const scalar_t *i, complex_t *o)
+    void fwd(int n0, int n1, const scalar_t *i, complex_t *o)
     {
         if (m_plan == nullptr) {
             PLAN_LOCK
@@ -196,7 +197,7 @@ class plan<float>
 
     // num of i: n0 * (n1/2 + 1)
     // num of o: n0 * n1
-    void inv(const int n0, const int n1, const complex_t *i, scalar_t *o)
+    void inv(int n0, int n1, const complex_t *i, scalar_t *o)
     {
         if (m_plan == nullptr) {
             PLAN_LOCK
@@ -219,8 +220,8 @@ class plan<float>
     // r2r
     // ========================================
 
-    template <kind k>
-    void fwd(const int n, const scalar_t *i, scalar_t *o)
+    template <fft::kind k>
+    void fwd(int n, const scalar_t *i, scalar_t *o)
     {
         if (m_plan == nullptr) {
             PLAN_LOCK
@@ -236,8 +237,8 @@ class plan<float>
         fftwf_execute_r2r(m_plan, (scalar_t *)i, o);
     }
 
-    template <kind k>
-    void inv(const int n, const scalar_t *i, scalar_t *o)
+    template <fft::kind k>
+    void inv(int n, const scalar_t *i, scalar_t *o)
     {
         if (m_plan == nullptr) {
             PLAN_LOCK
@@ -253,8 +254,8 @@ class plan<float>
         fftwf_execute_r2r(m_plan, (scalar_t *)i, o);
     }
 
-    template <kind k0, kind k1>
-    void fwd(const int n0, const int n1, const scalar_t *i, scalar_t *o)
+    template <fft::kind k0, fft::kind k1>
+    void fwd(int n0, int n1, const scalar_t *i, scalar_t *o)
     {
         if (m_plan == nullptr) {
             PLAN_LOCK
@@ -272,8 +273,8 @@ class plan<float>
         fftwf_execute_r2r(m_plan, (scalar_t *)i, o);
     }
 
-    template <kind k0, kind k1>
-    void inv(const int n0, const int n1, const scalar_t *i, scalar_t *o)
+    template <fft::kind k0, fft::kind k1>
+    void inv(int n0, int n1, const scalar_t *i, scalar_t *o)
     {
         if (m_plan == nullptr) {
             PLAN_LOCK

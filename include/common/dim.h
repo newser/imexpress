@@ -16,14 +16,12 @@
  * USA.
  */
 
-#ifndef __IEXP_FFT_TYPE__
-#define __IEXP_FFT_TYPE__
+#ifndef __IEXP_DIM__
+#define __IEXP_DIM__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
-
-#include <common/common.h>
 
 IEXP_NS_BEGIN
 
@@ -31,36 +29,26 @@ IEXP_NS_BEGIN
 // macro definition
 ////////////////////////////////////////////////////////////
 
-#define IS_DCT(k) (((k) >= DCT_I) && ((k) <= DCT_IV))
+#define IS_VEC(v) (((v).rows() == 1) || ((v).cols() == 1))
 
-#define IS_DST(k) (((k) >= DST_I) && ((k) <= DST_IV))
+#define VEC_SAME_SIZE(v1, v2)                                                  \
+    (IS_VEC(v1) && IS_VEC(v2) && ((v1).size() == (v2).size()))
+
+#define MATRIX_SAME_SIZE(m1, m2)                                               \
+    (((m1).rows() == (m2).rows()) && ((m1).cols() == (m2).cols()))
 
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
-
-enum kind
-{
-    DCT_I,
-    DCT_II,
-    DCT_III,
-    DCT_IV,
-    DST_I,
-    DST_II,
-    DST_III,
-    DST_IV,
-
-    KIND_NUM
-};
 
 ////////////////////////////////////////////////////////////
 // global variants
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
-// indexerface declaration
+// interface declaration
 ////////////////////////////////////////////////////////////
 
 IEXP_NS_END
 
-#endif /* __IEXP_FFT_TYPE__ */
+#endif /* __IEXP_DIM__ */

@@ -6,6 +6,7 @@
 #include <test_util.h>
 
 using namespace iexp;
+using namespace iexp::fft;
 using namespace std;
 
 TEST_CASE("fft_plan_double_1d")
@@ -17,7 +18,7 @@ TEST_CASE("fft_plan_double_1d")
     i << 0, complex<double>(1, 1), complex<double>(2, 2), complex<double>(3, 3),
         complex<double>(4, 4), complex<double>(5, 5), complex<double>(6, 6),
         complex<double>(7, 7);
-    p.fwd((int)(int)i.size(), i.data(), o.data());
+    p.fwd((int)i.size(), i.data(), o.data());
     REQUIRE(__F_EQ_IN(o[0].real(), 28, 0.0001));
     REQUIRE(__F_EQ_IN(o[0].imag(), 28, 0.0001));
     REQUIRE(__F_EQ_IN(o[1].real(), -13.6569, 0.0001));
@@ -26,12 +27,12 @@ TEST_CASE("fft_plan_double_1d")
     REQUIRE(__F_EQ_IN(o[7].imag(), -13.6569, 0.0001));
 
     // reuse
-    p.fwd((int)(int)i.size(), i.data(), o.data());
+    p.fwd((int)i.size(), i.data(), o.data());
     REQUIRE(__F_EQ_IN(o[7].real(), 5.65685, 0.00001));
     REQUIRE(__F_EQ_IN(o[7].imag(), -13.6569, 0.0001));
 
     // c2c inv
-    q.inv((int)(int)i.size(), o.data(), o2.data());
+    q.inv((int)i.size(), o.data(), o2.data());
     REQUIRE(__F_EQ_IN(o2[0].real(), 0 * 8, 0.0001));
     REQUIRE(__F_EQ_IN(o2[0].imag(), 0 * 8, 0.0001));
     REQUIRE(__F_EQ_IN(o2[1].real(), 1 * 8, 0.0001));
@@ -39,7 +40,7 @@ TEST_CASE("fft_plan_double_1d")
     REQUIRE(__F_EQ_IN(o2[7].real(), 7 * 8, 0.00001));
     REQUIRE(__F_EQ_IN(o2[7].imag(), 7 * 8, 0.0001));
 
-    q.inv((int)(int)i.size(), o.data(), o2.data());
+    q.inv((int)i.size(), o.data(), o2.data());
     REQUIRE(__F_EQ_IN(o2[7].real(), 7 * 8, 0.00001));
     REQUIRE(__F_EQ_IN(o2[7].imag(), 7 * 8, 0.0001));
 
@@ -56,7 +57,7 @@ TEST_CASE("fft_plan_double_1d")
     REQUIRE(__F_EQ_IN(o[4].real(), -4, 0.00001));
     REQUIRE(__F_EQ_IN(o[4].imag(), 0, 0.0001));
 
-    p_r.fwd((int)(int)i_r.size(), i_r.data(), o.data());
+    p_r.fwd((int)i_r.size(), i_r.data(), o.data());
     REQUIRE(__F_EQ_IN(o[4].real(), -4, 0.00001));
     REQUIRE(__F_EQ_IN(o[4].imag(), 0, 0.0001));
 

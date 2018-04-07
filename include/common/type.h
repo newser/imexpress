@@ -51,6 +51,26 @@ IEXP_NS_BEGIN
 
 #define UNSUPPORTED_TYPE(t) throw std::invalid_argument(typeid(t).name())
 
+#define SCALAR(t) std::conditional<is_complex<t>::value, t::value_type, t>::type
+
+#define IS_MATRIX(t) is_matrix<t>::value
+
+#define IS_ARRAY(t) is_array<t>::value
+
+#define TP1_OF(t) typename Eigen::internal::traits<t>::Scalar
+
+#define TP2_OF(t) Eigen::internal::traits<t>::RowsAtCompileTime
+
+#define TP3_OF(t) Eigen::internal::traits<t>::ColsAtCompileTime
+
+//#define TP4_OF(t) Eigen::internal::traits<t>::Flags
+#define TP4_OF(t)                                                              \
+    (Eigen::internal::traits<t>::Flags & RowMajorBit) ? RowMajor : ColMajor
+
+#define TP5_OF(t) Eigen::internal::traits<t>::MaxRowsAtCompileTime
+
+#define TP6_OF(t) Eigen::internal::traits<t>::MaxColsAtCompileTime
+
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
@@ -66,7 +86,37 @@ struct is_complex
 template <typename T>
 struct type_eval
 {
-    typedef typename Eigen::internal::eval<T>::type type;
+    using type = typename Eigen::internal::eval<T>::type;
+};
+
+template <typename T>
+struct is_matrix
+{
+    static const bool value =
+        std::is_same<typename Eigen::internal::traits<T>::XprKind,
+                     MatrixXpr>::value;
+};
+
+template <typename T>
+struct is_array
+{
+    static const bool value =
+        std::is_same<typename Eigen::internal::traits<T>::XprKind,
+                     ArrayXpr>::value;
+};
+
+template <typename T>
+struct dense_derive
+{
+    using matrix = Matrix<TP1_OF(T),
+                          TP2_OF(T),
+                          TP3_OF(T),
+                          TP4_OF(T),
+                          TP5_OF(T),
+                          TP6_OF(T)>;
+    using array =
+        Array<TP1_OF(T), TP2_OF(T), TP3_OF(T), TP4_OF(T), TP5_OF(T), TP6_OF(T)>;
+    using type = typename std::conditional<IS_MATRIX(T), matrix, array>::type;
 };
 
 ////////////////////////////////////////////////////////////

@@ -54,7 +54,8 @@ class fft_functor
     using Scalar = typename TYPE_CHOOSE(IS_COMPLEX(typename T::Scalar),
                                         typename T::Scalar,
                                         std::complex<typename T::Scalar>);
-    using ArrayType = Array<Scalar, Dynamic, 1, ColMajor, Dynamic, 1>;
+    using type = Array<Scalar, Dynamic, 1, ColMajor, Dynamic, 1>;
+    // using type = typename dense_derive<T>::type;
 
     fft_functor(const T &x)
         : m_in_size(x.size())
@@ -77,17 +78,17 @@ class fft_functor
 
   private:
     const Index m_in_size, m_out_size;
-    ArrayType m_result;
+    type m_result;
 };
 
 template <typename T>
-inline CwiseNullaryOp<fft_functor<T>, typename fft_functor<T>::ArrayType> fft(
-    const ArrayBase<T> &x)
+inline CwiseNullaryOp<fft_functor<T>, typename fft_functor<T>::type> fft(
+    const DenseBase<T> &x)
 {
     eigen_assert(IS_VEC(x));
 
-    using ArrayType = typename fft_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(x.size(), fft_functor<T>(x.derived()));
+    using type = typename fft_functor<T>::type;
+    return type::NullaryExpr(x.size(), fft_functor<T>(x.derived()));
 }
 
 ////////////////////////////////////////////////////////////

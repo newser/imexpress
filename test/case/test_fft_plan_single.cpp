@@ -6,6 +6,7 @@
 #include <test_util.h>
 
 using namespace iexp;
+using namespace iexp::fft;
 using namespace std;
 
 TEST_CASE("fft_plan_float_1d")

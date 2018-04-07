@@ -24,6 +24,7 @@
 ////////////////////////////////////////////////////////////
 
 #include <common/common.h>
+
 #include <fft/fftw/plan.h>
 
 #include <map>
@@ -152,7 +153,7 @@ struct io_traits<float, float>
     static const io io = R2R;
 };
 
-template <typename T, int dim, kind k0, kind k1>
+template <typename T, int dim, fft::kind k0, fft::kind k1>
 class plan_cache
 {
   public:
@@ -161,16 +162,12 @@ class plan_cache
     using map_t = typename plan_traits<T, dim>::map_t;
 
     template <typename I, typename O>
-    plan_t &get(const int n,
-                const I *i,
-                const O *o,
-                const bool fwd,
-                const how h = MEASURE)
+    plan_t &get(int n, const I *i, const O *o, bool fwd, how h = MEASURE)
     {
         static_assert(std::is_same<T, typename io_traits<I, O>::type>::value,
                       "invalid type");
 
-        const int64_t kval = key(n, i, o, fwd);
+        int64_t kval = key(n, i, o, fwd);
         {
             std::lock_guard<std::mutex> g(m_lock);
 
@@ -181,17 +178,13 @@ class plan_cache
     }
 
     template <typename I, typename O>
-    plan_t &get(const int n0,
-                const int n1,
-                const I *i,
-                const O *o,
-                const bool fwd,
-                const how h = MEASURE)
+    plan_t &get(
+        int n0, int n1, const I *i, const O *o, bool fwd, how h = MEASURE)
     {
         static_assert(std::is_same<T, typename io_traits<I, O>::type>::value,
                       "invalid type");
 
-        const key_t kval = key(n0, n1, i, o, fwd);
+        key_t kval = key(n0, n1, i, o, fwd);
         {
             std::lock_guard<std::mutex> g(m_lock);
 
@@ -203,9 +196,9 @@ class plan_cache
 
   private:
     template <typename I, typename O>
-    key_t key(const int n, const I *i, const O *o, const bool fwd)
+    key_t key(int n, const I *i, const O *o, const bool fwd)
     {
-        const bool inplace((uintptr_t)i == (uintptr_t)o);
+        bool inplace((uintptr_t)i == (uintptr_t)o);
 
         return key_t(
             fwd | ((int)inplace << 1) | (io_traits<I, O>::scalar << 2) |
@@ -213,10 +206,9 @@ class plan_cache
     }
 
     template <typename I, typename O>
-    key_t key(
-        const int n0, const int n1, const I *i, const O *o, const bool fwd)
+    key_t key(int n0, int n1, const I *i, const O *o, const bool fwd)
     {
-        const bool inplace((uintptr_t)i == (uintptr_t)o);
+        bool inplace((uintptr_t)i == (uintptr_t)o);
 
         return key_t(int64_t(fwd | ((int)inplace << 1) |
                              (io_traits<I, O>::scalar << 2) |
@@ -237,24 +229,21 @@ class plan_cache
 // indexerface declaration
 ////////////////////////////////////////////////////////////
 
-template <kind k = KIND_NUM, typename I = void, typename O = void>
+template <fft::kind k = fft::KIND_NUM, typename I = void, typename O = void>
 plan<typename io_traits<I, O>::type> &get_plan(
-    const int n, const I *i, const O *o, const bool fwd, const how h = MEASURE)
+    int n, const I *i, const O *o, bool fwd, how h = MEASURE)
 {
-    static plan_cache<typename io_traits<I, O>::type, 1, k, KIND_NUM> cache;
+    static plan_cache<typename io_traits<I, O>::type, 1, k, fft::KIND_NUM>
+        cache;
     return cache.get(n, i, o, fwd, h);
 }
 
-template <kind k0 = KIND_NUM,
-          kind k1 = KIND_NUM,
+template <fft::kind k0 = fft::KIND_NUM,
+          fft::kind k1 = fft::KIND_NUM,
           typename I = void,
           typename O = void>
-plan<typename io_traits<I, O>::type> &get_plan(const int n0,
-                                               const int n1,
-                                               const I *i,
-                                               const O *o,
-                                               const bool fwd,
-                                               const how h = MEASURE)
+plan<typename io_traits<I, O>::type> &get_plan(
+    int n0, int n1, const I *i, const O *o, bool fwd, how h = MEASURE)
 {
     static plan_cache<typename io_traits<I, O>::type, 2, k0, k1> cache;
     return cache.get(n0, n1, i, o, fwd, h);

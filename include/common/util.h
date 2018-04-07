@@ -40,16 +40,6 @@ IEXP_NS_BEGIN
 
 #define RETURN_OR_THROW(t) throw(t)
 
-#define IS_VEC(v) (((v).rows() == 1) || ((v).cols() == 1))
-
-#define VEC_SAME_SIZE(v1, v2)                                                  \
-    (IS_VEC(v1) && IS_VEC(v2) && ((v1).size() == (v2).size()))
-
-#define MATRIX_SAME_SIZE(m1, m2)                                               \
-    (((m1).rows() == (m2).rows()) && ((m1).cols() == (m2).cols()))
-
-#define SCALAR(t) std::conditional<is_complex<t>::value, t::value_type, t>::type
-
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////

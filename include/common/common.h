@@ -44,6 +44,7 @@
 #include <common/def.h>
 #include <common/type.h>
 #include <common/util.h>
+#include <common/dim.h>
 
 IEXP_NS_BEGIN
 
