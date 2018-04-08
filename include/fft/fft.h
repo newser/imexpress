@@ -42,7 +42,7 @@ namespace fft {
 ////////////////////////////////////////////////////////////
 
 template <typename T, typename U>
-inline void fft_impl(const int n, const T *i, U *o)
+inline void fft_impl(int n, const T *i, U *o)
 {
     fftw3::get_plan(n, i, o, true).fwd(n, i, o);
 }
@@ -54,41 +54,40 @@ class fft_functor
     using Scalar = typename TYPE_CHOOSE(IS_COMPLEX(typename T::Scalar),
                                         typename T::Scalar,
                                         std::complex<typename T::Scalar>);
-    using type = Array<Scalar, Dynamic, 1, ColMajor, Dynamic, 1>;
-    // using type = typename dense_derive<T>::type;
+    using ResultType = typename dense_derive<T, Scalar>::type;
 
     fft_functor(const T &x)
         : m_in_size(x.size())
         , m_out_size(IS_COMPLEX(typename T::Scalar) ? m_in_size
                                                     : ((m_in_size >> 1) + 1))
-        , m_result(m_out_size)
+        , m_result(new Scalar[m_out_size])
     {
         typename type_eval<T>::type m_x(x.eval());
-        fft_impl((int)m_in_size, m_x.data(), m_result.data());
+        fft_impl((int)m_in_size, m_x.data(), m_result.get());
     }
 
-    const Scalar operator()(Index i) const
+    Scalar operator()(Index i) const
     {
         if (i < m_out_size) {
-            return m_result[i];
+            return m_result.get()[i];
         } else {
-            return std::conj(m_result[m_in_size - i]);
+            return std::conj(m_result.get()[m_in_size - i]);
         }
     }
 
   private:
-    const Index m_in_size, m_out_size;
-    type m_result;
+    Index m_in_size, m_out_size;
+    std::shared_ptr<Scalar> m_result;
 };
 
 template <typename T>
-inline CwiseNullaryOp<fft_functor<T>, typename fft_functor<T>::type> fft(
+inline CwiseNullaryOp<fft_functor<T>, typename fft_functor<T>::ResultType> fft(
     const DenseBase<T> &x)
 {
-    eigen_assert(IS_VEC(x));
-
-    using type = typename fft_functor<T>::type;
-    return type::NullaryExpr(x.size(), fft_functor<T>(x.derived()));
+    using ResultType = typename fft_functor<T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   fft_functor<T>(x.derived()));
 }
 
 ////////////////////////////////////////////////////////////

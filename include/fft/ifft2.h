@@ -42,56 +42,99 @@ namespace fft {
 ////////////////////////////////////////////////////////////
 
 template <typename T, typename U>
-inline void ifft2_impl(const int n0, const int n1, const T *i, U *o)
+inline void ifft2_impl(int n0, int n1, const T *i, U *o)
 {
     fftw3::get_plan(n0, n1, i, o, false).inv(n0, n1, i, o);
 }
 
+template <bool normalize,
+          typename T,
+          bool is_row_major = bool(TP4(T) == RowMajor)>
+class ifft2_functor;
+
+// c2c, row major
 template <bool normalize, typename T>
-class ifft2_functor
+class ifft2_functor<normalize, T, true>
 {
   public:
-    using Scalar = typename TYPE_CHOOSE(IS_COMPLEX(typename T::Scalar),
-                                        typename T::Scalar,
-                                        std::complex<typename T::Scalar>);
-    using ArrayType = Array<Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            RowMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T, Scalar>::type;
 
     ifft2_functor(const T &x)
-        : m_result(x.rows(), x.cols())
+        : m_n0(x.rows())
+        , m_n1(x.cols())
+        , m_result(new Scalar[m_n0 * m_n1])
     {
-        static_assert(T::Flags & RowMajorBit, "must be row major matrix");
-
         typename type_eval<T>::type m_x(x.eval());
-        ifft2_impl((int)x.rows(), (int)x.cols(), m_x.data(), m_result.data());
+        ifft2_impl((int)m_n0, (int)m_n1, m_x.data(), m_result.get());
 
         if (normalize) {
-            m_result /= (typename T::Scalar)m_x.size();
+            Scalar *p = m_result.get();
+            Index n = x.size();
+            for (int i = 0; i < n; ++i) {
+                p[i] /= n;
+            }
         }
     }
 
-    const Scalar &operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
-        return m_result(i, j);
+#define FFT2_RESULT(i, j) m_result.get()[(i)*m_n1 + (j)]
+        return FFT2_RESULT(i, j);
+#undef FFT2_RESULT
     }
 
   private:
-    ArrayType m_result;
+    Index m_n0, m_n1;
+    std::shared_ptr<Scalar> m_result;
+};
+
+// c2c, col major
+template <bool normalize, typename T>
+class ifft2_functor<normalize, T, false>
+{
+  public:
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T, Scalar>::type;
+
+    ifft2_functor(const T &x)
+        : m_n0(x.cols())
+        , m_n1(x.rows())
+        , m_result(new Scalar[m_n0 * m_n1])
+    {
+        typename type_eval<T>::type m_x(x.eval());
+        ifft2_impl((int)m_n0, (int)m_n1, m_x.data(), m_result.get());
+
+        if (normalize) {
+            Scalar *p = m_result.get();
+            Index n = x.size();
+            for (int i = 0; i < n; ++i) {
+                p[i] /= n;
+            }
+        }
+    }
+
+    Scalar operator()(Index i, Index j) const
+    {
+#define FFT2_RESULT(i, j) m_result.get()[(i)*m_n1 + (j)]
+        return FFT2_RESULT(j, i);
+#undef FFT2_RESULT
+    }
+
+  private:
+    Index m_n0, m_n1;
+    std::shared_ptr<Scalar> m_result;
 };
 
 template <bool normalize = false, typename T = void>
 inline CwiseNullaryOp<ifft2_functor<normalize, T>,
-                      typename ifft2_functor<normalize, T>::ArrayType>
-ifft2(const ArrayBase<T> &x)
+                      typename ifft2_functor<normalize, T>::ResultType>
+ifft2(const DenseBase<T> &x)
 {
-    using ArrayType = typename ifft2_functor<normalize, T>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  ifft2_functor<normalize, T>(x.derived()));
+    using ResultType = typename ifft2_functor<normalize, T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   ifft2_functor<normalize, T>(x.derived()));
 }
 
 ////////////////////////////////////////////////////////////

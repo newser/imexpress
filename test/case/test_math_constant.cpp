@@ -20,7 +20,10 @@ TEST_CASE("error")
         }
     }
     REQUIRE(ok);
+}
 
+TEST_CASE("type")
+{
     REQUIRE(IS_MATRIX(Matrix3f));
     REQUIRE(!IS_MATRIX(Array3f));
 
@@ -28,60 +31,88 @@ TEST_CASE("error")
     REQUIRE(IS_ARRAY(Array3f));
 
     Matrix<char, 2, 3, RowMajor, 2, 3> m1;
-    REQUIRE((TYPE_IS(TP1_OF(decltype(m1)), char)));
-    REQUIRE(TP2_OF(decltype(m1)) == 2);
-    REQUIRE(TP3_OF(decltype(m1)) == 3);
-    REQUIRE((TP4_OF(decltype(m1)) == RowMajor));
-    REQUIRE(TP5_OF(decltype(m1)) == 2);
-    REQUIRE(TP6_OF(decltype(m1)) == 3);
+    REQUIRE((TYPE_IS(TP1(decltype(m1)), char)));
+    REQUIRE(TP2(decltype(m1)) == 2);
+    REQUIRE(TP3(decltype(m1)) == 3);
+    REQUIRE((TP4(decltype(m1)) == RowMajor));
+    REQUIRE(TP5(decltype(m1)) == 2);
+    REQUIRE(TP6(decltype(m1)) == 3);
+    REQUIRE(!IS_DYNAMIC(decltype(m1)));
 
     dense_derive<decltype(m1)>::type d1;
-    REQUIRE((TYPE_IS(TP1_OF(decltype(d1)), char)));
-    REQUIRE(TP2_OF(decltype(d1)) == 2);
-    REQUIRE(TP3_OF(decltype(d1)) == 3);
-    REQUIRE((TP4_OF(decltype(d1)) == RowMajor));
-    REQUIRE(TP5_OF(decltype(d1)) == 2);
-    REQUIRE(TP6_OF(decltype(d1)) == 3);
+    REQUIRE((TYPE_IS(TP1(decltype(d1)), char)));
+    REQUIRE(TP2(decltype(d1)) == 2);
+    REQUIRE(TP3(decltype(d1)) == 3);
+    REQUIRE((TP4(decltype(d1)) == RowMajor));
+    REQUIRE(TP5(decltype(d1)) == 2);
+    REQUIRE(TP6(decltype(d1)) == 3);
 
     dense_derive<decltype(m1 + m1)>::type d2;
-    REQUIRE((TYPE_IS(TP1_OF(decltype(d2)), char)));
-    REQUIRE(TP2_OF(decltype(d2)) == 2);
-    REQUIRE(TP3_OF(decltype(d2)) == 3);
-    REQUIRE((TP4_OF(decltype(d2)) == RowMajor));
-    REQUIRE(TP5_OF(decltype(d2)) == 2);
-    REQUIRE(TP6_OF(decltype(d2)) == 3);
+    REQUIRE((TYPE_IS(TP1(decltype(d2)), char)));
+    REQUIRE(TP2(decltype(d2)) == 2);
+    REQUIRE(TP3(decltype(d2)) == 3);
+    REQUIRE((TP4(decltype(d2)) == RowMajor));
+    REQUIRE(TP5(decltype(d2)) == 2);
+    REQUIRE(TP6(decltype(d2)) == 3);
 
     Array<char, Dynamic, Dynamic, 0, 2, 3> a1;
-    REQUIRE((TYPE_IS(TP1_OF(decltype(a1)), char)));
-    REQUIRE(TP2_OF(decltype(a1)) == Dynamic);
-    REQUIRE(TP3_OF(decltype(a1)) == Dynamic);
-    REQUIRE((TP4_OF(decltype(a1)) == ColMajor));
-    REQUIRE(TP5_OF(decltype(a1)) == 2);
-    REQUIRE(TP6_OF(decltype(a1)) == 3);
+    REQUIRE((TYPE_IS(TP1(decltype(a1)), char)));
+    REQUIRE(TP2(decltype(a1)) == Dynamic);
+    REQUIRE(TP3(decltype(a1)) == Dynamic);
+    REQUIRE((TP4(decltype(a1)) == ColMajor));
+    REQUIRE(TP5(decltype(a1)) == 2);
+    REQUIRE(TP6(decltype(a1)) == 3);
+    REQUIRE(!IS_DYNAMIC(decltype(a1)));
 
     dense_derive<decltype(a1)>::type e1;
-    REQUIRE((TYPE_IS(TP1_OF(decltype(e1)), char)));
-    REQUIRE(TP2_OF(decltype(e1)) == Dynamic);
-    REQUIRE(TP3_OF(decltype(e1)) == Dynamic);
-    REQUIRE((TP4_OF(decltype(e1)) == ColMajor));
-    REQUIRE(TP5_OF(decltype(e1)) == 2);
-    REQUIRE(TP6_OF(decltype(e1)) == 3);
+    REQUIRE((TYPE_IS(TP1(decltype(e1)), char)));
+    REQUIRE(TP2(decltype(e1)) == Dynamic);
+    REQUIRE(TP3(decltype(e1)) == Dynamic);
+    REQUIRE((TP4(decltype(e1)) == ColMajor));
+    REQUIRE(TP5(decltype(e1)) == 2);
+    REQUIRE(TP6(decltype(e1)) == 3);
 
     dense_derive<decltype(a1 + a1)>::type e2;
-    REQUIRE((TYPE_IS(TP1_OF(decltype(e2)), char)));
-    REQUIRE(TP2_OF(decltype(e2)) == Dynamic);
-    REQUIRE(TP3_OF(decltype(e2)) == Dynamic);
-    REQUIRE((TP4_OF(decltype(e2)) == ColMajor));
-    REQUIRE(TP5_OF(decltype(e2)) == 2);
-    REQUIRE(TP6_OF(decltype(e2)) == 3);
+    REQUIRE((TYPE_IS(TP1(decltype(e2)), char)));
+    REQUIRE(TP2(decltype(e2)) == Dynamic);
+    REQUIRE(TP3(decltype(e2)) == Dynamic);
+    REQUIRE((TP4(decltype(e2)) == ColMajor));
+    REQUIRE(TP5(decltype(e2)) == 2);
+    REQUIRE(TP6(decltype(e2)) == 3);
 
     // a colmajor + rowmajoe
     Array<char, Dynamic, Dynamic, RowMajor, 2, 3> a2;
     dense_derive<decltype(a2 + a1)>::type e3;
-    REQUIRE((TP4_OF(decltype(e3)) == ColMajor));
+    REQUIRE((TP4(decltype(e3)) == ColMajor));
+    REQUIRE(!IS_DYNAMIC(decltype(a2)));
 
-    int i = 0;
+    {
+        Matrix<int, Dynamic, 1> m;
+        REQUIRE(IS_DYNAMIC(decltype(m)));
+        Matrix<int, 1, Dynamic> n;
+        REQUIRE(IS_DYNAMIC(decltype(n)));
+    }
+
     REQUIRE(IS_INTEGER(int));
+}
+
+TEST_CASE("buf")
+{
+    buf<Matrix<int, 1, 2>> b1(2);
+    REQUIRE(b1.size() == 2);
+    REQUIRE(b1.is_static());
+
+    buf<Matrix<int, 1, 2>> b2(3);
+    REQUIRE(b2.size() == 3);
+    REQUIRE(!b2.is_static());
+
+    buf<Matrix<int, Dynamic, 2>> b3(1);
+    REQUIRE(b3.size() == 1);
+    REQUIRE(b3.is_static());
+
+    buf<Matrix<int, Dynamic, 2>> b4(2);
+    REQUIRE(b4.size() == 2);
+    REQUIRE(!b4.is_static());
 }
 
 TEST_CASE("math_constant")

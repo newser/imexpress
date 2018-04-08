@@ -95,6 +95,23 @@ TEST_CASE("ifft_double")
     REQUIRE(__F_EQ_IN(o2[7].real(), 7, 0.0001));
     REQUIRE(__F_EQ_IN(o2[7].imag(), 7, 0.0001));
 
+    Matrix<std::complex<double>, 4, 2, RowMajor> im, om;
+    im(0, 0) = o[0];
+    im(0, 1) = o[1];
+    im(1, 0) = o[2];
+    im(1, 1) = o[3];
+    im(2, 0) = o[4];
+    im(2, 1) = o[5];
+    im(3, 0) = o[6];
+    im(3, 1) = o[7];
+    om = fft::ifft(im);
+    REQUIRE(__F_EQ_IN(om(0, 0).real(), 0, 0.0001));
+    REQUIRE(__F_EQ_IN(om(0, 0).imag(), 0, 0.0001));
+    REQUIRE(__F_EQ_IN(om(0, 1).real(), 1 * 8, 0.0001));
+    REQUIRE(__F_EQ_IN(om(0, 1).imag(), 1 * 8, 0.0001));
+    REQUIRE(__F_EQ_IN(om(3, 1).real(), 7 * 8, 0.0001));
+    REQUIRE(__F_EQ_IN(om(3, 1).imag(), 7 * 8, 0.0001));
+
     // again
     o2.array() = fft::ifft(o.array());
     REQUIRE(__F_EQ_IN(o2[0].real(), 0, 0.0001));

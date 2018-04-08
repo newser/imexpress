@@ -60,9 +60,13 @@ IEXP_NS_BEGIN
     ((std::abs((a) - (b)) < (e)) ||                                            \
      (std::isnan((float)(a)) && std::isnan((float)(b))))
 
-#define __F_EQ(a, b) __D_EQ_IN(a, b, std::numeric_limits<float>::epsilon())
+#define __F_EQ(a, b) __F_EQ_IN(a, b, std::numeric_limits<float>::epsilon())
 
-#define __F_EQ5(a, b) __D_EQ_IN(a, b, 0.00001)
+#define __F_EQ5(a, b) __F_EQ_IN(a, b, 0.00001)
+
+#define __F_EQ7(a, b) __F_EQ_IN(a, b, 1e-7)
+
+#define __F_EQ8(a, b) __F_EQ_IN(a, b, 1e-8)
 
 // clang-format off
 #define except_begin()                                                         \

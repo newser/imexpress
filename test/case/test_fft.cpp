@@ -22,8 +22,26 @@ TEST_CASE("fft_float")
     REQUIRE(__F_EQ_IN(o[7].real(), 5.65685, 0.00001));
     REQUIRE(__F_EQ_IN(o[7].imag(), -13.6569, 0.0001));
 
+    //    Matrix<std::complex<float>, 2, 4> im, om;
+    MatrixXcf im(2, 4), om(2, 4);
+    im(0, 0) = complex<float>(0, 0);
+    im(1, 0) = complex<float>(1, 1);
+    im(0, 1) = complex<float>(2, 2);
+    im(1, 1) = complex<float>(3, 3);
+    im(0, 2) = complex<float>(4, 4);
+    im(1, 2) = complex<float>(5, 5);
+    im(0, 3) = complex<float>(6, 6);
+    im(1, 3) = complex<float>(7, 7);
+    om = fft::fft(im);
+    REQUIRE(__F_EQ_IN(om(0, 0).real(), 28, 0.0001));
+    REQUIRE(__F_EQ_IN(om(0, 0).imag(), 28, 0.0001));
+    REQUIRE(__F_EQ_IN(om(1, 0).real(), -13.6569, 0.0001));
+    REQUIRE(__F_EQ_IN(om(1, 0).imag(), 5.65685, 0.00001));
+    REQUIRE(__F_EQ_IN(om(1, 3).real(), 5.65685, 0.00001));
+    REQUIRE(__F_EQ_IN(om(1, 3).imag(), -13.6569, 0.0001));
+
     // again
-    o.array() = fft::fft(i.array());
+    o = fft::fft(i);
     REQUIRE(__F_EQ_IN(o[0].real(), 28, 0.0001));
     REQUIRE(__F_EQ_IN(o[0].imag(), 28, 0.0001));
     REQUIRE(__F_EQ_IN(o[1].real(), -13.6569, 0.0001));
@@ -46,7 +64,7 @@ TEST_CASE("fft_float")
     REQUIRE(__F_EQ_IN(o[7].imag(), -9.65685, 0.0001));
 
     // again
-    o.array() = fft::fft(i_r.array());
+    o.array() = fft::fft(i_r);
     REQUIRE(__F_EQ_IN(o[0].real(), 28, 0.0001));
     REQUIRE(__F_EQ_IN(o[0].imag(), 0, 0.0001));
     REQUIRE(__F_EQ_IN(o[1].real(), -4, 0.0001));
@@ -65,7 +83,7 @@ TEST_CASE("fft_double")
     i << 0, complex<double>(1, 1), complex<double>(2, 2), complex<double>(3, 3),
         complex<double>(4, 4), complex<double>(5, 5), complex<double>(6, 6),
         complex<double>(7, 7);
-    o.array() = fft::fft(i.array());
+    o = fft::fft(i.array());
     REQUIRE(__F_EQ_IN(o[0].real(), 28, 0.0001));
     REQUIRE(__F_EQ_IN(o[0].imag(), 28, 0.0001));
     REQUIRE(__F_EQ_IN(o[1].real(), -13.6569, 0.0001));

@@ -42,19 +42,19 @@ namespace fft {
 ////////////////////////////////////////////////////////////
 
 template <kind k, typename T>
-inline void idct_impl(const int n, const T *i, T *o)
+inline void idct_impl(int n, const T *i, T *o)
 {
     fftw3::get_plan<k>(n, i, o, false).template inv<k>(n, i, o);
 }
 
 template <kind k>
-inline size_t idct_scale(const size_t n)
+inline size_t idct_scale(size_t n)
 {
     return n << 1;
 }
 
 template <>
-inline size_t idct_scale<DCT_I>(const size_t n)
+inline size_t idct_scale<DCT_I>(size_t n)
 {
     return (n - 1) << 1;
 }
@@ -63,40 +63,45 @@ template <bool normalize, kind k, typename T>
 class idct_functor
 {
   public:
-    using ArrayType =
-        Array<typename T::Scalar, Dynamic, 1, ColMajor, Dynamic, 1>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
     idct_functor(const T &x)
-        : m_result(x.size())
+        : m_result(new Scalar[x.size()])
     {
         typename type_eval<T>::type m_x(x.eval());
-        idct_impl<k>((int)m_x.size(), m_x.data(), m_result.data());
+        idct_impl<k>((int)m_x.size(), m_x.data(), m_result.get());
 
         if (normalize) {
-            m_result /= (typename T::Scalar)idct_scale<k>(m_x.size());
+            Scalar *p = m_result.get();
+            Index n = x.size();
+            Scalar scale = (Scalar)idct_scale<k>(m_x.size());
+            for (int i = 0; i < n; ++i) {
+                p[i] /= scale;
+            }
         }
     }
 
-    const typename T::Scalar &operator()(Index i) const
+    Scalar operator()(Index i) const
     {
-        return m_result[i];
+        return m_result.get()[i];
     }
 
   private:
-    ArrayType m_result;
+    std::shared_ptr<Scalar> m_result;
 };
 
 template <bool normalize = false, kind k = DCT_II, typename T = void>
 inline CwiseNullaryOp<idct_functor<normalize, k, T>,
-                      typename idct_functor<normalize, k, T>::ArrayType>
-idct(const ArrayBase<T> &x)
+                      typename idct_functor<normalize, k, T>::ResultType>
+idct(const DenseBase<T> &x)
 {
     static_assert(IS_DCT(k), "not dct kind");
-    eigen_assert(IS_VEC(x));
 
-    using ArrayType = typename idct_functor<normalize, k, T>::ArrayType;
-    return ArrayType::NullaryExpr(x.size(),
-                                  idct_functor<normalize, k, T>(x.derived()));
+    using ResultType = typename idct_functor<normalize, k, T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   idct_functor<normalize, k, T>(x.derived()));
 }
 
 ////////////////////////////////////////////////////////////

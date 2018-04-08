@@ -33,25 +33,35 @@ TEST_CASE("fft2_float")
     REQUIRE(__F_EQ5(o(2, 2).imag(), 3.80385));
 
     // r2c
-    Matrix<float, Dynamic, Dynamic, RowMajor> i_r(3, 3), o_r2(3, 3);
+    Matrix<float, Dynamic, Dynamic, RowMajor> i_r(2, 5);
+    Matrix<std::complex<float>, Dynamic, Dynamic, RowMajor> o_r2(2, 5),
+        o_r3(2, 5);
 
-    i_r << 1, 9, 8, 7, 0, 9, 3, 1, 5;
-    o.array() = fft::fft2(i_r.array());
-    REQUIRE(__F_EQ5(o(0, 0).real(), 43));
-    REQUIRE(__F_EQ5(o(0, 0).imag(), 0));
-    REQUIRE(__F_EQ5(o(1, 2).real(), -12.5));
-    REQUIRE(__F_EQ5(o(1, 2).imag(), 4.33013));
-    REQUIRE(__F_EQ5(o(2, 2).real(), -5));
-    REQUIRE(__F_EQ5(o(2, 2).imag(), 8.66025));
+    i_r << 1, 9, 8, 7, 0, 9, 3, 1, 5, 4;
+    o_r2.array() = fft::fft2(i_r.array());
+    REQUIRE(__F_EQ8(o_r2(0, 0).real(), 47));
+    REQUIRE(__F_EQ8(o_r2(0, 0).imag(), 0));
+    REQUIRE(__F_EQ8(o_r2(0, 1).real(), -2.04508495));
+    REQUIRE(__F_EQ8(o_r2(0, 1).imag(), -5.84509754));
+    REQUIRE(__F_EQ8(o_r2(0, 4).real(), -2.04508495));
+    REQUIRE(__F_EQ8(o_r2(0, 4).imag(), 5.84509754));
+    REQUIRE(__F_EQ8(o_r2(1, 0).real(), 3));
+    REQUIRE(__F_EQ8(o_r2(1, 0).imag(), 0));
+    REQUIRE(__F_EQ7(o_r2(1, 4).real(), -14.6631193));
+    REQUIRE(__F_EQ7(o_r2(1, 4).imag(), 12.4494925));
 
     // again
-    o.array() = fft::fft2(i_r.array());
-    REQUIRE(__F_EQ5(o(0, 0).real(), 43));
-    REQUIRE(__F_EQ5(o(0, 0).imag(), 0));
-    REQUIRE(__F_EQ5(o(1, 2).real(), -12.5));
-    REQUIRE(__F_EQ5(o(1, 2).imag(), 4.33013));
-    REQUIRE(__F_EQ5(o(2, 2).real(), -5));
-    REQUIRE(__F_EQ5(o(2, 2).imag(), 8.66025));
+    o_r3 = fft::fft2(i_r);
+    REQUIRE(__F_EQ8(o_r3(0, 0).real(), 47));
+    REQUIRE(__F_EQ8(o_r3(0, 0).imag(), 0));
+    REQUIRE(__F_EQ8(o_r3(0, 1).real(), -2.04508495));
+    REQUIRE(__F_EQ8(o_r3(0, 1).imag(), -5.84509754));
+    REQUIRE(__F_EQ8(o_r3(0, 4).real(), -2.04508495));
+    REQUIRE(__F_EQ8(o_r3(0, 4).imag(), 5.84509754));
+    REQUIRE(__F_EQ8(o_r3(1, 0).real(), 3));
+    REQUIRE(__F_EQ8(o_r3(1, 0).imag(), 0));
+    REQUIRE(__F_EQ7(o_r3(1, 4).real(), -14.6631193));
+    REQUIRE(__F_EQ7(o_r3(1, 4).imag(), 12.4494925));
 }
 
 TEST_CASE("fft2_double")
@@ -80,6 +90,26 @@ TEST_CASE("fft2_double")
     REQUIRE(__F_EQ5(o(2, 2).real(), -16.66025));
     REQUIRE(__F_EQ5(o(2, 2).imag(), 3.80385));
 
+    Matrix<std::complex<double>, 4, 3> c;
+    Matrix<std::complex<double>, 4, 3> c_o;
+    c << 1, 2, 3, 4, 5, 6, 7, 7, 7, 9, 8, 7;
+    c_o = fft::fft2(c);
+    REQUIRE(__F_EQ7(c_o(0, 0).real(), 66));
+    REQUIRE(__F_EQ7(c_o(0, 0).imag(), 0));
+    REQUIRE(__F_EQ7(c_o(3, 0).real(), -15));
+    REQUIRE(__F_EQ7(c_o(3, 0).imag(), -9));
+    REQUIRE(__F_EQ7(c_o(3, 1).real(), -3.2320508075688772));
+    REQUIRE(__F_EQ7(c_o(3, 1).imag(), -2.1339745962155616));
+
+    // again
+    c_o = fft::fft2(c);
+    REQUIRE(__F_EQ7(c_o(0, 0).real(), 66));
+    REQUIRE(__F_EQ7(c_o(0, 0).imag(), 0));
+    REQUIRE(__F_EQ7(c_o(3, 0).real(), -15));
+    REQUIRE(__F_EQ7(c_o(3, 0).imag(), -9));
+    REQUIRE(__F_EQ7(c_o(3, 1).real(), -3.2320508075688772));
+    REQUIRE(__F_EQ7(c_o(3, 1).imag(), -2.1339745962155616));
+
     // r2c
     Matrix<double, Dynamic, Dynamic, RowMajor> i_r(3, 3), o_r2(3, 3);
 
@@ -100,4 +130,27 @@ TEST_CASE("fft2_double")
     REQUIRE(__F_EQ5(o(1, 2).imag(), 4.33013));
     REQUIRE(__F_EQ5(o(2, 2).real(), -5));
     REQUIRE(__F_EQ5(o(2, 2).imag(), 8.66025));
+
+    // r2c
+    {
+        Matrix<double, 4, 3> c;
+        Matrix<std::complex<double>, 4, 3> c_o;
+        c << 1, 2, 3, 4, 5, 6, 7, 7, 7, 9, 8, 7;
+        c_o = fft::fft2(c);
+        REQUIRE(__F_EQ7(c_o(0, 0).real(), 66));
+        REQUIRE(__F_EQ7(c_o(0, 0).imag(), 0));
+        REQUIRE(__F_EQ7(c_o(3, 0).real(), -15));
+        REQUIRE(__F_EQ7(c_o(3, 0).imag(), -9));
+        REQUIRE(__F_EQ7(c_o(3, 1).real(), -3.2320508075688772));
+        REQUIRE(__F_EQ7(c_o(3, 1).imag(), -2.1339745962155616));
+
+        // again
+        c_o = fft::fft2(c);
+        REQUIRE(__F_EQ7(c_o(0, 0).real(), 66));
+        REQUIRE(__F_EQ7(c_o(0, 0).imag(), 0));
+        REQUIRE(__F_EQ7(c_o(3, 0).real(), -15));
+        REQUIRE(__F_EQ7(c_o(3, 0).imag(), -9));
+        REQUIRE(__F_EQ7(c_o(3, 1).real(), -3.2320508075688772));
+        REQUIRE(__F_EQ7(c_o(3, 1).imag(), -2.1339745962155616));
+    }
 }

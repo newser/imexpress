@@ -54,39 +54,43 @@ class ifft_functor
     using Scalar = typename TYPE_CHOOSE(IS_COMPLEX(typename T::Scalar),
                                         typename T::Scalar,
                                         std::complex<typename T::Scalar>);
-    using ArrayType = Array<Scalar, Dynamic, 1, ColMajor, Dynamic, 1>;
+    using ResultType = typename dense_derive<T, Scalar>::type;
 
     ifft_functor(const T &x)
-        : m_result(x.size())
+        : m_result(new Scalar[x.size()])
     {
         typename type_eval<T>::type m_x(x.eval());
-        ifft_impl((int)m_x.size(), m_x.data(), m_result.data());
+        ifft_impl((int)m_x.size(), m_x.data(), m_result.get());
 
         if (normalize) {
-            m_result /= (typename T::Scalar)m_x.size();
+            Scalar *p = m_result.get();
+            Index n = x.size();
+            for (int i = 0; i < n; ++i) {
+                p[i] /= n;
+            }
         }
     }
 
-    const Scalar &operator()(Index i) const
+    Scalar operator()(Index i) const
     {
-        return m_result[i];
+        return m_result.get()[i];
     }
 
   private:
-    ArrayType m_result;
+    std::shared_ptr<Scalar> m_result;
 };
 
 template <bool normalize = false, typename T = void>
 inline CwiseNullaryOp<ifft_functor<normalize, T>,
-                      typename ifft_functor<normalize, T>::ArrayType>
-ifft(const ArrayBase<T> &x)
+                      typename ifft_functor<normalize, T>::ResultType>
+ifft(const DenseBase<T> &x)
 {
-    eigen_assert(IS_VEC(x));
     // if x is real, x[i](i > 0) should be conjudate with x[size - i]
 
-    using ArrayType = typename ifft_functor<normalize, T>::ArrayType;
-    return ArrayType::NullaryExpr(x.size(),
-                                  ifft_functor<normalize, T>(x.derived()));
+    using ResultType = typename ifft_functor<normalize, T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   ifft_functor<normalize, T>(x.derived()));
 }
 
 ////////////////////////////////////////////////////////////

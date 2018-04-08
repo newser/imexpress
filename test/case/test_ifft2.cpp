@@ -30,6 +30,14 @@ TEST_CASE("ifft2_float")
     REQUIRE(__F_EQ5(o2(2, 1).real(), 3 * 6));
     REQUIRE(__F_EQ5(o2(2, 1).imag(), 9 * 6));
 
+    // again, matrix col major
+    Matrix<complex<float>, 3, 2> c = o;
+    Matrix<complex<float>, 3, 2> c_o = fft::ifft2(c);
+    REQUIRE(__F_EQ5(c_o(0, 0).real(), 1 * 6));
+    REQUIRE(__F_EQ5(c_o(0, 0).imag(), 2 * 6));
+    REQUIRE(__F_EQ5(c_o(2, 1).real(), 3 * 6));
+    REQUIRE(__F_EQ5(c_o(2, 1).imag(), 9 * 6));
+
     // normalize
     o2.array() = fft::ifft2<true>(o.array());
     REQUIRE(__F_EQ5(o2(0, 0).real(), 1));
@@ -117,4 +125,12 @@ TEST_CASE("ifft2_double")
     REQUIRE(__F_EQ5(o2(0, 0).imag(), 0));
     REQUIRE(__F_EQ5(o2(2, 1).real(), 9));
     REQUIRE(__F_EQ5(o2(2, 1).imag(), 0));
+
+    // again, matrix col major
+    Matrix<std::complex<double>, 3, 2> c = o;
+    Matrix<std::complex<double>, 3, 2> c_o = fft::ifft2(c);
+    REQUIRE(__F_EQ5(c_o(0, 0).real(), 1 * 6));
+    REQUIRE(__F_EQ5(c_o(0, 0).imag(), 0));
+    REQUIRE(__F_EQ5(c_o(2, 1).real(), 9 * 6));
+    REQUIRE(__F_EQ5(c_o(2, 1).imag(), 0));
 }

@@ -57,19 +57,25 @@ IEXP_NS_BEGIN
 
 #define IS_ARRAY(t) is_array<t>::value
 
-#define TP1_OF(t) typename Eigen::internal::traits<t>::Scalar
+#define IS_DYNAMIC(t) is_dynamic<t>::value
 
-#define TP2_OF(t) Eigen::internal::traits<t>::RowsAtCompileTime
+#define TP1(t) typename Eigen::internal::traits<t>::Scalar
 
-#define TP3_OF(t) Eigen::internal::traits<t>::ColsAtCompileTime
+#define TP2(t) Eigen::internal::traits<t>::RowsAtCompileTime
 
-//#define TP4_OF(t) Eigen::internal::traits<t>::Flags
-#define TP4_OF(t)                                                              \
+#define TP3(t) Eigen::internal::traits<t>::ColsAtCompileTime
+
+//#define TP4(t) Eigen::internal::traits<t>::Flags
+#define TP4(t)                                                                 \
     (Eigen::internal::traits<t>::Flags & RowMajorBit) ? RowMajor : ColMajor
 
-#define TP5_OF(t) Eigen::internal::traits<t>::MaxRowsAtCompileTime
+#define TP5(t) Eigen::internal::traits<t>::MaxRowsAtCompileTime
 
-#define TP6_OF(t) Eigen::internal::traits<t>::MaxColsAtCompileTime
+#define TP6(t) Eigen::internal::traits<t>::MaxColsAtCompileTime
+
+#define ENABLE_TEMPLATE_IF(expr) , typename std::enable_if<expr>::type = 0
+
+#define ENABLE_FUNCTION_IF(expr) , typename std::enable_if<expr>::type * = 0
 
 ////////////////////////////////////////////////////////////
 // type definition
@@ -106,16 +112,24 @@ struct is_array
 };
 
 template <typename T>
+struct is_dynamic
+{
+    static const bool value =
+        ((Eigen::internal::traits<T>::MaxRowsAtCompileTime == Dynamic) ||
+         (Eigen::internal::traits<T>::MaxColsAtCompileTime == Dynamic));
+};
+
+template <typename T,
+          typename _Scalar = TP1(T),
+          int _Rows = TP2(T),
+          int _Cols = TP3(T),
+          int _Options = TP4(T),
+          int _MaxRows = TP5(T),
+          int _MaxCols = TP6(T)>
 struct dense_derive
 {
-    using matrix = Matrix<TP1_OF(T),
-                          TP2_OF(T),
-                          TP3_OF(T),
-                          TP4_OF(T),
-                          TP5_OF(T),
-                          TP6_OF(T)>;
-    using array =
-        Array<TP1_OF(T), TP2_OF(T), TP3_OF(T), TP4_OF(T), TP5_OF(T), TP6_OF(T)>;
+    using matrix = Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>;
+    using array = Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>;
     using type = typename std::conditional<IS_MATRIX(T), matrix, array>::type;
 };
 
