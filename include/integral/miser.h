@@ -81,7 +81,12 @@ class miser_t
         UNSUPPORTED_TYPE(T);
     }
 
-    double estimate_frac()
+    void reset()
+    {
+        gsl_monte_miser_init(m_state);
+    }
+
+    double estimate_frac() const
     {
         gsl_monte_miser_params p;
         gsl_monte_miser_params_get(m_state, &p);
@@ -98,7 +103,7 @@ class miser_t
         return *this;
     }
 
-    size_t min_calls()
+    size_t min_calls() const
     {
         gsl_monte_miser_params p;
         gsl_monte_miser_params_get(m_state, &p);
@@ -115,7 +120,7 @@ class miser_t
         return *this;
     }
 
-    size_t min_calls_per_bisection()
+    size_t min_calls_per_bisection() const
     {
         gsl_monte_miser_params p;
         gsl_monte_miser_params_get(m_state, &p);
@@ -132,7 +137,7 @@ class miser_t
         return *this;
     }
 
-    double alpha()
+    double alpha() const
     {
         gsl_monte_miser_params p;
         gsl_monte_miser_params_get(m_state, &p);
@@ -149,7 +154,7 @@ class miser_t
         return *this;
     }
 
-    double dither()
+    double dither() const
     {
         gsl_monte_miser_params p;
         gsl_monte_miser_params_get(m_state, &p);
@@ -182,10 +187,8 @@ double miser_t<double>::operator()(
     size_t calls,
     double *abserr)
 {
-    gsl_monte_miser_init(m_state);
-
     monte_func<double> m_fn(fn);
-    double result, __abserr;
+    double r, e;
     gsl_monte_miser_integrate(const_cast<gsl_monte_function *>(m_fn.gsl()),
                               &a,
                               &b,
@@ -193,9 +196,9 @@ double miser_t<double>::operator()(
                               calls,
                               m_rng.gsl(),
                               m_state,
-                              &result,
-                              abserr != nullptr ? abserr : &__abserr);
-    return result;
+                              &r,
+                              abserr != nullptr ? abserr : &e);
+    return r;
 }
 
 template <>
@@ -209,10 +212,8 @@ double miser_t<double>::operator()(
 {
     eigen_assert(dim == m_state->dim);
 
-    gsl_monte_miser_init(m_state);
-
     monte_func<double> m_fn(dim, fn);
-    double result, __abserr;
+    double r, e;
     gsl_monte_miser_integrate(const_cast<gsl_monte_function *>(m_fn.gsl()),
                               a,
                               b,
@@ -220,9 +221,9 @@ double miser_t<double>::operator()(
                               calls,
                               m_rng.gsl(),
                               m_state,
-                              &result,
-                              abserr != nullptr ? abserr : &__abserr);
-    return result;
+                              &r,
+                              abserr != nullptr ? abserr : &e);
+    return r;
 }
 
 typedef miser_t<double> miser;

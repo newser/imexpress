@@ -47,9 +47,8 @@ template <typename T>
 class qawf_t
 {
   public:
-    qawf_t(const typename unary_func<T>::type &fn, T epsabs, size_t limit)
-        : m_fn(fn)
-        , m_epsabs(epsabs)
+    qawf_t(T epsabs, size_t limit)
+        : m_epsabs(epsabs)
         , m_limit(limit)
         , m_workspace(nullptr)
         , m_cycle_workspace(nullptr)
@@ -67,34 +66,57 @@ class qawf_t
         }
     }
 
-    int operator()(qawo_table_t<T> &w,
-                   const T a,
-                   T *result,
-                   T *abserr = nullptr)
+    T operator()(const typename unary_func<T>::type &fn,
+                 qawo_table_t<T> &w,
+                 T a,
+                 T *abserr = nullptr)
     {
         UNSUPPORTED_TYPE(T);
     }
 
-    T &epsabs()
+    T epsabs()
     {
         return m_epsabs;
+    }
+
+    qawf_t &epsabs(T e)
+    {
+        m_epsabs = e;
+        return *this;
+    }
+
+    T limit() const
+    {
+        return m_limit;
+    }
+
+    qawf_t &limit(T l)
+    {
+        if (m_limit != l) {
+            m_limit = l;
+            if (m_workspace != nullptr) {
+                gsl_integration_workspace_free(m_workspace);
+                m_workspace = gsl_integration_workspace_alloc(m_limit);
+                IEXP_NOT_NULLPTR(m_workspace);
+            }
+        }
+        return *this;
     }
 
   private:
     qawf_t(const qawf_t &) = delete;
     qawf_t &operator=(const qawf_t &) = delete;
 
-    unary_func<T> m_fn;
     T m_epsabs;
     size_t m_limit;
     gsl_integration_workspace *m_workspace, *m_cycle_workspace;
 };
 
 template <>
-int qawf_t<double>::operator()(qawo_table &w,
-                               const double a,
-                               double *result,
-                               double *abserr)
+double qawf_t<double>::operator()(const typename unary_func<double>::type &fn,
+                                  qawo_table &w,
+                                  double a,
+                                  double *abserr)
 {
     if (m_workspace == nullptr) {
         m_workspace = gsl_integration_workspace_alloc(m_limit);
@@ -106,16 +128,18 @@ int qawf_t<double>::operator()(qawo_table &w,
         IEXP_NOT_NULLPTR(m_workspace);
     }
 
-    double __abserr;
-    return gsl_integration_qawf((gsl_function *)m_fn.gsl(),
-                                a,
-                                m_epsabs,
-                                m_limit,
-                                m_workspace,
-                                m_cycle_workspace,
-                                w.get(),
-                                result,
-                                abserr != nullptr ? abserr : &__abserr);
+    unary_func<double> m_fn(fn);
+    double r, e;
+    gsl_integration_qawf((gsl_function *)m_fn.gsl(),
+                         a,
+                         m_epsabs,
+                         m_limit,
+                         m_workspace,
+                         m_cycle_workspace,
+                         w.gsl(),
+                         &r,
+                         abserr != nullptr ? abserr : &e);
+    return r;
 }
 
 typedef qawf_t<double> qawf;

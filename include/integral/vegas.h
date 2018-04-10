@@ -43,7 +43,7 @@ namespace integral {
 // type definition
 ////////////////////////////////////////////////////////////
 
-enum vegas_mode
+enum class vegas_mode
 {
     IMPORTANCE = GSL_VEGAS_MODE_IMPORTANCE,
     IMPORTANCE_ONLY = GSL_VEGAS_MODE_IMPORTANCE_ONLY,
@@ -88,12 +88,17 @@ class vegas_t
         UNSUPPORTED_TYPE(T);
     }
 
-    double chisq()
+    void reset()
+    {
+        gsl_monte_vegas_init(m_state);
+    }
+
+    double chisq() const
     {
         return gsl_monte_vegas_chisq(m_state);
     }
 
-    double alpha()
+    double alpha() const
     {
         gsl_monte_vegas_params p;
         gsl_monte_vegas_params_get(m_state, &p);
@@ -110,7 +115,7 @@ class vegas_t
         return *this;
     }
 
-    size_t iterations()
+    size_t iterations() const
     {
         gsl_monte_vegas_params p;
         gsl_monte_vegas_params_get(m_state, &p);
@@ -127,7 +132,7 @@ class vegas_t
         return *this;
     }
 
-    int stage()
+    int stage() const
     {
         gsl_monte_vegas_params p;
         gsl_monte_vegas_params_get(m_state, &p);
@@ -144,7 +149,7 @@ class vegas_t
         return *this;
     }
 
-    vegas_mode mode()
+    vegas_mode mode() const
     {
         gsl_monte_vegas_params p;
         gsl_monte_vegas_params_get(m_state, &p);
@@ -155,7 +160,7 @@ class vegas_t
     {
         gsl_monte_vegas_params p;
         gsl_monte_vegas_params_get(m_state, &p);
-        p.mode = mode;
+        p.mode = static_cast<int>(mode);
         gsl_monte_vegas_params_set(m_state, &p);
 
         return *this;
@@ -177,10 +182,8 @@ double vegas_t<double>::operator()(
     size_t calls,
     double *abserr)
 {
-    gsl_monte_vegas_init(m_state);
-
     monte_func<double> m_fn(fn);
-    double result, __abserr;
+    double r, e;
     gsl_monte_vegas_integrate(const_cast<gsl_monte_function *>(m_fn.gsl()),
                               &a,
                               &b,
@@ -188,9 +191,9 @@ double vegas_t<double>::operator()(
                               calls,
                               m_rng.gsl(),
                               m_state,
-                              &result,
-                              abserr != nullptr ? abserr : &__abserr);
-    return result;
+                              &r,
+                              abserr != nullptr ? abserr : &e);
+    return r;
 }
 
 template <>
@@ -204,10 +207,8 @@ double vegas_t<double>::operator()(
 {
     eigen_assert(dim == m_state->dim);
 
-    gsl_monte_vegas_init(m_state);
-
     monte_func<double> m_fn(dim, fn);
-    double result, __abserr;
+    double r, e;
     gsl_monte_vegas_integrate(const_cast<gsl_monte_function *>(m_fn.gsl()),
                               const_cast<double *>(a),
                               const_cast<double *>(b),
@@ -215,9 +216,9 @@ double vegas_t<double>::operator()(
                               calls,
                               m_rng.gsl(),
                               m_state,
-                              &result,
-                              abserr != nullptr ? abserr : &__abserr);
-    return result;
+                              &r,
+                              abserr != nullptr ? abserr : &e);
+    return r;
 }
 
 typedef vegas_t<double> vegas;

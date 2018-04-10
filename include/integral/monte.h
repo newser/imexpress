@@ -63,8 +63,8 @@ class monte_t
     }
 
     T operator()(const typename monte_func<T>::type_1d &fn,
-                 const T a,
-                 const T b,
+                 T a,
+                 T b,
                  size_t calls,
                  T *abserr = nullptr)
     {
@@ -72,13 +72,18 @@ class monte_t
     }
 
     T operator()(const typename monte_func<T>::type_nd &fn,
-                 const T a[],
-                 const T b[],
+                 T a[],
+                 T b[],
                  size_t dim,
                  size_t calls,
                  T *abserr = nullptr)
     {
         UNSUPPORTED_TYPE(T);
+    }
+
+    void reset()
+    {
+        gsl_monte_plain_init(m_state);
     }
 
   private:
@@ -92,15 +97,13 @@ class monte_t
 template <>
 double monte_t<double>::operator()(
     const typename monte_func<double>::type_1d &fn,
-    const double a,
-    const double b,
+    double a,
+    double b,
     size_t calls,
     double *abserr)
 {
-    gsl_monte_plain_init(m_state);
-
     monte_func<double> m_fn(fn);
-    double result, __abserr;
+    double r, e;
     gsl_monte_plain_integrate(m_fn.gsl(),
                               &a,
                               &b,
@@ -108,26 +111,24 @@ double monte_t<double>::operator()(
                               calls,
                               m_rng.gsl(),
                               m_state,
-                              &result,
-                              abserr != nullptr ? abserr : &__abserr);
-    return result;
+                              &r,
+                              abserr != nullptr ? abserr : &e);
+    return r;
 }
 
 template <>
 double monte_t<double>::operator()(
     const typename monte_func<double>::type_nd &fn,
-    const double a[],
-    const double b[],
+    double a[],
+    double b[],
     size_t dim,
     size_t calls,
     double *abserr)
 {
     eigen_assert(dim == m_state->dim);
 
-    gsl_monte_plain_init(m_state);
-
     monte_func<double> m_fn(dim, fn);
-    double result, __abserr;
+    double r, e;
     gsl_monte_plain_integrate(m_fn.gsl(),
                               a,
                               b,
@@ -135,9 +136,9 @@ double monte_t<double>::operator()(
                               calls,
                               m_rng.gsl(),
                               m_state,
-                              &result,
-                              abserr != nullptr ? abserr : &__abserr);
-    return result;
+                              &r,
+                              abserr != nullptr ? abserr : &e);
+    return r;
 }
 
 typedef monte_t<double> monte;

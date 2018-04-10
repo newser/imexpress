@@ -46,57 +46,69 @@ template <typename T>
 class qng_t
 {
   public:
-    qng_t(const typename unary_func<T>::type &fn, T epsabs, T epsrel)
-        : m_fn(fn)
-        , m_epsabs(epsabs)
+    qng_t(T epsabs, T epsrel)
+        : m_epsabs(epsabs)
         , m_epsrel(epsrel)
     {
     }
 
-    int operator()(const T a,
-                   const T b,
-                   T *result,
-                   T *abserr = nullptr,
-                   size_t *neval = nullptr)
+    T operator()(const typename unary_func<T>::type &fn,
+                 T a,
+                 T b,
+                 T *abserr = nullptr,
+                 size_t *neval = nullptr)
     {
         UNSUPPORTED_TYPE(T);
     }
 
-    T &epsabs()
+    T epsabs() const
     {
         return m_epsabs;
     }
 
-    T &epsrel()
+    qng_t &epsabs(T e)
+    {
+        m_epsabs = e;
+        return *this;
+    }
+
+    T epsrel() const
     {
         return m_epsrel;
+    }
+
+    qng_t &epsrel(T e)
+    {
+        m_epsrel = e;
+        return *this;
     }
 
   private:
     qng_t(const qng_t &) = delete;
     qng_t &operator=(const qng_t &) = delete;
 
-    unary_func<T> m_fn;
     T m_epsabs, m_epsrel;
 };
 
 template <>
-int qng_t<double>::operator()(const double a,
-                              const double b,
-                              double *result,
-                              double *abserr,
-                              size_t *neval)
+double qng_t<double>::operator()(const typename unary_func<double>::type &fn,
+                                 double a,
+                                 double b,
+                                 double *abserr,
+                                 size_t *neval)
 {
-    double __abserr;
-    size_t __neval;
-    return gsl_integration_qng(m_fn.gsl(),
-                               a,
-                               b,
-                               m_epsabs,
-                               m_epsrel,
-                               result,
-                               abserr != nullptr ? abserr : &__abserr,
-                               neval != nullptr ? neval : &__neval);
+    unary_func<double> m_fn(fn);
+    double r, e;
+    size_t n;
+    gsl_integration_qng(m_fn.gsl(),
+                        a,
+                        b,
+                        m_epsabs,
+                        m_epsrel,
+                        &r,
+                        abserr != nullptr ? abserr : &e,
+                        neval != nullptr ? neval : &n);
+    return r;
 }
 
 typedef qng_t<double> qng;

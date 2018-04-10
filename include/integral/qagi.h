@@ -50,12 +50,8 @@ template <typename T>
 class qagi_t
 {
   public:
-    qagi_t(const typename unary_func<T>::type &fn,
-           T epsabs,
-           T epsrel,
-           size_t limit)
-        : m_fn(fn)
-        , m_epsabs(epsabs)
+    qagi_t(T epsabs, T epsrel, size_t limit)
+        : m_epsabs(epsabs)
         , m_epsrel(epsrel)
         , m_limit(limit)
         , m_workspace(nullptr)
@@ -69,47 +65,79 @@ class qagi_t
         }
     }
 
-    int operator()(T *result, T *abserr = nullptr)
+    T operator()(const typename unary_func<T>::type &fn, T *abserr = nullptr)
     {
         UNSUPPORTED_TYPE(T);
     }
 
-    T &epsabs()
+    T epsabs() const
     {
         return m_epsabs;
     }
 
-    T &epsrel()
+    qagi_t &epsabs(T e)
+    {
+        m_epsabs = e;
+        return *this;
+    }
+
+    T epsrel() const
     {
         return m_epsrel;
+    }
+
+    qagi_t &epsrel(T e)
+    {
+        m_epsrel = e;
+        return *this;
+    }
+
+    T limit() const
+    {
+        return m_limit;
+    }
+
+    qagi_t &limit(T l)
+    {
+        if (m_limit != l) {
+            m_limit = l;
+            if (m_workspace != nullptr) {
+                gsl_integration_workspace_free(m_workspace);
+                m_workspace = gsl_integration_workspace_alloc(m_limit);
+                IEXP_NOT_NULLPTR(m_workspace);
+            }
+        }
+        return *this;
     }
 
   private:
     qagi_t(const qagi_t &) = delete;
     qagi_t &operator=(const qagi_t &) = delete;
 
-    unary_func<T> m_fn;
     T m_epsabs, m_epsrel;
     size_t m_limit;
     gsl_integration_workspace *m_workspace;
 };
 
 template <>
-int qagi_t<double>::operator()(double *result, double *abserr)
+double qagi_t<double>::operator()(const typename unary_func<double>::type &fn,
+                                  double *abserr)
 {
     if (m_workspace == nullptr) {
         m_workspace = gsl_integration_workspace_alloc(m_limit);
         IEXP_NOT_NULLPTR(m_workspace);
     }
 
-    double __abserr;
-    return gsl_integration_qagi((gsl_function *)m_fn.gsl(),
-                                m_epsabs,
-                                m_epsrel,
-                                m_limit,
-                                m_workspace,
-                                result,
-                                abserr != nullptr ? abserr : &__abserr);
+    unary_func<double> m_fn(fn);
+    double r, e;
+    gsl_integration_qagi((gsl_function *)m_fn.gsl(),
+                         m_epsabs,
+                         m_epsrel,
+                         m_limit,
+                         m_workspace,
+                         &r,
+                         abserr != nullptr ? abserr : &e);
+    return r;
 }
 
 typedef qagi_t<double> qagi;
@@ -122,12 +150,8 @@ template <typename T>
 class qagiu_t
 {
   public:
-    qagiu_t(const typename unary_func<T>::type &fn,
-            T epsabs,
-            T epsrel,
-            size_t limit)
-        : m_fn(fn)
-        , m_epsabs(epsabs)
+    qagiu_t(T epsabs, T epsrel, size_t limit)
+        : m_epsabs(epsabs)
         , m_epsrel(epsrel)
         , m_limit(limit)
         , m_workspace(nullptr)
@@ -141,48 +165,83 @@ class qagiu_t
         }
     }
 
-    int operator()(const T a, T *result, T *abserr = nullptr)
+    double operator()(const typename unary_func<T>::type &fn,
+                      T a,
+                      T *abserr = nullptr)
     {
         UNSUPPORTED_TYPE(T);
     }
 
-    T &epsabs()
+    T epsabs() const
     {
         return m_epsabs;
     }
 
-    T &epsrel()
+    qagiu_t &epsabs(T e)
+    {
+        m_epsabs = e;
+        return *this;
+    }
+
+    T epsrel() const
     {
         return m_epsrel;
     }
 
-  private:
+    qagiu_t &epsrel(T e)
+    {
+        m_epsrel = e;
+        return *this;
+    }
+
+    T limit() const
+    {
+        return m_limit;
+    }
+
+    qagiu_t &limit(T l)
+    {
+        if (m_limit != l) {
+            m_limit = l;
+            if (m_workspace != nullptr) {
+                gsl_integration_workspace_free(m_workspace);
+                m_workspace = gsl_integration_workspace_alloc(m_limit);
+                IEXP_NOT_NULLPTR(m_workspace);
+            }
+        }
+        return *this;
+    }
+
+  protected:
     qagiu_t(const qagiu_t &) = delete;
     qagiu_t &operator=(const qagiu_t &) = delete;
 
-    unary_func<T> m_fn;
     T m_epsabs, m_epsrel;
     size_t m_limit;
     gsl_integration_workspace *m_workspace;
 };
 
 template <>
-int qagiu_t<double>::operator()(const double a, double *result, double *abserr)
+double qagiu_t<double>::operator()(const typename unary_func<double>::type &fn,
+                                   double a,
+                                   double *abserr)
 {
     if (m_workspace == nullptr) {
         m_workspace = gsl_integration_workspace_alloc(m_limit);
         IEXP_NOT_NULLPTR(m_workspace);
     }
 
-    double __abserr;
-    return gsl_integration_qagiu((gsl_function *)m_fn.gsl(),
-                                 a,
-                                 m_epsabs,
-                                 m_epsrel,
-                                 m_limit,
-                                 m_workspace,
-                                 result,
-                                 abserr != nullptr ? abserr : &__abserr);
+    unary_func<double> m_fn(fn);
+    double r, e;
+    gsl_integration_qagiu((gsl_function *)m_fn.gsl(),
+                          a,
+                          m_epsabs,
+                          m_epsrel,
+                          m_limit,
+                          m_workspace,
+                          &r,
+                          abserr != nullptr ? abserr : &e);
+    return r;
 }
 
 typedef qagiu_t<double> qagiu;
@@ -195,12 +254,8 @@ template <typename T>
 class qagil_t
 {
   public:
-    qagil_t(const typename unary_func<T>::type &fn,
-            T epsabs,
-            T epsrel,
-            size_t limit)
-        : m_fn(fn)
-        , m_epsabs(epsabs)
+    qagil_t(T epsabs, T epsrel, size_t limit)
+        : m_epsabs(epsabs)
         , m_epsrel(epsrel)
         , m_limit(limit)
         , m_workspace(nullptr)
@@ -214,48 +269,83 @@ class qagil_t
         }
     }
 
-    int operator()(const T b, T *result, T *abserr = nullptr)
+    double operator()(const typename unary_func<T>::type &fn,
+                      T b,
+                      T *abserr = nullptr)
     {
         UNSUPPORTED_TYPE(T);
     }
 
-    T &epsabs()
+    T epsabs() const
     {
         return m_epsabs;
     }
 
-    T &epsrel()
+    qagil_t &epsabs(T e)
+    {
+        m_epsabs = e;
+        return *this;
+    }
+
+    T epsrel() const
     {
         return m_epsrel;
+    }
+
+    qagil_t &epsrel(T e)
+    {
+        m_epsrel = e;
+        return *this;
+    }
+
+    T limit() const
+    {
+        return m_limit;
+    }
+
+    qagil_t &limit(T l)
+    {
+        if (m_limit != l) {
+            m_limit = l;
+            if (m_workspace != nullptr) {
+                gsl_integration_workspace_free(m_workspace);
+                m_workspace = gsl_integration_workspace_alloc(m_limit);
+                IEXP_NOT_NULLPTR(m_workspace);
+            }
+        }
+        return *this;
     }
 
   private:
     qagil_t(const qagil_t &) = delete;
     qagil_t &operator=(const qagil_t &) = delete;
 
-    unary_func<T> m_fn;
     T m_epsabs, m_epsrel;
     size_t m_limit;
     gsl_integration_workspace *m_workspace;
 };
 
 template <>
-int qagil_t<double>::operator()(const double b, double *result, double *abserr)
+double qagil_t<double>::operator()(const typename unary_func<double>::type &fn,
+                                   double b,
+                                   double *abserr)
 {
     if (m_workspace == nullptr) {
         m_workspace = gsl_integration_workspace_alloc(m_limit);
         IEXP_NOT_NULLPTR(m_workspace);
     }
 
-    double __abserr;
-    return gsl_integration_qagil((gsl_function *)m_fn.gsl(),
-                                 b,
-                                 m_epsabs,
-                                 m_epsrel,
-                                 m_limit,
-                                 m_workspace,
-                                 result,
-                                 abserr != nullptr ? abserr : &__abserr);
+    unary_func<double> m_fn(fn);
+    double r, e;
+    gsl_integration_qagil((gsl_function *)m_fn.gsl(),
+                          b,
+                          m_epsabs,
+                          m_epsrel,
+                          m_limit,
+                          m_workspace,
+                          &r,
+                          abserr != nullptr ? abserr : &e);
+    return r;
 }
 
 typedef qagil_t<double> qagil;

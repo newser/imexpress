@@ -59,7 +59,7 @@ class unary_func
         static_assert(TYPE_IS(T, double), "only support double now");
     }
 
-    const gsl_function *gsl()
+    const gsl_function *gsl() const
     {
         return &m_gsl_fn;
     }
@@ -119,7 +119,7 @@ class monte_func
         }
     }
 
-    const gsl_monte_function *gsl()
+    const gsl_monte_function *gsl() const
     {
         return &m_gsl_fn;
     }

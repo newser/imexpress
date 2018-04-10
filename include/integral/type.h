@@ -40,7 +40,7 @@ namespace integral {
 // type definition
 ////////////////////////////////////////////////////////////
 
-enum key
+enum class key
 {
     GAUSS15 = GSL_INTEG_GAUSS15,
     GAUSS21 = GSL_INTEG_GAUSS21,
