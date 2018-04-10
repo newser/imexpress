@@ -1,5 +1,6 @@
 #include <catch.hpp>
 #include <integral/cquad.h>
+#include <integral/glfixed.h>
 #include <integral/miser.h>
 #include <integral/monte.h>
 #include <integral/qag.h>
@@ -756,4 +757,16 @@ TEST_CASE("integral_cquad")
     result = q([](double x) { return x >= 0.3; }, 0.0, 1.0, &abserr, &neval);
     REQUIRE(__D_EQ_IN(result, 0.7, 1E-12));
     REQUIRE(fabs(result - 0.7) <= abserr);
+}
+
+TEST_CASE("integral_glfixed")
+{
+    double result;
+
+    integral::glfixed q(1000);
+    result = q([](double x) { return exp(x); }, 0.0, 1.0);
+    REQUIRE(__D_EQ9(result, 1.718281828605944));
+
+    result = q([](double x) { return x >= 0.3; }, 0.0, 1.0);
+    REQUIRE(__D_EQ_IN(result, 0.7, 1E-4));
 }
