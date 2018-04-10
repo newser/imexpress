@@ -17,5 +17,4 @@ TEST_CASE("quantile")
 
     double v1 = stats::quantile(sort(a), 0.66);
     double v2 = q.get();
-    std::cout << v1 << std::endl << v2 << std::endl;
 }

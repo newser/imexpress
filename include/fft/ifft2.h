@@ -79,9 +79,9 @@ class ifft2_functor<normalize, T, true>
 
     Scalar operator()(Index i, Index j) const
     {
-#define FFT2_RESULT(i, j) m_result.get()[(i)*m_n1 + (j)]
-        return FFT2_RESULT(i, j);
-#undef FFT2_RESULT
+#define IFFT2_RESULT(i, j) m_result.get()[(i)*m_n1 + (j)]
+        return IFFT2_RESULT(i, j);
+#undef IFFT2_RESULT
     }
 
   private:
@@ -116,9 +116,9 @@ class ifft2_functor<normalize, T, false>
 
     Scalar operator()(Index i, Index j) const
     {
-#define FFT2_RESULT(i, j) m_result.get()[(i)*m_n1 + (j)]
-        return FFT2_RESULT(j, i);
-#undef FFT2_RESULT
+#define IFFT2_RESULT(i, j) m_result.get()[(i)*m_n1 + (j)]
+        return IFFT2_RESULT(j, i);
+#undef IFFT2_RESULT
     }
 
   private:

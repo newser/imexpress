@@ -246,7 +246,6 @@ TEST_CASE("math_elementary")
     {
         iexp::Matrix2d m = iexp::Matrix2d::Random();
         iexp::Matrix2d m2 = iexp::sign(m.array());
-        std::cout << m2 << std::endl;
         REQUIRE(m(0, 0) * m2(0, 0) >= 0);
         REQUIRE(m(0, 1) * m2(0, 1) >= 0);
         REQUIRE(m(1, 0) * m2(1, 0) >= 0);

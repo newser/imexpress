@@ -26,6 +26,19 @@ TEST_CASE("dst2_float")
     REQUIRE(__F_EQ_IN(o_rr(2, 0), 1.08672, 0.00001));
     REQUIRE(__F_EQ_IN(o_rr(2, 1), 9.55177, 0.00001));
 
+    Matrix<float, 3, 2> ic = i_rr;
+    Matrix<float, 3, 2> oc = fft::dst2(ic);
+    REQUIRE(__F_EQ_IN(oc(0, 0), 77.297, 0.001));
+    REQUIRE(__F_EQ_IN(oc(0, 1), -38.9456, 0.0001));
+    REQUIRE(__F_EQ_IN(oc(2, 0), 1.08672, 0.00001));
+    REQUIRE(__F_EQ_IN(oc(2, 1), 9.55177, 0.00001));
+
+    Matrix<float, 3, 2> oc2 = fft::idst2<true>(oc);
+    REQUIRE(__F_EQ_IN(oc2(0, 0), 1, 0.001));
+    REQUIRE(__F_EQ_IN(oc2(0, 1), 3, 0.0001));
+    REQUIRE(__F_EQ_IN(oc2(2, 0), 4, 0.00001));
+    REQUIRE(__F_EQ_IN(oc2(2, 1), 8, 0.00001));
+
     // inv
     o_rr2.array() = fft::idst2(o_rr.array());
     REQUIRE(__F_EQ_IN(o_rr2(0, 0), 1 * 48, 0.0001));

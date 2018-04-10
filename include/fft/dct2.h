@@ -42,55 +42,85 @@ namespace fft {
 ////////////////////////////////////////////////////////////
 
 template <kind k0, kind k1, typename T>
-inline void dct2_impl(const int n0, const int n1, const T *i, T *o)
+inline void dct2_impl(int n0, int n1, const T *i, T *o)
 {
     fftw3::get_plan<k0, k1>(n0, n1, i, o, true)
         .template fwd<k0, k1>(n0, n1, i, o);
 }
 
+template <kind k0,
+          kind k1,
+          typename T,
+          bool is_row_major = bool(TP4(T) == RowMajor)>
+class dct2_functor;
+
 template <kind k0, kind k1, typename T>
-class dct2_functor
+class dct2_functor<k0, k1, T, true>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            RowMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
     dct2_functor(const T &x)
-        : m_result(x.rows(), x.cols())
+        : m_n0(x.rows())
+        , m_n1(x.cols())
+        , m_result(new Scalar[m_n0 * m_n1])
     {
-        static_assert(T::Flags & RowMajorBit, "must be row major matrix");
-
         typename type_eval<T>::type m_x(x.eval());
-        dct2_impl<k0, k1>((int)m_x.rows(),
-                          (int)m_x.cols(),
-                          m_x.data(),
-                          m_result.data());
+        dct2_impl<k0, k1>((int)m_n0, (int)m_n1, m_x.data(), m_result.get());
     }
 
-    const typename T::Scalar &operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
-        return m_result(i, j);
+#define DCT2_RESULT(i, j) m_result.get()[(i)*m_n1 + (j)]
+        return DCT2_RESULT(i, j);
+#undef DCT2_RESULT
     }
 
   private:
-    ArrayType m_result;
+    Index m_n0, m_n1;
+    std::shared_ptr<Scalar> m_result;
+};
+
+template <kind k0, kind k1, typename T>
+class dct2_functor<k0, k1, T, false>
+{
+  public:
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
+
+    dct2_functor(const T &x)
+        : m_n0(x.cols())
+        , m_n1(x.rows())
+        , m_result(new Scalar[m_n0 * m_n1])
+    {
+        typename type_eval<T>::type m_x(x.eval());
+        dct2_impl<k0, k1>((int)m_n0, (int)m_n1, m_x.data(), m_result.get());
+    }
+
+    Scalar operator()(Index i, Index j) const
+    {
+#define DCT2_RESULT(i, j) m_result.get()[(i)*m_n1 + (j)]
+        return DCT2_RESULT(j, i);
+#undef DCT2_RESULT
+    }
+
+  private:
+    Index m_n0, m_n1;
+    std::shared_ptr<Scalar> m_result;
 };
 
 template <kind k0 = DCT_II, kind k1 = DCT_II, typename T = void>
 inline CwiseNullaryOp<dct2_functor<k0, k1, T>,
-                      typename dct2_functor<k0, k1, T>::ArrayType>
-dct2(const ArrayBase<T> &x)
+                      typename dct2_functor<k0, k1, T>::ResultType>
+dct2(const DenseBase<T> &x)
 {
     static_assert(IS_DCT(k0) && IS_DCT(k1), "not dct kind");
 
-    using ArrayType = typename dct2_functor<k0, k1, T>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  dct2_functor<k0, k1, T>(x.derived()));
+    using ResultType = typename dct2_functor<k0, k1, T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   dct2_functor<k0, k1, T>(x.derived()));
 }
 
 ////////////////////////////////////////////////////////////

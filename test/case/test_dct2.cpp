@@ -60,6 +60,13 @@ TEST_CASE("dct2_float")
     REQUIRE(__F_EQ_IN(o_rr2(0, 1), 3, 0.0001));
     REQUIRE(__F_EQ_IN(o_rr2(2, 0), 4, 0.00001));
     REQUIRE(__F_EQ_IN(o_rr2(2, 1), 8, 0.00001));
+
+    Matrix<float, 3, 2> ic_rr = o_rr;
+    Matrix<float, 3, 2> oc_rr = fft::idct2<true>(ic_rr);
+    REQUIRE(__F_EQ_IN(oc_rr(0, 0), 1, 0.0001));
+    REQUIRE(__F_EQ_IN(oc_rr(0, 1), 3, 0.0001));
+    REQUIRE(__F_EQ_IN(oc_rr(2, 0), 4, 0.00001));
+    REQUIRE(__F_EQ_IN(oc_rr(2, 1), 8, 0.00001));
 }
 
 TEST_CASE("dct2_double")
@@ -87,6 +94,13 @@ TEST_CASE("dct2_double")
     REQUIRE(__F_EQ_IN(o_rr(0, 1), -36.7696, 0.0001));
     REQUIRE(__F_EQ_IN(o_rr(2, 0), -12, 0.00001));
     REQUIRE(__F_EQ_IN(o_rr(2, 1), 11.3137, 0.00001));
+
+    Matrix<double, 3, 2> ic_rr = i_rr;
+    Matrix<double, 3, 2> oc_rr = fft::dct2(ic_rr);
+    REQUIRE(__F_EQ_IN(oc_rr(0, 0), 108, 0.0001));
+    REQUIRE(__F_EQ_IN(oc_rr(0, 1), -36.7696, 0.0001));
+    REQUIRE(__F_EQ_IN(oc_rr(2, 0), -12, 0.00001));
+    REQUIRE(__F_EQ_IN(oc_rr(2, 1), 11.3137, 0.00001));
 
     // inv
     o_rr2.array() = fft::idct2(o_rr.array());

@@ -42,55 +42,85 @@ namespace fft {
 ////////////////////////////////////////////////////////////
 
 template <kind k0, kind k1, typename T>
-inline void dst2_impl(const int n0, const int n1, const T *i, T *o)
+inline void dst2_impl(int n0, int n1, const T *i, T *o)
 {
     fftw3::get_plan<k0, k1>(n0, n1, i, o, true)
         .template fwd<k0, k1>(n0, n1, i, o);
 }
 
+template <kind k0,
+          kind k1,
+          typename T,
+          bool is_row_major = bool(TP4(T) == RowMajor)>
+class dst2_functor;
+
 template <kind k0, kind k1, typename T>
-class dst2_functor
+class dst2_functor<k0, k1, T, true>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            RowMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
     dst2_functor(const T &x)
-        : m_result(x.rows(), x.cols())
+        : m_n0(x.rows())
+        , m_n1(x.cols())
+        , m_result(new Scalar[m_n0 * m_n1])
     {
-        static_assert(T::Flags & RowMajorBit, "must be row major matrix");
-
         typename type_eval<T>::type m_x(x.eval());
-        dst2_impl<k0, k1>((int)m_x.rows(),
-                          (int)m_x.cols(),
-                          m_x.data(),
-                          m_result.data());
+        dst2_impl<k0, k1>((int)m_n0, (int)m_n1, m_x.data(), m_result.get());
     }
 
-    const typename T::Scalar &operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
-        return m_result(i, j);
+#define DST2_RESULT(i, j) m_result.get()[(i)*m_n1 + (j)]
+        return DST2_RESULT(i, j);
+#undef DST2_RESULT
     }
 
   private:
-    ArrayType m_result;
+    Index m_n0, m_n1;
+    std::shared_ptr<Scalar> m_result;
+};
+
+template <kind k0, kind k1, typename T>
+class dst2_functor<k0, k1, T, false>
+{
+  public:
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
+
+    dst2_functor(const T &x)
+        : m_n0(x.cols())
+        , m_n1(x.rows())
+        , m_result(new Scalar[m_n0 * m_n1])
+    {
+        typename type_eval<T>::type m_x(x.eval());
+        dst2_impl<k0, k1>((int)m_n0, (int)m_n1, m_x.data(), m_result.get());
+    }
+
+    Scalar operator()(Index i, Index j) const
+    {
+#define DST2_RESULT(i, j) m_result.get()[(i)*m_n1 + (j)]
+        return DST2_RESULT(j, i);
+#undef DST2_RESULT
+    }
+
+  private:
+    Index m_n0, m_n1;
+    std::shared_ptr<Scalar> m_result;
 };
 
 template <kind k0 = DST_I, kind k1 = DST_I, typename T = void>
 inline CwiseNullaryOp<dst2_functor<k0, k1, T>,
-                      typename dst2_functor<k0, k1, T>::ArrayType>
-dst2(const ArrayBase<T> &x)
+                      typename dst2_functor<k0, k1, T>::ResultType>
+dst2(const DenseBase<T> &x)
 {
     static_assert(IS_DST(k0) && IS_DST(k1), "not dst kind");
 
-    using ArrayType = typename dst2_functor<k0, k1, T>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  dst2_functor<k0, k1, T>(x.derived()));
+    using ResultType = typename dst2_functor<k0, k1, T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   dst2_functor<k0, k1, T>(x.derived()));
 }
 
 ////////////////////////////////////////////////////////////
