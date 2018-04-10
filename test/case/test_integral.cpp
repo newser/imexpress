@@ -1,4 +1,5 @@
 #include <catch.hpp>
+#include <integral/cquad.h>
 #include <integral/miser.h>
 #include <integral/monte.h>
 #include <integral/qag.h>
@@ -740,4 +741,19 @@ TEST_CASE("integral_vegas")
     REQUIRE(e < 5 * 1.264e-3);
 
     m_1.alpha(0.1).iterations(10);
+}
+
+TEST_CASE("integral_cquad")
+{
+    double result, abserr;
+    size_t neval;
+
+    integral::cquad q(0.0, 1e-12, 200);
+    result = q([](double x) { return exp(x); }, 0.0, 1.0, &abserr, &neval);
+    REQUIRE(__D_EQ_IN(result, 1.7182818284590452354, 1E-12));
+    REQUIRE(fabs(result - 1.7182818284590452354) <= abserr);
+
+    result = q([](double x) { return x >= 0.3; }, 0.0, 1.0, &abserr, &neval);
+    REQUIRE(__D_EQ_IN(result, 0.7, 1E-12));
+    REQUIRE(fabs(result - 0.7) <= abserr);
 }
