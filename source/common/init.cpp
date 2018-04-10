@@ -78,7 +78,7 @@ void iexp_gsl_error_handler(const char *reason,
     es.append(gsl_strerror(gsl_errno));
     es.append(":");
     es.append(reason);
-    es.append(" at [");
+    es.append(". see[");
     es.append(file);
     es.append(":");
     es.append(std::to_string(line));

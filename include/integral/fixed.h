@@ -101,22 +101,9 @@ class fixed_t
     T m_a, m_b, m_alpha, m_beta;
     gsl_integration_fixed_workspace *m_workspace;
 
-    void init()
+    static const gsl_integration_fixed_type *gsl_type(type t)
     {
-        if (m_workspace == nullptr) {
-            m_workspace = gsl_integration_fixed_alloc(gsl_type(),
-                                                      m_n,
-                                                      m_a,
-                                                      m_b,
-                                                      m_alpha,
-                                                      m_beta);
-            IEXP_NOT_NULLPTR(m_workspace);
-        }
-    }
-
-    const gsl_integration_fixed_type *gsl_type()
-    {
-        switch (m_type) {
+        switch (t) {
             case type::LEGENDRE: {
                 return gsl_integration_fixed_legendre;
             } break;
@@ -147,6 +134,19 @@ class fixed_t
             default: {
                 throw std::invalid_argument("invalid type");
             }
+        }
+    }
+
+    void init()
+    {
+        if (m_workspace == nullptr) {
+            m_workspace = gsl_integration_fixed_alloc(gsl_type(m_type),
+                                                      m_n,
+                                                      m_a,
+                                                      m_b,
+                                                      m_alpha,
+                                                      m_beta);
+            IEXP_NOT_NULLPTR(m_workspace);
         }
     }
 };
