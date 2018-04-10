@@ -1,5 +1,6 @@
 #include <catch.hpp>
 #include <integral/cquad.h>
+#include <integral/fixed.h>
 #include <integral/glfixed.h>
 #include <integral/miser.h>
 #include <integral/monte.h>
@@ -87,7 +88,7 @@ TEST_CASE("integral_qag")
 {
     double result, abserr;
 
-    integral::qag q(0.0, 1e-10, integral::key::GAUSS15, 1000);
+    integral::qag q(0.0, 1e-10, integral::qag::key::GAUSS15, 1000);
     result =
         q([](double x) { return pow(x, 2.6) * log(1 / x); }, 0.0, 1.0, &abserr);
     REQUIRE(__D_EQ_IN(result, 7.716049382715854665E-02, 1E-15));
@@ -95,7 +96,7 @@ TEST_CASE("integral_qag")
 
     REQUIRE(q.epsabs() == 0.0);
     REQUIRE(q.epsrel() == 1e-10);
-    REQUIRE(q.key() == integral::key::GAUSS15);
+    REQUIRE(q.key() == integral::qag::key::GAUSS15);
 
     result =
         q([](double x) { return pow(x, 2.6) * log(1 / x); }, 1.0, 0.0, &abserr);
@@ -769,4 +770,22 @@ TEST_CASE("integral_glfixed")
 
     result = q([](double x) { return x >= 0.3; }, 0.0, 1.0);
     REQUIRE(__D_EQ_IN(result, 0.7, 1E-4));
+}
+
+TEST_CASE("integral_fixed")
+{
+    double result, expect;
+
+    integral::fixed q(integral::fixed::type::LEGENDRE, 200, 1.2, 1.6, 0, 0);
+    result = q([](double x) -> double { return exp(-x - x * x); });
+    expect = 0.01505500344456001;
+    REQUIRE(fabs(result - expect) / expect < 1.0e-12);
+
+    integral::fixed q2(integral::fixed::type::JACOBI, 200, 1.2, 1.6, 2.0, 1.5);
+    q2.n();
+    q2.x();
+    q2.w();
+    result = q2([](double x) -> double { return exp(-x - x * x); });
+    expect = 3.173064776410033e-5;
+    REQUIRE(fabs(result - expect) / expect < 1.0e-12);
 }

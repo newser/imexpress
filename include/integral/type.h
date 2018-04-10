@@ -40,16 +40,6 @@ namespace integral {
 // type definition
 ////////////////////////////////////////////////////////////
 
-enum class key
-{
-    GAUSS15 = GSL_INTEG_GAUSS15,
-    GAUSS21 = GSL_INTEG_GAUSS21,
-    GAUSS31 = GSL_INTEG_GAUSS31,
-    GAUSS41 = GSL_INTEG_GAUSS41,
-    GAUSS51 = GSL_INTEG_GAUSS51,
-    GAUSS61 = GSL_INTEG_GAUSS61,
-};
-
 ////////////////////////////////////////////////////////////
 // global variants
 ////////////////////////////////////////////////////////////
