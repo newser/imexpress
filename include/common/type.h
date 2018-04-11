@@ -49,7 +49,10 @@ IEXP_NS_BEGIN
         def(unsigned short, ushort) def(int, int) def(unsigned int, uint)      \
             def(long, long) def(unsigned long, ulong) def(float, float)
 
-#define UNSUPPORTED_TYPE(t) throw std::invalid_argument(typeid(t).name())
+#define UNSUPPORTED_TYPE(t)                                                    \
+    throw std::invalid_argument(std::string("type \"")                         \
+                                    .append(typeid(t).name())                  \
+                                    .append("\" is not implemented yet"))
 
 #define SCALAR(t) std::conditional<is_complex<t>::value, t::value_type, t>::type
 

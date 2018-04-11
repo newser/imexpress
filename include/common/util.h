@@ -40,6 +40,10 @@ IEXP_NS_BEGIN
 
 #define RETURN_OR_THROW(t) throw(t)
 
+#define IEXP_NOT_COPYABLE(name)                                                \
+    name(const name &) = delete;                                               \
+    name &operator=(const name &) = delete;
+
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////

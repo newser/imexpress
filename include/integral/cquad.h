@@ -26,7 +26,6 @@
 #include <common/common.h>
 
 #include <integral/function.h>
-#include <integral/type.h>
 
 #include <gsl/gsl_integration.h>
 
@@ -97,10 +96,10 @@ class cquad_t
         return m_n;
     }
 
-    cquad_t &n(T l)
+    cquad_t &n(T n)
     {
-        if (m_n != l) {
-            m_n = l;
+        if (m_n != n) {
+            m_n = n;
             if (m_workspace != nullptr) {
                 gsl_integration_cquad_workspace_free(m_workspace);
                 m_workspace = gsl_integration_cquad_workspace_alloc(m_n);
@@ -111,8 +110,7 @@ class cquad_t
     }
 
   private:
-    cquad_t(const cquad_t &) = delete;
-    cquad_t &operator=(const cquad_t &) = delete;
+    IEXP_NOT_COPYABLE(cquad_t)
 
     T m_epsabs, m_epsrel;
     size_t m_n;

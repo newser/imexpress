@@ -27,7 +27,6 @@
 
 #include <integral/function.h>
 #include <integral/qawo.h>
-#include <integral/type.h>
 
 #include <gsl/gsl_integration.h>
 

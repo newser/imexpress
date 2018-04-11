@@ -452,6 +452,29 @@ TEST_CASE("integral_monte")
     double xl[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     double xu[11] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
+#if 0
+    integral::monte_t<float> mf(2);
+    float xl_f[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    float xu_f[11] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    float ef;
+    mf(
+        [](float *x, size_t d) -> float {
+            float prod = 1.0;
+            unsigned int i;
+
+            for (i = 0; i < d; ++i) {
+                prod *= 2.0 * x[i];
+            }
+
+            return prod;
+        },
+        xl_f,
+        xu_f,
+        2,
+        3333,
+        &ef);
+#endif
+
     // 2d
 
     integral::monte m(2);
@@ -758,6 +781,10 @@ TEST_CASE("integral_cquad")
     result = q([](double x) { return x >= 0.3; }, 0.0, 1.0, &abserr, &neval);
     REQUIRE(__D_EQ_IN(result, 0.7, 1E-12));
     REQUIRE(fabs(result - 0.7) <= abserr);
+
+    // test compile
+    // integral::cquad qq = q;
+    // integral::cquad qq2(q);
 }
 
 TEST_CASE("integral_glfixed")

@@ -26,7 +26,6 @@
 #include <common/common.h>
 
 #include <integral/function.h>
-#include <integral/type.h>
 
 #include <gsl/gsl_integration.h>
 

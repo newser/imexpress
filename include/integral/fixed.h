@@ -26,7 +26,6 @@
 #include <common/common.h>
 
 #include <integral/function.h>
-#include <integral/type.h>
 
 #include <gsl/gsl_integration.h>
 
@@ -88,9 +87,35 @@ class fixed_t
         return gsl_integration_fixed_n(m_workspace);
     }
 
-    const T *x();
+    T a() const
+    {
+        return m_a;
+    }
 
-    const T *w();
+    T b() const
+    {
+        return m_a;
+    }
+
+    T alpha() const
+    {
+        return m_alpha;
+    }
+
+    T beta() const
+    {
+        return m_beta;
+    }
+
+    const T *x()
+    {
+        UNSUPPORTED_TYPE(T);
+    }
+
+    const T *w()
+    {
+        UNSUPPORTED_TYPE(T);
+    }
 
   private:
     fixed_t(const fixed_t &) = delete;
