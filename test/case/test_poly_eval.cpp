@@ -11,6 +11,14 @@ TEST_CASE("poly_eval")
     double ans = iexp::poly::eval(v.array(), x);
     REQUIRE(__D_EQ(1.0 + 0.5 * x + 0.3 * x * x, ans));
 
+    ans = iexp::poly::eval(v, x);
+    REQUIRE(__D_EQ(1.0 + 0.5 * x + 0.3 * x * x, ans));
+
+    iexp::Matrix<double, 2, 2> mm;
+    mm << 1, 2, 3, 4;
+    ans = iexp::poly::eval(mm, x);
+    REQUIRE(__D_EQ(1 + 3 * x + 2 * x * x + 4 * x * x * x, ans));
+
     iexp::Vector4cd v2(4);
     v2[0] = std::complex<double>(-2.31, 0.44);
     v2[1] = std::complex<double>(4.21, -3.19);
@@ -47,6 +55,14 @@ TEST_CASE("poly_eval_derive")
     REQUIRE(__D_EQ_IN(v2[3], y, 0.001));
     y = 4.0 * 3.0 * 2.0 * v[4] + 5.0 * 4.0 * 3.0 * 2.0 * v[5] * x;
     REQUIRE(__D_EQ_IN(v2[4], y, 0.001));
+    y = 5.0 * 4.0 * 3.0 * 2.0 * v[5];
+    REQUIRE(__D_EQ_IN(v2[5], y, 0.001));
+
+    // matrix
+    v2 = iexp::poly::eval_deriv(v, x, 5);
+    y = v[0] + v[1] * x + v[2] * x * x + v[3] * x * x * x +
+        v[4] * x * x * x * x + v[5] * x * x * x * x * x;
+    REQUIRE(__D_EQ_IN(v2[0], y, 0.001));
     y = 5.0 * 4.0 * 3.0 * 2.0 * v[5];
     REQUIRE(__D_EQ_IN(v2[5], y, 0.001));
 

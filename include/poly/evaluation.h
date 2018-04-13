@@ -43,22 +43,31 @@ namespace poly {
 // evaluation
 // ========================================
 
-template <typename T>
-inline T eval_impl(const T *c, const int len, const T x)
+template <typename T, typename U>
+inline U eval_impl(const T *c, int len, U x)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double eval_impl(const double *c, const int len, const double x)
+inline double eval_impl(const double *c, int len, double x)
 {
     return gsl_poly_eval(c, len, x);
 }
 
 template <>
+inline std::complex<double> eval_impl(const double *c,
+                                      int len,
+                                      std::complex<double> x)
+{
+    gsl_complex ans = gsl_poly_complex_eval(c, len, *(gsl_complex *)&x);
+    return std::complex<double>(ans.dat[0], ans.dat[1]);
+}
+
+template <>
 inline std::complex<double> eval_impl(const std::complex<double> *c,
-                                      const int len,
-                                      const std::complex<double> x)
+                                      int len,
+                                      std::complex<double> x)
 {
     gsl_complex ans = gsl_complex_poly_complex_eval((gsl_complex *)c,
                                                     len,
@@ -67,11 +76,8 @@ inline std::complex<double> eval_impl(const std::complex<double> *c,
 }
 
 template <typename T>
-inline typename T::Scalar eval(const ArrayBase<T> &c,
-                               const typename T::Scalar x)
+inline typename T::Scalar eval(const DenseBase<T> &c, typename T::Scalar x)
 {
-    eigen_assert(IS_VEC(c));
-
     typename type_eval<T>::type m_c(c.eval());
     return eval_impl(m_c.data(), m_c.size(), x);
 }
@@ -81,18 +87,14 @@ inline typename T::Scalar eval(const ArrayBase<T> &c,
 // ========================================
 
 template <typename T>
-inline void eval_deriv_impl(
-    const T *c, const int len, const T x, T *res, const int res_len)
+inline void eval_deriv_impl(const T *c, int len, T x, T *res, int res_len)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline void eval_deriv_impl(const double *c,
-                            const int len,
-                            const double x,
-                            double *res,
-                            const int res_len)
+inline void eval_deriv_impl(
+    const double *c, int len, double x, double *res, int res_len)
 {
     gsl_poly_eval_derivs(c, len, x, res, res_len);
 }
@@ -101,36 +103,30 @@ template <typename T>
 class eval_deriv_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::SizeAtCompileTime,
-                            1,
-                            ColMajor,
-                            T::SizeAtCompileTime,
-                            1>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T, Scalar>::type;
 
-    eval_deriv_functor(const T &c, typename T::Scalar x, int order)
-        : m_result(order, 1)
+    eval_deriv_functor(const T &c, Scalar x, int order)
+        : m_result(new Scalar[order])
     {
         typename type_eval<T>::type m_c(c.eval());
-        eval_deriv_impl(m_c.data(), m_c.size(), x, m_result.data(), order);
+        eval_deriv_impl(m_c.data(), m_c.size(), x, m_result.get(), order);
     }
 
-    const typename T::Scalar &operator()(Index i) const
+    Scalar operator()(Index i) const
     {
-        return m_result(i);
+        return m_result.get()[i];
     }
 
   private:
-    ArrayType m_result;
+    std::shared_ptr<Scalar> m_result;
 };
 
 template <typename T>
 inline CwiseNullaryOp<eval_deriv_functor<T>,
-                      typename eval_deriv_functor<T>::ArrayType>
-eval_deriv(const ArrayBase<T> &c, typename T::Scalar x, int order)
+                      typename eval_deriv_functor<T>::ResultType>
+eval_deriv(const DenseBase<T> &c, typename T::Scalar x, int order)
 {
-    eigen_assert(IS_VEC(c));
-
     // order 0: [f(x)]
     // order 1: [f(x), f'(x)]
     // ...
@@ -138,9 +134,11 @@ eval_deriv(const ArrayBase<T> &c, typename T::Scalar x, int order)
     eigen_assert(order >= 0);
     ++order;
 
-    using ArrayType = typename eval_deriv_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(order,
-                                  eval_deriv_functor<T>(c.derived(), x, order));
+    using ResultType = typename eval_deriv_functor<T>::ResultType;
+    return ResultType::NullaryExpr(order,
+                                   eval_deriv_functor<T>(c.derived(),
+                                                         x,
+                                                         order));
 }
 
 ////////////////////////////////////////////////////////////
