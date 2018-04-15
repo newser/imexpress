@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_BUF__
-#define __IEXP_BUF__
+#ifndef __IEXP_BUF_RC__
+#define __IEXP_BUF_RC__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -33,55 +33,60 @@ IEXP_NS_BEGIN
 // type definition
 ////////////////////////////////////////////////////////////
 
-template <typename T, typename Scalar = TP1(T)>
-class buf
+template <typename Scalar, bool row_major>
+class buf_rc
 {
   public:
-    buf(size_t n)
-        : m_size(n)
-        , m_data(m_static)
+    buf_rc(size_t row, size_t col)
+        : m_row(row)
+        , m_col(col)
+        , m_data(new Scalar[row * col])
     {
-        if (m_size > (sizeof(m_static) / sizeof(Scalar))) {
-            m_data = new Scalar[n];
-            IEXP_NOT_NULLPTR(m_data);
-        }
-    }
-
-    buf(const buf &&x)
-        : m_size(x.size())
-        , m_data(m_static)
-    {
-    }
-
-    ~buf()
-    {
-        if (!is_static()) {
-            delete[] m_data;
-        }
     }
 
     Scalar *data() const
     {
-        return m_data;
+        return m_data.get();
     }
 
     size_t size() const
     {
-        return m_size;
+        return m_row * m_col;
     }
 
-    bool is_static() const
+    Scalar &operator[](size_t i) const
     {
-        return m_data == m_static;
+        eigen_assert(i < size());
+        return m_data.get()[i];
+    }
+
+    Scalar &operator()(size_t i) const
+    {
+        eigen_assert(i < size());
+        return m_data.get()[i];
+    }
+
+    Scalar &operator()(size_t i, size_t j) const
+    {
+        eigen_assert((i < m_row) && (j < m_col));
+        return at(i, j, TYPE_BOOL(row_major)());
     }
 
   private:
-    buf(const buf &) = delete;
-    buf &operator=(const buf &) = delete;
+    size_t m_row, m_col;
+    std::shared_ptr<Scalar> m_data;
 
-    size_t m_size;
-    Scalar *m_data;
-    Scalar m_static[is_dynamic<T>::value ? 1 : (TP5(T) * TP6(T))];
+    Scalar &at(Index i, Index j, std::false_type) const
+    {
+        // col major
+        return m_data.get()[i + j * m_row];
+    }
+
+    Scalar &at(Index i, Index j, std::true_type) const
+    {
+        // row major
+        return m_data.get()[i * m_col + j];
+    }
 };
 
 ////////////////////////////////////////////////////////////
@@ -94,4 +99,4 @@ class buf
 
 IEXP_NS_END
 
-#endif /* __IEXP_BUF__ */
+#endif /* __IEXP_BUF_RC__ */

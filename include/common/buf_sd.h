@@ -16,37 +16,12 @@
  * USA.
  */
 
-#ifndef __IEXP_COMMON__
-#define __IEXP_COMMON__
+#ifndef __IEXP_BUF_SD__
+#define __IEXP_BUF_SD__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
-
-// clang-format off
-
-// environment must be first
-#include <common/environment.h>
-
-// define namespace
-#include <common/namespace.h>
-
-// library: eigen
-#include <common/eigen_config.h>
-#include <Eigen/Dense>
-
-// library: gsl
-#include <gsl/config.h>
-
-#include <common/def.h>
-#include <common/type.h>
-#include <common/util.h>
-#include <common/buf_sd.h>
-#include <common/buf_rc.h>
-#include <common/copy.h>
-#include <common/dim.h>
-
-// clang-format on
 
 IEXP_NS_BEGIN
 
@@ -58,6 +33,57 @@ IEXP_NS_BEGIN
 // type definition
 ////////////////////////////////////////////////////////////
 
+template <typename T, typename Scalar = TP1(T)>
+class buf_sd
+{
+  public:
+    buf_sd(size_t n)
+        : m_size(n)
+        , m_data(m_static)
+    {
+        if (m_size > (sizeof(m_static) / sizeof(Scalar))) {
+            m_data = new Scalar[n];
+            IEXP_NOT_NULLPTR(m_data);
+        }
+    }
+
+    buf_sd(const buf_sd &&x)
+        : m_size(x.size())
+        , m_data(m_static)
+    {
+    }
+
+    ~buf_sd()
+    {
+        if (!is_static()) {
+            delete[] m_data;
+        }
+    }
+
+    Scalar *data() const
+    {
+        return m_data;
+    }
+
+    size_t size() const
+    {
+        return m_size;
+    }
+
+    bool is_static() const
+    {
+        return m_data == m_static;
+    }
+
+  private:
+    buf_sd(const buf_sd &) = delete;
+    buf_sd &operator=(const buf_sd &) = delete;
+
+    size_t m_size;
+    Scalar *m_data;
+    Scalar m_static[is_dynamic<T>::value ? 1 : (TP5(T) * TP6(T))];
+};
+
 ////////////////////////////////////////////////////////////
 // global variants
 ////////////////////////////////////////////////////////////
@@ -68,4 +94,4 @@ IEXP_NS_BEGIN
 
 IEXP_NS_END
 
-#endif /* __IEXP_COMMON__ */
+#endif /* __IEXP_BUF_SD__ */

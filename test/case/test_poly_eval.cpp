@@ -43,6 +43,12 @@ TEST_CASE("poly_eval")
     REQUIRE(__D_EQ(mr(0, 0), 4));
     REQUIRE(__D_EQ(mr(1, 0), 49));
     REQUIRE(__D_EQ(mr(1, 2), 109));
+
+    iexp::Matrix<double, 2, 3, iexp::RowMajor> mx2 = mx, mr2;
+    mr2 = iexp::poly::eval(cc, mx2);
+    REQUIRE(__D_EQ(mr2(0, 0), 4));
+    REQUIRE(__D_EQ(mr2(1, 0), 49));
+    REQUIRE(__D_EQ(mr2(1, 2), 109));
 }
 
 TEST_CASE("poly_eval_derive")

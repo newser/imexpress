@@ -99,23 +99,68 @@ TEST_CASE("type")
     REQUIRE(TYPE_IS(TYPE_BOOL(false), std::false_type));
 }
 
-TEST_CASE("buf")
+TEST_CASE("buf_sd")
 {
-    buf<Matrix<int, 1, 2>> b1(2);
+    buf_sd<Matrix<int, 1, 2>> b1(2);
     REQUIRE(b1.size() == 2);
     REQUIRE(b1.is_static());
 
-    buf<Matrix<int, 1, 2>> b2(3);
+    buf_sd<Matrix<int, 1, 2>> b2(3);
     REQUIRE(b2.size() == 3);
     REQUIRE(!b2.is_static());
 
-    buf<Matrix<int, Dynamic, 2>> b3(1);
+    buf_sd<Matrix<int, Dynamic, 2>> b3(1);
     REQUIRE(b3.size() == 1);
     REQUIRE(b3.is_static());
 
-    buf<Matrix<int, Dynamic, 2>> b4(2);
+    buf_sd<Matrix<int, Dynamic, 2>> b4(2);
     REQUIRE(b4.size() == 2);
     REQUIRE(!b4.is_static());
+}
+
+TEST_CASE("buf_rc")
+{
+    buf_rc<int, true> b1(2, 3);
+    for (int i = 0; i < 6; ++i) {
+        if (i % 1) {
+            b1[i] = i;
+        } else {
+            b1(i) = i;
+        }
+    }
+    REQUIRE(b1[0] == 0);
+    REQUIRE(b1[1] == 1);
+    REQUIRE(b1[5] == 5);
+    REQUIRE(b1(0) == 0);
+    REQUIRE(b1(1) == 1);
+    REQUIRE(b1(5) == 5);
+    // 0, 1, 2
+    // 3, 4, 5
+    REQUIRE(b1(0, 0) == 0);
+    REQUIRE(b1(0, 1) == 1);
+    REQUIRE(b1(1, 0) == 3);
+    REQUIRE(b1(1, 2) == 5);
+
+    buf_rc<int, false> b2(2, 3);
+    for (int i = 0; i < 6; ++i) {
+        if (i % 1) {
+            b2(i) = i;
+        } else {
+            b2[i] = i;
+        }
+    }
+    REQUIRE(b2[0] == 0);
+    REQUIRE(b2[1] == 1);
+    REQUIRE(b2[5] == 5);
+    REQUIRE(b2(0) == 0);
+    REQUIRE(b2(1) == 1);
+    REQUIRE(b2(5) == 5);
+    // 0, 2, 4
+    // 1, 3, 5
+    REQUIRE(b2(0, 0) == 0);
+    REQUIRE(b2(0, 1) == 2);
+    REQUIRE(b2(1, 0) == 1);
+    REQUIRE(b2(1, 2) == 5);
 }
 
 TEST_CASE("math_constant")

@@ -60,7 +60,7 @@ class dd_functor
 {
   public:
     using Scalar = typename T::Scalar;
-    using ResultType = typename dense_derive<T, Scalar>::type;
+    using ResultType = typename dense_derive<T>::type;
 
     dd_functor(const T &xa, const T &ya)
         : m_result(new Scalar[xa.size()])
@@ -82,10 +82,11 @@ template <typename T>
 inline CwiseNullaryOp<dd_functor<T>, typename dd_functor<T>::ResultType> dd(
     const DenseBase<T> &xa, const DenseBase<T> &ya)
 {
-    eigen_assert(xa.size() == ya.size());
+    eigen_assert(MATRIX_SAME_SIZE(xa, ya));
 
     using ResultType = typename dd_functor<T>::ResultType;
-    return ResultType::NullaryExpr(xa.size(),
+    return ResultType::NullaryExpr(xa.rows(),
+                                   xa.cols(),
                                    dd_functor<T>(xa.derived(), ya.derived()));
 }
 
@@ -119,6 +120,49 @@ inline typename T::Scalar dd_eval(const DenseBase<T> &dd,
     return dd_eval_impl(m_dd.data(), m_xa.data(), m_dd.size(), x);
 }
 
+template <typename T, typename U>
+class dd_eval_functor
+{
+  public:
+    using Scalar = typename U::Scalar;
+    using ResultType = typename dense_derive<U>::type;
+
+    dd_eval_functor(const DenseBase<T> &dd,
+                    const DenseBase<T> &xa,
+                    const DenseBase<U> &x)
+        : m_result(new Scalar[x.size()])
+    {
+        typename type_eval<T>::type m_dd(dd.eval()), m_xa(xa.eval());
+        ASSIGN_IJ(TP4(U) == RowMajor,
+                  m_result.get(),
+                  x,
+                  dd_eval_impl(m_dd.data(), m_xa.data(), m_dd.size(), x(i, j)));
+    }
+
+    Scalar operator()(Index i) const
+    {
+        return m_result.get()[i];
+    }
+
+  private:
+    std::shared_ptr<Scalar> m_result;
+};
+
+template <typename T, typename U>
+inline CwiseNullaryOp<dd_eval_functor<T, U>,
+                      typename dd_eval_functor<T, U>::ResultType>
+dd_eval(const DenseBase<T> &dd, const DenseBase<T> &xa, const DenseBase<U> &x)
+{
+    eigen_assert(MATRIX_SAME_SIZE(dd, xa));
+
+    using ResultType = typename dd_eval_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   dd_eval_functor<T, U>(dd.derived(),
+                                                         xa.derived(),
+                                                         x.derived()));
+}
+
 // ========================================
 // divided difference to taylor expansion
 // ========================================
@@ -145,7 +189,7 @@ class dd_taylor_functor
 {
   public:
     using Scalar = typename T::Scalar;
-    using ResultType = typename dense_derive<T, Scalar>::type;
+    using ResultType = typename dense_derive<T>::type;
 
     dd_taylor_functor(Scalar xp, const T &dd, const T &xa)
         : m_result(new Scalar[dd.size()])
@@ -174,10 +218,11 @@ inline CwiseNullaryOp<dd_taylor_functor<T>,
                       typename dd_taylor_functor<T>::ResultType>
 dd_taylor(typename T::Scalar xp, const DenseBase<T> &dd, const DenseBase<T> &xa)
 {
-    eigen_assert(dd.size() == xa.size());
+    eigen_assert(MATRIX_SAME_SIZE(dd, xa));
 
     using ResultType = typename dd_taylor_functor<T>::ResultType;
-    return ResultType::NullaryExpr(xa.size(),
+    return ResultType::NullaryExpr(dd.rows(),
+                                   dd.cols(),
                                    dd_taylor_functor<T>(xp,
                                                         dd.derived(),
                                                         xa.derived()));
@@ -205,12 +250,15 @@ inline void dd_hermit_impl(double *dd,
     gsl_poly_dd_hermite_init(dd, za, xa, ya, dya, len);
 }
 
-template <typename T>
+template <bool row_form, typename T>
 class dd_hermit_functor
 {
   public:
     using Scalar = typename T::Scalar;
-    using ResultType = typename dense_derive<T, Scalar>::type;
+    using ResultType = typename dense_derive<T,
+                                             Scalar,
+                                             row_form ? 1 : Dynamic,
+                                             row_form ? Dynamic : 1>::type;
 
     dd_hermit_functor(const T &xa, const T &ya, const T &dya)
         : m_result(new Scalar[xa.size() << 1])
@@ -235,19 +283,21 @@ class dd_hermit_functor
     std::shared_ptr<Scalar> m_result;
 };
 
-template <typename T>
-inline CwiseNullaryOp<dd_hermit_functor<T>,
-                      typename dd_hermit_functor<T>::ResultType>
+template <bool row_form = false, typename T = void>
+inline CwiseNullaryOp<dd_hermit_functor<row_form, T>,
+                      typename dd_hermit_functor<row_form, T>::ResultType>
 dd_hermit(const DenseBase<T> &xa,
           const DenseBase<T> &ya,
           const DenseBase<T> &dya)
 {
-    eigen_assert(xa.size() == ya.size());
-    eigen_assert(xa.size() == dya.size());
+    eigen_assert(MATRIX_SAME_SIZE(xa, ya));
+    eigen_assert(MATRIX_SAME_SIZE(xa, dya));
 
-    using ResultType = typename dd_hermit_functor<T>::ResultType;
-    return ResultType::NullaryExpr(xa.size() << 1,
-                                   dd_hermit_functor<T>(xa.derived(),
+    using ResultType = typename dd_hermit_functor<row_form, T>::ResultType;
+    return ResultType::NullaryExpr(row_form ? 1 : (xa.size() << 1),
+                                   row_form ? (xa.size() << 1) : 1,
+                                   dd_hermit_functor<row_form,
+                                                     T>(xa.derived(),
                                                         ya.derived(),
                                                         dya.derived()));
 }
