@@ -94,6 +94,9 @@ TEST_CASE("type")
     }
 
     REQUIRE(IS_INTEGER(int));
+
+    REQUIRE(TYPE_IS(TYPE_BOOL(true), std::true_type));
+    REQUIRE(TYPE_IS(TYPE_BOOL(false), std::false_type));
 }
 
 TEST_CASE("buf")
@@ -134,4 +137,32 @@ TEST_CASE("math_constant")
     REQUIRE(IEXP_LN2 == M_LN2);
     REQUIRE(IEXP_LNPI == M_LNPI);
     REQUIRE(IEXP_EULER == M_EULER);
+}
+
+TEST_CASE("copy")
+{
+    Matrix<int, 3, 2> im, om;
+    im << 1, 2, 3, 4, 5, 6;
+    iexp::copy_matrix(om.data(), 6, im);
+    REQUIRE(om(0, 0) == 1);
+    REQUIRE(om(0, 1) == 2);
+    REQUIRE(om(2, 1) == 6);
+
+    iexp::copy_matrix(om.data(), 6, im + im);
+    REQUIRE(om(0, 0) == 2);
+    REQUIRE(om(0, 1) == 4);
+    REQUIRE(om(2, 1) == 12);
+
+    Array<int, 3, 2, RowMajor> ia, oa;
+    ia << 1, 2, 3, 4, 5, 6;
+    ia << 1, 2, 3, 4, 5, 6;
+    iexp::copy_matrix(oa.data(), 6, ia);
+    REQUIRE(oa(0, 0) == 1);
+    REQUIRE(oa(0, 1) == 2);
+    REQUIRE(oa(2, 1) == 6);
+
+    iexp::copy_matrix(oa.data(), 6, ia + ia);
+    REQUIRE(oa(0, 0) == 2);
+    REQUIRE(oa(0, 1) == 4);
+    REQUIRE(oa(2, 1) == 12);
 }

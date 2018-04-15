@@ -82,6 +82,47 @@ inline typename T::Scalar eval(const DenseBase<T> &c, typename T::Scalar x)
     return eval_impl(m_c.data(), m_c.size(), x);
 }
 
+template <typename T, typename U>
+class eval_functor
+{
+  public:
+    // note scalar should be same with U(input)
+    using Scalar = typename U::Scalar;
+    using ResultType = typename dense_derive<U>::type;
+
+    eval_functor(const T &c, const U &x)
+        : m_result(new Scalar[x.size()])
+    {
+        // doing evaluating m_c each time calling operator() would be expensive
+        // when c is an composed expression(x+y) but not a matrix or an array
+        typename type_eval<T>::type m_c(c.eval());
+        ASSIGN_IJ(TP4(U) == RowMajor,
+                  m_result.get(),
+                  x,
+                  eval_impl(m_c.data(), m_c.size(), x(i, j)));
+    }
+
+    Scalar operator()(Index i) const
+    {
+        return m_result.get()[i];
+    }
+
+  private:
+    std::shared_ptr<Scalar> m_result;
+};
+
+template <typename T, typename U>
+inline CwiseNullaryOp<eval_functor<T, U>,
+                      typename eval_functor<T, U>::ResultType>
+eval(const DenseBase<T> &c, const DenseBase<U> &x)
+{
+    using ResultType = typename eval_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   eval_functor<T, U>(c.derived(),
+                                                      x.derived()));
+}
+
 // ========================================
 // derivative evaluation
 // ========================================
@@ -104,7 +145,8 @@ class eval_deriv_functor
 {
   public:
     using Scalar = typename T::Scalar;
-    using ResultType = typename dense_derive<T, Scalar>::type;
+    // return a colume
+    using ResultType = typename dense_derive<T, Scalar, Dynamic, 1>::type;
 
     eval_deriv_functor(const T &c, Scalar x, int order)
         : m_result(new Scalar[order])
@@ -137,6 +179,74 @@ eval_deriv(const DenseBase<T> &c, typename T::Scalar x, int order)
     using ResultType = typename eval_deriv_functor<T>::ResultType;
     return ResultType::NullaryExpr(order,
                                    eval_deriv_functor<T>(c.derived(),
+                                                         x,
+                                                         order));
+}
+
+template <bool row_major, typename T, typename U>
+class eval2_deriv_functor
+{
+  public:
+    // note scalar should be same with U(input)
+    using Scalar = typename U::Scalar;
+    using ResultType = typename dense_derive<T,
+                                             Scalar,
+                                             Dynamic,
+                                             Dynamic,
+                                             row_major ? RowMajor : 0,
+                                             Dynamic,
+                                             Dynamic>::type;
+
+    eval2_deriv_functor(const T &c, const U &x, int order)
+        : m_order(order)
+        , m_result(new Scalar[order * x.size()])
+    {
+        typename type_eval<T>::type m_c(c.eval());
+        for (int i = 0; i < x.size(); ++i) {
+            eval_deriv_impl(m_c.data(),
+                            m_c.size(),
+                            x.data()[i],
+                            &m_result.get()[i * order],
+                            order);
+        }
+    }
+
+    Scalar operator()(Index i, Index j) const
+    {
+        return at(i, j, TYPE_BOOL(row_major)());
+    }
+
+  private:
+    Index m_order;
+    std::shared_ptr<Scalar> m_result;
+
+    Scalar at(Index i, Index j, std::false_type) const
+    {
+        // col major
+        return m_result.get()[i + j * m_order];
+    }
+
+    Scalar at(Index i, Index j, std::true_type) const
+    {
+        // row major
+        return m_result.get()[i * m_order + j];
+    }
+};
+
+template <bool row_major = false, typename T = void, typename U = void>
+inline CwiseNullaryOp<eval2_deriv_functor<row_major, T, U>,
+                      typename eval2_deriv_functor<row_major, T, U>::ResultType>
+eval_deriv(const DenseBase<T> &c, const DenseBase<U> &x, int order)
+{
+    eigen_assert(order >= 0);
+    ++order;
+
+    using ResultType =
+        typename eval2_deriv_functor<row_major, T, U>::ResultType;
+    return ResultType::
+        NullaryExpr(row_major ? x.size() : order,
+                    row_major ? order : x.size(),
+                    eval2_deriv_functor<row_major, T, U>(c.derived(),
                                                          x,
                                                          order));
 }

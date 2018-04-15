@@ -55,6 +55,40 @@ struct copy<T, T>
     }
 };
 
+template <typename D, typename S>
+void copy_matrix(D *d, size_t n, const DenseBase<S> &s, std::true_type)
+{
+    eigen_assert(n == s.size());
+
+    // typename type_eval<S>::type m_s(s.derived().eval());
+    int idx = 0;
+    for (int i = 0; i < s.rows(); ++i) {
+        for (int j = 0; j < s.cols(); ++j) {
+            d[idx++] = s(i, j);
+        }
+    }
+}
+
+template <typename D, typename S>
+void copy_matrix(D *d, size_t n, const DenseBase<S> &s, std::false_type)
+{
+    eigen_assert(n == s.size());
+
+    // typename type_eval<S>::type m_s(s.derived().eval());
+    int idx = 0;
+    for (int j = 0; j < s.cols(); ++j) {
+        for (int i = 0; i < s.rows(); ++i) {
+            d[idx++] = s(i, j);
+        }
+    }
+}
+
+template <typename D, typename S>
+void copy_matrix(D *d, size_t n, const DenseBase<S> &s)
+{
+    copy_matrix(d, n, s, TYPE_BOOL(bool(S::Flags & RowMajorBit))());
+}
+
 ////////////////////////////////////////////////////////////
 // global variants
 ////////////////////////////////////////////////////////////

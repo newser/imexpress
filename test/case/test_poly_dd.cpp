@@ -19,6 +19,11 @@ TEST_CASE("poly_dd")
     REQUIRE(__D_EQ_IN(dd[5], 6.12763259971375e-03, 0.000000000000001));
     REQUIRE(__D_EQ_IN(dd[6], -6.45402453527083e-03, 0.000000000000001));
 
+    dd = iexp::poly::dd(xa, ya);
+    REQUIRE(dd.size() == 7);
+    REQUIRE(__D_EQ_IN(dd[0], 7.30000000000000e-01, 0.000000000000001));
+    REQUIRE(__D_EQ_IN(dd[6], -6.45402453527083e-03, 0.000000000000001));
+
     // dd eval
     for (int i = 0; i < xa.size(); ++i) {
         double ans = iexp::poly::dd_eval(dd.array(), xa.array(), xa[i]);

@@ -76,9 +76,8 @@ IEXP_NS_BEGIN
 
 #define TP6(t) Eigen::internal::traits<t>::MaxColsAtCompileTime
 
-#define ENABLE_TEMPLATE_IF(expr) , typename std::enable_if<expr>::type = 0
-
-#define ENABLE_FUNCTION_IF(expr) , typename std::enable_if<expr>::type * = 0
+#define TYPE_BOOL(expr)                                                        \
+    typename TYPE_CHOOSE(expr, std::true_type, std::false_type)
 
 ////////////////////////////////////////////////////////////
 // type definition

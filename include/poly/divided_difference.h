@@ -44,16 +44,13 @@ namespace poly {
 // ========================================
 
 template <typename T>
-inline void dd_impl(T *dd, const T *xa, const T *ya, const int len)
+inline void dd_impl(T *dd, const T *xa, const T *ya, int len)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline void dd_impl(double *dd,
-                    const double *xa,
-                    const double *ya,
-                    const int len)
+inline void dd_impl(double *dd, const double *xa, const double *ya, int len)
 {
     gsl_poly_dd_init(dd, xa, ya, len);
 }
@@ -62,38 +59,34 @@ template <typename T>
 class dd_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::SizeAtCompileTime,
-                            1,
-                            ColMajor,
-                            T::SizeAtCompileTime,
-                            1>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T, Scalar>::type;
 
     dd_functor(const T &xa, const T &ya)
-        : m_result(xa.size(), 1)
+        : m_result(new Scalar[xa.size()])
     {
         typename type_eval<T>::type m_xa(xa.eval()), m_ya(ya.eval());
-        dd_impl(m_result.data(), m_xa.data(), m_ya.data(), m_xa.size());
+        dd_impl(m_result.get(), m_xa.data(), m_ya.data(), m_xa.size());
     }
 
-    const typename T::Scalar &operator()(Index i) const
+    Scalar operator()(Index i) const
     {
-        return m_result(i);
+        return m_result.get()[i];
     }
 
   private:
-    ArrayType m_result;
+    std::shared_ptr<Scalar> m_result;
 };
 
 template <typename T>
-inline CwiseNullaryOp<dd_functor<T>, typename dd_functor<T>::ArrayType> dd(
-    const ArrayBase<T> &xa, const ArrayBase<T> &ya)
+inline CwiseNullaryOp<dd_functor<T>, typename dd_functor<T>::ResultType> dd(
+    const DenseBase<T> &xa, const DenseBase<T> &ya)
 {
-    eigen_assert(VEC_SAME_SIZE(xa, ya));
+    eigen_assert(xa.size() == ya.size());
 
-    using ArrayType = typename dd_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(xa.derived().size(),
-                                  dd_functor<T>(xa.derived(), ya.derived()));
+    using ResultType = typename dd_functor<T>::ResultType;
+    return ResultType::NullaryExpr(xa.size(),
+                                   dd_functor<T>(xa.derived(), ya.derived()));
 }
 
 // ========================================
@@ -101,7 +94,7 @@ inline CwiseNullaryOp<dd_functor<T>, typename dd_functor<T>::ArrayType> dd(
 // ========================================
 
 template <typename T>
-inline double dd_eval_impl(const T *dd, const T *xa, const int len, const T x)
+inline double dd_eval_impl(const T *dd, const T *xa, int len, T x)
 {
     UNSUPPORTED_TYPE(T);
 }
@@ -109,18 +102,18 @@ inline double dd_eval_impl(const T *dd, const T *xa, const int len, const T x)
 template <>
 inline double dd_eval_impl(const double *dd,
                            const double *xa,
-                           const int len,
-                           const double x)
+                           int len,
+                           double x)
 {
     return gsl_poly_dd_eval(dd, xa, len, x);
 }
 
 template <typename T>
-inline typename T::Scalar dd_eval(const ArrayBase<T> &dd,
-                                  const ArrayBase<T> &xa,
-                                  const typename T::Scalar x)
+inline typename T::Scalar dd_eval(const DenseBase<T> &dd,
+                                  const DenseBase<T> &xa,
+                                  typename T::Scalar x)
 {
-    eigen_assert(VEC_SAME_SIZE(dd, xa));
+    eigen_assert(dd.size() == xa.size());
 
     typename type_eval<T>::type m_dd(dd.eval()), m_xa(xa.eval());
     return dd_eval_impl(m_dd.data(), m_xa.data(), m_dd.size(), x);
@@ -131,18 +124,17 @@ inline typename T::Scalar dd_eval(const ArrayBase<T> &dd,
 // ========================================
 
 template <typename T>
-inline void dd_taylor_impl(
-    T *c, const T xp, const T *dd, const T *xa, const int len, T *w)
+inline void dd_taylor_impl(T *c, T xp, const T *dd, const T *xa, int len, T *w)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
 inline void dd_taylor_impl(double *c,
-                           const double xp,
+                           double xp,
                            const double *dd,
                            const double *xa,
-                           const int len,
+                           int len,
                            double *w)
 {
     gsl_poly_dd_taylor(c, xp, dd, xa, len, w);
@@ -152,47 +144,43 @@ template <typename T>
 class dd_taylor_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::SizeAtCompileTime,
-                            1,
-                            ColMajor,
-                            T::SizeAtCompileTime,
-                            1>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T, Scalar>::type;
 
-    dd_taylor_functor(typename T::Scalar xp, const T &dd, const T &xa)
-        : m_result(dd.size(), 1)
+    dd_taylor_functor(Scalar xp, const T &dd, const T &xa)
+        : m_result(new Scalar[dd.size()])
     {
         typename type_eval<T>::type m_dd(dd.eval()), m_xa(xa.eval());
-        ArrayType m_w(dd.size());
-        dd_taylor_impl(m_result.data(),
+        std::unique_ptr<Scalar> m_w(new Scalar[dd.size()]);
+        dd_taylor_impl(m_result.get(),
                        xp,
                        m_dd.data(),
                        m_xa.data(),
                        m_xa.size(),
-                       m_w.data());
+                       m_w.get());
     }
 
-    const typename T::Scalar &operator()(Index i) const
+    Scalar operator()(Index i) const
     {
-        return m_result(i);
+        return m_result.get()[i];
     }
 
   private:
-    ArrayType m_result;
+    std::shared_ptr<Scalar> m_result;
 };
 
 template <typename T>
 inline CwiseNullaryOp<dd_taylor_functor<T>,
-                      typename dd_taylor_functor<T>::ArrayType>
-dd_taylor(typename T::Scalar xp, const ArrayBase<T> &dd, const ArrayBase<T> &xa)
+                      typename dd_taylor_functor<T>::ResultType>
+dd_taylor(typename T::Scalar xp, const DenseBase<T> &dd, const DenseBase<T> &xa)
 {
-    eigen_assert(VEC_SAME_SIZE(dd, xa));
+    eigen_assert(dd.size() == xa.size());
 
-    using ArrayType = typename dd_taylor_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(xa.derived().size(),
-                                  dd_taylor_functor<T>(xp,
-                                                       dd.derived(),
-                                                       xa.derived()));
+    using ResultType = typename dd_taylor_functor<T>::ResultType;
+    return ResultType::NullaryExpr(xa.size(),
+                                   dd_taylor_functor<T>(xp,
+                                                        dd.derived(),
+                                                        xa.derived()));
 }
 
 // ========================================
@@ -201,7 +189,7 @@ dd_taylor(typename T::Scalar xp, const ArrayBase<T> &dd, const ArrayBase<T> &xa)
 
 template <typename T>
 inline void dd_hermit_impl(
-    T *dd, T *za, const T *xa, const T *ya, const T *dya, const int len)
+    T *dd, T *za, const T *xa, const T *ya, const T *dya, int len)
 {
     UNSUPPORTED_TYPE(T);
 }
@@ -212,7 +200,7 @@ inline void dd_hermit_impl(double *dd,
                            const double *xa,
                            const double *ya,
                            const double *dya,
-                           const int len)
+                           int len)
 {
     gsl_poly_dd_hermite_init(dd, za, xa, ya, dya, len);
 }
@@ -221,51 +209,47 @@ template <typename T>
 class dd_hermit_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::SizeAtCompileTime,
-                            1,
-                            ColMajor,
-                            T::MaxSizeAtCompileTime,
-                            1>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T, Scalar>::type;
 
     dd_hermit_functor(const T &xa, const T &ya, const T &dya)
-        : m_result(xa.size() << 1, 1)
+        : m_result(new Scalar[xa.size() << 1])
     {
-        ArrayType m_za(xa.size() << 1);
+        std::unique_ptr<Scalar> m_za(new Scalar[xa.size() << 1]);
         typename type_eval<T>::type m_xa(xa.eval()), m_ya(ya.eval()),
             m_dya(dya.eval());
-        dd_hermit_impl(m_result.data(),
-                       m_za.data(),
+        dd_hermit_impl(m_result.get(),
+                       m_za.get(),
                        m_xa.data(),
                        m_ya.data(),
                        m_dya.data(),
                        xa.size());
     }
 
-    const typename T::Scalar &operator()(Index i) const
+    Scalar operator()(Index i) const
     {
-        return m_result(i);
+        return m_result.get()[i];
     }
 
   private:
-    ArrayType m_result;
+    std::shared_ptr<Scalar> m_result;
 };
 
 template <typename T>
 inline CwiseNullaryOp<dd_hermit_functor<T>,
-                      typename dd_hermit_functor<T>::ArrayType>
-dd_hermit(const ArrayBase<T> &xa,
-          const ArrayBase<T> &ya,
-          const ArrayBase<T> &dya)
+                      typename dd_hermit_functor<T>::ResultType>
+dd_hermit(const DenseBase<T> &xa,
+          const DenseBase<T> &ya,
+          const DenseBase<T> &dya)
 {
-    eigen_assert(VEC_SAME_SIZE(xa, ya));
-    eigen_assert(VEC_SAME_SIZE(xa, dya));
+    eigen_assert(xa.size() == ya.size());
+    eigen_assert(xa.size() == dya.size());
 
-    using ArrayType = typename dd_hermit_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(xa.derived().size() << 1,
-                                  dd_hermit_functor<T>(xa.derived(),
-                                                       ya.derived(),
-                                                       dya.derived()));
+    using ResultType = typename dd_hermit_functor<T>::ResultType;
+    return ResultType::NullaryExpr(xa.size() << 1,
+                                   dd_hermit_functor<T>(xa.derived(),
+                                                        ya.derived(),
+                                                        dya.derived()));
 }
 
 ////////////////////////////////////////////////////////////

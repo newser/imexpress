@@ -44,6 +44,35 @@ IEXP_NS_BEGIN
     name(const name &) = delete;                                               \
     name &operator=(const name &) = delete;
 
+#define ASSIGN_IJ_ROW(dst, src, src_expr)                                      \
+    do {                                                                       \
+        int __idx = 0;                                                         \
+        for (int i = 0; i < (src).rows(); ++i) {                               \
+            for (int j = 0; j < (src).cols(); ++j) {                           \
+                (dst)[__idx++] = (src_expr);                                   \
+            }                                                                  \
+        }                                                                      \
+    } while (0)
+
+#define ASSIGN_IJ_COL(dst, src, src_expr)                                      \
+    do {                                                                       \
+        int __idx = 0;                                                         \
+        for (int j = 0; j < (src).cols(); ++j) {                               \
+            for (int i = 0; i < (src).rows(); ++i) {                           \
+                (dst)[__idx++] = (src_expr);                                   \
+            }                                                                  \
+        }                                                                      \
+    } while (0)
+
+#define ASSIGN_IJ(row_major, dst, src, src_expr)                               \
+    do {                                                                       \
+        if ((row_major)) {                                                     \
+            ASSIGN_IJ_ROW(dst, src, src_expr);                                 \
+        } else {                                                               \
+            ASSIGN_IJ_COL(dst, src, src_expr);                                 \
+        }                                                                      \
+    } while (0)
+
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
