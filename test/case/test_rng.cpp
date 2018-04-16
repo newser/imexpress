@@ -51,7 +51,7 @@ using namespace iexp;
 
 TEST_CASE("test_rng")
 {
-    rand::rng r(rand::BOROSH13, 1);
+    rand::rng r(rand::rng::type::BOROSH13, 1);
     REQUIRE(strcmp("borosh13", r.name()) == 0);
 #if 0
     cout << "ulong: " << r.uniform_ulong() << endl;
@@ -60,7 +60,7 @@ TEST_CASE("test_rng")
     cout << "pos double: " << r.uniform_pos_double() << endl;
 #endif
 
-    rand::rng r2(rand::ZUF, 1);
+    rand::rng r2(rand::rng::type::ZUF, 1);
     REQUIRE(strcmp("zuf", r2.name()) == 0);
 #if 0
     cout << "ulong: " << r2.uniform_ulong() << endl;
@@ -89,11 +89,12 @@ TEST_CASE("test_rand")
 
     v2 = rand::rand(v) + rand::rand(v);
 
-    v2 = rand::rand(v, 999) + rand::rand(v, 12345, rand::ZUF);
+    v2 = rand::rand(v, 999) + rand::rand(v, 12345, rand::rng::type::ZUF);
 
     iexp::Matrix3i w(3, 3), w2(3, 3);
     rand::rng r;
-    w2 = rand::rand(w, r) + rand::rand(w, 12345, rand::ZUF) + rand::rand(w, r);
+    w2 = rand::rand(w, r) + rand::rand(w, 12345, rand::rng::type::ZUF) +
+         rand::rand(w, r);
     // cout << w2;
 
     iexp::Matrix3i &wr = rand::rand(w);
@@ -104,22 +105,22 @@ TEST_CASE("test_qrng")
 {
     double x[10];
 
-    rand::qrng r(rand::NIEDERREITER_2, 2);
+    rand::qrng r(rand::qrng::type::NIEDERREITER_2, 2);
     REQUIRE(strcmp("niederreiter-base-2", r.name()) == 0);
     r.next(x);
 
-    rand::qrng r2(rand::REVERSEHALTON, 3);
+    rand::qrng r2(rand::qrng::type::REVERSEHALTON, 3);
     REQUIRE(strcmp("reversehalton", r2.name()) == 0);
     r.next(x);
 
-    rand::qrng r3(rand::SOBOL, 10);
+    rand::qrng r3(rand::qrng::type::SOBOL, 10);
     REQUIRE(strcmp("sobol", r3.name()) == 0);
 
     rand::qrng r4(std::move(r3));
     rand::qrng r5 = std::move(r4);
-    r5 = rand::qrng(rand::SOBOL, 10);
+    r5 = rand::qrng(rand::qrng::type::SOBOL, 10);
 
-    rand::qrng r6(rand::SOBOL, 10);
+    rand::qrng r6(rand::qrng::type::SOBOL, 10);
     r6 = r5;
 }
 
@@ -127,27 +128,30 @@ TEST_CASE("test_qrand")
 {
     iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::qrand(v, rand::SOBOL);
+    iexp::VectorXd &vr = rand::qrand(v, rand::qrng::type::SOBOL);
     REQUIRE(&vr == &v);
 
-    v2 = rand::qrand(v, rand::SOBOL) + rand::qrand(v, rand::HALTON);
+    v2 = rand::qrand(v, rand::qrng::type::SOBOL) +
+         rand::qrand(v, rand::qrng::type::HALTON);
 
     iexp::MatrixXd w(3, 4), w2(3, 4);
     w.fill(9.9999);
-    w2 = rand::qrand(w, rand::REVERSEHALTON);
-    w2 = rand::qrand(w, rand::REVERSEHALTON) + rand::qrand(w, rand::HALTON) +
-         rand::qrand(w, rand::SOBOL);
+    w2 = rand::qrand(w, rand::qrng::type::REVERSEHALTON);
+    w2 = rand::qrand(w, rand::qrng::type::REVERSEHALTON) +
+         rand::qrand(w, rand::qrng::type::HALTON) +
+         rand::qrand(w, rand::qrng::type::SOBOL);
 
-    iexp::MatrixXd &wr = rand::qrand(w, rand::HALTON);
+    iexp::MatrixXd &wr = rand::qrand(w, rand::qrng::type::HALTON);
     REQUIRE(&wr == &w);
 
     iexp::MatrixXcd cw(3, 4), cw2(3, 4);
     cw.fill(9.9999);
-    cw2 = rand::qrand(cw, rand::REVERSEHALTON);
-    cw2 = rand::qrand(cw, rand::REVERSEHALTON) + rand::qrand(cw, rand::HALTON) +
-          rand::qrand(cw, rand::SOBOL);
+    cw2 = rand::qrand(cw, rand::qrng::type::REVERSEHALTON);
+    cw2 = rand::qrand(cw, rand::qrng::type::REVERSEHALTON) +
+          rand::qrand(cw, rand::qrng::type::HALTON) +
+          rand::qrand(cw, rand::qrng::type::SOBOL);
 
-    iexp::MatrixXcd &cwr = rand::qrand(cw, rand::HALTON);
+    iexp::MatrixXcd &cwr = rand::qrand(cw, rand::qrng::type::HALTON);
     REQUIRE(&cwr == &cw);
 }
 
@@ -159,13 +163,13 @@ TEST_CASE("test_normal_rand")
     REQUIRE(&vr == &v);
 
     v2 = rand::gauss_rand(v, 2.0) +
-         rand::gauss_rand(v, 3.0, 1234, rand::BOROSH13);
+         rand::gauss_rand(v, 3.0, 1234, rand::rng::type::BOROSH13);
 
     iexp::MatrixXd w(3, 4), w2(3, 4);
     w.fill(9.9999);
     w2 = rand::gauss_rand(w);
     w2 = rand::gauss_rand(w) + rand::gauss_rand(w, 2.0) +
-         rand::gauss_rand(w, 3.0, 1234, rand::BOROSH13);
+         rand::gauss_rand(w, 3.0, 1234, rand::rng::type::BOROSH13);
 
     iexp::MatrixXd &wr = rand::gauss_rand(w);
     REQUIRE(&wr == &w);
@@ -174,10 +178,11 @@ TEST_CASE("test_normal_rand")
     cw.fill(9.9999);
     cw2 = rand::gauss_rand(cw, 2.0);
     cw2 = rand::gauss_rand(cw, 2.0) +
-          rand::gauss_rand(cw, 3.0, 1234, rand::BOROSH13) +
-          rand::gauss_rand(cw, 3.0, 1234, rand::BOROSH13);
+          rand::gauss_rand(cw, 3.0, 1234, rand::rng::type::BOROSH13) +
+          rand::gauss_rand(cw, 3.0, 1234, rand::rng::type::BOROSH13);
 
-    iexp::MatrixXd &cwr = rand::gauss_rand(cw, 3.0, 1234, rand::BOROSH13);
+    iexp::MatrixXd &cwr =
+        rand::gauss_rand(cw, 3.0, 1234, rand::rng::type::BOROSH13);
     REQUIRE(&cwr == &cw);
 
 #if 0 // #ifdef IEXP_MGL2
@@ -202,13 +207,13 @@ TEST_CASE("test_normal_tail_rand")
     REQUIRE(&vr == &v);
 
     v2 = rand::gausst_rand(v, 35, 2.0) +
-         rand::gausst_rand(v, 23, 3.0, 1234, rand::BOROSH13);
+         rand::gausst_rand(v, 23, 3.0, 1234, rand::rng::type::BOROSH13);
 
     iexp::MatrixXd w(3, 4), w2(3, 4);
     w.fill(9.9999);
     w2 = rand::gausst_rand(w, 1);
     w2 = rand::gausst_rand(w, 2) + rand::gausst_rand(w, 3, 2.0) +
-         rand::gausst_rand(w, 4, 3.0, 1234, rand::BOROSH13);
+         rand::gausst_rand(w, 4, 3.0, 1234, rand::rng::type::BOROSH13);
 
     iexp::MatrixXd &wr = rand::gausst_rand(w, 5);
     REQUIRE(&wr == &w);
@@ -217,10 +222,11 @@ TEST_CASE("test_normal_tail_rand")
     cw.fill(9.9999);
     cw2 = rand::gausst_rand(cw, 6, 2.0);
     cw2 = rand::gausst_rand(cw, 7, 2.0) +
-          rand::gausst_rand(cw, 8, 3.0, 1234, rand::BOROSH13) +
-          rand::gausst_rand(cw, 9, 3.0, 1234, rand::BOROSH13);
+          rand::gausst_rand(cw, 8, 3.0, 1234, rand::rng::type::BOROSH13) +
+          rand::gausst_rand(cw, 9, 3.0, 1234, rand::rng::type::BOROSH13);
 
-    iexp::MatrixXd &cwr = rand::gausst_rand(cw, 10, 3.0, 1234, rand::BOROSH13);
+    iexp::MatrixXd &cwr =
+        rand::gausst_rand(cw, 10, 3.0, 1234, rand::rng::type::BOROSH13);
     REQUIRE(&cwr == &cw);
 
 #if 0 // #ifdef IEXP_MGL2
@@ -239,36 +245,71 @@ TEST_CASE("test_normal_tail_rand")
 
 TEST_CASE("test_bi_gauss")
 {
-    iexp::VectorXcd v(10), v2(10);
+    {
+        iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXcd &vr = rand::bgauss_rand(v, 1.0, 1.0, 0);
-    REQUIRE(&vr == &v);
+        iexp::VectorXd &vr = rand::bgauss::fill(v, 1.0, 1.0, 0);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::bgauss_rand(v, 1.0, 1.0, 0) + rand::bgauss_rand(v, 1.0, 1.0, 0);
+        v2 = rand::bgauss::fill(v, 1.0, 1.0, 0) +
+             rand::bgauss::fill(v, 1.0, 1.0, 0);
 
-    iexp::MatrixXcd m(10, 8), m2(10, 8);
+        iexp::MatrixXd m(10, 8), m2(10, 8);
 
-    iexp::MatrixXcd &mr = rand::bgauss_rand(m, 1.0, 1.0, 0);
-    REQUIRE(&mr == &m);
+        iexp::MatrixXd &mr = rand::bgauss::fill(m, 1.0, 1.0, 0);
+        REQUIRE(&mr == &m);
 
-    m2 = rand::bgauss_rand(m, 1.0, 2.0, 0) + rand::bgauss_rand(m, 3.0, 4.0, 0);
+        m2 = rand::bgauss::fill(m, 1.0, 2.0, 0) +
+             rand::bgauss::fill(m, 3.0, 4.0, 0);
+
+        rand::bgauss::fill(v, v2, 1.0, 1.0, 0);
 
 #if 0 // #ifdef IEXP_MGL2
-    iexp::VectorXcd vv(100);
-    rand::bgauss_rand(vv, 1.0, 1.0, 0.9);
-    iexp::VectorXd vv1 = vv.real();
-    iexp::VectorXd vv2 = vv.imag();
+        iexp::VectorXd vv1(100), vv2(100);
+        rand::bgauss::fill(vv1, vv2, 1.0, 1.0, 0.9);
 
-    mglData x(100), y(100);
-    x.Link(vv1.data(), vv1.size());
-    y.Link(vv2.data(), vv2.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(-3, 3, -3, 3);
-    gr.Axis();
-    gr.Plot(x, y, "+");
-    gr.WriteFrame("bi_norm_rand.png");
+        mglData x(100), y(100);
+        x.Link(vv1.data(), vv1.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(-3, 3, -3, 3);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("bi_norm_rand.png");
 #endif
+    }
+
+    {
+        VectorXd vv = VectorXd::LinSpaced(10, -2, 2);
+        double z[100];
+
+        rand::bgauss::dist bg(1, 1, 0.9);
+        for (int i = 0; i < vv.size(); ++i) {
+            for (int j = 0; j < vv.size(); ++j) {
+                z[i * vv.size() + j] = bg.pdf(vv[i], vv[j]);
+            }
+        }
+
+#if 0 // #ifdef IEXP_MGL2
+        mglData zz(100);
+        zz.Create(10, 10);
+        for (int i = 0; i < 10; ++i) {
+            for (int j = 0; j < 10; ++j) {
+                zz.a[i * 10 + j] = bg.pdf(vv[i], vv[j]);
+            }
+        }
+
+        mglGraph gr;
+        // gr.SetOrigin(0, 0);
+        // gr.SetRanges(-2, 2, -2, 2, -2, 2);
+        gr.Light(true);
+        gr.Rotate(50, 60);
+        gr.Box();
+        gr.Surf(zz);
+        gr.WriteFrame("bgauss_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_mul_normal")
@@ -399,35 +440,65 @@ TEST_CASE("test_expow_rand")
 
 TEST_CASE("test_cauchy_rand")
 {
-    iexp::VectorXd v(10), v2(10);
+    {
+        iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::cauchy_rand(v, 1.0);
-    REQUIRE(&vr == &v);
+        iexp::VectorXd &vr = rand::cauchy::fill(v, 1.0);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::cauchy_rand(v, 2.0) + rand::cauchy_rand(v, 3.0);
+        v2 = rand::cauchy::fill(v, 2.0) + rand::cauchy::fill(v, 3.0);
 
-    iexp::MatrixXd w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::cauchy_rand(w, 2.0);
-    w2 = rand::cauchy_rand(w, 3.3) + rand::cauchy_rand(w, 4.4) +
-         rand::cauchy_rand(w, 5.5);
+        iexp::MatrixXd w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::cauchy::fill(w, 2.0);
+        w2 = rand::cauchy::fill(w, 3.3) + rand::cauchy::fill(w, 4.4) +
+             rand::cauchy::fill(w, 5.5);
 
-    iexp::MatrixXd &wr = rand::cauchy_rand(w, 99);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXd &wr = rand::cauchy::fill(w, 99);
+        REQUIRE(&wr == &w);
 
-#if 0 // #ifdef IEXP_MGL2
-    VectorXd v1(100);
-    rand::cauchy_rand(v1, 1.0);
+#if 1 // #ifdef IEXP_MGL2
+        VectorXd v1(100);
+        rand::cauchy::fill(v1, 1.0);
 
-    mglData y(100);
-    y.Link(v1.data(), v1.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 100, -5, 5);
-    gr.Axis();
-    gr.Plot(y, "+");
-    gr.WriteFrame("cauchy_rand.png");
+        mglData y(100);
+        y.Link(v1.data(), v1.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 100, -5, 5);
+        gr.Axis();
+        gr.Plot(y, "+");
+        gr.WriteFrame("cauchy_rand.png");
 #endif
+    }
+
+    {
+        VectorXd v = VectorXd::LinSpaced(10, 0, 3);
+        VectorXd v2 = rand::cauchy::pdf(v.array(), 2.0);
+
+        Matrix2Xd m = Matrix2Xd::Random(2, 10);
+        Matrix2Xd m2 = rand::cauchy::pdf(m.array(), 2.0);
+
+        // test compile
+        v2 = rand::cauchy::pdf(v.array(), 2.0) +
+             rand::cauchy::pdf(v.array(), 2.0);
+        m2 = rand::cauchy::pdf(m.array() + m.array(), 2.0);
+
+#if 1 // #ifdef Icauchy_MGL2
+        VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
+        VectorXd vv2 = rand::cauchy::pdf(vv.array(), 1.0);
+
+        mglData x(100), y(100);
+        x.Link(vv.data(), vv.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(-5, 5, 0, 1);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("cauchy_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_rayleigh_rand")
@@ -660,37 +731,66 @@ TEST_CASE("test_gamma_rand")
 #endif
 }
 
-TEST_CASE("test_beta_rand")
+TEST_CASE("test_beta")
 {
-    iexp::VectorXd v(10), v2(10);
+    {
+        iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::beta_rand(v, 1, 2);
-    REQUIRE(&vr == &v);
+        iexp::VectorXd &vr = rand::beta::fill(v, 1, 2);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::beta_rand(v, 2, 3) + rand::beta_rand(v, 2, 4);
+        v2 = rand::beta::fill(v, 2, 3) + rand::beta::fill(v, 2, 4);
 
-    iexp::MatrixXd w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::beta_rand(w, 2, 3);
-    w2 = rand::beta_rand(w, 2, 3) + rand::beta_rand(w, 2, 3) +
-         rand::flat_rand(w, 2, 3);
+        iexp::MatrixXd w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::beta::fill(w, 2, 3);
+        w2 = rand::beta::fill(w, 2, 3) + rand::beta::fill(w, 2, 3) +
+             rand::flat_rand(w, 2, 3);
 
-    iexp::MatrixXd &wr = rand::beta_rand(w, 2, 3);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXd &wr = rand::beta::fill(w, 2, 3);
+        REQUIRE(&wr == &w);
 
 #if 0 // #ifdef IEXP_MGL2
-    VectorXd v1(100);
-    rand::beta_rand(v1, 2, 2);
+        VectorXd v1(100);
+        rand::beta::fill(v1, 2, 2);
 
-    mglData y(100);
-    y.Link(v1.data(), v1.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 100, 0, 1);
-    gr.Axis();
-    gr.Plot(y, "+");
-    gr.WriteFrame("beta_rand.png");
+        mglData y(100);
+        y.Link(v1.data(), v1.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 100, 0, 1);
+        gr.Axis();
+        gr.Plot(y, "+");
+        gr.WriteFrame("beta_fill.png");
 #endif
+    }
+
+    {
+        VectorXd v = VectorXd::LinSpaced(10, 0, 3);
+        VectorXd v2 = rand::beta::pdf(v.array(), 2, 3);
+
+        Matrix2Xd m = Matrix2Xd::Random(2, 10);
+        Matrix2Xd m2 = rand::beta::pdf(m.array(), 2, 3);
+
+        // test compile
+        v2 = rand::beta::pdf(v, 2, 3) + rand::beta::pdf(v, 2, 3);
+        m2 = rand::beta::pdf(m.array() + m.array(), 2, 3);
+
+#if 1 // #ifdef IEXP_MGL2
+        VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
+        VectorXd vv2 = rand::beta::pdf(vv.array(), 2, 2);
+
+        mglData x(100), y(100);
+        x.Link(vv.data(), vv.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 5, 0, 2);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("beta_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_lgnorm_rand")
@@ -728,35 +828,64 @@ TEST_CASE("test_lgnorm_rand")
 
 TEST_CASE("test_chisq_rand")
 {
-    iexp::VectorXd v(10), v2(10);
+    {
+        iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::chisq_rand(v, 1.0);
-    REQUIRE(&vr == &v);
+        iexp::VectorXd &vr = rand::chisq::fill(v, 1.0);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::chisq_rand(v, 2.0) + rand::chisq_rand(v, 3.0);
+        v2 = rand::chisq::fill(v, 2.0) + rand::chisq::fill(v, 3.0);
 
-    iexp::MatrixXd w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::chisq_rand(w, 2.0);
-    w2 = rand::chisq_rand(w, 3.3) + rand::chisq_rand(w, 4.4) +
-         rand::chisq_rand(w, 5.5);
+        iexp::MatrixXd w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::chisq::fill(w, 2.0);
+        w2 = rand::chisq::fill(w, 3.3) + rand::chisq::fill(w, 4.4) +
+             rand::chisq::fill(w, 5.5);
 
-    iexp::MatrixXd &wr = rand::chisq_rand(w, 99);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXd &wr = rand::chisq::fill(w, 99);
+        REQUIRE(&wr == &w);
 
-#if 0 // #ifdef Ichisq_MGL2
-    VectorXd v1(100);
-    rand::chisq_rand(v1, 1.0);
-    
-    mglData y(100);
-    y.Link(v1.data(), v1.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 100, -1, 10);
-    gr.Axis();
-    gr.Plot(y, "+");
-    gr.WriteFrame("chisq_rand.png");
+#if 1 // #ifdef Ichisq_MGL2
+        VectorXd v1(100);
+        rand::chisq::fill(v1, 1.0);
+
+        mglData y(100);
+        y.Link(v1.data(), v1.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 100, -1, 10);
+        gr.Axis();
+        gr.Plot(y, "+");
+        gr.WriteFrame("chisq_rand.png");
 #endif
+    }
+
+    {
+        VectorXd v = VectorXd::LinSpaced(10, 0, 3);
+        VectorXd v2 = rand::chisq::pdf(v.array(), 1);
+
+        Matrix2Xd m = Matrix2Xd::Random(2, 10);
+        Matrix2Xd m2 = rand::chisq::pdf(m.array(), 1);
+
+        // test compile
+        v2 = rand::chisq::pdf(v.array(), 1) + rand::chisq::pdf(v.array(), 1);
+        m2 = rand::chisq::pdf(m.array() + m.array(), 1);
+
+#if 1 // #ifdef Icauchy_MGL2
+        VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
+        VectorXd vv2 = rand::chisq::pdf(vv.array(), 1);
+
+        mglData x(100), y(100);
+        x.Link(vv.data(), vv.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 5, 0, 1);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("chisq_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_f_rand")
@@ -1026,21 +1155,21 @@ TEST_CASE("test_gbl2_rand")
 
 TEST_CASE("test_drch_rand")
 {
-    double alpha[2] = {2.5, 5.5};
-    iexp::VectorXcd v(10), v2(10);
+    double alpha[6] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.5};
+    iexp::VectorXd v(12), v2(12);
 
-    iexp::VectorXcd &vr = rand::drch_rand(v, 2, alpha);
+    iexp::VectorXd &vr = rand::drch_rand(v, 6, alpha);
     REQUIRE(&vr == &v);
 
-    v2 = rand::drch_rand(v, 2, alpha) + rand::drch_rand(v, 2, alpha);
+    v2 = rand::drch_rand(v, 6, alpha) + rand::drch_rand(v, 6, alpha);
 
-    iexp::MatrixXcd w(3, 4), w2(3, 4);
+    iexp::MatrixXd w(3, 4), w2(3, 4);
     w.fill(9.9999);
-    w2 = rand::drch_rand(w, 2, alpha);
-    w2 = rand::drch_rand(w, 2, alpha) + rand::drch_rand(w, 2, alpha) +
-         rand::drch_rand(w, 2, alpha);
+    w2 = rand::drch_rand(w, 6, alpha);
+    w2 = rand::drch_rand(w, 6, alpha) + rand::drch_rand(w, 6, alpha) +
+         rand::drch_rand(w, 6, alpha);
 
-    iexp::MatrixXcd &wr = rand::drch_rand(w, 2, alpha);
+    iexp::MatrixXd &wr = rand::drch_rand(w, 6, alpha);
     REQUIRE(&wr == &w);
 
 #if 0 // #ifdef IEXP_MGL2
@@ -1063,37 +1192,54 @@ TEST_CASE("test_drch_rand")
 
 TEST_CASE("test_discrete_rand")
 {
-    const double p[4] = {0.1, 0.2, 0.3, 0.4};
-    iexp::VectorXi v(10), v2(10);
+    {
+        const double p[4] = {0.1, 0.2, 0.3, 0.4};
+        iexp::VectorXi v(10), v2(10);
 
-    iexp::VectorXi &vr = rand::discrete_rand(v, 4, p);
-    REQUIRE(&vr == &v);
+        iexp::VectorXi &vr = rand::discrete::fill(v, 4, p);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::discrete_rand(v, 4, p) + rand::discrete_rand(v, 4, p);
+        v2 = rand::discrete::fill(v, 4, p) + rand::discrete::fill(v, 4, p);
 
-    iexp::MatrixXi w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::discrete_rand(w, 4, p);
-    w2 = rand::discrete_rand(w, 4, p) + rand::discrete_rand(w, 4, p) +
-         rand::discrete_rand(w, 4, p);
+        iexp::MatrixXi w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::discrete::fill(w, 4, p);
+        w2 = rand::discrete::fill(w, 4, p) + rand::discrete::fill(w, 4, p) +
+             rand::discrete::fill(w, 4, p);
 
-    iexp::MatrixXi &wr = rand::discrete_rand(w, 4, p);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXi &wr = rand::discrete::fill(w, 4, p);
+        REQUIRE(&wr == &w);
 
-#if 0 // #ifdef IEXP_MGL2
-    VectorXi vi(100);
-    rand::discrete_rand(vi, 4, p);
-    VectorXd v1 = vi.cast<double>();
-    
-    mglData y(100);
-    y.Link(v1.data(), v1.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 100, 0, 5);
-    gr.Axis();
-    gr.Plot(y, "+");
-    gr.WriteFrame("discrete_rand.png");
+#if 1 // #ifdef IEXP_MGL2
+        VectorXi vi(100);
+        rand::discrete::fill(vi, 4, p);
+        VectorXd v1 = vi.cast<double>();
+
+        mglData y(100);
+        y.Link(v1.data(), v1.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 100, 0, 5);
+        gr.Axis();
+        gr.Plot(y, "+");
+        gr.WriteFrame("discrete_rand.png");
 #endif
+    }
+
+    {
+        const double p[4] = {0.1, 0.2, 0.3, 0.4};
+
+        VectorXi v = VectorXi::LinSpaced(10, 0, 3);
+        VectorXd v2 = rand::discrete::pdf(v.array(), 4, p);
+
+        Matrix2Xi m = Matrix2Xi::Random(2, 10);
+        Matrix2Xd m2 = rand::discrete::pdf(m.array(), 4, p);
+
+        // test compile
+        v2 = rand::discrete::pdf(v.array(), 4, p) +
+             rand::discrete::pdf(v.array(), 4, p);
+        m2 = rand::discrete::pdf(m.array() + m.array(), 4, p);
+    }
 }
 
 TEST_CASE("test_poiss_rand")
@@ -1132,36 +1278,66 @@ TEST_CASE("test_poiss_rand")
 
 TEST_CASE("test_bnom_rand")
 {
-    iexp::VectorXi v(10), v2(10);
+    {
+        iexp::VectorXi v(10), v2(10);
 
-    iexp::VectorXi &vr = rand::bnom_rand(v, 0.5, 9);
-    REQUIRE(&vr == &v);
+        iexp::VectorXi &vr = rand::bnom::fill(v, 0.5, 9);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::bnom_rand(v, 0.5, 9) + rand::bnom_rand(v, 0.5, 9);
+        v2 = rand::bnom::fill(v, 0.5, 9) + rand::bnom::fill(v, 0.5, 9);
 
-    iexp::MatrixXi w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::bnom_rand(w, 0.5, 9);
-    w2 = rand::bnom_rand(w, 0.5, 9) + rand::bnom_rand(w, 0.5, 9) +
-         rand::bnom_rand(w, 0.5, 9);
+        iexp::MatrixXi w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::bnom::fill(w, 0.5, 9);
+        w2 = rand::bnom::fill(w, 0.5, 9) + rand::bnom::fill(w, 0.5, 9) +
+             rand::bnom::fill(w, 0.5, 9);
 
-    iexp::MatrixXi &wr = rand::bnom_rand(w, 0.5, 9);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXi &wr = rand::bnom::fill(w, 0.5, 9);
+        REQUIRE(&wr == &w);
 
-#if 0 // #ifdef IEXP_MGL2
-    VectorXi vi(100);
-    rand::bnom_rand(vi, 0.5, 9);
-    VectorXd v1 = vi.cast<double>();
-    
-    mglData y(100);
-    y.Link(v1.data(), v1.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 100, 0, 10);
-    gr.Axis();
-    gr.Plot(y, "+");
-    gr.WriteFrame("bnom_rand.png");
+#if 1 // #ifdef IEXP_MGL2
+        VectorXi vi(100);
+        rand::bnom::fill(vi, 0.5, 9);
+        VectorXd v1 = vi.cast<double>();
+
+        mglData y(100);
+        y.Link(v1.data(), v1.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 100, 0, 10);
+        gr.Axis();
+        gr.Plot(y, "+");
+        gr.WriteFrame("bnom_rand.png");
 #endif
+    }
+
+    {
+        VectorXi v = VectorXi::LinSpaced(10, 0, 3);
+        VectorXd v2 = rand::bnom::pdf(v.array(), 0.5, 2);
+
+        Matrix2Xi m = Matrix2Xi::Random(2, 10);
+        Matrix2Xd m2 = rand::bnom::pdf(m.array(), 0.5, 2);
+
+        // test compile
+        v2 = rand::bnom::pdf(v.array(), 0.5, 2) +
+             rand::bnom::pdf(v.array(), 0.5, 2);
+        m2 = rand::bnom::pdf(m.array() + m.array(), 0.5, 2);
+
+#if 1 // #ifdef IEXP_MGL2
+        VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
+        VectorXd vv2 = rand::bnom::pdf(vv.cast<unsigned int>().array(), 0.5, 9);
+
+        mglData x(100), y(100);
+        x.Link(vv.data(), vv.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 10, 0, 0.5);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("bnom_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_nbnom_rand")
@@ -1386,6 +1562,9 @@ TEST_CASE("test_choose")
     v = VectorXi::LinSpaced(10, 0, 9);
     iexp::VectorXi vr = rand::choose(v.array(), 5).matrix();
     REQUIRE(vr.size() == 5);
+
+    iexp::RowVectorXi vr2 = rand::choose<true>(v, 9).matrix();
+    REQUIRE(vr2.size() == 9);
 
     v2 = rand::choose(rand::shuffle(v).array() + rand::shuffle(v).array(), 7);
     REQUIRE(v2.size() == 7);

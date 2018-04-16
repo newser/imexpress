@@ -41,55 +41,62 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-template <typename T>
+template <bool row_form, typename T>
 class choose_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T,
+                                             Scalar,
+                                             row_form ? 1 : Dynamic,
+                                             row_form ? Dynamic : 1>::type;
 
-    choose_functor(const T &x, size_t k, unsigned long seed, rng_type type)
-        : m_result(k)
+    choose_functor(const T &x, size_t k, rng &r)
+        : m_result(new Scalar[k])
     {
-        rng r(type, seed);
         typename type_eval<T>::type m_x(x.eval());
         gsl_ran_choose(r.gsl(),
-                       m_result.data(),
+                       m_result.get(),
                        k,
-                       m_x.data(),
+                       const_cast<Scalar *>(m_x.data()),
                        m_x.size(),
                        sizeof(typename T::Scalar));
     }
 
-    const typename T::Scalar &operator()(Index i) const
+    Scalar operator()(Index i) const
     {
-        return m_result[i];
+        return m_result.get()[i];
     }
 
   private:
-    ArrayType m_result;
+    std::shared_ptr<Scalar> m_result;
 };
 
-template <typename T>
-inline CwiseNullaryOp<choose_functor<T>, typename choose_functor<T>::ArrayType>
-choose(const ArrayBase<T> &x,
+template <bool row_form = false, typename T = void>
+inline CwiseNullaryOp<choose_functor<row_form, T>,
+                      typename choose_functor<row_form, T>::ResultType>
+choose(const DenseBase<T> &x,
        size_t k,
        unsigned long seed = 0,
-       rng_type type = DEFAULT_RNG)
+       rng::type type = DEFAULT_RNG_TYPE)
 {
-    eigen_assert(IS_VEC(x));
+    rng r(type, seed);
+    return choose<row_form, T>(x, k, r);
+}
+
+template <bool row_form = false, typename T = void>
+inline CwiseNullaryOp<choose_functor<row_form, T>,
+                      typename choose_functor<row_form, T>::ResultType>
+choose(const DenseBase<T> &x, size_t k, rng &r)
+{
     eigen_assert(k <= x.size());
 
-    using ArrayType = typename choose_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(k,
-                                  choose_functor<T>(x.derived(),
-                                                    k,
-                                                    seed,
-                                                    type));
+    using ResultType = typename choose_functor<row_form, T>::ResultType;
+    return ResultType::NullaryExpr(row_form ? 1 : k,
+                                   row_form ? k : 1,
+                                   choose_functor<row_form, T>(x.derived(),
+                                                               k,
+                                                               r));
 }
 
 ////////////////////////////////////////////////////////////

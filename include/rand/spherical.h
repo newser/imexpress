@@ -57,7 +57,7 @@ template <bool trig = false>
 class sph2_rng
 {
   public:
-    sph2_rng(rng_type type = DEFAULT_RNG, unsigned long seed = 0)
+    sph2_rng(rng::type type = DEFAULT_RNG_TYPE, unsigned long seed = 0)
         : m_rng(type, seed)
     {
     }
@@ -79,7 +79,8 @@ class sph2_rng
 template <bool trig = false, typename T = void>
 inline auto sph2_rand(DenseBase<T> &x,
                       unsigned long seed = 0,
-                      rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+                      rng::type type = DEFAULT_RNG_TYPE)
+    -> decltype(x.derived())
 {
     static_assert(is_complex<typename T::Scalar>::value,
                   "scalar can only be complex");
@@ -97,7 +98,7 @@ inline auto sph2_rand(DenseBase<T> &x,
 class sph3_rng
 {
   public:
-    sph3_rng(rng_type type = DEFAULT_RNG, unsigned long seed = 0)
+    sph3_rng(rng::type type = DEFAULT_RNG_TYPE, unsigned long seed = 0)
         : m_rng(type, seed)
     {
     }
@@ -119,7 +120,9 @@ class sph3_rng
 class sphn_rng
 {
   public:
-    sphn_rng(size_t n, rng_type type = DEFAULT_RNG, unsigned long seed = 0)
+    sphn_rng(size_t n,
+             rng::type type = DEFAULT_RNG_TYPE,
+             unsigned long seed = 0)
         : m_n(n)
         , m_rng(type, seed)
     {

@@ -40,7 +40,7 @@ class hist2pdf
 {
   public:
     hist2pdf(const hist2 &h,
-             rand::rng_type type = rand::DEFAULT_RNG,
+             rand::rng::type type = DEFAULT_RNG_TYPE,
              unsigned long seed = 0)
         : m_ghp(nullptr)
         , m_xrng(type, seed)

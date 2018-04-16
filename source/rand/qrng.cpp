@@ -42,7 +42,7 @@ namespace rand {
 // global variant
 ////////////////////////////////////////////////////////////
 
-static const gsl_qrng_type *s_type_map[QRNG_TYPE_NUM] = {
+static const gsl_qrng_type *s_type_map[] = {
     gsl_qrng_niederreiter_2,
     gsl_qrng_sobol,
     gsl_qrng_halton,
@@ -57,10 +57,9 @@ static const gsl_qrng_type *s_type_map[QRNG_TYPE_NUM] = {
 // interface implementation
 ////////////////////////////////////////////////////////////
 
-qrng::qrng(qrng_type type, unsigned int dim)
+qrng::qrng(qrng::type type, unsigned int dim)
 {
-    eigen_assert(type < QRNG_TYPE_NUM);
-    m_qrng = gsl_qrng_alloc(s_type_map[type], dim);
+    m_qrng = gsl_qrng_alloc(s_type_map[static_cast<int>(type)], dim);
     IEXP_NOT_NULLPTR(m_qrng);
 }
 }

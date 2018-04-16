@@ -48,7 +48,7 @@ class mgauss_rng
     mgauss_rng(size_t k,
                double mu[],
                double cov[],
-               rng_type type = DEFAULT_RNG,
+               rng::type type = DEFAULT_RNG_TYPE,
                unsigned long seed = 0)
         : m_mu_block{k, mu}
         , m_mu{k, 1, mu, &m_mu_block, 0}

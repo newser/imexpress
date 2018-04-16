@@ -47,7 +47,7 @@ class miser_t
 {
   public:
     miser_t(size_t dim,
-            rand::rng_type type = rand::MT19937,
+            rand::rng::type type = DEFAULT_RNG_TYPE,
             unsigned long seed = 0)
         : m_state(nullptr)
         , m_rng(type, seed)

@@ -52,7 +52,7 @@ class sample_functor
                             T::MaxRowsAtCompileTime,
                             T::MaxColsAtCompileTime>;
 
-    sample_functor(const T &x, size_t k, unsigned long seed, rng_type type)
+    sample_functor(const T &x, size_t k, unsigned long seed, rng::type type)
         : m_result(k)
     {
         rng r(type, seed);
@@ -79,7 +79,7 @@ inline CwiseNullaryOp<sample_functor<T>, typename sample_functor<T>::ArrayType>
 sample(const ArrayBase<T> &x,
        size_t k,
        unsigned long seed = 0,
-       rng_type type = DEFAULT_RNG)
+       rng::type type = DEFAULT_RNG_TYPE)
 {
     eigen_assert(IS_VEC(x));
 

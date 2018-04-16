@@ -39,20 +39,19 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-enum qrng_type
-{
-    NIEDERREITER_2,
-    SOBOL,
-    HALTON,
-    REVERSEHALTON,
-
-    QRNG_TYPE_NUM
-};
-
 class qrng
 {
   public:
-    qrng(qrng_type type, unsigned int dim);
+    enum class type
+    {
+        NIEDERREITER_2,
+        SOBOL,
+        HALTON,
+        REVERSEHALTON,
+    };
+
+  public:
+    qrng(qrng::type type, unsigned int dim);
 
     ~qrng()
     {
@@ -61,31 +60,31 @@ class qrng
         }
     }
 
-    qrng(const qrng &other)
+    qrng(const qrng &rhs)
     {
-        m_qrng = gsl_qrng_clone(other.m_qrng);
+        m_qrng = gsl_qrng_clone(rhs.m_qrng);
         eigen_assert(m_qrng != nullptr);
     }
 
-    qrng(qrng &&other)
+    qrng(qrng &&rhs)
     {
-        m_qrng = other.m_qrng;
-        other.m_qrng = nullptr;
+        m_qrng = rhs.m_qrng;
+        rhs.m_qrng = nullptr;
     }
 
-    qrng &operator=(const qrng &other)
+    qrng &operator=(const qrng &rhs)
     {
-        gsl_qrng_memcpy(m_qrng, other.m_qrng);
+        gsl_qrng_memcpy(m_qrng, rhs.m_qrng);
         return *this;
     }
 
-    qrng &operator=(qrng &&other)
+    qrng &operator=(qrng &&rhs)
     {
         if (m_qrng != nullptr) {
             gsl_qrng_free(m_qrng);
         }
-        m_qrng = other.m_qrng;
-        other.m_qrng = nullptr;
+        m_qrng = rhs.m_qrng;
+        rhs.m_qrng = nullptr;
         return *this;
     }
 
@@ -94,7 +93,7 @@ class qrng
         gsl_qrng_init(m_qrng);
     }
 
-    void next(double x[]) const
+    void next(double x[])
     {
         gsl_qrng_get(m_qrng, x);
     }
@@ -102,6 +101,11 @@ class qrng
     const char *name() const
     {
         return gsl_qrng_name(m_qrng);
+    }
+
+    gsl_qrng *gsl() const
+    {
+        return m_qrng;
     }
 
   private:

@@ -44,7 +44,9 @@ namespace rand {
 class exp_rng
 {
   public:
-    exp_rng(double mu, rng_type type = DEFAULT_RNG, unsigned long seed = 0)
+    exp_rng(double mu,
+            rng::type type = DEFAULT_RNG_TYPE,
+            unsigned long seed = 0)
         : m_mu(mu)
         , m_rng(type, seed)
     {
@@ -69,18 +71,19 @@ template <typename T>
 inline auto exp_rand(DenseBase<T> &x,
                      typename T::Scalar mu,
                      unsigned long seed = 0,
-                     rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+                     rng::type type = DEFAULT_RNG_TYPE) -> decltype(x.derived())
 {
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "scalar can only be double");
-
     exp_rng r(mu, type, seed);
+    return exp_rand(x, r);
+}
 
+template <typename T>
+inline auto exp_rand(DenseBase<T> &x, exp_rng &r) -> decltype(x.derived())
+{
     typename T::Scalar *data = x.derived().data();
     for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
+        data[i] = static_cast<typename T::Scalar>(r.next());
     }
-
     return x.derived();
 }
 

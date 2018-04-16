@@ -56,7 +56,7 @@ class siman
     using f_copy = std::function<void(const C &, C &)>;
     using f_copy_construct = std::function<C &(const C &)>;
 
-    siman(rand::rng_type type = rand::MT19937, unsigned long seed = 0)
+    siman(rand::rng::type type = DEFAULT_RNG_TYPE, unsigned long seed = 0)
         : m_rng(type, seed)
     {
     }

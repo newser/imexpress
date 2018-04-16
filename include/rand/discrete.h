@@ -41,63 +41,149 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class discrete_rng
+class discrete
 {
+    template <typename T>
+    class pdf_functor;
+
   public:
-    discrete_rng(size_t K,
-                 const double P[],
-                 rng_type type = DEFAULT_RNG,
-                 unsigned long seed = 0)
-        : m_g(nullptr)
-        , m_rng(type, seed)
+    // ========================================
+    // generator
+    // ========================================
+
+    class rng
     {
-        m_g = gsl_ran_discrete_preproc(K, P);
-        IEXP_NOT_NULLPTR(m_g);
+      public:
+        rng(size_t K,
+            const double P[],
+            rand::rng::type type = DEFAULT_RNG_TYPE,
+            unsigned long seed = 0)
+            : m_g(nullptr)
+            , m_rng(type, seed)
+        {
+            m_g = gsl_ran_discrete_preproc(K, P);
+            IEXP_NOT_NULLPTR(m_g);
+        }
+
+        ~rng()
+        {
+            gsl_ran_discrete_free(m_g);
+        }
+
+        void seed(unsigned long seed)
+        {
+            m_rng.seed(seed);
+        }
+
+        size_t next()
+        {
+            return gsl_ran_discrete(m_rng.gsl(), m_g);
+        }
+
+      private:
+        rng(const rng &) = delete;
+        rng &operator=(const rng &other) = delete;
+
+        gsl_ran_discrete_t *m_g;
+        rand::rng m_rng;
+    };
+
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x,
+                            size_t K,
+                            const double P[],
+                            unsigned long seed = 0,
+                            rand::rng::type type = DEFAULT_RNG_TYPE)
+        -> decltype(x.derived())
+    {
+        discrete::rng r(K, P, type, seed);
+        return fill(x, r);
     }
 
-    ~discrete_rng()
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x, discrete::rng &r)
+        -> decltype(x.derived())
     {
-        gsl_ran_discrete_free(m_g);
+        static_assert(IS_INTEGER(typename T::Scalar),
+                      "only support integer scalar");
+
+        typename T::Scalar *data = x.derived().data();
+        for (Index i = 0; i < x.size(); ++i) {
+            data[i] = r.next();
+        }
+        return x.derived();
     }
 
-    void seed(unsigned long seed)
-    {
-        m_rng.seed(seed);
-    }
+    // ========================================
+    // distribution
+    // ========================================
 
-    size_t next()
+    class dist
     {
-        return gsl_ran_discrete(m_rng.gsl(), m_g);
+      public:
+        dist(size_t K, const double P[])
+            : m_g(nullptr)
+        {
+            m_g = gsl_ran_discrete_preproc(K, P);
+            IEXP_NOT_NULLPTR(m_g);
+        }
+
+        ~dist()
+        {
+            gsl_ran_discrete_free(m_g);
+        }
+
+        double pdf(size_t x) const
+        {
+            return gsl_ran_discrete_pdf(x, m_g);
+        }
+
+      private:
+        dist(const dist &) = delete;
+        dist &operator=(const dist &other) = delete;
+
+        gsl_ran_discrete_t *m_g;
+    };
+
+    template <typename T>
+    static inline CwiseNullaryOp<pdf_functor<T>,
+                                 typename pdf_functor<T>::ResultType>
+    pdf(const DenseBase<T> &x, size_t K, const double P[])
+    {
+        static_assert(IS_INTEGER(typename T::Scalar),
+                      "only support integer scalar");
+
+        using ResultType = typename pdf_functor<T>::ResultType;
+        return ResultType::NullaryExpr(x.rows(),
+                                       x.cols(),
+                                       pdf_functor<T>(x.derived(), K, P));
     }
 
   private:
-    discrete_rng(const discrete_rng &) = delete;
-    discrete_rng &operator=(const discrete_rng &other) = delete;
+    discrete() = delete;
 
-    gsl_ran_discrete_t *m_g;
-    rng m_rng;
+    template <typename T>
+    class pdf_functor
+    {
+      public:
+        using ResultType = typename dense_derive<T, double>::type;
+
+        pdf_functor(const T &x, size_t K, const double P[])
+            : m_x(x)
+            , m_dist(new dist(K, P))
+        {
+        }
+
+        double operator()(Index i, Index j) const
+        {
+            return m_dist->pdf(m_x(i, j));
+        }
+
+      private:
+        const T &m_x;
+        std::shared_ptr<dist> m_dist;
+    };
 };
-
-template <typename T>
-inline auto discrete_rand(DenseBase<T> &x,
-                          size_t K,
-                          const double P[],
-                          unsigned long seed = 0,
-                          rng_type type = DEFAULT_RNG) -> decltype(x.derived())
-{
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "scalar can only be int or unsigned int");
-
-    discrete_rng r(K, P, type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
-    }
-
-    return x.derived();
-}
 
 ////////////////////////////////////////////////////////////
 // global variants

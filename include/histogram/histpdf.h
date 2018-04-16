@@ -40,7 +40,7 @@ class histpdf
 {
   public:
     histpdf(const hist &h,
-            rand::rng_type type = rand::DEFAULT_RNG,
+            rand::rng::type type = DEFAULT_RNG_TYPE,
             unsigned long seed = 0)
         : m_ghp(nullptr)
         , m_rng(type, seed)

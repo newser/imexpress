@@ -35,84 +35,83 @@ namespace rand {
 // macro definition
 ////////////////////////////////////////////////////////////
 
-#define DEFAULT_RNG MT19937
+#define DEFAULT_RNG_TYPE iexp::rand::rng::type::MT19937
 
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
 
-enum rng_type
-{
-    BOROSH13,
-    COVEYOU,
-    CMRG,
-    FISHMAN18,
-    FISHMAN20,
-    FISHMAN2X,
-    GFSR4,
-    KNUTHRAN,
-    KNUTHRAN2,
-    KNUTHRAN2002,
-    LECUYER21,
-    MINSTD,
-    MRG,
-    MT19937,
-    MT19937_1999,
-    MT19937_1998,
-    R250,
-    RAN0,
-    RAN1,
-    RAN2,
-    RAN3,
-    RAND,
-    RAND48,
-    RANDOM128_BSD,
-    RANDOM128_GLIBC2,
-    RANDOM128_LIBC5,
-    RANDOM256_BSD,
-    RANDOM256_GLIBC2,
-    RANDOM256_LIBC5,
-    RANDOM32_BSD,
-    RANDOM32_GLIBC2,
-    RANDOM32_LIBC5,
-    RANDOM64_BSD,
-    RANDOM64_GLIBC2,
-    RANDOM64_LIBC5,
-    RANDOM8_BSD,
-    RANDOM8_GLIBC2,
-    RANDOM8_LIBC5,
-    RANDOM_BSD,
-    RANDOM_GLIBC2,
-    RANDOM_LIBC5,
-    RANDU,
-    RANF,
-    RANLUX,
-    RANLUX389,
-    RANLXD1,
-    RANLXD2,
-    RANLXS0,
-    RANLXS1,
-    RANLXS2,
-    RANMAR,
-    SLATEC,
-    TAUS,
-    TAUS2,
-    TAUS113,
-    TRANSPUTER,
-    TT800,
-    UNI,
-    UNI32,
-    VAX,
-    WATERMAN14,
-    ZUF,
-
-    RNG_TYPE_NUM
-};
-
 class rng
 {
   public:
-    rng(rng_type type = DEFAULT_RNG, unsigned long seed = 0);
+    enum class type
+    {
+        BOROSH13,
+        COVEYOU,
+        CMRG,
+        FISHMAN18,
+        FISHMAN20,
+        FISHMAN2X,
+        GFSR4,
+        KNUTHRAN,
+        KNUTHRAN2,
+        KNUTHRAN2002,
+        LECUYER21,
+        MINSTD,
+        MRG,
+        MT19937,
+        MT19937_1999,
+        MT19937_1998,
+        R250,
+        RAN0,
+        RAN1,
+        RAN2,
+        RAN3,
+        RAND,
+        RAND48,
+        RANDOM128_BSD,
+        RANDOM128_GLIBC2,
+        RANDOM128_LIBC5,
+        RANDOM256_BSD,
+        RANDOM256_GLIBC2,
+        RANDOM256_LIBC5,
+        RANDOM32_BSD,
+        RANDOM32_GLIBC2,
+        RANDOM32_LIBC5,
+        RANDOM64_BSD,
+        RANDOM64_GLIBC2,
+        RANDOM64_LIBC5,
+        RANDOM8_BSD,
+        RANDOM8_GLIBC2,
+        RANDOM8_LIBC5,
+        RANDOM_BSD,
+        RANDOM_GLIBC2,
+        RANDOM_LIBC5,
+        RANDU,
+        RANF,
+        RANLUX,
+        RANLUX389,
+        RANLXD1,
+        RANLXD2,
+        RANLXS0,
+        RANLXS1,
+        RANLXS2,
+        RANMAR,
+        SLATEC,
+        TAUS,
+        TAUS2,
+        TAUS113,
+        TRANSPUTER,
+        TT800,
+        UNI,
+        UNI32,
+        VAX,
+        WATERMAN14,
+        ZUF,
+    };
+
+  public:
+    rng(type type = DEFAULT_RNG_TYPE, unsigned long seed = 0);
 
     ~rng()
     {
@@ -121,31 +120,31 @@ class rng
         }
     }
 
-    rng(const rng &other)
+    rng(const rng &rhs)
     {
-        m_rng = gsl_rng_clone(other.m_rng);
+        m_rng = gsl_rng_clone(rhs.m_rng);
         eigen_assert(m_rng != nullptr);
     }
 
-    rng(rng &&other)
+    rng(rng &&rhs)
     {
-        m_rng = other.m_rng;
-        other.m_rng = nullptr;
+        m_rng = rhs.m_rng;
+        rhs.m_rng = nullptr;
     }
 
-    rng &operator=(const rng &other)
+    rng &operator=(const rng &rhs)
     {
-        gsl_rng_memcpy(m_rng, other.m_rng);
+        gsl_rng_memcpy(m_rng, rhs.m_rng);
         return *this;
     }
 
-    rng &operator=(rng &&other)
+    rng &operator=(rng &&rhs)
     {
         if (m_rng != nullptr) {
             gsl_rng_free(m_rng);
         }
-        m_rng = other.m_rng;
-        other.m_rng = nullptr;
+        m_rng = rhs.m_rng;
+        rhs.m_rng = nullptr;
         return *this;
     }
 
@@ -154,26 +153,26 @@ class rng
         gsl_rng_set(m_rng, seed);
     }
 
-    unsigned long uniform_ulong() const
+    unsigned long uniform_ulong()
     {
         return gsl_rng_get(m_rng);
     }
 
     // [0, n - 1]
-    unsigned long uniform_ulong(unsigned long n) const
+    unsigned long uniform_ulong(unsigned long n)
     {
         n = std::min(n, max());
         return gsl_rng_uniform_int(m_rng, n);
     }
 
     // [0, 1)
-    double uniform_double() const
+    double uniform_double()
     {
         return gsl_rng_uniform(m_rng);
     }
 
     // (0, 1)
-    double uniform_pos_double() const
+    double uniform_pos_double()
     {
         return gsl_rng_uniform_pos(m_rng);
     }
@@ -193,7 +192,7 @@ class rng
         return gsl_rng_max(m_rng);
     }
 
-    gsl_rng *gsl()
+    gsl_rng *gsl() const
     {
         return m_rng;
     }
