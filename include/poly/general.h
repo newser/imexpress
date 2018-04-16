@@ -41,18 +41,7 @@ namespace poly {
 // type definition
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-inline void complex_solve_impl(const T *a,
-                               const int len,
-                               std::complex<double> *z)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline void complex_solve_impl(const double *a,
-                               const int len,
-                               std::complex<double> *z)
+inline void solve(const double *a, int len, std::complex<double> *z)
 {
     gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc(len);
     IEXP_NOT_NULLPTR(w);
@@ -62,43 +51,54 @@ inline void complex_solve_impl(const double *a,
     gsl_poly_complex_workspace_free(w);
 }
 
-template <typename T>
-class complex_solve_functor
+inline void solve(const std::initializer_list<double> &a,
+                  std::complex<double> *z)
+{
+    gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc(a.size());
+    IEXP_NOT_NULLPTR(w);
+
+    gsl_poly_complex_solve(a.begin(), a.size(), w, (gsl_complex_packed_ptr)z);
+
+    gsl_poly_complex_workspace_free(w);
+}
+
+template <bool row_form, typename T>
+class solve_functor
 {
   public:
-    using ArrayType = Array<std::complex<double>,
-                            T::SizeAtCompileTime,
-                            1,
-                            ColMajor,
-                            T::SizeAtCompileTime,
-                            1>;
+    using Scalar = typename TYPE_CHOOSE(IS_COMPLEX(typename T::Scalar),
+                                        typename T::Scalar,
+                                        std::complex<typename T::Scalar>);
+    using ResultType = typename dense_derive<T,
+                                             Scalar,
+                                             row_form ? 1 : Dynamic,
+                                             row_form ? Dynamic : 1>::type;
 
-    complex_solve_functor(const T &a)
-        : m_result(a.size() - 1, 1)
+    solve_functor(const T &a)
+        : m_result(new Scalar[a.size() - 1])
     {
         typename type_eval<T>::type m_a(a.eval());
-        complex_solve_impl(m_a.data(), m_a.size(), m_result.data());
+        solve(m_a.data(), m_a.size(), m_result.get());
     }
 
-    const typename std::complex<double> &operator()(Index i) const
+    Scalar operator()(Index i) const
     {
-        return m_result(i);
+        return m_result.get()[i];
     }
 
   private:
-    ArrayType m_result;
+    std::shared_ptr<Scalar> m_result;
 };
 
-template <typename T>
-inline CwiseNullaryOp<complex_solve_functor<T>,
-                      typename complex_solve_functor<T>::ArrayType>
-complex_solve(const ArrayBase<T> &a)
+template <bool row_form = false, typename T = void>
+inline CwiseNullaryOp<solve_functor<row_form, T>,
+                      typename solve_functor<row_form, T>::ResultType>
+solve(const DenseBase<T> &a)
 {
-    eigen_assert(IS_VEC(a));
-
-    using ArrayType = typename complex_solve_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(a.derived().size() - 1,
-                                  complex_solve_functor<T>(a.derived()));
+    using ResultType = typename solve_functor<row_form, T>::ResultType;
+    return ResultType::NullaryExpr(row_form ? 1 : (a.size() - 1),
+                                   row_form ? (a.size() - 1) : 1,
+                                   solve_functor<row_form, T>(a.derived()));
 }
 
 ////////////////////////////////////////////////////////////

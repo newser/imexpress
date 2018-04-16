@@ -9,7 +9,7 @@ TEST_CASE("poly_general")
     iexp::ArrayXcd x(5);
 
     c << -120, 274, -225, 85, -15, 1;
-    x = iexp::poly::complex_solve(c);
+    x = iexp::poly::solve(c);
     REQUIRE(x.size() == 5);
     REQUIRE(__D_EQ9(x[0].real(), 1.0));
     REQUIRE(__D_EQ9(x[0].imag(), 0.0));
@@ -24,7 +24,7 @@ TEST_CASE("poly_general")
 
     c.resize(16, 1);
     c << 32, -48, -8, 28, -8, 16, -16, 12, -16, 6, 10, -17, 10, 2, -4, 1;
-    x = iexp::poly::complex_solve(c);
+    x = iexp::poly::solve(c);
     REQUIRE(x.size() == 15);
     REQUIRE(__D_EQ7(x[0].real(), -1.6078107423472359));
     REQUIRE(__D_EQ7(x[0].imag(), 0.0));
@@ -39,6 +39,17 @@ TEST_CASE("poly_general")
     REQUIRE(__D_EQ7(x[14].real(), 2.0));
     REQUIRE(__D_EQ7(x[14].imag(), 0.0));
 
+    std::complex<double> zz[16];
+    iexp::poly::
+        solve({32, -48, -8, 28, -8, 16, -16, 12, -16, 6, 10, -17, 10, 2, -4, 1},
+              zz);
+    REQUIRE(__D_EQ7(zz[0].real(), -1.6078107423472359));
+    REQUIRE(__D_EQ7(zz[0].imag(), 0.0));
+    REQUIRE(__D_EQ7(zz[1].real(), -1.3066982484920768));
+    REQUIRE(__D_EQ7(zz[1].imag(), 0.0));
+    REQUIRE(__D_EQ7(zz[14].real(), 2.0));
+    REQUIRE(__D_EQ7(zz[14].imag(), 0.0));
+
     // compile
-    x = iexp::poly::complex_solve((c + c) * 2);
+    x = iexp::poly::solve((c + c) * 2);
 }
