@@ -44,7 +44,7 @@ namespace rand {
 class t_rng
 {
   public:
-    t_rng(double nu, rng_type type = DEFAULT_RNG, unsigned long seed = 0)
+    t_rng(double nu, rng::type type = DEFAULT_RNG_TYPE, unsigned long seed = 0)
         : m_nu(nu)
         , m_rng(type, seed)
     {
@@ -69,7 +69,7 @@ template <typename T>
 inline auto t_rand(DenseBase<T> &x,
                    typename T::Scalar nu,
                    unsigned long seed = 0,
-                   rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+                   rng::type type = DEFAULT_RNG_TYPE) -> decltype(x.derived())
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");

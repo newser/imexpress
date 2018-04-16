@@ -46,7 +46,7 @@ class drch_rng
   public:
     drch_rng(size_t K,
              const double alpha[],
-             rng_type type = DEFAULT_RNG,
+             rng::type type = DEFAULT_RNG_TYPE,
              unsigned long seed = 0)
         : m_K(K)
         , m_alpha(alpha)
@@ -64,10 +64,12 @@ class drch_rng
         gsl_ran_dirichlet(m_rng.gsl(), m_K, m_alpha, theta);
     }
 
-  private:
-    drch_rng(const drch_rng &) = delete;
-    drch_rng &operator=(const drch_rng &other) = delete;
+    size_t K() const
+    {
+        return m_K;
+    }
 
+  private:
     size_t m_K;
     const double *m_alpha;
     rng m_rng;
@@ -76,20 +78,26 @@ class drch_rng
 template <typename T>
 inline auto drch_rand(DenseBase<T> &x,
                       size_t K,
-                      typename SCALAR(typename T::Scalar) * alpha,
+                      typename T::Scalar *alpha,
                       unsigned long seed = 0,
-                      rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+                      rng::type type = DEFAULT_RNG_TYPE)
+    -> decltype(x.derived())
 {
-    static_assert(is_complex<typename T::Scalar>::value,
-                  "scalar can only be complex");
-
     drch_rng r(K, alpha, type, seed);
+    return drch_rand(x, r);
+}
+
+template <typename T>
+inline auto drch_rand(DenseBase<T> &x, drch_rng &r) -> decltype(x.derived())
+{
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "only support double scalar");
+    eigen_assert((x.size() % r.K()) == 0);
 
     typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        r.next((double *)&data[i]);
+    for (Index i = 0; i < x.size(); i += r.K()) {
+        r.next(&data[i]);
     }
-
     return x.derived();
 }
 

@@ -46,7 +46,7 @@ class gbl1_rng
   public:
     gbl1_rng(double a,
              double b,
-             rng_type type = DEFAULT_RNG,
+             rng::type type = DEFAULT_RNG_TYPE,
              unsigned long seed = 0)
         : m_a(a)
         , m_b(b)
@@ -74,7 +74,8 @@ inline auto gbl1_rand(DenseBase<T> &x,
                       typename T::Scalar a,
                       typename T::Scalar b,
                       unsigned long seed = 0,
-                      rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+                      rng::type type = DEFAULT_RNG_TYPE)
+    -> decltype(x.derived())
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");

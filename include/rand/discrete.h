@@ -46,7 +46,7 @@ class discrete_rng
   public:
     discrete_rng(size_t K,
                  const double P[],
-                 rng_type type = DEFAULT_RNG,
+                 rng::type type = DEFAULT_RNG_TYPE,
                  unsigned long seed = 0)
         : m_g(nullptr)
         , m_rng(type, seed)
@@ -83,19 +83,21 @@ inline auto discrete_rand(DenseBase<T> &x,
                           size_t K,
                           const double P[],
                           unsigned long seed = 0,
-                          rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+                          rng::type type = DEFAULT_RNG_TYPE)
+    -> decltype(x.derived())
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "scalar can only be int or unsigned int");
-
     discrete_rng r(K, P, type, seed);
+    return discrete_rand(x, r);
+}
 
+template <typename T>
+inline auto discrete_rand(DenseBase<T> &x, discrete_rng &r)
+    -> decltype(x.derived())
+{
     typename T::Scalar *data = x.derived().data();
     for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
+        data[i] = static_cast<typename T::Scalar>(r.next());
     }
-
     return x.derived();
 }
 

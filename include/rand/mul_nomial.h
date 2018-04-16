@@ -47,7 +47,7 @@ class mnom_rng
     mnom_rng(size_t K,
              const double p[],
              unsigned int N,
-             rng_type type = DEFAULT_RNG,
+             rng::type type = DEFAULT_RNG_TYPE,
              unsigned long seed = 0)
         : m_K(K)
         , m_p(p)

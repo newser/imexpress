@@ -48,26 +48,25 @@ namespace rand {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline void qrand_impl(const qrng &r, T x[])
+inline void qrand_impl(qrng &r, T x[])
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline void qrand_impl<double>(const qrng &r, double x[])
+inline void qrand_impl<double>(qrng &r, double x[])
 {
     return r.next(x);
 }
 
 template <>
-inline void qrand_impl<std::complex<double>>(const qrng &r,
-                                             std::complex<double> x[])
+inline void qrand_impl<std::complex<double>>(qrng &r, std::complex<double> x[])
 {
     return r.next((double *)x);
 }
 
 template <typename T>
-inline auto qrand(DenseBase<T> &x, qrng_type type) -> decltype(x.derived())
+inline auto qrand(DenseBase<T> &x, qrng::type type) -> decltype(x.derived())
 {
     qrng r(type, is_complex<typename T::Scalar>::value ? 2 : 1);
 

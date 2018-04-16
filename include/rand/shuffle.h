@@ -44,7 +44,7 @@ namespace rand {
 template <typename T>
 inline auto shuffle(DenseBase<T> &x,
                     unsigned long seed = 0,
-                    rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+                    rng::type type = DEFAULT_RNG_TYPE) -> decltype(x.derived())
 {
     rng r(type, seed);
 

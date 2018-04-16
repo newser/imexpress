@@ -46,7 +46,7 @@ class levy_rng
   public:
     levy_rng(double c,
              double alpha,
-             rng_type type = DEFAULT_RNG,
+             rng::type type = DEFAULT_RNG_TYPE,
              unsigned long seed = 0)
         : m_c(c)
         , m_alpha(alpha)
@@ -74,7 +74,8 @@ inline auto levy_rand(DenseBase<T> &x,
                       typename T::Scalar c,
                       typename T::Scalar alpha,
                       unsigned long seed = 0,
-                      rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+                      rng::type type = DEFAULT_RNG_TYPE)
+    -> decltype(x.derived())
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");

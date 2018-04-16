@@ -44,7 +44,7 @@ namespace rand {
 class log_rng
 {
   public:
-    log_rng(double p, rng_type type = DEFAULT_RNG, unsigned long seed = 0)
+    log_rng(double p, rng::type type = DEFAULT_RNG_TYPE, unsigned long seed = 0)
         : m_p(p)
         , m_rng(type, seed)
     {
@@ -69,7 +69,7 @@ template <typename T>
 inline auto log_rand(DenseBase<T> &x,
                      double p,
                      unsigned long seed = 0,
-                     rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+                     rng::type type = DEFAULT_RNG_TYPE) -> decltype(x.derived())
 {
     static_assert(TYPE_IS(typename T::Scalar, int) ||
                       TYPE_IS(typename T::Scalar, unsigned int),

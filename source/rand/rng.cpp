@@ -42,7 +42,7 @@ namespace rand {
 // global variant
 ////////////////////////////////////////////////////////////
 
-static const gsl_rng_type *s_type_map[RNG_TYPE_NUM] = {
+static const gsl_rng_type *s_type_map[] = {
     gsl_rng_borosh13,
     gsl_rng_coveyou,
     gsl_rng_cmrg,
@@ -115,10 +115,9 @@ static const gsl_rng_type *s_type_map[RNG_TYPE_NUM] = {
 // interface implementation
 ////////////////////////////////////////////////////////////
 
-rng::rng(rng_type type, unsigned long seed)
+rng::rng(type type, unsigned long seed)
 {
-    eigen_assert(type < RNG_TYPE_NUM);
-    m_rng = gsl_rng_alloc(s_type_map[type]);
+    m_rng = gsl_rng_alloc(s_type_map[static_cast<int>(type)]);
     IEXP_NOT_NULLPTR(m_rng);
 
     if (seed != 0) {

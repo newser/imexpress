@@ -47,7 +47,7 @@ class bgauss_rng
     bgauss_rng(double sigma_x,
                double sigma_y,
                double rho,
-               rng_type type = DEFAULT_RNG,
+               rng::type type = DEFAULT_RNG_TYPE,
                unsigned long seed = 0)
         : m_sigma_x(sigma_x)
         , m_sigma_y(sigma_y)
@@ -78,23 +78,56 @@ class bgauss_rng
 
 template <typename T>
 inline auto bgauss_rand(DenseBase<T> &x,
-                        typename SCALAR(typename T::Scalar) sigma_x,
-                        typename SCALAR(typename T::Scalar) sigma_y,
-                        typename SCALAR(typename T::Scalar) rho,
+                        typename T::Scalar sigma_x,
+                        typename T::Scalar sigma_y,
+                        typename T::Scalar rho,
                         unsigned long seed = 0,
-                        rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+                        rng::type type = DEFAULT_RNG_TYPE)
+    -> decltype(x.derived())
 {
-    static_assert(is_complex<typename T::Scalar>::value,
-                  "scalar can only be complex");
-
     bgauss_rng r(sigma_x, sigma_y, rho, type, seed);
+    return bgauss_rand(x, r);
+}
+
+template <typename T>
+inline auto bgauss_rand(DenseBase<T> &x, bgauss_rng &r) -> decltype(x.derived())
+{
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "only support double scalar");
+    eigen_assert((x.size() % 2) == 0);
 
     typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        r.next(((double *)&data[i])[0], ((double *)&data[i])[1]);
+    for (Index i = 0; i < x.size(); i += 2) {
+        r.next(data[i], data[i + 1]);
     }
-
     return x.derived();
+}
+
+template <typename T>
+inline void bgauss_rand(DenseBase<T> &x,
+                        DenseBase<T> &y,
+                        typename T::Scalar sigma_x,
+                        typename T::Scalar sigma_y,
+                        typename T::Scalar rho,
+                        unsigned long seed = 0,
+                        rng::type type = DEFAULT_RNG_TYPE)
+{
+    bgauss_rng r(sigma_x, sigma_y, rho, type, seed);
+    return bgauss_rand(x, y, r);
+}
+
+template <typename T>
+inline void bgauss_rand(DenseBase<T> &x, DenseBase<T> &y, bgauss_rng &r)
+{
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "only support double scalar");
+    eigen_assert(x.size() == y.size());
+
+    typename T::Scalar *data_x = x.derived().data();
+    typename T::Scalar *data_y = y.derived().data();
+    for (Index i = 0; i < x.size(); ++i) {
+        r.next(data_x[i], data_y[i]);
+    }
 }
 
 ////////////////////////////////////////////////////////////

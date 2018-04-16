@@ -46,7 +46,7 @@ class bnom_rng
   public:
     bnom_rng(double p,
              unsigned int n,
-             rng_type type = DEFAULT_RNG,
+             rng::type type = DEFAULT_RNG_TYPE,
              unsigned long seed = 0)
         : m_p(p)
         , m_n(n)
@@ -75,19 +75,20 @@ inline auto bnom_rand(DenseBase<T> &x,
                       double p,
                       unsigned int n,
                       unsigned long seed = 0,
-                      rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+                      rng::type type = DEFAULT_RNG_TYPE)
+    -> decltype(x.derived())
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "scalar can only be int or unsigned int");
-
     bnom_rng r(p, n, type, seed);
+    return bnom_rand(x, r);
+}
 
+template <typename T>
+inline auto bnom_rand(DenseBase<T> &x, bnom_rng &r) -> decltype(x.derived())
+{
     typename T::Scalar *data = x.derived().data();
     for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
+        data[i] = static_cast<typename T::Scalar>(r.next());
     }
-
     return x.derived();
 }
 

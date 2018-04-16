@@ -82,20 +82,16 @@ template <typename T>
 class beta_pdf_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
-    beta_pdf_functor(const T &x, typename T::Scalar a, typename T::Scalar b)
+    beta_pdf_functor(const T &x, Scalar a, Scalar b)
         : m_x(x)
         , m_beta(a, b)
     {
     }
 
-    typename T::Scalar operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
         return m_beta.pdf(m_x(i, j));
     }
@@ -107,16 +103,16 @@ class beta_pdf_functor
 
 template <typename T>
 inline CwiseNullaryOp<beta_pdf_functor<T>,
-                      typename beta_pdf_functor<T>::ArrayType>
+                      typename beta_pdf_functor<T>::ResultType>
 beta_pdf(const ArrayBase<T> &x, typename T::Scalar a, typename T::Scalar b)
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");
 
-    using ArrayType = typename beta_pdf_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  beta_pdf_functor<T>(x.derived(), a, b));
+    using ResultType = typename beta_pdf_functor<T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   beta_pdf_functor<T>(x.derived(), a, b));
 }
 
 ////////////////////////////////////////////////////////////

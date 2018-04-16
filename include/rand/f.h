@@ -46,7 +46,7 @@ class f_rng
   public:
     f_rng(double nu1,
           double nu2,
-          rng_type type = DEFAULT_RNG,
+          rng::type type = DEFAULT_RNG_TYPE,
           unsigned long seed = 0)
         : m_nu1(nu1)
         , m_nu2(nu2)
@@ -74,7 +74,7 @@ inline auto f_rand(DenseBase<T> &x,
                    typename T::Scalar nu1,
                    typename T::Scalar nu2,
                    unsigned long seed = 0,
-                   rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+                   rng::type type = DEFAULT_RNG_TYPE) -> decltype(x.derived())
 {
     static_assert(TYPE_IS(typename T::Scalar, double),
                   "scalar can only be double");

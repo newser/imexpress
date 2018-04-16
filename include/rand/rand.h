@@ -48,26 +48,26 @@ namespace rand {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline T rand_impl(const rng &r)
+inline T rand_impl(rng &r)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double rand_impl<double>(const rng &r)
+inline double rand_impl<double>(rng &r)
 {
     return r.uniform_double();
 }
 
 template <>
-inline unsigned long rand_impl<unsigned long>(const rng &r)
+inline unsigned long rand_impl<unsigned long>(rng &r)
 {
     return r.uniform_ulong();
 }
 
 #define DEFINE_RAND_IMPL(t)                                                    \
     template <>                                                                \
-    inline t rand_impl<t>(const rng &r)                                        \
+    inline t rand_impl<t>(rng & r)                                             \
     {                                                                          \
         return r.uniform_ulong(std::numeric_limits<t>::max() + 1);             \
     }
@@ -83,7 +83,7 @@ DEFINE_RAND_IMPL(char)
 template <typename T>
 inline auto rand(DenseBase<T> &x,
                  unsigned long seed = 0,
-                 rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+                 rng::type type = DEFAULT_RNG_TYPE) -> decltype(x.derived())
 {
     rng r(type, seed);
 
@@ -96,7 +96,7 @@ inline auto rand(DenseBase<T> &x,
 }
 
 template <typename T>
-inline auto rand(DenseBase<T> &x, const rng &r) -> decltype(x.derived())
+inline auto rand(DenseBase<T> &x, rng &r) -> decltype(x.derived())
 {
     typename T::Scalar *data = x.derived().data();
     for (Index i = 0; i < x.size(); ++i) {

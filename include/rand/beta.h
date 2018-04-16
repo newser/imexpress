@@ -27,6 +27,7 @@
 
 #include <rand/rng.h>
 
+#include <gsl/gsl_cdf.h>
 #include <gsl/gsl_randist.h>
 
 IEXP_NS_BEGIN
@@ -41,53 +42,146 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class beta_rng
+class beta
 {
+    template <typename T>
+    class pdf_functor;
+
+    // ========================================
+    // generator
+    // ========================================
+
   public:
-    beta_rng(double a,
-             double b,
-             rng_type type = DEFAULT_RNG,
-             unsigned long seed = 0)
-        : m_a(a)
-        , m_b(b)
-        , m_rng(type, seed)
+    class rng
     {
+      public:
+        rng(double a,
+            double b,
+            rand::rng::type type = DEFAULT_RNG_TYPE,
+            unsigned long seed = 0)
+            : m_a(a)
+            , m_b(b)
+            , m_rng(type, seed)
+        {
+        }
+
+        void seed(unsigned long seed)
+        {
+            m_rng.seed(seed);
+        }
+
+        double next()
+        {
+            return gsl_ran_beta(m_rng.gsl(), m_a, m_b);
+        }
+
+      private:
+        double m_a, m_b;
+        rand::rng m_rng;
+    };
+
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x,
+                            typename T::Scalar a,
+                            typename T::Scalar b,
+                            unsigned long seed = 0,
+                            rand::rng::type type = DEFAULT_RNG_TYPE)
+        -> decltype(x.derived())
+    {
+        beta::rng r(a, b, type, seed);
+        return fill(x, r);
     }
 
-    void seed(unsigned long seed)
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x, beta::rng &r)
+        -> decltype(x.derived())
     {
-        m_rng.seed(seed);
+        typename T::Scalar *data = x.derived().data();
+        for (Index i = 0; i < x.size(); ++i) {
+            data[i] = static_cast<typename T::Scalar>(r.next());
+        }
+        return x.derived();
     }
 
-    double next()
+    // ========================================
+    // distribution
+    // ========================================
+
+    class dist
     {
-        return gsl_ran_beta(m_rng.gsl(), m_a, m_b);
+      public:
+        dist(double a, double b)
+            : m_a(a)
+            , m_b(b)
+        {
+        }
+
+        double pdf(double x) const
+        {
+            return gsl_ran_beta_pdf(x, m_a, m_b);
+        }
+
+        double p(double x) const
+        {
+            return gsl_cdf_beta_P(x, m_a, m_b);
+        }
+
+        double invp(double x) const
+        {
+            return gsl_cdf_beta_Pinv(x, m_a, m_b);
+        }
+
+        double q(double x) const
+        {
+            return gsl_cdf_beta_Q(x, m_a, m_b);
+        }
+
+        double invq(double x) const
+        {
+            return gsl_cdf_beta_Qinv(x, m_a, m_b);
+        }
+
+      private:
+        double m_a, m_b;
+    };
+
+    template <typename T>
+    static inline CwiseNullaryOp<pdf_functor<T>,
+                                 typename pdf_functor<T>::ResultType>
+    pdf(const DenseBase<T> &x, typename T::Scalar a, typename T::Scalar b)
+    {
+        using ResultType = typename pdf_functor<T>::ResultType;
+        return ResultType::NullaryExpr(x.rows(),
+                                       x.cols(),
+                                       pdf_functor<T>(x.derived(), a, b));
     }
 
   private:
-    double m_a, m_b;
-    rng m_rng;
+    beta() = delete;
+
+    template <typename T>
+    class pdf_functor
+    {
+      public:
+        using Scalar = typename T::Scalar;
+        using ResultType = typename dense_derive<T>::type;
+
+        pdf_functor(const T &x, Scalar a, Scalar b)
+            : m_x(x)
+            , m_dist(a, b)
+        {
+        }
+
+        Scalar operator()(Index i, Index j) const
+        {
+            return (Scalar)m_dist.pdf((double)m_x(i, j));
+        }
+
+      private:
+        const T &m_x;
+        dist m_dist;
+    };
 };
-
-template <typename T>
-inline auto beta_rand(DenseBase<T> &x,
-                      typename T::Scalar a,
-                      typename T::Scalar b,
-                      unsigned long seed = 0,
-                      rng_type type = DEFAULT_RNG) -> decltype(x.derived())
-{
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "scalar can only be double");
-
-    beta_rng r(a, b, type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
-    }
-
-    return x.derived();
-}
 
 ////////////////////////////////////////////////////////////
 // global variants

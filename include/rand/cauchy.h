@@ -44,7 +44,9 @@ namespace rand {
 class cauchy_rng
 {
   public:
-    cauchy_rng(double a, rng_type type = DEFAULT_RNG, unsigned long seed = 0)
+    cauchy_rng(double a,
+               rng::type type = DEFAULT_RNG_TYPE,
+               unsigned long seed = 0)
         : m_a(a)
         , m_rng(type, seed)
     {
@@ -69,18 +71,20 @@ template <typename T>
 inline auto cauchy_rand(DenseBase<T> &x,
                         typename T::Scalar a,
                         unsigned long seed = 0,
-                        rng_type type = DEFAULT_RNG) -> decltype(x.derived())
+                        rng::type type = DEFAULT_RNG_TYPE)
+    -> decltype(x.derived())
 {
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "scalar can only be double");
-
     cauchy_rng r(a, type, seed);
+    return cauchy_rand(x, r);
+}
 
+template <typename T>
+inline auto cauchy_rand(DenseBase<T> &x, cauchy_rng &r) -> decltype(x.derived())
+{
     typename T::Scalar *data = x.derived().data();
     for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
+        data[i] = static_cast<typename T::Scalar>(r.next());
     }
-
     return x.derived();
 }
 
