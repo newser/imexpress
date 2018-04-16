@@ -45,113 +45,55 @@ namespace poly {
 // solve in real field
 // ========================================
 
-template <typename T>
-inline void solve_quad_impl(
-    const T a, const T b, const T c, double *x0, double *x1)
+inline int solve_quad(double a, double b, double c, double &x0, double &x1)
 {
-    UNSUPPORTED_TYPE(T);
+    int r = gsl_poly_solve_quadratic(a, b, c, &x0, &x1);
+    if (r == 0) {
+        x0 = NAN;
+        x1 = NAN;
+    } else if (r == 1) {
+        x1 = NAN;
+    }
+    return r;
 }
 
-template <>
-inline void solve_quad_impl(
-    const double a, const double b, const double c, double *x0, double *x1)
+inline std::tuple<double, double> solve_quad(double a, double b, double c)
 {
-    gsl_poly_solve_quadratic(a, b, c, x0, x1);
-}
-
-template <typename T>
-class solve_quad_functor
-{
-  public:
-    using ArrayType = Array<double, 2, 1, ColMajor, 2, 1>;
-
-    solve_quad_functor(const T &c)
-        : m_result(IEXP_NAN, IEXP_NAN)
-    {
-        typename type_eval<T>::type m_c(c.eval());
-        solve_quad_impl(m_c[0], m_c[1], m_c[2], &m_result[0], &m_result[1]);
-    }
-
-    const double &operator()(Index i) const
-    {
-        return m_result(i);
-    }
-
-  private:
-    ArrayType m_result;
-};
-
-template <typename T>
-inline CwiseNullaryOp<solve_quad_functor<T>,
-                      typename solve_quad_functor<T>::ArrayType>
-solve_quad(const ArrayBase<T> &c)
-{
-    eigen_assert(IS_VEC(c) && (c.size() == 3));
-
-    using ArrayType = typename solve_quad_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(2, solve_quad_functor<T>(c.derived()));
+    double x0, x1;
+    solve_quad(a, b, c, x0, x1);
+    return std::make_tuple(x0, x1);
 }
 
 // ========================================
 // solve in complex field
 // ========================================
 
-template <typename T>
-inline void complex_solve_quad_impl(const T a,
-                                    const T b,
-                                    const T c,
-                                    std::complex<double> *x0,
-                                    std::complex<double> *x1)
+inline int complex_solve_quad(double a,
+                              double b,
+                              double c,
+                              std::complex<double> &x0,
+                              std::complex<double> &x1)
 {
-    UNSUPPORTED_TYPE(T);
+    int r = gsl_poly_complex_solve_quadratic(a,
+                                             b,
+                                             c,
+                                             (gsl_complex *)&x0,
+                                             (gsl_complex *)&x1);
+    if (r == 0) {
+        x0 = std::complex<double>(NAN, NAN);
+        x1 = std::complex<double>(NAN, NAN);
+    } else if (r == 1) {
+        x1 = std::complex<double>(NAN, NAN);
+    }
+    return r;
 }
 
-template <>
-inline void complex_solve_quad_impl(const double a,
-                                    const double b,
-                                    const double c,
-                                    std::complex<double> *x0,
-                                    std::complex<double> *x1)
+inline std::tuple<std::complex<double>, std::complex<double>>
+complex_solve_quad(double a, double b, double c)
 {
-    gsl_poly_complex_solve_quadratic(a,
-                                     b,
-                                     c,
-                                     (gsl_complex *)x0,
-                                     (gsl_complex *)x1);
-}
-
-template <typename T>
-class complex_solve_quad_functor
-{
-  public:
-    using ArrayType = Array<std::complex<double>, 2, 1, ColMajor, 2, 1>;
-
-    complex_solve_quad_functor(const T &c)
-        : m_result(IEXP_NAN, IEXP_NAN)
-    {
-        typename type_eval<T>::type m_c(c.eval());
-        complex_solve_quad_impl(c[0], c[1], c[2], &m_result[0], &m_result[1]);
-    }
-
-    const typename std::complex<double> &operator()(Index i) const
-    {
-        return m_result(i);
-    }
-
-  private:
-    ArrayType m_result;
-};
-
-template <typename T>
-inline CwiseNullaryOp<complex_solve_quad_functor<T>,
-                      typename complex_solve_quad_functor<T>::ArrayType>
-complex_solve_quad(const ArrayBase<T> &c)
-{
-    eigen_assert(IS_VEC(c) && (c.size() == 3));
-
-    using ArrayType = typename complex_solve_quad_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(2,
-                                  complex_solve_quad_functor<T>(c.derived()));
+    std::complex<double> x0, x1;
+    complex_solve_quad(a, b, c, x0, x1);
+    return std::make_tuple(x0, x1);
 }
 
 ////////////////////////////////////////////////////////////
