@@ -157,90 +157,150 @@ TEST_CASE("test_qrand")
 
 TEST_CASE("test_normal_rand")
 {
-    iexp::VectorXd v(10), v2(10);
+    {
+        iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::gauss_rand(v);
-    REQUIRE(&vr == &v);
+        iexp::VectorXd &vr = rand::gauss::fill(v);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::gauss_rand(v, 2.0) +
-         rand::gauss_rand(v, 3.0, 1234, rand::rng::type::BOROSH13);
+        v2 = rand::gauss::fill(v, 2.0) +
+             rand::gauss::fill(v, 3.0, 1234, rand::rng::type::BOROSH13);
 
-    iexp::MatrixXd w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::gauss_rand(w);
-    w2 = rand::gauss_rand(w) + rand::gauss_rand(w, 2.0) +
-         rand::gauss_rand(w, 3.0, 1234, rand::rng::type::BOROSH13);
+        iexp::MatrixXd w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::gauss::fill(w);
+        w2 = rand::gauss::fill(w) + rand::gauss::fill(w, 2.0) +
+             rand::gauss::fill(w, 3.0, 1234, rand::rng::type::BOROSH13);
 
-    iexp::MatrixXd &wr = rand::gauss_rand(w);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXd &wr = rand::gauss::fill(w);
+        REQUIRE(&wr == &w);
 
-    iexp::MatrixXd cw(3, 4), cw2(3, 4);
-    cw.fill(9.9999);
-    cw2 = rand::gauss_rand(cw, 2.0);
-    cw2 = rand::gauss_rand(cw, 2.0) +
-          rand::gauss_rand(cw, 3.0, 1234, rand::rng::type::BOROSH13) +
-          rand::gauss_rand(cw, 3.0, 1234, rand::rng::type::BOROSH13);
+        iexp::MatrixXd cw(3, 4), cw2(3, 4);
+        cw.fill(9.9999);
+        cw2 = rand::gauss::fill(cw, 2.0);
+        cw2 = rand::gauss::fill(cw, 2.0) +
+              rand::gauss::fill(cw, 3.0, 1234, rand::rng::type::BOROSH13) +
+              rand::gauss::fill(cw, 3.0, 1234, rand::rng::type::BOROSH13);
 
-    iexp::MatrixXd &cwr =
-        rand::gauss_rand(cw, 3.0, 1234, rand::rng::type::BOROSH13);
-    REQUIRE(&cwr == &cw);
+        iexp::MatrixXd &cwr =
+            rand::gauss::fill(cw, 3.0, 1234, rand::rng::type::BOROSH13);
+        REQUIRE(&cwr == &cw);
 
-#if 0 // #ifdef IEXP_MGL2
-    iexp::VectorXd vv(100);
-    rand::gauss_rand(vv);
-    mglData y(100);
-    y.Link(vv.data(), vv.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 100, 0, 2);
-    gr.Axis();
-    gr.Plot(y, "+");
-    gr.WriteFrame("normal_rand.png");
+#if 1 // #ifdef IEXP_MGL2
+        iexp::VectorXd vv(100);
+        rand::gauss::fill(vv);
+        mglData y(100);
+        y.Link(vv.data(), vv.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 100, 0, 2);
+        gr.Axis();
+        gr.Plot(y, "+");
+        gr.WriteFrame("normal_rand.png");
 #endif
+    }
+
+    {
+        VectorXd v = VectorXd::LinSpaced(10, -5, 5);
+        VectorXd v2 = rand::gauss::pdf(v.array(), 2.0);
+
+        Matrix2Xd m = Matrix2Xd::Random(2, 10);
+        Matrix2Xd m2 = rand::gauss::pdf(m.array(), 2.0);
+
+        // test compile
+        v2 =
+            rand::gauss::pdf(v.array(), 2.0) + rand::gauss::pdf(v.array(), 2.0);
+        m2 = rand::gauss::pdf(m.array() + m.array(), 2.0);
+
+#if 1 // #ifdef IEXP_MGL2
+        VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
+        VectorXd vv2 = rand::gauss::pdf(vv.array(), 2.0);
+
+        mglData x(100), y(100);
+        x.Link(vv.data(), vv.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(-5, 5, 0, 1);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("gauss_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_normal_tail_rand")
 {
-    iexp::VectorXd v(10), v2(10);
+    {
+        iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::gausst_rand(v, 12);
-    REQUIRE(&vr == &v);
+        iexp::VectorXd &vr = rand::gausst::fill(v, 12);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::gausst_rand(v, 35, 2.0) +
-         rand::gausst_rand(v, 23, 3.0, 1234, rand::rng::type::BOROSH13);
+        v2 = rand::gausst::fill(v, 35, 2.0) +
+             rand::gausst::fill(v, 23, 3.0, 1234, rand::rng::type::BOROSH13);
 
-    iexp::MatrixXd w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::gausst_rand(w, 1);
-    w2 = rand::gausst_rand(w, 2) + rand::gausst_rand(w, 3, 2.0) +
-         rand::gausst_rand(w, 4, 3.0, 1234, rand::rng::type::BOROSH13);
+        iexp::MatrixXd w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::gausst::fill(w, 1);
+        w2 = rand::gausst::fill(w, 2) + rand::gausst::fill(w, 3, 2.0) +
+             rand::gausst::fill(w, 4, 3.0, 1234, rand::rng::type::BOROSH13);
 
-    iexp::MatrixXd &wr = rand::gausst_rand(w, 5);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXd &wr = rand::gausst::fill(w, 5);
+        REQUIRE(&wr == &w);
 
-    iexp::MatrixXd cw(3, 4), cw2(3, 4);
-    cw.fill(9.9999);
-    cw2 = rand::gausst_rand(cw, 6, 2.0);
-    cw2 = rand::gausst_rand(cw, 7, 2.0) +
-          rand::gausst_rand(cw, 8, 3.0, 1234, rand::rng::type::BOROSH13) +
-          rand::gausst_rand(cw, 9, 3.0, 1234, rand::rng::type::BOROSH13);
+        iexp::MatrixXd cw(3, 4), cw2(3, 4);
+        cw.fill(9.9999);
+        cw2 = rand::gausst::fill(cw, 6, 2.0);
+        cw2 = rand::gausst::fill(cw, 7, 2.0) +
+              rand::gausst::fill(cw, 8, 3.0, 1234, rand::rng::type::BOROSH13) +
+              rand::gausst::fill(cw, 9, 3.0, 1234, rand::rng::type::BOROSH13);
 
-    iexp::MatrixXd &cwr =
-        rand::gausst_rand(cw, 10, 3.0, 1234, rand::rng::type::BOROSH13);
-    REQUIRE(&cwr == &cw);
+        iexp::MatrixXd &cwr =
+            rand::gausst::fill(cw, 10, 3.0, 1234, rand::rng::type::BOROSH13);
+        REQUIRE(&cwr == &cw);
 
-#if 0 // #ifdef IEXP_MGL2
-    iexp::VectorXd vv(100);
-    rand::gausst_rand(vv, 3.0);
-    mglData y(100);
-    y.Link(vv.data(), vv.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 100, -5, 5);
-    gr.Axis();
-    gr.Plot(y, "+");
-    gr.WriteFrame("normalt_rand.png");
+#if 1 // #ifdef IEXP_MGL2
+        iexp::VectorXd vv(100);
+        rand::gausst::fill(vv, 3.0);
+        mglData y(100);
+        y.Link(vv.data(), vv.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 100, -5, 5);
+        gr.Axis();
+        gr.Plot(y, "+");
+        gr.WriteFrame("normalt_rand.png");
 #endif
+    }
+
+    {
+        VectorXd v = VectorXd::LinSpaced(10, -5, 5);
+        VectorXd v2 = rand::gausst::pdf(v.array(), 1.5, 2.0);
+
+        Matrix2Xd m = Matrix2Xd::Random(2, 10);
+        Matrix2Xd m2 = rand::gausst::pdf(m.array(), 1.5, 2.0);
+
+        // test compile
+        v2 = rand::gausst::pdf(v.array(), 1.5, 2.0) +
+             rand::gausst::pdf(v.array(), 1.5, 2.0);
+        m2 = rand::gausst::pdf(m.array() + m.array(), 1.5, 2.0);
+
+#if 1 // #ifdef IEXP_MGL2
+        VectorXd vv = VectorXd::LinSpaced(100, 0, 5);
+        VectorXd vv2 = rand::gausst::pdf(vv.array(), 1.5, 1.0);
+
+        mglData x(100), y(100);
+        x.Link(vv.data(), vv.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 5, 0, 2);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("gausst_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_bi_gauss")
@@ -434,37 +494,67 @@ TEST_CASE("test_laplace_rand")
 #endif
 }
 
-TEST_CASE("test_expow_rand")
+TEST_CASE("test_expow_fill")
 {
-    iexp::VectorXd v(10), v2(10);
+    {
+        iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::expow_rand(v, 1.0, 2.0);
-    REQUIRE(&vr == &v);
+        iexp::VectorXd &vr = rand::expow::fill(v, 1.0, 2.0);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::expow_rand(v, 2.0, 100) + rand::expow_rand(v, 3.0, 4.0);
+        v2 = rand::expow::fill(v, 2.0, 100) + rand::expow::fill(v, 3.0, 4.0);
 
-    iexp::MatrixXd w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::expow_rand(w, 2.0, 3.3);
-    w2 = rand::expow_rand(w, 3.3, 3.3) + rand::expow_rand(w, 4.4, 3.3) +
-         rand::expow_rand(w, 5.5, 3.3);
+        iexp::MatrixXd w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::expow::fill(w, 2.0, 3.3);
+        w2 = rand::expow::fill(w, 3.3, 3.3) + rand::expow::fill(w, 4.4, 3.3) +
+             rand::expow::fill(w, 5.5, 3.3);
 
-    iexp::MatrixXd &wr = rand::expow_rand(w, 99, 3.3);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXd &wr = rand::expow::fill(w, 99, 3.3);
+        REQUIRE(&wr == &w);
 
-#if 0 // #ifdef IEXP_MGL2
-    VectorXd v1(100);
-    rand::expow_rand(v1, 1.0, 2.5);
+#if 1 // #ifdef IEXP_MGL2
+        VectorXd v1(100);
+        rand::expow::fill(v1, 1.0, 2.5);
 
-    mglData y(100);
-    y.Link(v1.data(), v1.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 100, -10, 10);
-    gr.Axis();
-    gr.Plot(y, "+");
-    gr.WriteFrame("expow_rand.png");
+        mglData y(100);
+        y.Link(v1.data(), v1.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 100, -10, 10);
+        gr.Axis();
+        gr.Plot(y, "+");
+        gr.WriteFrame("expow_rand.png");
 #endif
+    }
+
+    {
+        VectorXd v = VectorXd::LinSpaced(10, 0, 3);
+        VectorXd v2 = rand::expow::pdf(v.array(), 2.0, 3.0);
+
+        Matrix2Xd m = Matrix2Xd::Random(2, 10);
+        Matrix2Xd m2 = rand::expow::pdf(m.array(), 2.0, 3.0);
+
+        // test compile
+        v2 = rand::expow::pdf(v.array(), 2.0, 3.0) +
+             rand::expow::pdf(v.array(), 2.0, 3.0);
+        m2 = rand::expow::pdf(m.array() + m.array(), 2.0, 3.0);
+
+#if 1 // #ifdef Iexpow_MGL2
+        VectorXd vv = VectorXd::LinSpaced(100, -3, 3);
+        VectorXd vv2 = rand::expow::pdf(vv.array(), 1.0, 2.5);
+
+        mglData x(100), y(100);
+        x.Link(vv.data(), vv.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(-3, 3, 0, 1);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("expow_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_cauchy_rand")
@@ -696,59 +786,89 @@ TEST_CASE("test_levy_skew_rand")
 
 TEST_CASE("test_flat_rand")
 {
-    iexp::VectorXd v(10), v2(10);
+    {
+        iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::flat_rand(v, 1, 2);
-    REQUIRE(&vr == &v);
+        iexp::VectorXd &vr = rand::flat::fill(v, 1, 2);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::flat_rand(v, 2, 3) + rand::flat_rand(v, 2, 4);
+        v2 = rand::flat::fill(v, 2, 3) + rand::flat::fill(v, 2, 4);
 
-    iexp::MatrixXd w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::flat_rand(w, 2, 3);
-    w2 = rand::flat_rand(w, 2, 3) + rand::flat_rand(w, 2, 3) +
-         rand::flat_rand(w, 2, 3);
+        iexp::MatrixXd w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::flat::fill(w, 2, 3);
+        w2 = rand::flat::fill(w, 2, 3) + rand::flat::fill(w, 2, 3) +
+             rand::flat::fill(w, 2, 3);
 
-    iexp::MatrixXd &wr = rand::flat_rand(w, 2, 3);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXd &wr = rand::flat::fill(w, 2, 3);
+        REQUIRE(&wr == &w);
 
-#if 0 // #ifdef IEXP_MGL2
-    VectorXd v1(100);
-    rand::flat_rand(v1, 1, 5);
+#if 1 // #ifdef IEXP_MGL2
+        VectorXd v1(100);
+        rand::flat::fill(v1, 1, 5);
 
-    mglData y(100);
-    y.Link(v1.data(), v1.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 100, 0, 6);
-    gr.Axis();
-    gr.Plot(y, "+");
-    gr.WriteFrame("flat_rand.png");
+        mglData y(100);
+        y.Link(v1.data(), v1.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 100, 0, 6);
+        gr.Axis();
+        gr.Plot(y, "+");
+        gr.WriteFrame("flat_rand.png");
 #endif
+    }
+
+    {
+        VectorXd v = VectorXd::LinSpaced(10, 0, 3);
+        VectorXd v2 = rand::flat::pdf(v.array(), 0, 1);
+
+        Matrix2Xd m = Matrix2Xd::Random(2, 10);
+        Matrix2Xd m2 = rand::flat::pdf(m.array(), 0, 1);
+
+        // test compile
+        v2 =
+            rand::flat::pdf(v.array(), 0, 1) + rand::flat::pdf(v.array(), 0, 1);
+        m2 = rand::flat::pdf(m.array() + m.array(), 0, 1);
+
+#if 1 // #ifdef Icauchy_MGL2
+        VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
+        VectorXd vv2 = rand::flat::pdf(vv.array(), 0.5, 2.5);
+
+        mglData x(100), y(100);
+        x.Link(vv.data(), vv.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 5, 0, 1);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("flat_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_gamma_rand")
 {
     iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::gamma_rand(v, 1, 2);
+    iexp::VectorXd &vr = rand::gamma::fill(v, 1, 2);
     REQUIRE(&vr == &v);
 
-    v2 = rand::gamma_rand(v, 2, 3) + rand::gamma_rand(v, 2, 4);
+    v2 = rand::gamma::fill(v, 2, 3) + rand::gamma::fill(v, 2, 4);
 
     iexp::MatrixXd w(3, 4), w2(3, 4);
     w.fill(9.9999);
-    w2 = rand::gamma_rand(w, 2, 3);
-    w2 = rand::gamma_rand(w, 2, 3) + rand::gamma_rand(w, 2, 3) +
-         rand::flat_rand(w, 2, 3);
+    w2 = rand::gamma::fill(w, 2, 3);
+    w2 = rand::gamma::fill(w, 2, 3) + rand::gamma::fill(w, 2, 3) +
+         rand::flat::fill(w, 2, 3);
 
-    iexp::MatrixXd &wr = rand::gamma_rand(w, 2, 3);
+    iexp::MatrixXd &wr = rand::gamma::fill(w, 2, 3);
     REQUIRE(&wr == &w);
 
-#if 0 // #ifdef IEXP_MGL2
+#if 1 // #ifdef IEXP_MGL2
     VectorXd v1(100);
-    rand::gamma_rand(v1, 2, 1);
-    
+    rand::gamma::fill(v1, 2, 1);
+
     mglData y(100);
     y.Link(v1.data(), v1.size());
     mglGraph gr;
@@ -758,6 +878,33 @@ TEST_CASE("test_gamma_rand")
     gr.Plot(y, "+");
     gr.WriteFrame("gamma_rand.png");
 #endif
+    {
+        VectorXd v = VectorXd::LinSpaced(10, 0, 3);
+        VectorXd v2 = rand::gamma::pdf(v.array(), 1, 1);
+
+        Matrix2Xd m = Matrix2Xd::Random(2, 10);
+        Matrix2Xd m2 = rand::gamma::pdf(m.array(), 1, 1);
+
+        // test compile
+        v2 = rand::gamma::pdf(v.array(), 1, 1) +
+             rand::gamma::pdf(v.array(), 1, 1);
+        m2 = rand::gamma::pdf(m.array() + m.array(), 1, 1);
+
+#if 1 // #ifdef Icauchy_MGL2
+        VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
+        VectorXd vv2 = rand::gamma::pdf(vv.array(), 1, 1);
+
+        mglData x(100), y(100);
+        x.Link(vv.data(), vv.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(-5, 5, 0, 1);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("gamma_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_beta")
@@ -919,35 +1066,64 @@ TEST_CASE("test_chisq_rand")
 
 TEST_CASE("test_f_rand")
 {
-    iexp::VectorXd v(10), v2(10);
+    {
+        iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::f_rand(v, 1, 2);
-    REQUIRE(&vr == &v);
+        iexp::VectorXd &vr = rand::f::fill(v, 1, 2);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::f_rand(v, 2, 3) + rand::f_rand(v, 2, 4);
+        v2 = rand::f::fill(v, 2, 3) + rand::f::fill(v, 2, 4);
 
-    iexp::MatrixXd w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::f_rand(w, 2, 3);
-    w2 = rand::f_rand(w, 2, 3) + rand::f_rand(w, 2, 3) +
-         rand::flat_rand(w, 2, 3);
+        iexp::MatrixXd w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::f::fill(w, 2, 3);
+        w2 = rand::f::fill(w, 2, 3) + rand::f::fill(w, 2, 3) +
+             rand::f::fill(w, 2, 3);
 
-    iexp::MatrixXd &wr = rand::f_rand(w, 2, 3);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXd &wr = rand::f::fill(w, 2, 3);
+        REQUIRE(&wr == &w);
 
-#if 0 // #ifdef IEXP_MGL2
-    VectorXd v1(100);
-    rand::f_rand(v1, 1, 1);
-    
-    mglData y(100);
-    y.Link(v1.data(), v1.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 100, 0, 1);
-    gr.Axis();
-    gr.Plot(y, "+");
-    gr.WriteFrame("f_rand.png");
+#if 1 // #ifdef IEXP_MGL2
+        VectorXd v1(100);
+        rand::f::fill(v1, 1, 1);
+
+        mglData y(100);
+        y.Link(v1.data(), v1.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 100, 0, 1);
+        gr.Axis();
+        gr.Plot(y, "+");
+        gr.WriteFrame("f_rand.png");
 #endif
+    }
+
+    {
+        VectorXd v = VectorXd::LinSpaced(10, 0, 3);
+        VectorXd v2 = rand::f::pdf(v.array(), 1, 2);
+
+        Matrix2Xd m = Matrix2Xd::Random(2, 10);
+        Matrix2Xd m2 = rand::f::pdf(m.array(), 1, 2);
+
+        // test compile
+        v2 = rand::f::pdf(v.array(), 1, 2) + rand::f::pdf(v.array(), 1, 2);
+        m2 = rand::f::pdf(m.array() + m.array(), 1, 2);
+
+#if 1 // #ifdef Icauchy_MGL2
+        VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
+        VectorXd vv2 = rand::f::pdf(vv.array(), 3, 2);
+
+        mglData x(100), y(100);
+        x.Link(vv.data(), vv.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 5, 0, 1);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("f_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_t_rand")
@@ -1118,68 +1294,128 @@ TEST_CASE("test_wbl_rand")
 
 TEST_CASE("test_gbl1_rand")
 {
-    iexp::VectorXd v(10), v2(10);
+    {
+        iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::gbl1_rand(v, 1.0, 2.0);
-    REQUIRE(&vr == &v);
+        iexp::VectorXd &vr = rand::gbl1::fill(v, 1.0, 2.0);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::gbl1_rand(v, 2.0, 100) + rand::gbl1_rand(v, 3.0, 4.0);
+        v2 = rand::gbl1::fill(v, 2.0, 100) + rand::gbl1::fill(v, 3.0, 4.0);
 
-    iexp::MatrixXd w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::gbl1_rand(w, 2.0, 3.3);
-    w2 = rand::gbl1_rand(w, 3.3, 3.3) + rand::gbl1_rand(w, 4.4, 3.3) +
-         rand::gbl1_rand(w, 5.5, 3.3);
+        iexp::MatrixXd w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::gbl1::fill(w, 2.0, 3.3);
+        w2 = rand::gbl1::fill(w, 3.3, 3.3) + rand::gbl1::fill(w, 4.4, 3.3) +
+             rand::gbl1::fill(w, 5.5, 3.3);
 
-    iexp::MatrixXd &wr = rand::gbl1_rand(w, 99, 3.3);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXd &wr = rand::gbl1::fill(w, 99, 3.3);
+        REQUIRE(&wr == &w);
 
-#if 0 // #ifdef IEXP_MGL2
-    VectorXd v1(100);
-    rand::gbl1_rand(v1, 1.0, 1.0);
-    
-    mglData y(100);
-    y.Link(v1.data(), v1.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 100, 0, 5);
-    gr.Axis();
-    gr.Plot(y, "+");
-    gr.WriteFrame("gbl1_rand.png");
+#if 1 // #ifdef IEXP_MGL2
+        VectorXd v1(100);
+        rand::gbl1::fill(v1, 1.0, 1.0);
+
+        mglData y(100);
+        y.Link(v1.data(), v1.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 100, 0, 5);
+        gr.Axis();
+        gr.Plot(y, "+");
+        gr.WriteFrame("gbl1_rand.png");
 #endif
+    }
+
+    {
+        VectorXd v = VectorXd::LinSpaced(10, 0, 3);
+        VectorXd v2 = rand::gbl1::pdf(v.array(), 2, 3);
+
+        Matrix2Xd m = Matrix2Xd::Random(2, 10);
+        Matrix2Xd m2 = rand::gbl1::pdf(m.array(), 2, 3);
+
+        // test compile
+        v2 =
+            rand::gbl1::pdf(v.array(), 2, 3) + rand::gbl1::pdf(v.array(), 2, 3);
+        m2 = rand::gbl1::pdf(m.array() + m.array(), 2, 3);
+
+#if 1 // #ifdef Icauchy_MGL2
+        VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
+        VectorXd vv2 = rand::gbl1::pdf(vv.array(), 1, 1);
+
+        mglData x(100), y(100);
+        x.Link(vv.data(), vv.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(-5, 5, 0, 1);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("gbl1_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_gbl2_rand")
 {
-    iexp::VectorXd v(10), v2(10);
+    {
+        iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::gbl2_rand(v, 1.0, 2.0);
-    REQUIRE(&vr == &v);
+        iexp::VectorXd &vr = rand::gbl2::fill(v, 1.0, 2.0);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::gbl2_rand(v, 2.0, 100) + rand::gbl2_rand(v, 3.0, 4.0);
+        v2 = rand::gbl2::fill(v, 2.0, 100) + rand::gbl2::fill(v, 3.0, 4.0);
 
-    iexp::MatrixXd w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::gbl2_rand(w, 2.0, 3.3);
-    w2 = rand::gbl2_rand(w, 3.3, 3.3) + rand::gbl2_rand(w, 4.4, 3.3) +
-         rand::gbl2_rand(w, 5.5, 3.3);
+        iexp::MatrixXd w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::gbl2::fill(w, 2.0, 3.3);
+        w2 = rand::gbl2::fill(w, 3.3, 3.3) + rand::gbl2::fill(w, 4.4, 3.3) +
+             rand::gbl2::fill(w, 5.5, 3.3);
 
-    iexp::MatrixXd &wr = rand::gbl2_rand(w, 99, 3.3);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXd &wr = rand::gbl2::fill(w, 99, 3.3);
+        REQUIRE(&wr == &w);
 
-#if 0 // #ifdef IEXP_MGL2
-    VectorXd v1(100);
-    rand::gbl2_rand(v1, 1.0, 1.0);
-    
-    mglData y(100);
-    y.Link(v1.data(), v1.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 100, 0, 5);
-    gr.Axis();
-    gr.Plot(y, "+");
-    gr.WriteFrame("gbl2_rand.png");
+#if 1 // #ifdef IEXP_MGL2
+        VectorXd v1(100);
+        rand::gbl2::fill(v1, 1.0, 1.0);
+
+        mglData y(100);
+        y.Link(v1.data(), v1.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 100, 0, 5);
+        gr.Axis();
+        gr.Plot(y, "+");
+        gr.WriteFrame("gbl2_rand.png");
 #endif
+    }
+
+    {
+        VectorXd v = VectorXd::LinSpaced(10, 0, 3);
+        VectorXd v2 = rand::gbl2::pdf(v.array(), 2, 3);
+
+        Matrix2Xd m = Matrix2Xd::Random(2, 10);
+        Matrix2Xd m2 = rand::gbl2::pdf(m.array(), 2, 3);
+
+        // test compile
+        v2 =
+            rand::gbl2::pdf(v.array(), 2, 3) + rand::gbl2::pdf(v.array(), 2, 3);
+        m2 = rand::gbl2::pdf(m.array() + m.array(), 2, 3);
+
+#if 1 // #ifdef Icauchy_MGL2
+        VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
+        VectorXd vv2 = rand::gbl2::pdf(vv.array(), 1, 1);
+
+        mglData x(100), y(100);
+        x.Link(vv.data(), vv.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 5, 0, 1);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("gbl2_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_drch_rand")
@@ -1465,59 +1701,89 @@ TEST_CASE("test_pascal_rand")
 
 TEST_CASE("test_geo_rand")
 {
-    iexp::VectorXi v(10), v2(10);
+    {
+        iexp::VectorXi v(10), v2(10);
 
-    iexp::VectorXi &vr = rand::geo_rand(v, 0.5);
-    REQUIRE(&vr == &v);
+        iexp::VectorXi &vr = rand::geo::fill(v, 0.5);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::geo_rand(v, 0.5) + rand::geo_rand(v, 0.5);
+        v2 = rand::geo::fill(v, 0.5) + rand::geo::fill(v, 0.5);
 
-    iexp::MatrixXi w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::geo_rand(w, 0.5);
-    w2 = rand::geo_rand(w, 0.5) + rand::geo_rand(w, 0.5) +
-         rand::geo_rand(w, 0.5);
+        iexp::MatrixXi w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::geo::fill(w, 0.5);
+        w2 = rand::geo::fill(w, 0.5) + rand::geo::fill(w, 0.5) +
+             rand::geo::fill(w, 0.5);
 
-    iexp::MatrixXi &wr = rand::geo_rand(w, 0.5);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXi &wr = rand::geo::fill(w, 0.5);
+        REQUIRE(&wr == &w);
 
-#if 0 // #ifdef IEXP_MGL2
-    VectorXi vi(100);
-    rand::geo_rand(vi, 0.5);
-    VectorXd v1 = vi.cast<double>();
-    
-    mglData y(100);
-    y.Link(v1.data(), v1.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 100, 0, 5);
-    gr.Axis();
-    gr.Plot(y, "+");
-    gr.WriteFrame("geo_rand.png");
+#if 1 // #ifdef IEXP_MGL2
+        VectorXi vi(100);
+        rand::geo::fill(vi, 0.5);
+        VectorXd v1 = vi.cast<double>();
+
+        mglData y(100);
+        y.Link(v1.data(), v1.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 100, 0, 5);
+        gr.Axis();
+        gr.Plot(y, "+");
+        gr.WriteFrame("geo_rand.png");
 #endif
+    }
+
+    {
+        VectorXi v = VectorXi::LinSpaced(10, 0, 3);
+        VectorXd v2 = rand::geo::pdf(v.array(), 0.5);
+
+        Matrix2Xi m = Matrix2Xi::Random(2, 10);
+        Matrix2Xd m2 = rand::geo::pdf(m.array(), 0.5);
+
+        // test compile
+        v2 = rand::geo::pdf(v.array(), 0.5) + rand::geo::pdf(v.array(), 0.5);
+        m2 = rand::geo::pdf(m.array() + m.array(), 0.5);
+
+#if 1 // #ifdef Icauchy_MGL2
+        VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
+        VectorXd vv2 = rand::geo::pdf(vv.cast<unsigned int>().array(), 0.5);
+
+        mglData x(100), y(100);
+        x.Link(vv.data(), vv.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 10, 0, 1);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("geometric_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_hgeo_rand")
 {
-    iexp::VectorXi v(10), v2(10);
+    {
+        iexp::VectorXi v(10), v2(10);
 
-    iexp::VectorXi &vr = rand::hgeo_rand(v, 3, 10, 5);
-    REQUIRE(&vr == &v);
+        iexp::VectorXi &vr = rand::hgeo::fill(v, 3, 10, 5);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::hgeo_rand(v, 3, 10, 5) + rand::hgeo_rand(v, 3, 10, 5);
+        v2 = rand::hgeo::fill(v, 3, 10, 5) + rand::hgeo::fill(v, 3, 10, 5);
 
-    iexp::MatrixXi w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::hgeo_rand(w, 3, 10, 5);
-    w2 = rand::hgeo_rand(w, 3, 10, 5) + rand::hgeo_rand(w, 3, 10, 5) +
-         rand::hgeo_rand(w, 3, 10, 5);
+        iexp::MatrixXi w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::hgeo::fill(w, 3, 10, 5);
+        w2 = rand::hgeo::fill(w, 3, 10, 5) + rand::hgeo::fill(w, 3, 10, 5) +
+             rand::hgeo::fill(w, 3, 10, 5);
 
-    iexp::MatrixXi &wr = rand::hgeo_rand(w, 3, 10, 5);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXi &wr = rand::hgeo::fill(w, 3, 10, 5);
+        REQUIRE(&wr == &w);
 
 #if 0 // #ifdef IEXP_MGL2
     VectorXi vi(100);
-    rand::hgeo_rand(vi, 5, 20, 3);
+    rand::hgeo::fill(vi, 5, 20, 3);
     VectorXd v1 = vi.cast<double>();
 
     mglData y(100);
@@ -1529,6 +1795,35 @@ TEST_CASE("test_hgeo_rand")
     gr.Plot(y, "+");
     gr.WriteFrame("hgeo_rand.png");
 #endif
+    }
+
+    {
+        VectorXi v = VectorXi::LinSpaced(10, 0, 3);
+        VectorXd v2 = rand::hgeo::pdf(v.array(), 1, 2, 3);
+
+        Matrix2Xi m = Matrix2Xi::Random(2, 10);
+        Matrix2Xd m2 = rand::hgeo::pdf(m.array(), 1, 2, 3);
+
+        // test compile
+        v2 = rand::hgeo::pdf(v.array(), 1, 2, 3) +
+             rand::hgeo::pdf(v.array(), 1, 2, 3);
+        m2 = rand::hgeo::pdf(m.array() + m.array(), 1, 2, 3);
+
+#if 0 // #ifdef Icauchy_MGL2
+        VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
+        VectorXd vv2 = rand::hgeo::pdf(vv.cast<unsigned int>().array(), 5, 20, 3);
+        
+        mglData x(100), y(100);
+        x.Link(vv.data(), vv.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 10, 0, 1);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("hgeo_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_log_rand")

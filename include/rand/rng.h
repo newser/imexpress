@@ -148,31 +148,31 @@ class rng
         return *this;
     }
 
-    void seed(unsigned long seed)
+    void seed(unsigned long seed) const
     {
         gsl_rng_set(m_rng, seed);
     }
 
-    unsigned long uniform_ulong()
+    unsigned long uniform_ulong() const
     {
         return gsl_rng_get(m_rng);
     }
 
     // [0, n - 1]
-    unsigned long uniform_ulong(unsigned long n)
+    unsigned long uniform_ulong(unsigned long n) const
     {
         n = std::min(n, max());
         return gsl_rng_uniform_int(m_rng, n);
     }
 
     // [0, 1)
-    double uniform_double()
+    double uniform_double() const
     {
         return gsl_rng_uniform(m_rng);
     }
 
     // (0, 1)
-    double uniform_pos_double()
+    double uniform_pos_double() const
     {
         return gsl_rng_uniform_pos(m_rng);
     }

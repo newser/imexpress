@@ -3,16 +3,6 @@
 #include <rand/beta.h>
 #include <rand/binomial.h>
 #include <rand/mul_gauss.h>
-#include <randist/expow.h>
-#include <randist/f.h>
-#include <randist/flat.h>
-#include <randist/gamma.h>
-#include <randist/gauss.h>
-#include <randist/gauss_tail.h>
-#include <randist/geometric.h>
-#include <randist/gumbel1.h>
-#include <randist/gumbel2.h>
-#include <randist/hyper_geometric.h>
 #include <randist/landau.h>
 #include <randist/laplace.h>
 #include <randist/lgnorm.h>
@@ -32,63 +22,6 @@
 
 using namespace iexp;
 using namespace std;
-
-TEST_CASE("randist_gauss")
-{
-    VectorXd v = VectorXd::LinSpaced(10, -5, 5);
-    VectorXd v2 = rdist::gauss_pdf(v.array(), 2.0);
-
-    Matrix2Xd m = Matrix2Xd::Random(2, 10);
-    Matrix2Xd m2 = rdist::gauss_pdf(m.array(), 2.0);
-
-    // test compile
-    v2 = rdist::gauss_pdf(v.array(), 2.0) + rdist::gauss_pdf(v.array(), 2.0);
-    m2 = rdist::gauss_pdf(m.array() + m.array(), 2.0);
-
-#if 0 // #ifdef IEXP_MGL2
-    VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
-    VectorXd vv2 = rdist::gauss_pdf(vv.array(), 2.0);
-
-    mglData x(100), y(100);
-    x.Link(vv.data(), vv.size());
-    y.Link(vv2.data(), vv2.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(-5, 5, 0, 1);
-    gr.Axis();
-    gr.Plot(x, y, "+");
-    gr.WriteFrame("gauss_pdf.png");
-#endif
-}
-
-TEST_CASE("randist_gausst")
-{
-    VectorXd v = VectorXd::LinSpaced(10, -5, 5);
-    VectorXd v2 = rdist::gausst_pdf(v.array(), 1.5, 2.0);
-
-    Matrix2Xd m = Matrix2Xd::Random(2, 10);
-    Matrix2Xd m2 = rdist::gausst_pdf(m.array(), 1.5, 2.0);
-
-    // test compile
-    v2 = rdist::gausst_pdf(v.array(), 1.5, 2.0) +
-         rdist::gausst_pdf(v.array(), 1.5, 2.0);
-    m2 = rdist::gausst_pdf(m.array() + m.array(), 1.5, 2.0);
-
-#if 0 // #ifdef IEXP_MGL2
-    VectorXd vv = VectorXd::LinSpaced(100, 0, 5);
-    VectorXd vv2 = rdist::gausst_pdf(vv.array(), 1.5, 1.0);
-
-    mglData x(100), y(100);
-    x.Link(vv.data(), vv.size());
-    y.Link(vv2.data(), vv2.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 5, 0, 2);
-    gr.Axis();
-    gr.Plot(x, y, "+");
-    gr.WriteFrame("gausst_pdf.png");
-#endif
-}
 
 TEST_CASE("randist_mgauss")
 {
@@ -161,35 +94,6 @@ TEST_CASE("randist_laplace")
     gr.Axis();
     gr.Plot(x, y, "+");
     gr.WriteFrame("laplace_pdf.png");
-#endif
-}
-
-TEST_CASE("randist_expow")
-{
-    VectorXd v = VectorXd::LinSpaced(10, 0, 3);
-    VectorXd v2 = rdist::expow_pdf(v.array(), 2.0, 3.0);
-
-    Matrix2Xd m = Matrix2Xd::Random(2, 10);
-    Matrix2Xd m2 = rdist::expow_pdf(m.array(), 2.0, 3.0);
-
-    // test compile
-    v2 = rdist::expow_pdf(v.array(), 2.0, 3.0) +
-         rdist::expow_pdf(v.array(), 2.0, 3.0);
-    m2 = rdist::expow_pdf(m.array() + m.array(), 2.0, 3.0);
-
-#if 0 // #ifdef Iexpow_MGL2
-    VectorXd vv = VectorXd::LinSpaced(100, -3, 3);
-    VectorXd vv2 = rdist::expow_pdf(vv.array(), 1.0, 2.5);
-    
-    mglData x(100), y(100);
-    x.Link(vv.data(), vv.size());
-    y.Link(vv2.data(), vv2.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(-3, 3, 0, 1);
-    gr.Axis();
-    gr.Plot(x, y, "+");
-    gr.WriteFrame("expow_pdf.png");
 #endif
 }
 
@@ -278,62 +182,6 @@ TEST_CASE("randist_laudau")
 #endif
 }
 
-TEST_CASE("randist_gamma")
-{
-    VectorXd v = VectorXd::LinSpaced(10, 0, 3);
-    VectorXd v2 = rdist::gamma_pdf(v.array(), 1, 1);
-
-    Matrix2Xd m = Matrix2Xd::Random(2, 10);
-    Matrix2Xd m2 = rdist::gamma_pdf(m.array(), 1, 1);
-
-    // test compile
-    v2 = rdist::gamma_pdf(v.array(), 1, 1) + rdist::gamma_pdf(v.array(), 1, 1);
-    m2 = rdist::gamma_pdf(m.array() + m.array(), 1, 1);
-
-#if 0 // #ifdef Icauchy_MGL2
-    VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
-    VectorXd vv2 = rdist::gamma_pdf(vv.array(), 1, 1);
-    
-    mglData x(100), y(100);
-    x.Link(vv.data(), vv.size());
-    y.Link(vv2.data(), vv2.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(-5, 5, 0, 1);
-    gr.Axis();
-    gr.Plot(x, y, "+");
-    gr.WriteFrame("gamma_pdf.png");
-#endif
-}
-
-TEST_CASE("randist_flat")
-{
-    VectorXd v = VectorXd::LinSpaced(10, 0, 3);
-    VectorXd v2 = rdist::flat_pdf(v.array(), 0, 1);
-
-    Matrix2Xd m = Matrix2Xd::Random(2, 10);
-    Matrix2Xd m2 = rdist::flat_pdf(m.array(), 0, 1);
-
-    // test compile
-    v2 = rdist::flat_pdf(v.array(), 0, 1) + rdist::flat_pdf(v.array(), 0, 1);
-    m2 = rdist::flat_pdf(m.array() + m.array(), 0, 1);
-
-#if 0 // #ifdef Icauchy_MGL2
-    VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
-    VectorXd vv2 = rdist::flat_pdf(vv.array(), 0.5, 2.5);
-    
-    mglData x(100), y(100);
-    x.Link(vv.data(), vv.size());
-    y.Link(vv2.data(), vv2.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 5, 0, 1);
-    gr.Axis();
-    gr.Plot(x, y, "+");
-    gr.WriteFrame("flat_pdf.png");
-#endif
-}
-
 TEST_CASE("randist_lognormal")
 {
     VectorXd v = VectorXd::LinSpaced(10, 0, 3);
@@ -360,34 +208,6 @@ TEST_CASE("randist_lognormal")
     gr.Axis();
     gr.Plot(x, y, "+");
     gr.WriteFrame("lgnorm_pdf.png");
-#endif
-}
-
-TEST_CASE("randist_f")
-{
-    VectorXd v = VectorXd::LinSpaced(10, 0, 3);
-    VectorXd v2 = rdist::f_pdf(v.array(), 1, 2);
-
-    Matrix2Xd m = Matrix2Xd::Random(2, 10);
-    Matrix2Xd m2 = rdist::f_pdf(m.array(), 1, 2);
-
-    // test compile
-    v2 = rdist::f_pdf(v.array(), 1, 2) + rdist::f_pdf(v.array(), 1, 2);
-    m2 = rdist::f_pdf(m.array() + m.array(), 1, 2);
-
-#if 0 // #ifdef Icauchy_MGL2
-    VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
-    VectorXd vv2 = rdist::f_pdf(vv.array(), 3, 2);
-    
-    mglData x(100), y(100);
-    x.Link(vv.data(), vv.size());
-    y.Link(vv2.data(), vv2.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 5, 0, 1);
-    gr.Axis();
-    gr.Plot(x, y, "+");
-    gr.WriteFrame("f_pdf.png");
 #endif
 }
 
@@ -504,62 +324,6 @@ TEST_CASE("randist_weibull")
 #endif
 }
 
-TEST_CASE("randist_gumbel1")
-{
-    VectorXd v = VectorXd::LinSpaced(10, 0, 3);
-    VectorXd v2 = rdist::gbl1_pdf(v.array(), 2, 3);
-
-    Matrix2Xd m = Matrix2Xd::Random(2, 10);
-    Matrix2Xd m2 = rdist::gbl1_pdf(m.array(), 2, 3);
-
-    // test compile
-    v2 = rdist::gbl1_pdf(v.array(), 2, 3) + rdist::gbl1_pdf(v.array(), 2, 3);
-    m2 = rdist::gbl1_pdf(m.array() + m.array(), 2, 3);
-
-#if 0 // #ifdef Icauchy_MGL2
-    VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
-    VectorXd vv2 = rdist::gbl1_pdf(vv.array(), 1, 1);
-    
-    mglData x(100), y(100);
-    x.Link(vv.data(), vv.size());
-    y.Link(vv2.data(), vv2.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(-5, 5, 0, 1);
-    gr.Axis();
-    gr.Plot(x, y, "+");
-    gr.WriteFrame("gbl1_pdf.png");
-#endif
-}
-
-TEST_CASE("randist_gumbel2")
-{
-    VectorXd v = VectorXd::LinSpaced(10, 0, 3);
-    VectorXd v2 = rdist::gbl2_pdf(v.array(), 2, 3);
-
-    Matrix2Xd m = Matrix2Xd::Random(2, 10);
-    Matrix2Xd m2 = rdist::gbl2_pdf(m.array(), 2, 3);
-
-    // test compile
-    v2 = rdist::gbl2_pdf(v.array(), 2, 3) + rdist::gbl2_pdf(v.array(), 2, 3);
-    m2 = rdist::gbl2_pdf(m.array() + m.array(), 2, 3);
-
-#if 0 // #ifdef Icauchy_MGL2
-    VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
-    VectorXd vv2 = rdist::gbl2_pdf(vv.array(), 1, 1);
-
-    mglData x(100), y(100);
-    x.Link(vv.data(), vv.size());
-    y.Link(vv2.data(), vv2.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 5, 0, 1);
-    gr.Axis();
-    gr.Plot(x, y, "+");
-    gr.WriteFrame("gbl2_pdf.png");
-#endif
-}
-
 TEST_CASE("randist_poisson")
 {
     VectorXd v = VectorXd::LinSpaced(10, 0, 3);
@@ -656,62 +420,6 @@ TEST_CASE("randist_pascal")
 #endif
 }
 
-TEST_CASE("randist_geometric")
-{
-    VectorXi v = VectorXi::LinSpaced(10, 0, 3);
-    VectorXd v2 = rdist::geo_pdf(v.array(), 0.5);
-
-    Matrix2Xi m = Matrix2Xi::Random(2, 10);
-    Matrix2Xd m2 = rdist::geo_pdf(m.array(), 0.5);
-
-    // test compile
-    v2 = rdist::geo_pdf(v.array(), 0.5) + rdist::geo_pdf(v.array(), 0.5);
-    m2 = rdist::geo_pdf(m.array() + m.array(), 0.5);
-
-#if 0 // #ifdef Icauchy_MGL2
-    VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
-    VectorXd vv2 = rdist::geo_pdf(vv.cast<unsigned int>().array(), 0.5);
-    
-    mglData x(100), y(100);
-    x.Link(vv.data(), vv.size());
-    y.Link(vv2.data(), vv2.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 10, 0, 1);
-    gr.Axis();
-    gr.Plot(x, y, "+");
-    gr.WriteFrame("geometric_pdf.png");
-#endif
-}
-
-TEST_CASE("randist_hyper_geometric")
-{
-    VectorXi v = VectorXi::LinSpaced(10, 0, 3);
-    VectorXd v2 = rdist::hgeo_pdf(v.array(), 1, 2, 3);
-
-    Matrix2Xi m = Matrix2Xi::Random(2, 10);
-    Matrix2Xd m2 = rdist::hgeo_pdf(m.array(), 1, 2, 3);
-
-    // test compile
-    v2 = rdist::hgeo_pdf(v.array(), 1, 2, 3) + rdist::geo_pdf(v.array(), 0.5);
-    m2 = rdist::hgeo_pdf(m.array() + m.array(), 1, 2, 3);
-
-#if 0 // #ifdef Icauchy_MGL2
-    VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
-    VectorXd vv2 = rdist::hgeo_pdf(vv.cast<unsigned int>().array(), 5, 20, 3);
-
-    mglData x(100), y(100);
-    x.Link(vv.data(), vv.size());
-    y.Link(vv2.data(), vv2.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 10, 0, 1);
-    gr.Axis();
-    gr.Plot(x, y, "+");
-    gr.WriteFrame("hgeo_pdf.png");
-#endif
-}
-
 TEST_CASE("randist_log")
 {
     VectorXi v = VectorXi::LinSpaced(10, 0, 3);
@@ -721,7 +429,7 @@ TEST_CASE("randist_log")
     Matrix2Xd m2 = rdist::log_pdf(m.array(), 0.5);
 
     // test compile
-    v2 = rdist::log_pdf(v.array(), 0.5) + rdist::geo_pdf(v.array(), 0.5);
+    v2 = rdist::log_pdf(v.array(), 0.5) + rdist::log_pdf(v.array(), 0.5);
     m2 = rdist::log_pdf(m.array() + m.array(), 0.5);
 
 #if 0 // #ifdef Icauchy_MGL2

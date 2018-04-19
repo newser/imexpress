@@ -65,7 +65,7 @@ class beta
         {
         }
 
-        void seed(unsigned long seed)
+        void seed(unsigned long seed) const
         {
             m_rng.seed(seed);
         }

@@ -41,51 +41,144 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class gauss_rng
+class gauss
 {
+    template <typename T>
+    class pdf_functor;
+
   public:
-    gauss_rng(double sigma = 1.0,
-              rng::type type = DEFAULT_RNG_TYPE,
-              unsigned long seed = 0)
-        : m_sigma(sigma)
-        , m_rng(type, seed)
+    // ========================================
+    // generator
+    // ========================================
+
+    class rng
     {
+      public:
+        rng(double sigma = 1.0,
+            rand::rng::type type = DEFAULT_RNG_TYPE,
+            unsigned long seed = 0)
+            : m_sigma(sigma)
+            , m_rng(type, seed)
+        {
+        }
+
+        void seed(unsigned long seed)
+        {
+            m_rng.seed(seed);
+        }
+
+        double next()
+        {
+            return gsl_ran_gaussian_ziggurat(m_rng.gsl(), m_sigma);
+        }
+
+      private:
+        double m_sigma;
+        rand::rng m_rng;
+    };
+
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x,
+                            double sigma = 1.0,
+                            unsigned long seed = 0,
+                            rand::rng::type type = DEFAULT_RNG_TYPE)
+        -> decltype(x.derived())
+    {
+        gauss::rng r(sigma, type, seed);
+        return fill(x, r);
     }
 
-    void seed(unsigned long seed)
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x, gauss::rng &r)
+        -> decltype(x.derived())
     {
-        m_rng.seed(seed);
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "only support double scalar");
+
+        double *data = x.derived().data();
+        for (Index i = 0; i < x.size(); ++i) {
+            data[i] = r.next();
+        }
+        return x.derived();
     }
 
-    double next()
+    // ========================================
+    // distribution
+    // ========================================
+
+    class dist
     {
-        return gsl_ran_gaussian_ziggurat(m_rng.gsl(), m_sigma);
+      public:
+        dist(double sigma = 1.0)
+            : m_sigma(sigma)
+        {
+        }
+
+        double pdf(double x) const
+        {
+            return gsl_ran_gaussian_pdf(x, m_sigma);
+        }
+
+        double p(double x) const
+        {
+            return gsl_cdf_gaussian_P(x, m_sigma);
+        }
+
+        double invp(double x) const
+        {
+            return gsl_cdf_gaussian_Pinv(x, m_sigma);
+        }
+
+        double q(double x) const
+        {
+            return gsl_cdf_gaussian_Q(x, m_sigma);
+        }
+
+        double invq(double x) const
+        {
+            return gsl_cdf_gaussian_Qinv(x, m_sigma);
+        }
+
+      private:
+        double m_sigma;
+    };
+
+    template <typename T>
+    static inline CwiseNullaryOp<pdf_functor<T>,
+                                 typename pdf_functor<T>::ResultType>
+    pdf(const DenseBase<T> &x, double sigma)
+    {
+        using ResultType = typename pdf_functor<T>::ResultType;
+        return ResultType::NullaryExpr(x.rows(),
+                                       x.cols(),
+                                       pdf_functor<T>(x.derived(), sigma));
     }
 
   private:
-    double m_sigma;
-    rng m_rng;
+    gauss() = delete;
+
+    template <typename T>
+    class pdf_functor
+    {
+      public:
+        using ResultType = typename dense_derive<T, double>::type;
+
+        pdf_functor(const T &x, double sigma)
+            : m_x(x)
+            , m_dist(sigma)
+        {
+        }
+
+        double operator()(Index i, Index j) const
+        {
+            return m_dist.pdf(m_x(i, j));
+        }
+
+      private:
+        const T &m_x;
+        dist m_dist;
+    };
 };
-
-template <typename T>
-inline auto gauss_rand(DenseBase<T> &x,
-                       typename T::Scalar sigma = 1.0,
-                       unsigned long seed = 0,
-                       rng::type type = DEFAULT_RNG_TYPE)
-    -> decltype(x.derived())
-{
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "scalar can only be double");
-
-    gauss_rng r(sigma, type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
-    }
-
-    return x.derived();
-}
 
 ////////////////////////////////////////////////////////////
 // global variants

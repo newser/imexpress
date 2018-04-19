@@ -41,54 +41,148 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class gbl2_rng
+class gbl2
 {
+    template <typename T>
+    class pdf_functor;
+
   public:
-    gbl2_rng(double a,
-             double b,
-             rng::type type = DEFAULT_RNG_TYPE,
-             unsigned long seed = 0)
-        : m_a(a)
-        , m_b(b)
-        , m_rng(type, seed)
+    // ========================================
+    // generator
+    // ========================================
+
+    class rng
     {
+      public:
+        rng(double a,
+            double b,
+            rand::rng::type type = DEFAULT_RNG_TYPE,
+            unsigned long seed = 0)
+            : m_a(a)
+            , m_b(b)
+            , m_rng(type, seed)
+        {
+        }
+
+        void seed(unsigned long seed)
+        {
+            m_rng.seed(seed);
+        }
+
+        double next()
+        {
+            return gsl_ran_gumbel2(m_rng.gsl(), m_a, m_b);
+        }
+
+      private:
+        double m_a, m_b;
+        rand::rng m_rng;
+    };
+
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x,
+                            double a,
+                            double b,
+                            unsigned long seed = 0,
+                            rand::rng::type type = DEFAULT_RNG_TYPE)
+        -> decltype(x.derived())
+    {
+        gbl2::rng r(a, b, type, seed);
+        return fill(x, r);
     }
 
-    void seed(unsigned long seed)
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x, gbl2::rng &r)
+        -> decltype(x.derived())
     {
-        m_rng.seed(seed);
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "only support double scalar");
+
+        double *data = x.derived().data();
+        for (Index i = 0; i < x.size(); ++i) {
+            data[i] = r.next();
+        }
+        return x.derived();
     }
 
-    double next()
+    // ========================================
+    // distribution
+    // ========================================
+
+    class dist
     {
-        return gsl_ran_gumbel2(m_rng.gsl(), m_a, m_b);
+      public:
+        dist(double a, double b)
+            : m_a(a)
+            , m_b(b)
+        {
+        }
+
+        double pdf(double x) const
+        {
+            return gsl_ran_gumbel2_pdf(x, m_a, m_b);
+        }
+
+        double p(double x) const
+        {
+            return gsl_cdf_gumbel2_P(x, m_a, m_b);
+        }
+
+        double invp(double x) const
+        {
+            return gsl_cdf_gumbel2_Pinv(x, m_a, m_b);
+        }
+
+        double q(double x) const
+        {
+            return gsl_cdf_gumbel2_Q(x, m_a, m_b);
+        }
+
+        double invq(double x) const
+        {
+            return gsl_cdf_gumbel2_Qinv(x, m_a, m_b);
+        }
+
+      private:
+        double m_a, m_b;
+    };
+
+    template <typename T>
+    static inline CwiseNullaryOp<pdf_functor<T>,
+                                 typename pdf_functor<T>::ResultType>
+    pdf(const DenseBase<T> &x, double a, double b)
+    {
+        using ResultType = typename pdf_functor<T>::ResultType;
+        return ResultType::NullaryExpr(x.rows(),
+                                       x.cols(),
+                                       pdf_functor<T>(x.derived(), a, b));
     }
 
   private:
-    double m_a, m_b;
-    rng m_rng;
+    gbl2() = delete;
+
+    template <typename T>
+    class pdf_functor
+    {
+      public:
+        using ResultType = typename dense_derive<T, double>::type;
+
+        pdf_functor(const T &x, double a, double b)
+            : m_x(x)
+            , m_dist(a, b)
+        {
+        }
+
+        double operator()(Index i, Index j) const
+        {
+            return m_dist.pdf(m_x(i, j));
+        }
+
+      private:
+        const T &m_x;
+        dist m_dist;
+    };
 };
-
-template <typename T>
-inline auto gbl2_rand(DenseBase<T> &x,
-                      typename T::Scalar a,
-                      typename T::Scalar b,
-                      unsigned long seed = 0,
-                      rng::type type = DEFAULT_RNG_TYPE)
-    -> decltype(x.derived())
-{
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "scalar can only be double");
-
-    gbl2_rng r(a, b, type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
-    }
-
-    return x.derived();
-}
 
 ////////////////////////////////////////////////////////////
 // global variants

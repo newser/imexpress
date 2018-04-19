@@ -41,53 +41,147 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class f_rng
+class f
 {
+    template <typename T>
+    class pdf_functor;
+
   public:
-    f_rng(double nu1,
-          double nu2,
-          rng::type type = DEFAULT_RNG_TYPE,
-          unsigned long seed = 0)
-        : m_nu1(nu1)
-        , m_nu2(nu2)
-        , m_rng(type, seed)
+    // ========================================
+    // generator
+    // ========================================
+
+    class rng
     {
+      public:
+        rng(double nu1,
+            double nu2,
+            rand::rng::type type = DEFAULT_RNG_TYPE,
+            unsigned long seed = 0)
+            : m_nu1(nu1)
+            , m_nu2(nu2)
+            , m_rng(type, seed)
+        {
+        }
+
+        void seed(unsigned long seed)
+        {
+            m_rng.seed(seed);
+        }
+
+        double next()
+        {
+            return gsl_ran_fdist(m_rng.gsl(), m_nu1, m_nu2);
+        }
+
+      private:
+        double m_nu1, m_nu2;
+        rand::rng m_rng;
+    };
+
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x,
+                            double nu1,
+                            double nu2,
+                            unsigned long seed = 0,
+                            rand::rng::type type = DEFAULT_RNG_TYPE)
+        -> decltype(x.derived())
+    {
+        f::rng r(nu1, nu2, type, seed);
+        return fill(x, r);
     }
 
-    void seed(unsigned long seed)
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x, f::rng &r) -> decltype(x.derived())
     {
-        m_rng.seed(seed);
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "only support double scalar");
+
+        double *data = x.derived().data();
+        for (Index i = 0; i < x.size(); ++i) {
+            data[i] = r.next();
+        }
+        return x.derived();
     }
 
-    double next()
+    // ========================================
+    // distribution
+    // ========================================
+
+    class dist
     {
-        return gsl_ran_fdist(m_rng.gsl(), m_nu1, m_nu2);
+      public:
+        dist(double nu1, double nu2)
+            : m_nu1(nu1)
+            , m_nu2(nu2)
+        {
+        }
+
+        double pdf(double x) const
+        {
+            return gsl_ran_fdist_pdf(x, m_nu1, m_nu2);
+        }
+
+        double p(double x) const
+        {
+            return gsl_cdf_fdist_P(x, m_nu1, m_nu2);
+        }
+
+        double invp(double x) const
+        {
+            return gsl_cdf_fdist_Pinv(x, m_nu1, m_nu2);
+        }
+
+        double q(double x) const
+        {
+            return gsl_cdf_fdist_Q(x, m_nu1, m_nu2);
+        }
+
+        double invq(double x) const
+        {
+            return gsl_cdf_fdist_Qinv(x, m_nu1, m_nu2);
+        }
+
+      private:
+        double m_nu1, m_nu2;
+    };
+
+    template <typename T>
+    static inline CwiseNullaryOp<pdf_functor<T>,
+                                 typename pdf_functor<T>::ResultType>
+    pdf(const DenseBase<T> &x, double nu1, double nu2)
+    {
+        using ResultType = typename pdf_functor<T>::ResultType;
+        return ResultType::NullaryExpr(x.rows(),
+                                       x.cols(),
+                                       pdf_functor<T>(x.derived(), nu1, nu2));
     }
 
   private:
-    double m_nu1, m_nu2;
-    rng m_rng;
+    f() = delete;
+
+    template <typename T>
+    class pdf_functor
+    {
+      public:
+        using ResultType = typename dense_derive<T, double>::type;
+
+        pdf_functor(const T &x, double nu1, double nu2)
+            : m_x(x)
+            , m_dist(nu1, nu2)
+        {
+        }
+
+        double operator()(Index i, Index j) const
+        {
+            return m_dist.pdf(m_x(i, j));
+        }
+
+      private:
+        const T &m_x;
+        dist m_dist;
+    };
 };
-
-template <typename T>
-inline auto f_rand(DenseBase<T> &x,
-                   typename T::Scalar nu1,
-                   typename T::Scalar nu2,
-                   unsigned long seed = 0,
-                   rng::type type = DEFAULT_RNG_TYPE) -> decltype(x.derived())
-{
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "scalar can only be double");
-
-    f_rng r(nu1, nu2, type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
-    }
-
-    return x.derived();
-}
 
 ////////////////////////////////////////////////////////////
 // global variants
