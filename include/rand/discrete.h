@@ -109,7 +109,7 @@ class discrete
 
         typename T::Scalar *data = x.derived().data();
         for (Index i = 0; i < x.size(); ++i) {
-            data[i] = r.next();
+            data[i] = (typename T::Scalar)r.next();
         }
         return x.derived();
     }

@@ -41,51 +41,144 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class exp_rng
+class exp
 {
+    template <typename T>
+    class pdf_functor;
+
   public:
-    exp_rng(double mu,
-            rng::type type = DEFAULT_RNG_TYPE,
+    // ========================================
+    // generator
+    // ========================================
+
+    class rng
+    {
+      public:
+        rng(double mu,
+            rand::rng::type type = DEFAULT_RNG_TYPE,
             unsigned long seed = 0)
-        : m_mu(mu)
-        , m_rng(type, seed)
+            : m_mu(mu)
+            , m_rng(type, seed)
+        {
+        }
+
+        void seed(unsigned long seed)
+        {
+            m_rng.seed(seed);
+        }
+
+        double next()
+        {
+            return gsl_ran_exponential(m_rng.gsl(), m_mu);
+        }
+
+      private:
+        double m_mu;
+        rand::rng m_rng;
+    };
+
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x,
+                            double mu,
+                            unsigned long seed = 0,
+                            rand::rng::type type = DEFAULT_RNG_TYPE)
+        -> decltype(x.derived())
     {
+        exp::rng r(mu, type, seed);
+        return fill(x, r);
     }
 
-    void seed(unsigned long seed)
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x, exp::rng &r)
+        -> decltype(x.derived())
     {
-        m_rng.seed(seed);
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "only support double scalar");
+
+        double *data = x.derived().data();
+        for (Index i = 0; i < x.size(); ++i) {
+            data[i] = r.next();
+        }
+        return x.derived();
     }
 
-    double next()
+    // ========================================
+    // distribution
+    // ========================================
+
+    class dist
     {
-        return gsl_ran_exponential(m_rng.gsl(), m_mu);
+      public:
+        dist(double mu)
+            : m_mu(mu)
+        {
+        }
+
+        double pdf(double x) const
+        {
+            return gsl_ran_exponential_pdf(x, m_mu);
+        }
+
+        double p(double x) const
+        {
+            return gsl_cdf_exponential_P(x, m_mu);
+        }
+
+        double invp(double x) const
+        {
+            return gsl_cdf_exponential_Pinv(x, m_mu);
+        }
+
+        double q(double x) const
+        {
+            return gsl_cdf_exponential_Q(x, m_mu);
+        }
+
+        double invq(double x) const
+        {
+            return gsl_cdf_exponential_Qinv(x, m_mu);
+        }
+
+      private:
+        double m_mu;
+    };
+
+    template <typename T>
+    static inline CwiseNullaryOp<pdf_functor<T>,
+                                 typename pdf_functor<T>::ResultType>
+    pdf(const DenseBase<T> &x, double mu)
+    {
+        using ResultType = typename pdf_functor<T>::ResultType;
+        return ResultType::NullaryExpr(x.rows(),
+                                       x.cols(),
+                                       pdf_functor<T>(x.derived(), mu));
     }
 
   private:
-    double m_mu;
-    rng m_rng;
+    exp() = delete;
+
+    template <typename T>
+    class pdf_functor
+    {
+      public:
+        using ResultType = typename dense_derive<T, double>::type;
+
+        pdf_functor(const T &x, double mu)
+            : m_x(x)
+            , m_dist(mu)
+        {
+        }
+
+        double operator()(Index i, Index j) const
+        {
+            return m_dist.pdf((double)m_x(i, j));
+        }
+
+      private:
+        const T &m_x;
+        dist m_dist;
+    };
 };
-
-template <typename T>
-inline auto exp_rand(DenseBase<T> &x,
-                     typename T::Scalar mu,
-                     unsigned long seed = 0,
-                     rng::type type = DEFAULT_RNG_TYPE) -> decltype(x.derived())
-{
-    exp_rng r(mu, type, seed);
-    return exp_rand(x, r);
-}
-
-template <typename T>
-inline auto exp_rand(DenseBase<T> &x, exp_rng &r) -> decltype(x.derived())
-{
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        data[i] = static_cast<typename T::Scalar>(r.next());
-    }
-    return x.derived();
-}
 
 ////////////////////////////////////////////////////////////
 // global variants

@@ -341,35 +341,64 @@ TEST_CASE("test_mul_normal")
 
 TEST_CASE("test_exp_rand")
 {
-    iexp::VectorXd v(10), v2(10);
+    {
+        iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::exp_rand(v, 1.0);
-    REQUIRE(&vr == &v);
+        iexp::VectorXd &vr = rand::exp::fill(v, 1.0);
+        REQUIRE(&vr == &v);
 
-    v2 = rand::exp_rand(v, 2.0) + rand::exp_rand(v, 3.0);
+        v2 = rand::exp::fill(v, 2.0) + rand::exp::fill(v, 3.0);
 
-    iexp::MatrixXd w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::exp_rand(w, 2.0);
-    w2 = rand::exp_rand(w, 3.3) + rand::exp_rand(w, 4.4) +
-         rand::exp_rand(w, 5.5);
+        iexp::MatrixXd w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::exp::fill(w, 2.0);
+        w2 = rand::exp::fill(w, 3.3) + rand::exp::fill(w, 4.4) +
+             rand::exp::fill(w, 5.5);
 
-    iexp::MatrixXd &wr = rand::exp_rand(w, 99);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXd &wr = rand::exp::fill(w, 99);
+        REQUIRE(&wr == &w);
 
-#if 0 // #ifdef IEXP_MGL2
-    VectorXd v1(100);
-    rand::exp_rand(v1, 1.0);
-    
-    mglData y(100);
-    y.Link(v1.data(), v1.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(0, 100, -1, 10);
-    gr.Axis();
-    gr.Plot(y, "+");
-    gr.WriteFrame("exp_rand.png");
+#if 1 // #ifdef IEXP_MGL2
+        VectorXd v1(100);
+        rand::exp::fill(v1, 1.0);
+
+        mglData y(100);
+        y.Link(v1.data(), v1.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(0, 100, -1, 10);
+        gr.Axis();
+        gr.Plot(y, "+");
+        gr.WriteFrame("exp_rand.png");
 #endif
+    }
+
+    {
+        VectorXd v = VectorXd::LinSpaced(10, 0, 3);
+        VectorXd v2 = rand::exp::pdf(v.array(), 2.0);
+
+        Matrix2Xd m = Matrix2Xd::Random(2, 10);
+        Matrix2Xd m2 = rand::exp::pdf(m.array(), 2.0);
+
+        // test compile
+        v2 = rand::exp::pdf(v.array(), 2.0) + rand::exp::pdf(v.array(), 2.0);
+        m2 = rand::exp::pdf(m.array() + m.array(), 2.0);
+
+#if 1 // #ifdef IEXP_MGL2
+        VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
+        VectorXd vv2 = rand::exp::pdf(vv.array(), 1.0);
+
+        mglData x(100), y(100);
+        x.Link(vv.data(), vv.size());
+        y.Link(vv2.data(), vv2.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(-5, 5, 0, 1);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("exp_pdf.png");
+#endif
+    }
 }
 
 TEST_CASE("test_laplace_rand")
