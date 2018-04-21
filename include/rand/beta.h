@@ -99,7 +99,7 @@ class beta
         static_assert(TYPE_IS(typename T::Scalar, double),
                       "only support double scalar");
 
-        typename T::Scalar *data = x.derived().data();
+        double *data = x.derived().data();
         for (Index i = 0; i < x.size(); ++i) {
             data[i] = r.next();
         }

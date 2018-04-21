@@ -41,51 +41,144 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class lgst_rng
+class lgst
 {
+    template <typename T>
+    class pdf_functor;
+
   public:
-    lgst_rng(double a,
-             rng::type type = DEFAULT_RNG_TYPE,
-             unsigned long seed = 0)
-        : m_a(a)
-        , m_rng(type, seed)
+    // ========================================
+    // generator
+    // ========================================
+
+    class rng
     {
+      public:
+        rng(double a,
+            rand::rng::type type = DEFAULT_RNG_TYPE,
+            unsigned long seed = 0)
+            : m_a(a)
+            , m_rng(type, seed)
+        {
+        }
+
+        void seed(unsigned long seed)
+        {
+            m_rng.seed(seed);
+        }
+
+        double next()
+        {
+            return gsl_ran_logistic(m_rng.gsl(), m_a);
+        }
+
+      private:
+        double m_a;
+        rand::rng m_rng;
+    };
+
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x,
+                            double a,
+                            unsigned long seed = 0,
+                            rand::rng::type type = DEFAULT_RNG_TYPE)
+        -> decltype(x.derived())
+    {
+        lgst::rng r(a, type, seed);
+        return fill(x, r);
     }
 
-    void seed(unsigned long seed)
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x, lgst::rng &r)
+        -> decltype(x.derived())
     {
-        m_rng.seed(seed);
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "only support double scalar");
+
+        double *data = x.derived().data();
+        for (Index i = 0; i < x.size(); ++i) {
+            data[i] = r.next();
+        }
+        return x.derived();
     }
 
-    double next()
+    // ========================================
+    // distribution
+    // ========================================
+
+    class dist
     {
-        return gsl_ran_logistic(m_rng.gsl(), m_a);
+      public:
+        dist(double a)
+            : m_a(a)
+        {
+        }
+
+        double pdf(double x) const
+        {
+            return gsl_ran_logistic_pdf(x, m_a);
+        }
+
+        double p(double x) const
+        {
+            return gsl_cdf_logistic_P(x, m_a);
+        }
+
+        double invp(double x) const
+        {
+            return gsl_cdf_logistic_Pinv(x, m_a);
+        }
+
+        double q(double x) const
+        {
+            return gsl_cdf_logistic_Q(x, m_a);
+        }
+
+        double invq(double x) const
+        {
+            return gsl_cdf_logistic_Qinv(x, m_a);
+        }
+
+      private:
+        double m_a;
+    };
+
+    template <typename T>
+    static inline CwiseNullaryOp<pdf_functor<T>,
+                                 typename pdf_functor<T>::ResultType>
+    pdf(const DenseBase<T> &x, double a)
+    {
+        using ResultType = typename pdf_functor<T>::ResultType;
+        return ResultType::NullaryExpr(x.rows(),
+                                       x.cols(),
+                                       pdf_functor<T>(x.derived(), a));
     }
 
   private:
-    double m_a;
-    rng m_rng;
+    lgst() = delete;
+
+    template <typename T>
+    class pdf_functor
+    {
+      public:
+        using ResultType = typename dense_derive<T, double>::type;
+
+        pdf_functor(const T &x, double a)
+            : m_x(x)
+            , m_dist(a)
+        {
+        }
+
+        double operator()(Index i, Index j) const
+        {
+            return m_dist.pdf(m_x(i, j));
+        }
+
+      private:
+        const T &m_x;
+        dist m_dist;
+    };
 };
-
-template <typename T>
-inline auto lgst_rand(DenseBase<T> &x,
-                      typename T::Scalar a,
-                      unsigned long seed = 0,
-                      rng::type type = DEFAULT_RNG_TYPE)
-    -> decltype(x.derived())
-{
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "scalar can only be double");
-
-    lgst_rng r(a, type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
-    }
-
-    return x.derived();
-}
 
 ////////////////////////////////////////////////////////////
 // global variants

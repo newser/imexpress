@@ -145,6 +145,7 @@ class eval_deriv_functor
 {
   public:
     using Scalar = typename T::Scalar;
+    // return a colume
     using ResultType = typename dense_derive<T,
                                              Scalar,
                                              row_form ? 1 : Dynamic,

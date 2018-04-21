@@ -41,46 +41,115 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class landau_rng
+class landau
 {
+    template <typename T>
+    class pdf_functor;
+
   public:
-    landau_rng(rng::type type = DEFAULT_RNG_TYPE, unsigned long seed = 0)
-        : m_rng(type, seed)
+    // ========================================
+    // generator
+    // ========================================
+
+    class rng
     {
+      public:
+        rng(rand::rng::type type = DEFAULT_RNG_TYPE, unsigned long seed = 0)
+            : m_rng(type, seed)
+        {
+        }
+
+        void seed(unsigned long seed)
+        {
+            m_rng.seed(seed);
+        }
+
+        double next()
+        {
+            return gsl_ran_landau(m_rng.gsl());
+        }
+
+      private:
+        rand::rng m_rng;
+    };
+
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x,
+                            unsigned long seed = 0,
+                            rand::rng::type type = DEFAULT_RNG_TYPE)
+        -> decltype(x.derived())
+    {
+        landau::rng r(type, seed);
+        return fill(x, r);
     }
 
-    void seed(unsigned long seed)
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x, landau::rng &r)
+        -> decltype(x.derived())
     {
-        m_rng.seed(seed);
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "only support double scalar");
+
+        double *data = x.derived().data();
+        for (Index i = 0; i < x.size(); ++i) {
+            data[i] = r.next();
+        }
+        return x.derived();
     }
 
-    double next()
+    // ========================================
+    // distribution
+    // ========================================
+
+    class dist
     {
-        return gsl_ran_landau(m_rng.gsl());
+      public:
+        dist()
+        {
+        }
+
+        double pdf(double x) const
+        {
+            return gsl_ran_landau_pdf(x);
+        }
+    };
+
+    template <typename T>
+    static inline CwiseNullaryOp<pdf_functor<T>,
+                                 typename pdf_functor<T>::ResultType>
+    pdf(const DenseBase<T> &x)
+    {
+        using ResultType = typename pdf_functor<T>::ResultType;
+        return ResultType::NullaryExpr(x.rows(),
+                                       x.cols(),
+                                       pdf_functor<T>(x.derived()));
     }
 
   private:
-    rng m_rng;
+    landau() = delete;
+
+    template <typename T>
+    class pdf_functor
+    {
+      public:
+        using ResultType = typename dense_derive<T, double>::type;
+
+        pdf_functor(const T &x)
+            : m_x(x)
+            , m_dist()
+        {
+        }
+
+        double operator()(Index i, Index j) const
+        {
+            return m_dist.pdf(m_x(i, j));
+        }
+
+      private:
+        const T &m_x;
+        dist m_dist;
+    };
 };
-
-template <typename T>
-inline auto landau_rand(DenseBase<T> &x,
-                        unsigned long seed = 0,
-                        rng::type type = DEFAULT_RNG_TYPE)
-    -> decltype(x.derived())
-{
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "scalar can only be double");
-
-    landau_rng r(type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
-    }
-
-    return x.derived();
-}
 
 ////////////////////////////////////////////////////////////
 // global variants
