@@ -2,7 +2,6 @@
 #include <iostream>
 #include <rand/beta.h>
 #include <rand/binomial.h>
-#include <rand/mul_gauss.h>
 #include <randist/mul_nomial.h>
 #include <randist/neg_binomial.h>
 #include <randist/pareto.h>
