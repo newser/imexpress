@@ -41,54 +41,128 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class raylt_rng
+class raylt
 {
+    template <typename T>
+    class pdf_functor;
+
   public:
-    raylt_rng(double a,
-              double sigma,
-              rng::type type = DEFAULT_RNG_TYPE,
-              unsigned long seed = 0)
-        : m_a(a)
-        , m_sigma(sigma)
-        , m_rng(type, seed)
+    // ========================================
+    // generator
+    // ========================================
+
+    class rng
     {
+      public:
+        rng(double a,
+            double sigma,
+            rand::rng::type type = DEFAULT_RNG_TYPE,
+            unsigned long seed = 0)
+            : m_a(a)
+            , m_sigma(sigma)
+            , m_rng(type, seed)
+        {
+        }
+
+        void seed(unsigned long seed)
+        {
+            m_rng.seed(seed);
+        }
+
+        double next()
+        {
+            return gsl_ran_rayleigh_tail(m_rng.gsl(), m_a, m_sigma);
+        }
+
+      private:
+        double m_a, m_sigma;
+        rand::rng m_rng;
+    };
+
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x,
+                            double a,
+                            double sigma,
+                            unsigned long seed = 0,
+                            rand::rng::type type = DEFAULT_RNG_TYPE)
+        -> decltype(x.derived())
+    {
+        raylt::rng r(a, sigma, type, seed);
+        return fill(x, r);
     }
 
-    void seed(unsigned long seed)
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x, raylt::rng &r)
+        -> decltype(x.derived())
     {
-        m_rng.seed(seed);
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "only support double scalar");
+
+        double *data = x.derived().data();
+        for (Index i = 0; i < x.size(); ++i) {
+            data[i] = r.next();
+        }
+        return x.derived();
     }
 
-    double next()
+    // ========================================
+    // distribution
+    // ========================================
+
+    class dist
     {
-        return gsl_ran_rayleigh_tail(m_rng.gsl(), m_a, m_sigma);
+      public:
+        dist(double a, double sigma = 1.0)
+            : m_a(a)
+            , m_sigma(sigma)
+        {
+        }
+
+        double pdf(double x) const
+        {
+            return gsl_ran_rayleigh_tail_pdf(x, m_a, m_sigma);
+        }
+
+      private:
+        double m_a, m_sigma;
+    };
+
+    template <typename T>
+    static inline CwiseNullaryOp<pdf_functor<T>,
+                                 typename pdf_functor<T>::ResultType>
+    pdf(const DenseBase<T> &x, double a, double sigma)
+    {
+        using ResultType = typename pdf_functor<T>::ResultType;
+        return ResultType::NullaryExpr(x.rows(),
+                                       x.cols(),
+                                       pdf_functor<T>(x.derived(), a, sigma));
     }
 
   private:
-    double m_a, m_sigma;
-    rng m_rng;
+    raylt() = delete;
+
+    template <typename T>
+    class pdf_functor
+    {
+      public:
+        using ResultType = typename dense_derive<T, double>::type;
+
+        pdf_functor(const T &x, double a, double sigma)
+            : m_x(x)
+            , m_dist(a, sigma)
+        {
+        }
+
+        double operator()(Index i, Index j) const
+        {
+            return m_dist.pdf(m_x(i, j));
+        }
+
+      private:
+        const T &m_x;
+        dist m_dist;
+    };
 };
-
-template <typename T>
-inline auto raylt_rand(DenseBase<T> &x,
-                       typename T::Scalar a,
-                       typename T::Scalar sigma,
-                       unsigned long seed = 0,
-                       rng::type type = DEFAULT_RNG_TYPE)
-    -> decltype(x.derived())
-{
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "scalar can only be double");
-
-    raylt_rng r(a, sigma, type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
-    }
-
-    return x.derived();
-}
 
 ////////////////////////////////////////////////////////////
 // global variants
