@@ -267,7 +267,6 @@ class mgauss
         eigen_assert(x.cols() == k);
 
         double *data = x.derived().data();
-
         for (Index i = 0; i < x.rows(); ++i) {
             r.next(&data[i * k]);
         }

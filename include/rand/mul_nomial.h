@@ -41,36 +41,205 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class mnom_rng
+class mnom
 {
+    template <typename T>
+    class pdf_functor;
+
   public:
-    mnom_rng(size_t K,
-             const double p[],
-             unsigned int N,
-             rng::type type = DEFAULT_RNG_TYPE,
-             unsigned long seed = 0)
-        : m_K(K)
-        , m_p(p)
-        , m_N(N)
-        , m_rng(type, seed)
+    // ========================================
+    // generator
+    // ========================================
+
+    class rng
     {
+      public:
+        rng(size_t k,
+            const double p[],
+            unsigned int N,
+            rand::rng::type type = DEFAULT_RNG_TYPE,
+            unsigned long seed = 0)
+            : m_k(k)
+            , m_p(p)
+            , m_N(N)
+            , m_rng(type, seed)
+        {
+        }
+
+        void seed(unsigned long seed)
+        {
+            m_rng.seed(seed);
+        }
+
+        void next(unsigned int n[])
+        {
+            return gsl_ran_multinomial(m_rng.gsl(), m_k, m_N, m_p, n);
+        }
+
+        size_t k()
+        {
+            return m_k;
+        }
+
+      private:
+        size_t m_k;
+        const double *m_p;
+        unsigned int m_N;
+        rand::rng m_rng;
+    };
+
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x,
+                            size_t k,
+                            const double p[],
+                            unsigned int N,
+                            rand::rng::type type = DEFAULT_RNG_TYPE,
+                            unsigned long seed = 0) -> decltype(x.derived())
+    {
+        mnom::rng r(k, p, N, type, seed);
+        return fill(x, r);
     }
 
-    void seed(unsigned long seed)
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x, mnom::rng &r)
+        -> decltype(x.derived())
     {
-        m_rng.seed(seed);
+        static_assert(IS_INTEGER(typename T::Scalar),
+                      "only support integer scalar");
+
+        return fill(x, r, TYPE_BOOL(TP4(T) == RowMajor)());
     }
 
-    void next(unsigned int n[])
+    // ========================================
+    // distribution
+    // ========================================
+
+    class dist
     {
-        return gsl_ran_multinomial(m_rng.gsl(), m_K, m_N, m_p, n);
+      public:
+        dist(size_t k, const double p[])
+            : m_k(k)
+            , m_p(p)
+        {
+        }
+
+        double pdf(const unsigned int x[]) const
+        {
+            return gsl_ran_multinomial_pdf(m_k, m_p, x);
+        }
+
+        double lnpdf(const unsigned int x[]) const
+        {
+            return gsl_ran_multinomial_lnpdf(m_k, m_p, x);
+        }
+
+        size_t k()
+        {
+            return m_k;
+        }
+
+      private:
+        size_t m_k;
+        const double *m_p;
+    };
+
+    template <typename T>
+    static inline CwiseNullaryOp<pdf_functor<T>,
+                                 typename pdf_functor<T>::ResultType>
+    pdf(const DenseBase<T> &x, size_t k, const double p[])
+    {
+        static_assert(IS_INTEGER(typename T::Scalar),
+                      "only support integer scalar");
+
+        using ResultType = typename pdf_functor<T>::ResultType;
+        return ResultType::NullaryExpr(x.IsRowMajor ? x.rows() : 1,
+                                       x.IsRowMajor ? 1 : x.cols(),
+                                       pdf_functor<T>(x.derived(), k, p));
     }
 
   private:
-    size_t m_K;
-    const double *m_p;
-    unsigned int m_N;
-    rng m_rng;
+    mnom() = delete;
+
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x, mnom::rng &r, std::true_type)
+        -> decltype(x.derived())
+    {
+        // row major
+        size_t k = r.k();
+        eigen_assert(x.cols() == k);
+
+        typename T::Scalar *data = x.derived().data();
+        for (Index i = 0; i < x.rows(); ++i) {
+            r.next(&data[i * k]);
+        }
+        return x.derived();
+    }
+
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x, mnom::rng &r, std::false_type)
+        -> decltype(x.derived())
+    {
+        // column major
+        size_t k = r.k();
+        eigen_assert(x.rows() == k);
+
+        typename T::Scalar *data = x.derived().data();
+        for (Index i = 0; i < x.cols(); ++i) {
+            r.next(&data[i * k]);
+        }
+        return x.derived();
+    }
+
+    template <typename T>
+    class pdf_functor
+    {
+      public:
+        using ResultType = typename dense_derive<
+            T,
+            double,
+            TP4(T) == RowMajor ? T::RowsAtCompileTime : 1,
+            TP4(T) == RowMajor ? 1 : T::ColsAtCompileTime>::type;
+
+        pdf_functor(const T &x, size_t k, const double p[])
+            : m_result(new double[TP4(T) == RowMajor ? x.rows() : x.cols()])
+        {
+            typename type_eval<T>::type m_x(x.eval());
+            dist m_dist(k, p);
+            compute(m_x, m_dist, TYPE_BOOL(TP4(T) == RowMajor)());
+        }
+
+        double operator()(Index i) const
+        {
+            return m_result.get()[i];
+        }
+
+      private:
+        std::shared_ptr<double> m_result;
+
+        void compute(typename type_eval<T>::type &m_x,
+                     dist &m_dist,
+                     std::true_type)
+        {
+            // row major
+            size_t k = m_dist.k();
+            eigen_assert(m_x.cols() == k);
+            for (Index i = 0; i < m_x.rows(); ++i) {
+                m_result.get()[i] = m_dist.pdf(&m_x.data()[i * k]);
+            }
+        }
+
+        void compute(typename type_eval<T>::type &m_x,
+                     dist &m_dist,
+                     std::false_type)
+        {
+            // column major
+            size_t k = m_dist.k();
+            eigen_assert(m_x.rows() == k);
+            for (Index i = 0; i < m_x.cols(); ++i) {
+                m_result.get()[i] = m_dist.pdf(&m_x.data()[i * k]);
+            }
+        }
+    };
 };
 
 ////////////////////////////////////////////////////////////

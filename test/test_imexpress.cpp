@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
     // global setup...
     iexp::init();
 
-    const char *__argv[2] = {"", "test_mul_normal"};
+    const char *__argv[2] = {"", "test_poiss_rand"};
     argc = sizeof(__argv) / sizeof(const char *);
     argv = (char **)__argv;
     int result = Catch::Session().run(argc, argv);
