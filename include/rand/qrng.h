@@ -108,6 +108,11 @@ class qrng
         return m_qrng;
     }
 
+    unsigned int dim() const
+    {
+        return m_qrng->dimension;
+    }
+
   private:
     gsl_qrng *m_qrng;
 };

@@ -59,22 +59,43 @@ inline void qrand_impl<double>(qrng &r, double x[])
     return r.next(x);
 }
 
-template <>
-inline void qrand_impl<std::complex<double>>(qrng &r, std::complex<double> x[])
-{
-    return r.next((double *)x);
-}
-
 template <typename T>
 inline auto qrand(DenseBase<T> &x, qrng::type type) -> decltype(x.derived())
 {
-    qrng r(type, is_complex<typename T::Scalar>::value ? 2 : 1);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        qrand_impl<typename T::Scalar>(r, &data[i]);
+    unsigned int dim;
+    if ((x.rows() == 1) || (x.cols() == 1)) {
+        dim = 1;
+    } else if (x.IsRowMajor) {
+        dim = x.cols();
+    } else {
+        dim = x.rows();
     }
+    qrng r(type, dim);
 
+    return qrand(x, r);
+}
+
+template <typename T>
+inline auto qrand(DenseBase<T> &x, qrng &r) -> decltype(x.derived())
+{
+    typename T::Scalar *data = x.derived().data();
+    unsigned int dim = r.dim();
+    if ((x.rows() == 1) || (x.cols() == 1)) {
+        eigen_assert(dim == 1);
+        for (Index i = 0; i < x.size(); ++i) {
+            qrand_impl<typename T::Scalar>(r, &data[i]);
+        }
+    } else if (x.IsRowMajor) {
+        eigen_assert(dim == x.cols());
+        for (Index i = 0; i < x.rows(); ++i) {
+            qrand_impl<typename T::Scalar>(r, &data[i * dim]);
+        }
+    } else {
+        eigen_assert(dim == x.rows());
+        for (Index i = 0; i < x.cols(); ++i) {
+            qrand_impl<typename T::Scalar>(r, &data[i * dim]);
+        }
+    }
     return x.derived();
 }
 }

@@ -131,6 +131,10 @@ TEST_CASE("test_qrand")
     iexp::VectorXd &vr = rand::qrand(v, rand::qrng::type::SOBOL);
     REQUIRE(&vr == &v);
 
+    iexp::RowVectorXd rv(10);
+    iexp::RowVectorXd &rvr = rand::qrand(rv, rand::qrng::type::SOBOL);
+    REQUIRE(&rv == &rvr);
+
     v2 = rand::qrand(v, rand::qrng::type::SOBOL) +
          rand::qrand(v, rand::qrng::type::HALTON);
 
@@ -144,15 +148,10 @@ TEST_CASE("test_qrand")
     iexp::MatrixXd &wr = rand::qrand(w, rand::qrng::type::HALTON);
     REQUIRE(&wr == &w);
 
-    iexp::MatrixXcd cw(3, 4), cw2(3, 4);
-    cw.fill(9.9999);
-    cw2 = rand::qrand(cw, rand::qrng::type::REVERSEHALTON);
-    cw2 = rand::qrand(cw, rand::qrng::type::REVERSEHALTON) +
-          rand::qrand(cw, rand::qrng::type::HALTON) +
-          rand::qrand(cw, rand::qrng::type::SOBOL);
-
-    iexp::MatrixXcd &cwr = rand::qrand(cw, rand::qrng::type::HALTON);
-    REQUIRE(&cwr == &cw);
+    iexp::Matrix<double, 3, 2, RowMajor> rm;
+    iexp::Matrix<double, 3, 2, RowMajor> &rm2 =
+        rand::qrand(rm, rand::qrng::type::HALTON);
+    REQUIRE(&rm2 == &rm);
 }
 
 TEST_CASE("test_normal_rand")
