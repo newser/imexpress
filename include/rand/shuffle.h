@@ -47,12 +47,16 @@ inline auto shuffle(DenseBase<T> &x,
                     rng::type type = DEFAULT_RNG_TYPE) -> decltype(x.derived())
 {
     rng r(type, seed);
+    return shuffle(x, r);
+}
 
+template <typename T>
+inline auto shuffle(DenseBase<T> &x, rng &r) -> decltype(x.derived())
+{
     gsl_ran_shuffle(r.gsl(),
                     x.derived().data(),
                     x.derived().size(),
                     sizeof(typename T::Scalar));
-
     return x.derived();
 }
 

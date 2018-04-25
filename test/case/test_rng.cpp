@@ -2354,6 +2354,9 @@ TEST_CASE("test_sample")
     iexp::VectorXd vr = rand::sample(v.array(), 5).matrix();
     REQUIRE(vr.size() == 5);
 
+    iexp::RowVectorXd vr2 = rand::sample<true>(v, 8);
+    REQUIRE(vr2.size() == 8);
+
     v2 = rand::sample(rand::shuffle(v).array() + rand::shuffle(v).array(), 7);
     REQUIRE(v2.size() == 7);
 }

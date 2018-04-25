@@ -41,54 +41,52 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-template <typename T>
+template <bool row_form, typename T>
 class sample_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T,
+                                             Scalar,
+                                             row_form ? 1 : Dynamic,
+                                             row_form ? Dynamic : 1>::type;
 
-    sample_functor(const T &x, size_t k, unsigned long seed, rng::type type)
-        : m_result(k)
+    sample_functor(const T &x, size_t k, rng::type type, unsigned long seed)
+        : m_result(new Scalar[k])
     {
         rng r(type, seed);
         typename type_eval<T>::type m_x(x.eval());
         gsl_ran_sample(r.gsl(),
-                       m_result.data(),
+                       m_result.get(),
                        k,
-                       m_x.data(),
+                       const_cast<Scalar *>(m_x.data()),
                        m_x.size(),
-                       sizeof(typename T::Scalar));
+                       sizeof(Scalar));
     }
 
-    const typename T::Scalar &operator()(Index i) const
+    Scalar operator()(Index i) const
     {
-        return m_result[i];
+        return m_result.get()[i];
     }
 
   private:
-    ArrayType m_result;
+    std::shared_ptr<Scalar> m_result;
 };
 
-template <typename T>
-inline CwiseNullaryOp<sample_functor<T>, typename sample_functor<T>::ArrayType>
-sample(const ArrayBase<T> &x,
+template <bool row_form = false, typename T = void>
+inline CwiseNullaryOp<sample_functor<row_form, T>,
+                      typename sample_functor<row_form, T>::ResultType>
+sample(const DenseBase<T> &x,
        size_t k,
        unsigned long seed = 0,
        rng::type type = DEFAULT_RNG_TYPE)
 {
-    eigen_assert(IS_VEC(x));
-
-    using ArrayType = typename sample_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(k,
-                                  sample_functor<T>(x.derived(),
-                                                    k,
-                                                    seed,
-                                                    type));
+    using ResultType = typename sample_functor<row_form, T>::ResultType;
+    return ResultType::NullaryExpr(k,
+                                   sample_functor<row_form, T>(x.derived(),
+                                                               k,
+                                                               type,
+                                                               seed));
 }
 
 ////////////////////////////////////////////////////////////
