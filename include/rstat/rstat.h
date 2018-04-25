@@ -24,9 +24,7 @@
 ////////////////////////////////////////////////////////////
 
 #include <common/common.h>
-#include <common/util.h>
 
-#include <gsl/gsl_errno.h>
 #include <gsl/gsl_rstat.h>
 
 IEXP_NS_BEGIN
@@ -55,79 +53,72 @@ class rstat
 
     void reset()
     {
-        if (gsl_rstat_reset(m_rw) != GSL_SUCCESS) {
-            RETURN_OR_THROW(std::runtime_error("rstat reset"));
-        }
+        gsl_rstat_reset(m_rw);
     }
 
-    void add(double x) const
+    void add(double x)
     {
-        if (gsl_rstat_add(x, m_rw) != GSL_SUCCESS) {
-            RETURN_OR_THROW(std::runtime_error("rstat add"));
-        }
+        gsl_rstat_add(x, m_rw);
     }
 
-    size_t size()
+    size_t size() const
     {
         return gsl_rstat_n(m_rw);
     }
 
-    double min()
+    double min() const
     {
         return gsl_rstat_min(m_rw);
     }
 
-    double max()
+    double max() const
     {
         return gsl_rstat_max(m_rw);
     }
 
-    double mean()
+    double mean() const
     {
         return gsl_rstat_mean(m_rw);
     }
 
-    double var()
+    double var() const
     {
         return gsl_rstat_variance(m_rw);
     }
 
-    double std()
+    double std() const
     {
         return gsl_rstat_sd(m_rw);
     }
 
-    double std_mean()
+    double std_mean() const
     {
         return gsl_rstat_sd_mean(m_rw);
     }
 
-    double rms()
+    double rms() const
     {
         return gsl_rstat_rms(m_rw);
     }
 
-    double skewness()
+    double skewness() const
     {
         return gsl_rstat_skew(m_rw);
     }
 
-    double kurtosis()
+    double kurtosis() const
     {
         return gsl_rstat_kurtosis(m_rw);
     }
 
-    double median()
+    double median() const
     {
         return gsl_rstat_median(m_rw);
     }
 
   private:
-    rstat(const rstat &rs) = delete;
-    rstat(rstat &&rs) = delete;
-
-    rstat &operator=(const rstat &rs) = delete;
-    rstat &operator=(const rstat &&c) = delete;
+    rstat(const rstat &) = delete;
+    rstat &operator=(const rstat &) = delete;
 
     gsl_rstat_workspace *m_rw;
 };

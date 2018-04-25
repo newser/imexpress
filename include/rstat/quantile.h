@@ -24,9 +24,7 @@
 ////////////////////////////////////////////////////////////
 
 #include <common/common.h>
-#include <common/util.h>
 
-#include <gsl/gsl_errno.h>
 #include <gsl/gsl_rstat.h>
 
 IEXP_NS_BEGIN
@@ -55,29 +53,22 @@ class quantile
 
     void reset()
     {
-        if (gsl_rstat_quantile_reset(m_qw) != GSL_SUCCESS) {
-            RETURN_OR_THROW(std::runtime_error("quantile reset"));
-        }
+        gsl_rstat_quantile_reset(m_qw);
     }
 
-    void add(double x) const
+    void add(double x)
     {
-        if (gsl_rstat_quantile_add(x, m_qw) != GSL_SUCCESS) {
-            RETURN_OR_THROW(std::runtime_error("quantile add"));
-        }
+        gsl_rstat_quantile_add(x, m_qw);
     }
 
-    double get()
+    double get() const
     {
         return gsl_rstat_quantile_get(m_qw);
     }
 
   private:
-    quantile(const quantile &rs) = delete;
-    quantile(quantile &&rs) = delete;
-
-    quantile &operator=(const quantile &rs) = delete;
-    quantile &operator=(const quantile &&c) = delete;
+    quantile(const quantile &) = delete;
+    quantile &operator=(const quantile &) = delete;
 
     gsl_rstat_quantile_workspace *m_qw;
 };

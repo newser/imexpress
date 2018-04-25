@@ -186,7 +186,7 @@ TEST_CASE("test_normal_rand")
             rand::gauss::fill(cw, 3.0, 1234, rand::rng::type::BOROSH13);
         REQUIRE(&cwr == &cw);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         iexp::VectorXd vv(100);
         rand::gauss::fill(vv);
         mglData y(100);
@@ -212,7 +212,7 @@ TEST_CASE("test_normal_rand")
             rand::gauss::pdf(v.array(), 2.0) + rand::gauss::pdf(v.array(), 2.0);
         m2 = rand::gauss::pdf(m.array() + m.array(), 2.0);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::gauss::pdf(vv.array(), 2.0);
 
@@ -260,7 +260,7 @@ TEST_CASE("test_normal_tail_rand")
             rand::gausst::fill(cw, 10, 3.0, 1234, rand::rng::type::BOROSH13);
         REQUIRE(&cwr == &cw);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         iexp::VectorXd vv(100);
         rand::gausst::fill(vv, 3.0);
         mglData y(100);
@@ -286,7 +286,7 @@ TEST_CASE("test_normal_tail_rand")
              rand::gausst::pdf(v.array(), 1.5, 2.0);
         m2 = rand::gausst::pdf(m.array() + m.array(), 1.5, 2.0);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, 0, 5);
         VectorXd vv2 = rand::gausst::pdf(vv.array(), 1.5, 1.0);
 
@@ -387,7 +387,7 @@ TEST_CASE("test_mul_normal")
 #endif
         rand::mgauss::fill(result, 2, mu, L);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1 = result.row(0);
         VectorXd v2 = result.row(1);
 
@@ -462,7 +462,7 @@ TEST_CASE("test_exp_rand")
         iexp::MatrixXd &wr = rand::exp::fill(w, 99);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::exp::fill(v1, 1.0);
 
@@ -488,7 +488,7 @@ TEST_CASE("test_exp_rand")
         v2 = rand::exp::pdf(v.array(), 2.0) + rand::exp::pdf(v.array(), 2.0);
         m2 = rand::exp::pdf(m.array() + m.array(), 2.0);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::exp::pdf(vv.array(), 1.0);
 
@@ -524,7 +524,7 @@ TEST_CASE("test_laplace_rand")
         iexp::MatrixXd &wr = rand::laplace::fill(w, 99);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::laplace::fill(v1, 1.0);
 
@@ -551,7 +551,7 @@ TEST_CASE("test_laplace_rand")
              rand::laplace::pdf(v.array(), 2.0);
         m2 = rand::laplace::pdf(m.array() + m.array(), 2.0);
 
-#if 1 // #ifdef Ilaplace_MGL2
+#if 0 // #ifdef Ilaplace_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::laplace::pdf(vv.array(), 1.0);
 
@@ -587,7 +587,7 @@ TEST_CASE("test_expow_fill")
         iexp::MatrixXd &wr = rand::expow::fill(w, 99, 3.3);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::expow::fill(v1, 1.0, 2.5);
 
@@ -614,7 +614,7 @@ TEST_CASE("test_expow_fill")
              rand::expow::pdf(v.array(), 2.0, 3.0);
         m2 = rand::expow::pdf(m.array() + m.array(), 2.0, 3.0);
 
-#if 1 // #ifdef Iexpow_MGL2
+#if 0 // #ifdef Iexpow_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -3, 3);
         VectorXd vv2 = rand::expow::pdf(vv.array(), 1.0, 2.5);
 
@@ -650,7 +650,7 @@ TEST_CASE("test_cauchy_rand")
         iexp::MatrixXd &wr = rand::cauchy::fill(w, 99);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::cauchy::fill(v1, 1.0);
 
@@ -677,7 +677,7 @@ TEST_CASE("test_cauchy_rand")
              rand::cauchy::pdf(v.array(), 2.0);
         m2 = rand::cauchy::pdf(m.array() + m.array(), 2.0);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::cauchy::pdf(vv.array(), 1.0);
 
@@ -713,7 +713,7 @@ TEST_CASE("test_rayleigh_rand")
         iexp::MatrixXd &wr = rand::rayl::fill(w, 99);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::rayl::fill(v1, 1.0);
 
@@ -739,7 +739,7 @@ TEST_CASE("test_rayleigh_rand")
         v2 = rand::rayl::pdf(v.array(), 2.0) + rand::rayl::pdf(v.array(), 2.0);
         m2 = rand::rayl::pdf(m.array() + m.array(), 2.0);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::rayl::pdf(vv.array(), 2.0);
 
@@ -775,7 +775,7 @@ TEST_CASE("test_rayleigh_tail_rand")
         iexp::MatrixXd &wr = rand::raylt::fill(w, 1.0, 99);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::raylt::fill(v1, 1.5, 1.0);
 
@@ -802,7 +802,7 @@ TEST_CASE("test_rayleigh_tail_rand")
              rand::raylt::pdf(v.array(), 1.0, 2.0);
         m2 = rand::raylt::pdf(m.array() + m.array(), 1.0, 2.0);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::raylt::pdf(vv.array(), 0.5, 2.0);
 
@@ -838,7 +838,7 @@ TEST_CASE("test_landau_rand")
         iexp::MatrixXd &wr = rand::landau::fill(w);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::landau::fill(v1);
 
@@ -864,7 +864,7 @@ TEST_CASE("test_landau_rand")
         v2 = rand::landau::pdf(v.array()) + rand::landau::pdf(v.array());
         m2 = rand::landau::pdf(m.array() + m.array());
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::landau::pdf(vv.array());
 
@@ -966,7 +966,7 @@ TEST_CASE("test_flat_rand")
         iexp::MatrixXd &wr = rand::flat::fill(w, 2, 3);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::flat::fill(v1, 1, 5);
 
@@ -993,7 +993,7 @@ TEST_CASE("test_flat_rand")
             rand::flat::pdf(v.array(), 0, 1) + rand::flat::pdf(v.array(), 0, 1);
         m2 = rand::flat::pdf(m.array() + m.array(), 0, 1);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::flat::pdf(vv.array(), 0.5, 2.5);
 
@@ -1028,7 +1028,7 @@ TEST_CASE("test_gamma_rand")
     iexp::MatrixXd &wr = rand::gamma::fill(w, 2, 3);
     REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
     VectorXd v1(100);
     rand::gamma::fill(v1, 2, 1);
 
@@ -1053,7 +1053,7 @@ TEST_CASE("test_gamma_rand")
              rand::gamma::pdf(v.array(), 1, 1);
         m2 = rand::gamma::pdf(m.array() + m.array(), 1, 1);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::gamma::pdf(vv.array(), 1, 1);
 
@@ -1115,7 +1115,7 @@ TEST_CASE("test_beta")
         v2 = rand::beta::pdf(v, 2, 3) + rand::beta::pdf(v, 2, 3);
         m2 = rand::beta::pdf(m.array() + m.array(), 2, 3);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::beta::pdf(vv.array(), 2, 2);
 
@@ -1151,7 +1151,7 @@ TEST_CASE("test_lgnorm_rand")
         iexp::MatrixXd &wr = rand::lgnorm::fill(w, 2, 3);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::lgnorm::fill(v1, 0, 1);
 
@@ -1178,7 +1178,7 @@ TEST_CASE("test_lgnorm_rand")
              rand::lgnorm::pdf(v.array(), 0, 1);
         m2 = rand::lgnorm::pdf(m.array() + m.array(), 0, 1);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::lgnorm::pdf(vv.array(), 0, 1);
 
@@ -1214,7 +1214,7 @@ TEST_CASE("test_chisq_rand")
         iexp::MatrixXd &wr = rand::chisq::fill(w, 99);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef Ichisq_MGL2
+#if 0 // #ifdef Ichisq_MGL2
         VectorXd v1(100);
         rand::chisq::fill(v1, 1.0);
 
@@ -1240,7 +1240,7 @@ TEST_CASE("test_chisq_rand")
         v2 = rand::chisq::pdf(v.array(), 1) + rand::chisq::pdf(v.array(), 1);
         m2 = rand::chisq::pdf(m.array() + m.array(), 1);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::chisq::pdf(vv.array(), 1);
 
@@ -1276,7 +1276,7 @@ TEST_CASE("test_f_rand")
         iexp::MatrixXd &wr = rand::f::fill(w, 2, 3);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::f::fill(v1, 1, 1);
 
@@ -1302,7 +1302,7 @@ TEST_CASE("test_f_rand")
         v2 = rand::f::pdf(v.array(), 1, 2) + rand::f::pdf(v.array(), 1, 2);
         m2 = rand::f::pdf(m.array() + m.array(), 1, 2);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::f::pdf(vv.array(), 3, 2);
 
@@ -1338,7 +1338,7 @@ TEST_CASE("test_t_rand")
         iexp::MatrixXd &wr = rand::t::fill(w, 99);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::t::fill(v1, 5.0);
 
@@ -1364,7 +1364,7 @@ TEST_CASE("test_t_rand")
         v2 = rand::t::pdf(v.array(), 2) + rand::t::pdf(v.array(), 2);
         m2 = rand::t::pdf(m.array() + m.array(), 2);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::t::pdf(vv.array(), 5);
 
@@ -1400,7 +1400,7 @@ TEST_CASE("test_lgst_rand")
         iexp::MatrixXd &wr = rand::lgst::fill(w, 99);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::lgst::fill(v1, 1);
 
@@ -1426,7 +1426,7 @@ TEST_CASE("test_lgst_rand")
         v2 = rand::lgst::pdf(v.array(), 2) + rand::lgst::pdf(v.array(), 2);
         m2 = rand::lgst::pdf(m.array() + m.array(), 2);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::lgst::pdf(vv.array(), 1);
 
@@ -1462,7 +1462,7 @@ TEST_CASE("test_pareto_rand")
         iexp::MatrixXd &wr = rand::pareto::fill(w, 99, 3.3);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::pareto::fill(v1, 3.0, 2.0);
 
@@ -1489,7 +1489,7 @@ TEST_CASE("test_pareto_rand")
              rand::pareto::pdf(v.array(), 2, 3);
         m2 = rand::pareto::pdf(m.array() + m.array(), 2, 3);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::pareto::pdf(vv.array(), 3, 2);
 
@@ -1560,7 +1560,7 @@ TEST_CASE("test_wbl_rand")
         iexp::MatrixXd &wr = rand::wbl::fill(w, 99, 3.3);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::wbl::fill(v1, 1.0, 2.0);
 
@@ -1586,7 +1586,7 @@ TEST_CASE("test_wbl_rand")
         v2 = rand::wbl::pdf(v.array(), 2, 3) + rand::wbl::pdf(v.array(), 2, 3);
         m2 = rand::wbl::pdf(m.array() + m.array(), 2, 3);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::wbl::pdf(vv.array(), 1, 2);
 
@@ -1622,7 +1622,7 @@ TEST_CASE("test_gbl1_rand")
         iexp::MatrixXd &wr = rand::gbl1::fill(w, 99, 3.3);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::gbl1::fill(v1, 1.0, 1.0);
 
@@ -1649,7 +1649,7 @@ TEST_CASE("test_gbl1_rand")
             rand::gbl1::pdf(v.array(), 2, 3) + rand::gbl1::pdf(v.array(), 2, 3);
         m2 = rand::gbl1::pdf(m.array() + m.array(), 2, 3);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::gbl1::pdf(vv.array(), 1, 1);
 
@@ -1685,7 +1685,7 @@ TEST_CASE("test_gbl2_rand")
         iexp::MatrixXd &wr = rand::gbl2::fill(w, 99, 3.3);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1(100);
         rand::gbl2::fill(v1, 1.0, 1.0);
 
@@ -1712,7 +1712,7 @@ TEST_CASE("test_gbl2_rand")
             rand::gbl2::pdf(v.array(), 2, 3) + rand::gbl2::pdf(v.array(), 2, 3);
         m2 = rand::gbl2::pdf(m.array() + m.array(), 2, 3);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, -5, 5);
         VectorXd vv2 = rand::gbl2::pdf(vv.array(), 1, 1);
 
@@ -1786,7 +1786,7 @@ TEST_CASE("test_discrete_rand")
         iexp::MatrixXi &wr = rand::discrete::fill(w, 4, p);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXi vi(100);
         rand::discrete::fill(vi, 4, p);
         VectorXd v1 = vi.cast<double>();
@@ -1837,7 +1837,7 @@ TEST_CASE("test_poiss_rand")
         iexp::MatrixXi &wr = rand::poiss::fill(w, 8.8);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXi vi(100);
         rand::poiss::fill(vi, 2.5);
         VectorXd v1 = vi.cast<double>();
@@ -1864,7 +1864,7 @@ TEST_CASE("test_poiss_rand")
         v2 = rand::poiss::pdf(v.array(), 2) + rand::poiss::pdf(v.array(), 2);
         m2 = rand::poiss::pdf(m.array() + m.array(), 2);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXi vv = VectorXi::LinSpaced(100, 0, 10);
         VectorXd vv2 = rand::poiss::pdf(vv.array(), 2.5);
         VectorXd vvd = vv.cast<double>();
@@ -1901,7 +1901,7 @@ TEST_CASE("test_bnom_rand")
         iexp::MatrixXi &wr = rand::bnom::fill(w, 0.5, 9);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXi vi(100);
         rand::bnom::fill(vi, 0.5, 9);
         VectorXd v1 = vi.cast<double>();
@@ -1929,7 +1929,7 @@ TEST_CASE("test_bnom_rand")
              rand::bnom::pdf(v.array(), 0.5, 2);
         m2 = rand::bnom::pdf(m.array() + m.array(), 0.5, 2);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
         VectorXd vv2 = rand::bnom::pdf(vv.cast<unsigned int>().array(), 0.5, 9);
 
@@ -1965,7 +1965,7 @@ TEST_CASE("test_nbnom_rand")
         iexp::MatrixXi &wr = rand::nbnom::fill(w, 0.5, 9);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXi vi(100);
         rand::nbnom::fill(vi, 0.5, 9);
         VectorXd v1 = vi.cast<double>();
@@ -1993,7 +1993,7 @@ TEST_CASE("test_nbnom_rand")
              rand::bnom::pdf(v.array(), 0.5, 2);
         m2 = rand::nbnom::pdf(m.array() + m.array(), 0.5, 2);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
         VectorXd vv2 =
             rand::nbnom::pdf(vv.cast<unsigned int>().array(), 0.5, 3.5);
@@ -2026,7 +2026,7 @@ TEST_CASE("test_multinomial")
 //        r.next(result.data() + i * 2);
 //    }
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd v1 = result.row(0).cast<double>();
         VectorXd v2 = result.row(1).cast<double>();
 
@@ -2076,7 +2076,7 @@ TEST_CASE("test_pascal_rand")
         iexp::MatrixXi &wr = rand::pascal::fill(w, 0.5, 9);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXi vi(100);
         rand::pascal::fill(vi, 0.5, 3);
         VectorXd v1 = vi.cast<double>();
@@ -2104,7 +2104,7 @@ TEST_CASE("test_pascal_rand")
              rand::pascal::pdf(v.array(), 0.5, 2);
         m2 = rand::pascal::pdf(m.array() + m.array(), 0.5, 2);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
         VectorXd vv2 =
             rand::pascal::pdf(vv.cast<unsigned int>().array(), 0.5, 3);
@@ -2141,7 +2141,7 @@ TEST_CASE("test_geo_rand")
         iexp::MatrixXi &wr = rand::geo::fill(w, 0.5);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXi vi(100);
         rand::geo::fill(vi, 0.5);
         VectorXd v1 = vi.cast<double>();
@@ -2168,7 +2168,7 @@ TEST_CASE("test_geo_rand")
         v2 = rand::geo::pdf(v.array(), 0.5) + rand::geo::pdf(v.array(), 0.5);
         m2 = rand::geo::pdf(m.array() + m.array(), 0.5);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
         VectorXd vv2 = rand::geo::pdf(vv.cast<unsigned int>().array(), 0.5);
 
@@ -2204,7 +2204,7 @@ TEST_CASE("test_hgeo_rand")
         iexp::MatrixXi &wr = rand::hgeo::fill(w, 3, 10, 5);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXi vi(100);
         rand::hgeo::fill(vi, 5, 20, 3);
         VectorXd v1 = vi.cast<double>();
@@ -2232,7 +2232,7 @@ TEST_CASE("test_hgeo_rand")
              rand::hgeo::pdf(v.array(), 1, 2, 3);
         m2 = rand::hgeo::pdf(m.array() + m.array(), 1, 2, 3);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
         VectorXd vv2 =
             rand::hgeo::pdf(vv.cast<unsigned int>().array(), 5, 20, 3);
@@ -2269,7 +2269,7 @@ TEST_CASE("test_log_rand")
         iexp::MatrixXi &wr = rand::log::fill(w, 0.7);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXi vi(100);
         rand::log::fill(vi, 0.7);
         VectorXd v1 = vi.cast<double>();
@@ -2296,7 +2296,7 @@ TEST_CASE("test_log_rand")
         v2 = rand::log::pdf(v.array(), 0.5) + rand::log::pdf(v.array(), 0.5);
         m2 = rand::log::pdf(m.array() + m.array(), 0.5);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         VectorXd vv = VectorXd::LinSpaced(100, 0, 10);
         VectorXd vv2 = rand::log::pdf(vv.cast<unsigned int>().array(), 0.7);
 
