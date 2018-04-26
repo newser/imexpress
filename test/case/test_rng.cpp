@@ -1507,26 +1507,36 @@ TEST_CASE("test_pareto_rand")
 
 TEST_CASE("test_sph2_rand")
 {
-    iexp::VectorXcd v(10), v2(10);
-
-    iexp::VectorXcd &vr = rand::sph2_rand(v);
+    iexp::MatrixXd v(2, 10), v2(2, 10);
+    iexp::MatrixXd &vr = rand::sph::fill(v);
     REQUIRE(&vr == &v);
+    REQUIRE(__D_EQ9(v(0, 0) * v(0, 0) + v(1, 0) * v(1, 0), 1));
+    REQUIRE(__D_EQ9(v(0, 9) * v(0, 9) + v(1, 9) * v(1, 9), 1));
 
-    v2 = rand::sph2_rand(v) + rand::sph2_rand(v);
+    v2 = rand::sph::fill(v) + rand::sph::fill(v);
 
-    iexp::MatrixXcd w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::sph2_rand<true>(w);
-    w2 = rand::sph2_rand(w) + rand::sph2_rand(w) + rand::sph2_rand(w);
-
-    iexp::MatrixXcd &wr = rand::sph2_rand(w);
+    iexp::Matrix<double, 10, 3, RowMajor> w;
+    auto &wr = rand::sph::fill(w);
     REQUIRE(&wr == &w);
+    REQUIRE(
+        __D_EQ9(w(0, 0) * w(0, 0) + w(0, 1) * w(0, 1) + w(0, 2) * w(0, 2), 1));
+    REQUIRE(
+        __D_EQ9(w(9, 0) * w(9, 0) + w(9, 1) * w(9, 1) + w(9, 2) * w(9, 2), 1));
+
+    iexp::Matrix<double, 3, 4, RowMajor> w2;
+    auto &wr2 = rand::sph::fill(w2);
+    REQUIRE(&wr2 == &w2);
+    REQUIRE(__D_EQ9(w2(0, 0) * w2(0, 0) + w2(0, 1) * w2(0, 1) +
+                        w2(0, 2) * w2(0, 2) + w2(0, 3) * w2(0, 3),
+                    1));
+    REQUIRE(__D_EQ9(w2(2, 0) * w2(2, 0) + w2(2, 1) * w2(2, 1) +
+                        w2(2, 2) * w2(2, 2) + w2(2, 3) * w2(2, 3),
+                    1));
 
 #if 0 // #ifdef IEXP_MGL2
-    VectorXcd v1(100);
-    rand::sph2_rand(v1);
-    VectorXd r = v1.real();
-    VectorXd i = v1.imag();
+    rand::sph::fill(v);
+    VectorXd r = v.row(0);
+    VectorXd i = v.row(1);
     
     mglData x(100), y(100);
     x.Link(r.data(), r.size());

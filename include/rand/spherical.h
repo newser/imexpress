@@ -41,106 +41,147 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-template <bool trig>
-void sph2_impl(const gsl_rng *r, double *x, double *y)
+class sph
 {
-    gsl_ran_dir_2d(r, x, y);
-}
+    template <typename Derived>
+    class rng_base
+    {
+      public:
+        rng_base(size_t dim, rand::rng::type type, unsigned long seed)
+            : m_dim(dim)
+            , m_rng(type, seed)
+        {
+        }
 
-template <>
-void sph2_impl<true>(const gsl_rng *r, double *x, double *y)
-{
-    gsl_ran_dir_2d_trig_method(r, x, y);
-}
+        void seed(unsigned long seed)
+        {
+            m_rng.seed(seed);
+        }
 
-template <bool trig = false>
-class sph2_rng
-{
+        void next(double x[])
+        {
+            static_cast<Derived *>(this)->next_impl(x);
+        }
+
+        size_t dim() const
+        {
+            return m_dim;
+        }
+
+      protected:
+        size_t m_dim;
+        rand::rng m_rng;
+    };
+
   public:
-    sph2_rng(rng::type type = DEFAULT_RNG_TYPE, unsigned long seed = 0)
-        : m_rng(type, seed)
+    class rng : public rng_base<rng>
     {
+      public:
+        rng(size_t dim,
+            rand::rng::type type = DEFAULT_RNG_TYPE,
+            unsigned long seed = 0)
+            : rng_base<rng>(dim, type, seed)
+        {
+        }
+
+        void next_impl(double x[])
+        {
+            gsl_ran_dir_nd(m_rng.gsl(), m_dim, x);
+        }
+    };
+
+    class rng2 : public rng_base<rng2>
+    {
+      public:
+        rng2(rand::rng::type type = DEFAULT_RNG_TYPE, unsigned long seed = 0)
+            : rng_base<rng2>(2, type, seed)
+        {
+        }
+
+        void next_impl(double x[])
+        {
+            gsl_ran_dir_2d_trig_method(m_rng.gsl(), &x[0], &x[1]);
+        }
+    };
+
+    class rng3 : public rng_base<rng3>
+    {
+      public:
+        rng3(rand::rng::type type = DEFAULT_RNG_TYPE, unsigned long seed = 0)
+            : rng_base<rng3>(3, type, seed)
+        {
+        }
+
+        void next_impl(double x[])
+        {
+            gsl_ran_dir_3d(m_rng.gsl(), &x[0], &x[1], &x[2]);
+        }
+    };
+
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x,
+                            unsigned long seed = 0,
+                            rand::rng::type type = DEFAULT_RNG_TYPE)
+        -> decltype(x.derived())
+    {
+        int dim = x.IsRowMajor ? x.cols() : x.rows();
+        if (dim == 2) {
+            sph::rng2 r(type, seed);
+            return fill(x, r);
+        } else if (dim == 3) {
+            sph::rng3 r(type, seed);
+            return fill(x, r);
+        } else {
+            sph::rng r(dim, type, seed);
+            return fill(x, r);
+        }
     }
 
-    void seed(unsigned long seed)
+    template <typename T, typename U>
+    static inline auto fill(DenseBase<T> &x, rng_base<U> &r)
+        -> decltype(x.derived())
     {
-        m_rng.seed(seed);
-    }
-
-    void next(double &x, double &y)
-    {
-        return sph2_impl<trig>(m_rng.gsl(), &x, &y);
+        return fill_impl(x, r, TYPE_BOOL(TP4(T) == RowMajor)());
     }
 
   private:
-    rng m_rng;
-};
+    sph() = delete;
 
-template <bool trig = false, typename T = void>
-inline auto sph2_rand(DenseBase<T> &x,
-                      unsigned long seed = 0,
-                      rng::type type = DEFAULT_RNG_TYPE)
-    -> decltype(x.derived())
-{
-    static_assert(is_complex<typename T::Scalar>::value,
-                  "scalar can only be complex");
-
-    sph2_rng<trig> r(type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        r.next(((double *)&data[i])[0], ((double *)&data[i])[1]);
-    }
-
-    return x.derived();
-}
-
-class sph3_rng
-{
-  public:
-    sph3_rng(rng::type type = DEFAULT_RNG_TYPE, unsigned long seed = 0)
-        : m_rng(type, seed)
+    template <typename T, typename U>
+    static inline auto fill_impl(DenseBase<T> &x,
+                                 rng_base<U> &r,
+                                 std::true_type) -> decltype(x.derived())
     {
+        // row major
+        size_t dim = r.dim();
+        eigen_assert(x.cols() == dim);
+
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "only support double scalar");
+        double *data = x.derived().data();
+        for (Index i = 0; i < x.rows(); ++i) {
+            r.next(&data[i * dim]);
+        }
+        return x.derived();
     }
 
-    void seed(unsigned long seed)
+    template <typename T, typename U>
+    static inline auto fill_impl(DenseBase<T> &x,
+                                 rng_base<U> &r,
+                                 std::false_type) -> decltype(x.derived())
     {
-        m_rng.seed(seed);
+        // col major
+        size_t dim = r.dim();
+        eigen_assert(x.rows() == dim);
+
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "only support double scalar");
+        double *data = x.derived().data();
+        for (Index i = 0; i < x.cols(); ++i) {
+            r.next(&data[i * dim]);
+        }
+        return x.derived();
     }
-
-    void next(double &x, double &y, double &z)
-    {
-        return gsl_ran_dir_3d(m_rng.gsl(), &x, &y, &z);
-    }
-
-  private:
-    rng m_rng;
-};
-
-class sphn_rng
-{
-  public:
-    sphn_rng(size_t n,
-             rng::type type = DEFAULT_RNG_TYPE,
-             unsigned long seed = 0)
-        : m_n(n)
-        , m_rng(type, seed)
-    {
-    }
-
-    void seed(unsigned long seed)
-    {
-        m_rng.seed(seed);
-    }
-
-    void next(double x[])
-    {
-        return gsl_ran_dir_nd(m_rng.gsl(), m_n, x);
-    }
-
-  private:
-    size_t m_n;
-    rng m_rng;
 };
 
 ////////////////////////////////////////////////////////////
