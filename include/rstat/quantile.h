@@ -51,14 +51,16 @@ class quantile
         gsl_rstat_quantile_free(m_qw);
     }
 
-    void reset()
+    quantile &reset()
     {
         gsl_rstat_quantile_reset(m_qw);
+        return *this;
     }
 
-    void add(double x)
+    quantile &add(double x)
     {
         gsl_rstat_quantile_add(x, m_qw);
+        return *this;
     }
 
     double get() const

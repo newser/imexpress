@@ -51,14 +51,16 @@ class rstat
         gsl_rstat_free(m_rw);
     }
 
-    void reset()
+    rstat &reset()
     {
         gsl_rstat_reset(m_rw);
+        return *this;
     }
 
-    void add(double x)
+    rstat &add(double x)
     {
         gsl_rstat_add(x, m_rw);
+        return *this;
     }
 
     size_t size() const
