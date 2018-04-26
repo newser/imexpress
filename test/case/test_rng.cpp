@@ -884,23 +884,23 @@ TEST_CASE("test_levy_rand")
 {
     iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::levy_rand(v, 1, 1);
+    iexp::VectorXd &vr = rand::levy::fill(v, 1, 1);
     REQUIRE(&vr == &v);
 
-    v2 = rand::levy_rand(v, 2, 3) + rand::levy_rand(v, 2, 4);
+    v2 = rand::levy::fill(v, 2, 3) + rand::levy::fill(v, 2, 4);
 
     iexp::MatrixXd w(3, 4), w2(3, 4);
     w.fill(9.9999);
-    w2 = rand::levy_rand(w, 2, 3);
-    w2 = rand::levy_rand(w, 2, 3) + rand::levy_rand(w, 2, 3) +
-         rand::levy_rand(w, 2, 3);
+    w2 = rand::levy::fill(w, 2, 3);
+    w2 = rand::levy::fill(w, 2, 3) + rand::levy::fill(w, 2, 3) +
+         rand::levy::fill(w, 2, 3);
 
-    iexp::MatrixXd &wr = rand::levy_rand(w, 2, 3);
+    iexp::MatrixXd &wr = rand::levy::fill(w, 2, 3);
     REQUIRE(&wr == &w);
 
 #if 0 // #ifdef IEXP_MGL2
     VectorXd v1(100);
-    rand::levy_rand(v1, 1, 1);
+    rand::levy::fill(v1, 1, 1);
     
     mglData y(100);
     y.Link(v1.data(), v1.size());
@@ -917,23 +917,23 @@ TEST_CASE("test_levy_skew_rand")
 {
     iexp::VectorXd v(10), v2(10);
 
-    iexp::VectorXd &vr = rand::levysk_rand(v, 1, 1, 2);
+    iexp::VectorXd &vr = rand::levysk::fill(v, 1, 1, 2);
     REQUIRE(&vr == &v);
 
-    v2 = rand::levysk_rand(v, 2, 3, 2) + rand::levysk_rand(v, 2, 4, 2);
+    v2 = rand::levysk::fill(v, 2, 3, 2) + rand::levysk::fill(v, 2, 4, 2);
 
     iexp::MatrixXd w(3, 4), w2(3, 4);
     w.fill(9.9999);
-    w2 = rand::levysk_rand(w, 2, 3, 2);
-    w2 = rand::levysk_rand(w, 2, 3, 2) + rand::levysk_rand(w, 2, 3, 2) +
-         rand::levysk_rand(w, 2, 3, 2);
+    w2 = rand::levysk::fill(w, 2, 3, 2);
+    w2 = rand::levysk::fill(w, 2, 3, 2) + rand::levysk::fill(w, 2, 3, 2) +
+         rand::levysk::fill(w, 2, 3, 2);
 
-    iexp::MatrixXd &wr = rand::levysk_rand(w, 2, 3, 2);
+    iexp::MatrixXd &wr = rand::levysk::fill(w, 2, 3, 2);
     REQUIRE(&wr == &w);
 
 #if 0 // #ifdef IEXP_MGL2
     VectorXd v1(100);
-    rand::levysk_rand(v1, 1, 1, 1);
+    rand::levysk::fill(v1, 1, 1, 1);
 
     mglData y(100);
     y.Link(v1.data(), v1.size());
@@ -1083,7 +1083,7 @@ TEST_CASE("test_beta")
         w.fill(9.9999);
         w2 = rand::beta::fill(w, 2, 3);
         w2 = rand::beta::fill(w, 2, 3) + rand::beta::fill(w, 2, 3) +
-             rand::flat_rand(w, 2, 3);
+             rand::flat::fill(w, 2, 3);
 
         iexp::MatrixXd &wr = rand::beta::fill(w, 2, 3);
         REQUIRE(&wr == &w);
@@ -1145,7 +1145,7 @@ TEST_CASE("test_lgnorm_rand")
         w.fill(9.9999);
         w2 = rand::lgnorm::fill(w, 2, 3);
         w2 = rand::lgnorm::fill(w, 2, 3) + rand::lgnorm::fill(w, 2, 3) +
-             rand::flat_rand(w, 2, 3);
+             rand::flat::fill(w, 2, 3);
 
         iexp::MatrixXd &wr = rand::lgnorm::fill(w, 2, 3);
         REQUIRE(&wr == &w);
@@ -1507,6 +1507,12 @@ TEST_CASE("test_pareto_rand")
 
 TEST_CASE("test_sph2_rand")
 {
+    double x[10] = {0};
+    rand::sph::rng2 r2;
+    r2.seed(1).next(&x[0]).next(&x[8]);
+    REQUIRE(__D_EQ9(x[0] * x[0] + x[1] * x[1], 1));
+    REQUIRE(__D_EQ9(x[8] * x[8] + x[9] * x[9], 1));
+
     iexp::MatrixXd v(2, 10), v2(2, 10);
     iexp::MatrixXd &vr = rand::sph::fill(v);
     REQUIRE(&vr == &v);
@@ -1740,39 +1746,65 @@ TEST_CASE("test_gbl2_rand")
 
 TEST_CASE("test_drch_rand")
 {
-    double alpha[6] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.5};
-    iexp::VectorXd v(12), v2(12);
+    {
+        double alpha[6] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.5};
+        iexp::Matrix<double, 2, 6, RowMajor> v, v2;
 
-    iexp::VectorXd &vr = rand::drch_rand(v, 6, alpha);
-    REQUIRE(&vr == &v);
+        auto &vr = rand::drch::fill(v, 6, alpha);
+        REQUIRE(&vr == &v);
+        REQUIRE(
+            __D_EQ9(v(0, 0) + v(0, 1) + v(0, 2) + v(0, 3) + v(0, 4) + v(0, 5),
+                    1));
+        REQUIRE(
+            __D_EQ9(v(1, 0) + v(1, 1) + v(1, 2) + v(1, 3) + v(1, 4) + v(1, 5),
+                    1));
 
-    v2 = rand::drch_rand(v, 6, alpha) + rand::drch_rand(v, 6, alpha);
+        v2 = rand::drch::fill(v, 6, alpha) + rand::drch::fill(v, 6, alpha);
 
-    iexp::MatrixXd w(3, 4), w2(3, 4);
-    w.fill(9.9999);
-    w2 = rand::drch_rand(w, 6, alpha);
-    w2 = rand::drch_rand(w, 6, alpha) + rand::drch_rand(w, 6, alpha) +
-         rand::drch_rand(w, 6, alpha);
+        iexp::MatrixXd w(3, 4), w2(3, 4);
+        w.fill(9.9999);
+        w2 = rand::drch::fill(w, 6, alpha);
+        w2 = rand::drch::fill(w, 6, alpha) + rand::drch::fill(w, 6, alpha) +
+             rand::drch::fill(w, 6, alpha);
 
-    iexp::MatrixXd &wr = rand::drch_rand(w, 6, alpha);
-    REQUIRE(&wr == &w);
+        iexp::MatrixXd &wr = rand::drch::fill(w, 6, alpha);
+        REQUIRE(&wr == &w);
 
-#if 0 // #ifdef IEXP_MGL2
-    VectorXcd v1(100);
-    rand::drch_rand(v1, 2, alpha);
-    VectorXd r = v1.real();
-    VectorXd i = v1.imag();
-    
-    mglData x(100), y(100);
-    x.Link(r.data(), r.size());
-    y.Link(i.data(), i.size());
-    mglGraph gr;
-    gr.SetOrigin(0, 0);
-    gr.SetRanges(-1.5, 1.5, -1.5, 1.5);
-    gr.Axis();
-    gr.Plot(x, y, "+");
-    gr.WriteFrame("drch_rand.png");
+#if 1 // #ifdef IEXP_MGL2
+        MatrixXd v1(2, 100);
+        rand::drch::fill(v1, 2, alpha);
+        VectorXd r = v1.row(0);
+        VectorXd i = v1.row(1);
+
+        mglData x(100), y(100);
+        x.Link(r.data(), r.size());
+        y.Link(i.data(), i.size());
+        mglGraph gr;
+        gr.SetOrigin(0, 0);
+        gr.SetRanges(-1.5, 1.5, -1.5, 1.5);
+        gr.Axis();
+        gr.Plot(x, y, "+");
+        gr.WriteFrame("drch_rand.png");
 #endif
+    }
+
+    {
+        double alpha[2] = {0.4, 0.6};
+        rand::drch::dist d(2, alpha);
+        double t1[2] = {0.2, 0.8};
+        double p1 = d.pdf(t1);
+        double t2[2] = {0.3, 0.7};
+        double p2 = d.pdf(t2);
+        double t3[2] = {0.9, 0.1};
+        double p3 = d.pdf(t3);
+
+        iexp::Matrix<double, 3, 2, RowMajor> r;
+        r << 0.2, 0.8, 0.3, 0.7, 0.9, 0.1;
+        iexp::Matrix<double, 3, 1> rr = rand::drch::pdf(r, 2, alpha);
+        REQUIRE(rr[0] == p1);
+        REQUIRE(rr[1] == p2);
+        REQUIRE(rr[2] == p3);
+    }
 }
 
 TEST_CASE("test_discrete_rand")

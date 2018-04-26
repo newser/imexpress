@@ -150,14 +150,16 @@ class combination
         return *(&gsl_combination_data(m_gc)[i]);
     }
 
-    void init_first()
+    combination &init_first()
     {
         gsl_combination_init_first(m_gc);
+        return *this;
     }
 
-    void init_last()
+    combination &init_last()
     {
         gsl_combination_init_last(m_gc);
+        return *this;
     }
 
     size_t n() const

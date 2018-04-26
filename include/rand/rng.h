@@ -148,9 +148,10 @@ class rng
         return *this;
     }
 
-    void seed(unsigned long seed) const
+    rng &seed(unsigned long seed)
     {
         gsl_rng_set(m_rng, seed);
+        return *this;
     }
 
     unsigned long uniform_ulong() const

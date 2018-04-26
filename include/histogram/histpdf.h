@@ -62,7 +62,7 @@ class histpdf
     }
 
     template <typename T>
-    void next(DenseBase<T> &x)
+    histpdf &next(DenseBase<T> &x)
     {
         static_assert(TYPE_IS(typename T::Scalar, double),
                       "must be double type");
@@ -73,6 +73,7 @@ class histpdf
                 x(i, j) = next();
             }
         }
+        return *this;
     }
 
   private:

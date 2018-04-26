@@ -63,19 +63,21 @@ class bgauss
         {
         }
 
-        void seed(unsigned long seed)
+        rng &seed(unsigned long seed)
         {
             m_rng.seed(seed);
+            return *this;
         }
 
-        void next(double &x, double &y)
+        rng &next(double &x, double &y)
         {
-            return gsl_ran_bivariate_gaussian(m_rng.gsl(),
-                                              m_sigma_x,
-                                              m_sigma_y,
-                                              m_rho,
-                                              &x,
-                                              &y);
+            gsl_ran_bivariate_gaussian(m_rng.gsl(),
+                                       m_sigma_x,
+                                       m_sigma_y,
+                                       m_rho,
+                                       &x,
+                                       &y);
+            return *this;
         }
 
       private:
@@ -111,20 +113,22 @@ class bgauss
     }
 
     template <typename T>
-    static void fill(DenseBase<T> &x,
+    static auto fill(DenseBase<T> &x,
                      DenseBase<T> &y,
                      double sigma_x,
                      double sigma_y,
                      double rho,
                      unsigned long seed = 0,
                      rand::rng::type type = DEFAULT_RNG_TYPE)
+        -> decltype(x.derived())
     {
         bgauss::rng r(sigma_x, sigma_y, rho, type, seed);
         return fill(x, y, r);
     }
 
     template <typename T>
-    static void fill(DenseBase<T> &x, DenseBase<T> &y, bgauss::rng &r)
+    static auto fill(DenseBase<T> &x, DenseBase<T> &y, bgauss::rng &r)
+        -> decltype(x.derived())
     {
         static_assert(TYPE_IS(typename T::Scalar, double),
                       "only support double scalar");
@@ -135,6 +139,7 @@ class bgauss
         for (Index i = 0; i < x.size(); ++i) {
             r.next(data_x[i], data_y[i]);
         }
+        return x.derived();
     }
 
     // ========================================

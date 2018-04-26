@@ -70,9 +70,10 @@ class discrete
             gsl_ran_discrete_free(m_g);
         }
 
-        void seed(unsigned long seed)
+        rng &seed(unsigned long seed)
         {
             m_rng.seed(seed);
+            return *this;
         }
 
         size_t next()

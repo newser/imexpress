@@ -147,14 +147,16 @@ class multiset
         return *(&gsl_multiset_data(m_gm)[i]);
     }
 
-    void init_first()
+    multiset &init_first()
     {
         gsl_multiset_init_first(m_gm);
+        return *this;
     }
 
-    void init_last()
+    multiset &init_last()
     {
         gsl_multiset_init_last(m_gm);
+        return *this;
     }
 
     size_t n() const

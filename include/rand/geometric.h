@@ -62,9 +62,10 @@ class geo
         {
         }
 
-        void seed(unsigned long seed)
+        rng &seed(unsigned long seed)
         {
             m_rng.seed(seed);
+            return *this;
         }
 
         unsigned int next()

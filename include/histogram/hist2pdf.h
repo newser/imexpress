@@ -59,17 +59,18 @@ class hist2pdf
         gsl_histogram2d_pdf_free(m_ghp);
     }
 
-    void next(double &x, double &y)
+    hist2pdf &next(double &x, double &y)
     {
         gsl_histogram2d_pdf_sample(m_ghp,
                                    m_xrng.uniform_double(),
                                    m_yrng.uniform_double(),
                                    &x,
                                    &y);
+        return *this;
     }
 
     template <typename T, typename U>
-    void next(DenseBase<T> &x, DenseBase<U> &y)
+    hist2pdf &next(DenseBase<T> &x, DenseBase<U> &y)
     {
         static_assert(TYPE_IS(typename T::Scalar, double),
                       "T must be double type");
@@ -82,6 +83,7 @@ class hist2pdf
                 next(x(i, j), y(i, j));
             }
         }
+        return *this;
     }
 
   private:

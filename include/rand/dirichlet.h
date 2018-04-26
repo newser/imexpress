@@ -41,65 +41,154 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class drch_rng
+class drch
 {
+    template <typename T>
+    class pdf_functor;
+
   public:
-    drch_rng(size_t K,
-             const double alpha[],
-             rng::type type = DEFAULT_RNG_TYPE,
-             unsigned long seed = 0)
-        : m_K(K)
-        , m_alpha(alpha)
-        , m_rng(type, seed)
+    // ========================================
+    // generator
+    // ========================================
+
+    class rng
     {
+      public:
+        rng(size_t k,
+            const double alpha[],
+            rand::rng::type type = DEFAULT_RNG_TYPE,
+            unsigned long seed = 0)
+            : m_k(k)
+            , m_alpha(alpha)
+            , m_rng(type, seed)
+        {
+        }
+
+        rng &seed(unsigned long seed)
+        {
+            m_rng.seed(seed);
+            return *this;
+        }
+
+        rng &next(double theta[])
+        {
+            gsl_ran_dirichlet(m_rng.gsl(), m_k, m_alpha, theta);
+            return *this;
+        }
+
+        size_t k() const
+        {
+            return m_k;
+        }
+
+      private:
+        size_t m_k;
+        const double *m_alpha;
+        rand::rng m_rng;
+    };
+
+    template <typename T>
+    static inline auto fill(DenseBase<T> &theta,
+                            size_t k,
+                            const double alpha[],
+                            unsigned long seed = 0,
+                            rand::rng::type type = DEFAULT_RNG_TYPE)
+        -> decltype(theta.derived())
+    {
+        rng r(k, alpha, type, seed);
+        return fill(theta, r);
     }
 
-    void seed(unsigned long seed)
+    template <typename T>
+    static inline auto fill(DenseBase<T> &theta, drch::rng &r)
+        -> decltype(theta.derived())
     {
-        m_rng.seed(seed);
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "only support double scalar");
+        eigen_assert((theta.size() % r.k()) == 0);
+
+        double *data = theta.derived().data();
+        for (Index i = 0; i < theta.size(); i += r.k()) {
+            r.next(&data[i]);
+        }
+        return theta.derived();
     }
 
-    void next(double theta[])
-    {
-        gsl_ran_dirichlet(m_rng.gsl(), m_K, m_alpha, theta);
-    }
+    // ========================================
+    // distribution
+    // ========================================
 
-    size_t K() const
+    class dist
     {
-        return m_K;
+      public:
+        dist(size_t k, const double alpha[])
+            : m_k(k)
+            , m_alpha(alpha)
+        {
+        }
+
+        double pdf(const double theta[]) const
+        {
+            return gsl_ran_dirichlet_pdf(m_k, m_alpha, theta);
+        }
+
+        double lnpdf(const double theta[]) const
+        {
+            return gsl_ran_dirichlet_lnpdf(m_k, m_alpha, theta);
+        }
+
+      private:
+        size_t m_k;
+        const double *m_alpha;
+    };
+
+    template <typename T>
+    static inline CwiseNullaryOp<pdf_functor<T>,
+                                 typename pdf_functor<T>::ResultType>
+    pdf(const DenseBase<T> &theta, size_t k, const double alpha[])
+    {
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "only support double scalar");
+
+        using ResultType = typename pdf_functor<T>::ResultType;
+        return ResultType::NullaryExpr(M2VNUM_ROW(T, theta),
+                                       M2VNUM_COL(T, theta),
+                                       pdf_functor<T>(theta.derived(),
+                                                      k,
+                                                      alpha));
     }
 
   private:
-    size_t m_K;
-    const double *m_alpha;
-    rng m_rng;
+    drch() = delete;
+
+    template <typename T>
+    class pdf_functor
+    {
+      public:
+        using ResultType = typename dense_derive_kpnum<T, double>::type;
+
+        pdf_functor(const T &theta, size_t k, const double alpha[])
+            : m_result(new double[M2V_NUM(T, theta)])
+        {
+            eigen_assert(k == M2V_DIM(T, theta));
+
+            size_t n = M2V_NUM(T, theta);
+            typename type_eval<T>::type m_theta(theta.eval());
+            dist m_dist(k, alpha);
+            for (size_t i = 0; i < n; ++i) {
+                m_result.get()[i] = m_dist.pdf(&m_theta.data()[i * k]);
+            }
+        }
+
+        double operator()(Index i) const
+        {
+            return m_result.get()[i];
+        }
+
+      private:
+        std::shared_ptr<double> m_result;
+    };
 };
-
-template <typename T>
-inline auto drch_rand(DenseBase<T> &x,
-                      size_t K,
-                      typename T::Scalar *alpha,
-                      unsigned long seed = 0,
-                      rng::type type = DEFAULT_RNG_TYPE)
-    -> decltype(x.derived())
-{
-    drch_rng r(K, alpha, type, seed);
-    return drch_rand(x, r);
-}
-
-template <typename T>
-inline auto drch_rand(DenseBase<T> &x, drch_rng &r) -> decltype(x.derived())
-{
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "only support double scalar");
-    eigen_assert((x.size() % r.K()) == 0);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); i += r.K()) {
-        r.next(&data[i]);
-    }
-    return x.derived();
-}
 
 ////////////////////////////////////////////////////////////
 // global variants

@@ -53,19 +53,26 @@ class sph
         {
         }
 
-        void seed(unsigned long seed)
+        Derived &seed(unsigned long seed)
         {
             m_rng.seed(seed);
+            return derived();
         }
 
-        void next(double x[])
+        Derived &next(double x[])
         {
-            static_cast<Derived *>(this)->next_impl(x);
+            derived().next_impl(x);
+            return derived();
         }
 
         size_t dim() const
         {
             return m_dim;
+        }
+
+        Derived &derived()
+        {
+            return *static_cast<Derived *>(this);
         }
 
       protected:

@@ -56,7 +56,7 @@ inline void qrand_impl(qrng &r, T x[])
 template <>
 inline void qrand_impl<double>(qrng &r, double x[])
 {
-    return r.next(x);
+    r.next(x);
 }
 
 template <typename T>

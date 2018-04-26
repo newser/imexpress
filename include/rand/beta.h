@@ -65,9 +65,10 @@ class beta
         {
         }
 
-        void seed(unsigned long seed) const
+        rng &seed(unsigned long seed)
         {
             m_rng.seed(seed);
+            return *this;
         }
 
         double next()

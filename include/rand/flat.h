@@ -41,55 +41,6 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class flat_rng
-{
-  public:
-    flat_rng(double a,
-             double b,
-             rng::type type = DEFAULT_RNG_TYPE,
-             unsigned long seed = 0)
-        : m_a(a)
-        , m_b(b)
-        , m_rng(type, seed)
-    {
-    }
-
-    void seed(unsigned long seed)
-    {
-        m_rng.seed(seed);
-    }
-
-    double next()
-    {
-        return gsl_ran_flat(m_rng.gsl(), m_a, m_b);
-    }
-
-  private:
-    double m_a, m_b;
-    rng m_rng;
-};
-
-template <typename T>
-inline auto flat_rand(DenseBase<T> &x,
-                      typename T::Scalar a,
-                      typename T::Scalar b,
-                      unsigned long seed = 0,
-                      rng::type type = DEFAULT_RNG_TYPE)
-    -> decltype(x.derived())
-{
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "scalar can only be double");
-
-    flat_rng r(a, b, type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
-    }
-
-    return x.derived();
-}
-
 class flat
 {
     template <typename T>
@@ -113,9 +64,10 @@ class flat
         {
         }
 
-        void seed(unsigned long seed)
+        rng &seed(unsigned long seed)
         {
             m_rng.seed(seed);
+            return *this;
         }
 
         double next()

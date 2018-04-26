@@ -64,9 +64,10 @@ class gbl1
         {
         }
 
-        void seed(unsigned long seed)
+        rng &seed(unsigned long seed)
         {
             m_rng.seed(seed);
+            return *this;
         }
 
         double next()

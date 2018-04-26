@@ -88,14 +88,16 @@ class qrng
         return *this;
     }
 
-    void reset()
+    qrng &reset()
     {
         gsl_qrng_init(m_qrng);
+        return *this;
     }
 
-    void next(double x[])
+    qrng &next(double x[])
     {
         gsl_qrng_get(m_qrng, x);
+        return *this;
     }
 
     const char *name() const

@@ -41,54 +41,68 @@ namespace rand {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class levy_rng
+class levy
 {
   public:
-    levy_rng(double c,
-             double alpha,
-             rng::type type = DEFAULT_RNG_TYPE,
-             unsigned long seed = 0)
-        : m_c(c)
-        , m_alpha(alpha)
-        , m_rng(type, seed)
+    // ========================================
+    // generator
+    // ========================================
+
+    class rng
     {
+      public:
+        rng(double c,
+            double alpha,
+            rand::rng::type type = DEFAULT_RNG_TYPE,
+            unsigned long seed = 0)
+            : m_c(c)
+            , m_alpha(alpha)
+            , m_rng(type, seed)
+        {
+        }
+
+        rng &seed(unsigned long seed)
+        {
+            m_rng.seed(seed);
+            return *this;
+        }
+
+        double next()
+        {
+            return gsl_ran_levy(m_rng.gsl(), m_c, m_alpha);
+        }
+
+      private:
+        double m_c, m_alpha;
+        rand::rng m_rng;
+    };
+
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x,
+                            double c,
+                            double alpha,
+                            unsigned long seed = 0,
+                            rand::rng::type type = DEFAULT_RNG_TYPE)
+        -> decltype(x.derived())
+    {
+        levy::rng r(c, alpha, type, seed);
+        return fill(x, r);
     }
 
-    void seed(unsigned long seed)
+    template <typename T>
+    static inline auto fill(DenseBase<T> &x, levy::rng &r)
+        -> decltype(x.derived())
     {
-        m_rng.seed(seed);
-    }
+        static_assert(TYPE_IS(typename T::Scalar, double),
+                      "only support double scalar");
 
-    double next()
-    {
-        return gsl_ran_levy(m_rng.gsl(), m_c, m_alpha);
+        double *data = x.derived().data();
+        for (Index i = 0; i < x.size(); ++i) {
+            data[i] = r.next();
+        }
+        return x.derived();
     }
-
-  private:
-    double m_c, m_alpha;
-    rng m_rng;
 };
-
-template <typename T>
-inline auto levy_rand(DenseBase<T> &x,
-                      typename T::Scalar c,
-                      typename T::Scalar alpha,
-                      unsigned long seed = 0,
-                      rng::type type = DEFAULT_RNG_TYPE)
-    -> decltype(x.derived())
-{
-    static_assert(TYPE_IS(typename T::Scalar, double),
-                  "scalar can only be double");
-
-    levy_rng r(c, alpha, type, seed);
-
-    typename T::Scalar *data = x.derived().data();
-    for (Index i = 0; i < x.size(); ++i) {
-        data[i] = r.next();
-    }
-
-    return x.derived();
-}
 
 ////////////////////////////////////////////////////////////
 // global variants

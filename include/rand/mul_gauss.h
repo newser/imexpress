@@ -85,16 +85,18 @@ class mgauss
             gsl_matrix_free(m_L);
         }
 
-        void seed(unsigned long seed)
+        rng &seed(unsigned long seed)
         {
             m_rng.seed(seed);
+            return *this;
         }
 
-        void next(double x[])
+        rng &next(double x[])
         {
             gsl_block b{m_mu_block.size, x};
             gsl_vector result{m_mu_block.size, 1, x, &b, 0};
             gsl_ran_multivariate_gaussian(m_rng.gsl(), &m_mu, m_L, &result);
+            return *this;
         }
 
         size_t k()
@@ -235,8 +237,8 @@ class mgauss
                       "only support double scalar");
 
         using ResultType = typename mean_functor<T>::ResultType;
-        return ResultType::NullaryExpr(TP4(T) == RowMajor ? 1 : x.rows(),
-                                       TP4(T) == RowMajor ? x.cols() : 1,
+        return ResultType::NullaryExpr((TP4(T) == RowMajor) ? 1 : x.rows(),
+                                       (TP4(T) == RowMajor) ? x.cols() : 1,
                                        mean_functor<T>(x.derived()));
     }
 
@@ -250,8 +252,10 @@ class mgauss
                       "only support double scalar");
 
         using ResultType = typename cov_functor<T>::ResultType;
-        return ResultType::NullaryExpr(TP4(T) == RowMajor ? x.cols() : x.rows(),
-                                       TP4(T) == RowMajor ? x.cols() : x.rows(),
+        return ResultType::NullaryExpr((TP4(T) == RowMajor) ? x.cols()
+                                                            : x.rows(),
+                                       (TP4(T) == RowMajor) ? x.cols()
+                                                            : x.rows(),
                                        cov_functor<T>(x.derived()));
     }
 
@@ -293,19 +297,14 @@ class mgauss
     {
       public:
         using Scalar = typename T::Scalar;
-        using ResultType =
-            typename dense_derive<T,
-                                  Scalar,
-                                  TP4(T) == RowMajor ? 1 : T::RowsAtCompileTime,
-                                  TP4(T) == RowMajor ? T::ColsAtCompileTime
-                                                     : 1>::type;
+        using ResultType = typename dense_derive_kpdim<T>::type;
 
         mean_functor(const T &x)
-            : m_result(new Scalar[TP4(T) == RowMajor ? x.cols() : x.rows()])
+            : m_result(new Scalar[M2V_DIM(T, x)])
         {
             typename type_eval<T>::type m_x(x.eval());
-            dist::mean(TP4(T) == RowMajor ? x.rows() : x.cols(),
-                       TP4(T) == RowMajor ? x.cols() : x.rows(),
+            dist::mean(M2V_NUM(T, x),
+                       M2V_DIM(T, x),
                        m_x.data(),
                        m_result.get());
         }
@@ -327,21 +326,21 @@ class mgauss
         using ResultType = typename dense_derive<
             T,
             Scalar,
-            TP4(T) == RowMajor ? T::ColsAtCompileTime : T::RowsAtCompileTime,
-            TP4(T) == RowMajor ? T::ColsAtCompileTime : T::RowsAtCompileTime,
-            TP4(T) == RowMajor ? RowMajor : ColMajor,
-            TP4(T) == RowMajor ? T::MaxColsAtCompileTime
-                               : T::MaxRowsAtCompileTime,
-            TP4(T) == RowMajor ? T::MaxColsAtCompileTime
-                               : T::MaxRowsAtCompileTime>::type;
+            (TP4(T) == RowMajor) ? T::ColsAtCompileTime : T::RowsAtCompileTime,
+            (TP4(T) == RowMajor) ? T::ColsAtCompileTime : T::RowsAtCompileTime,
+            (TP4(T) == RowMajor) ? RowMajor : ColMajor,
+            (TP4(T) == RowMajor) ? T::MaxColsAtCompileTime
+                                 : T::MaxRowsAtCompileTime,
+            (TP4(T) == RowMajor) ? T::MaxColsAtCompileTime
+                                 : T::MaxRowsAtCompileTime>::type;
 
         cov_functor(const T &x)
-            : m_result(TP4(T) == RowMajor ? x.cols() : x.rows(),
-                       TP4(T) == RowMajor ? x.cols() : x.rows())
+            : m_result((TP4(T) == RowMajor) ? x.cols() : x.rows(),
+                       (TP4(T) == RowMajor) ? x.cols() : x.rows())
         {
             typename type_eval<T>::type m_x(x.eval());
-            dist::cov(TP4(T) == RowMajor ? x.rows() : x.cols(),
-                      TP4(T) == RowMajor ? x.cols() : x.rows(),
+            dist::cov((TP4(T) == RowMajor) ? x.rows() : x.cols(),
+                      (TP4(T) == RowMajor) ? x.cols() : x.rows(),
                       m_x.data(),
                       m_result.data());
         }

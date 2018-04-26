@@ -199,9 +199,10 @@ class hist2
         return *this;
     }
 
-    void reset()
+    hist2 &reset()
     {
         gsl_histogram2d_reset(m_gh2);
+        return *this;
     }
 
     double get(size_t i, size_t j)
@@ -211,13 +212,14 @@ class hist2
         return gsl_histogram2d_get(m_gh2, i, j);
     }
 
-    void add(double x, double y, double weight = 1.0)
+    hist2 &add(double x, double y, double weight = 1.0)
     {
         gsl_histogram2d_accumulate(m_gh2, x, y, weight);
+        return *this;
     }
 
     template <typename T, typename U>
-    void add(const DenseBase<T> &x, const DenseBase<U> &y)
+    hist2 &add(const DenseBase<T> &x, const DenseBase<U> &y)
     {
         static_assert(TYPE_IS(typename T::Scalar, double),
                       "T must be double type");
@@ -230,12 +232,13 @@ class hist2
                 gsl_histogram2d_accumulate(m_gh2, x(i, j), y(i, j), 1.0);
             }
         }
+        return *this;
     }
 
     template <typename T, typename U, typename V>
-    void add(const DenseBase<T> &x,
-             const DenseBase<U> &y,
-             const DenseBase<V> &weight)
+    hist2 &add(const DenseBase<T> &x,
+               const DenseBase<U> &y,
+               const DenseBase<V> &weight)
     {
         static_assert(TYPE_IS(typename T::Scalar, double),
                       "T must be double type");
@@ -254,6 +257,7 @@ class hist2
                                            weight(i, j));
             }
         }
+        return *this;
     }
 
     void xrange(size_t i, double &lower, double &upper) const

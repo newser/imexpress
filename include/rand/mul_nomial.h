@@ -66,14 +66,16 @@ class mnom
         {
         }
 
-        void seed(unsigned long seed)
+        rng &seed(unsigned long seed)
         {
             m_rng.seed(seed);
+            return *this;
         }
 
-        void next(unsigned int n[])
+        rng &next(unsigned int n[])
         {
-            return gsl_ran_multinomial(m_rng.gsl(), m_k, m_N, m_p, n);
+            gsl_ran_multinomial(m_rng.gsl(), m_k, m_N, m_p, n);
+            return *this;
         }
 
         size_t k()
@@ -194,14 +196,10 @@ class mnom
     class pdf_functor
     {
       public:
-        using ResultType = typename dense_derive<
-            T,
-            double,
-            TP4(T) == RowMajor ? T::RowsAtCompileTime : 1,
-            TP4(T) == RowMajor ? 1 : T::ColsAtCompileTime>::type;
+        using ResultType = typename dense_derive_kpnum<T, double>::type;
 
         pdf_functor(const T &x, size_t k, const double p[])
-            : m_result(new double[TP4(T) == RowMajor ? x.rows() : x.cols()])
+            : m_result(new double[M2V_NUM(T, x)])
         {
             typename type_eval<T>::type m_x(x.eval());
             dist m_dist(k, p);
