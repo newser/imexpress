@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 haniu (niuhao.cn@gmail.com)
+/* Copyright (T) 2017 haniu (niuhao.cn@gmail.com)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,22 +41,22 @@ IEXP_NS_BEGIN
 
 class siman_test;
 
-template <typename C>
+template <typename T>
 class siman
 {
     friend struct state;
     friend class siman_test;
 
   public:
-    using f_energy = std::function<double(const C &)>;
-    using f_step = std::function<void(rand::rng &, C &, double)>;
-    using f_metric = std::function<double(const C &, const C &)>;
-    using f_print = std::function<void(const C &)>;
+    using f_energy = std::function<double(const T &)>;
+    using f_step = std::function<void(rand::rng &, T &, double)>;
+    using f_metric = std::function<double(const T &, const T &)>;
+    using f_print = std::function<void(const T &)>;
 
-    using f_copy = std::function<void(const C &, C &)>;
-    using f_copy_construct = std::function<C &(const C &)>;
+    using f_copy = std::function<void(const T &, T &)>;
+    using f_copy_construct = std::function<T &(const T &)>;
 
-    siman(rand::rng::type type = DEFAULT_RNG_TYPE, unsigned long seed = 0)
+    siman(unsigned long seed = 0, rand::rng::type type = DEFAULT_RNG_TYPE)
         : m_rng(type, seed)
     {
     }
@@ -112,9 +112,9 @@ class siman
         return *this;
     }
 
-    void solve(C &init)
+    void solve(T &init)
     {
-        state st(*this, &init);
+        state s(*this, &init);
         gsl_siman_params_t params{m_n_tries,
                                   m_iters_fixed_T,
                                   m_step_size,
@@ -123,7 +123,7 @@ class siman
                                   m_mu_t,
                                   m_t_min};
         gsl_siman_solve(m_rng.gsl(),
-                        &st,
+                        &s,
                         s_Efunc,
                         s_step,
                         s_metric,
@@ -135,7 +135,7 @@ class siman
                         params);
 
         // need not destroy passed param
-        st.m_cfg = nullptr;
+        s.m_x = nullptr;
     }
 
   private:
@@ -157,63 +157,63 @@ class siman
   private:
     struct state
     {
-        state(siman &s, C *cfg)
+        state(siman &s, T *x)
             : m_siman(s)
-            , m_cfg(cfg)
+            , m_x(x)
         {
         }
 
         ~state()
         {
-            delete m_cfg;
+            delete m_x;
         }
 
         siman &m_siman;
-        C *m_cfg;
+        T *m_x;
     };
 
     static double s_Efunc(void *xp)
     {
-        const state *st = (state *)xp;
-        return st->m_siman.m_energy(*st->m_cfg);
+        const state *s = (state *)xp;
+        return s->m_siman.m_energy(*s->m_x);
     }
 
     static void s_step(const gsl_rng *r, void *xp, double step_size)
     {
-        const state *st = (state *)xp;
-        return st->m_siman.m_step(st->m_siman.m_rng, *st->m_cfg, step_size);
+        const state *s = (state *)xp;
+        return s->m_siman.m_step(s->m_siman.m_rng, *s->m_x, step_size);
     }
 
     static double s_metric(void *xp, void *yp)
     {
         const state *x = (state *)xp;
         const state *y = (state *)yp;
-        return x->m_siman.m_metric(*x->m_cfg, *y->m_cfg);
+        return x->m_siman.m_metric(*x->m_x, *y->m_x);
     }
 
     static void s_print(void *xp)
     {
-        const state *st = (state *)xp;
-        st->m_siman.m_print(*st->m_cfg);
+        const state *s = (state *)xp;
+        s->m_siman.m_print(*s->m_x);
     }
 
     static void s_copy(void *source, void *dest)
     {
         const state *s = (state *)source;
         const state *d = (state *)dest;
-        *d->m_cfg = *s->m_cfg;
+        *d->m_x = *s->m_x;
     }
 
     static void *s_copy_construct(void *xp)
     {
-        const state *st = (state *)xp;
-        return new state(st->m_siman, new C(*st->m_cfg));
+        const state *s = (state *)xp;
+        return new state(s->m_siman, new T(*s->m_x));
     }
 
     static void s_destroy(void *xp)
     {
-        state *st = (state *)xp;
-        delete st;
+        state *s = (state *)xp;
+        delete s;
     }
 };
 

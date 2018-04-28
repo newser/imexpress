@@ -47,7 +47,7 @@ class siman_test
             x = 123;
         });
         s1.s_step(nullptr, p.get(), 999);
-        REQUIRE(*(int *)p->m_cfg == 123);
+        REQUIRE(*(int *)p->m_x == 123);
 
         // metric
         std::shared_ptr<siman<int>::state> p2(
@@ -74,14 +74,14 @@ class siman_test
         std::shared_ptr<siman<int>::state> p2(
             new siman<int>::state(s1, new int(2)));
         s1.s_copy(p.get(), p2.get());
-        REQUIRE(p->m_cfg != p2->m_cfg);
-        REQUIRE(*(int *)p->m_cfg == 1);
-        REQUIRE(*(int *)p2->m_cfg == 1);
+        REQUIRE(p->m_x != p2->m_x);
+        REQUIRE(*(int *)p->m_x == 1);
+        REQUIRE(*(int *)p2->m_x == 1);
 
-        *(int *)p->m_cfg = 9;
+        *(int *)p->m_x = 9;
         p2.reset((siman<int>::state *)s1.s_copy_construct(p.get()));
-        REQUIRE(*(int *)p->m_cfg == 9);
-        REQUIRE(*(int *)p2->m_cfg == 9);
+        REQUIRE(*(int *)p->m_x == 9);
+        REQUIRE(*(int *)p2->m_x == 9);
 
         siman<int>::state *ps = new siman<int>::state(s1, new int(3));
         s1.s_destroy(ps);
@@ -93,15 +93,15 @@ class siman_test
         std::shared_ptr<siman<to>::state> q2(
             new siman<to>::state(s2, new to(2)));
         s2.s_copy(q.get(), q2.get());
-        REQUIRE(q->m_cfg != q2->m_cfg);
-        REQUIRE(*((to *)q->m_cfg)->x == 1);
-        REQUIRE(*((to *)q2->m_cfg)->x == 1);
+        REQUIRE(q->m_x != q2->m_x);
+        REQUIRE(*((to *)q->m_x)->x == 1);
+        REQUIRE(*((to *)q2->m_x)->x == 1);
         REQUIRE(ctor == 2);
 
-        *((to *)q->m_cfg)->x = 9;
+        *((to *)q->m_x)->x = 9;
         q2.reset((siman<to>::state *)s2.s_copy_construct(q.get()));
-        REQUIRE(*((to *)q->m_cfg)->x == 9);
-        REQUIRE(*((to *)q2->m_cfg)->x == 9);
+        REQUIRE(*((to *)q->m_x)->x == 9);
+        REQUIRE(*((to *)q2->m_x)->x == 9);
         REQUIRE(ctor == 3);
     }
 
@@ -157,13 +157,15 @@ TEST_CASE("siman_solve")
     s.step_size(1.0);
 
     s.energy([](const double &x) {
-        return exp(-square(x - 1)) * sin(8 * x) - exp(-square(x - 1000)) * 0.89;
-    });
-    s.step([](rand::rng &r, double &x, double step_size) {
-        x = r.uniform_double() * 2 * step_size - step_size + x;
-    });
-    s.metric(
-        [](const double &x, const double &y) -> double { return fabs(x - y); });
+         return exp(-square(x - 1)) * sin(8 * x) -
+                exp(-square(x - 1000)) * 0.89;
+     })
+        .step([](rand::rng &r, double &x, double step_size) {
+            x = r.uniform_double() * 2 * step_size - step_size + x;
+        })
+        .metric([](const double &x, const double &y) -> double {
+            return fabs(x - y);
+        });
     // s.print([](const double &x) { printf(" %12g ", x);});
 
     /* The function tested here has multiple mimima.
