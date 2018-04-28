@@ -40,20 +40,20 @@ namespace stats {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline double quantile_impl(const T data[], const size_t n, double f)
+inline double quantile_impl(const T data[], size_t n, double f)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double quantile_impl(const double data[], const size_t n, double f)
+inline double quantile_impl(const double data[], size_t n, double f)
 {
     return gsl_stats_quantile_from_sorted_data(data, 1, n, f);
 }
 
 #define DEFINE_QUANTILE(type, name)                                            \
     template <>                                                                \
-    inline double quantile_impl(const type data[], const size_t n, double f)   \
+    inline double quantile_impl(const type data[], size_t n, double f)         \
     {                                                                          \
         return gsl_stats_##name##_quantile_from_sorted_data(data, 1, n, f);    \
     }
@@ -68,10 +68,8 @@ DEFINE_QUANTILE(long double, long_double)
 #undef DEFINE_QUANTILE
 
 template <typename T>
-inline double quantile(const ArrayBase<T> &data, double f)
+inline double quantile(const DenseBase<T> &data, double f)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return quantile_impl(m_data.data(), m_data.size(), f);
 }

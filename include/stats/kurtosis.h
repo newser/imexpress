@@ -72,10 +72,8 @@ DEFINE_KURTOSIS(long double, long_double)
 #undef DEFINE_KURTOSIS
 
 template <typename T>
-inline double kurtosis(const ArrayBase<T> &data)
+inline double kurtosis(const DenseBase<T> &data)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return kurtosis_impl(m_data.data(), m_data.size());
 }
@@ -122,10 +120,8 @@ DEFINE_KURTOSIS_MV(long double, long_double)
 #undef DEFINE_KURTOSIS_MV
 
 template <typename T>
-inline double kurtosis(const ArrayBase<T> &data, double mean, double std)
+inline double kurtosis(const DenseBase<T> &data, double mean, double std)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return kurtosis_mv_impl(m_data.data(), m_data.size(), mean, std);
 }

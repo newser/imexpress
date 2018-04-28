@@ -40,20 +40,20 @@ namespace stats {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline double median_impl(const T data[], const size_t n)
+inline double median_impl(const T data[], size_t n)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double median_impl(const double data[], const size_t n)
+inline double median_impl(const double data[], size_t n)
 {
     return gsl_stats_median_from_sorted_data(data, 1, n);
 }
 
 #define DEFINE_MEAN(type, name)                                                \
     template <>                                                                \
-    inline double median_impl(const type data[], const size_t n)               \
+    inline double median_impl(const type data[], size_t n)                     \
     {                                                                          \
         return gsl_stats_##name##_median_from_sorted_data(data, 1, n);         \
     }
@@ -68,10 +68,8 @@ DEFINE_MEAN(long double, long_double)
 #undef DEFINE_MEAN
 
 template <typename T>
-inline double median(const ArrayBase<T> &data)
+inline double median(const DenseBase<T> &data)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return median_impl(m_data.data(), m_data.size());
 }

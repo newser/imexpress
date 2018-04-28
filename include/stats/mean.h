@@ -44,20 +44,20 @@ namespace stats {
 // ========================================
 
 template <typename T>
-inline double mean_impl(const T data[], const size_t n)
+inline double mean_impl(const T data[], size_t n)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double mean_impl(const double data[], const size_t n)
+inline double mean_impl(const double data[], size_t n)
 {
     return gsl_stats_mean(data, 1, n);
 }
 
 #define DEFINE_MEAN(type, name)                                                \
     template <>                                                                \
-    inline double mean_impl(const type data[], const size_t n)                 \
+    inline double mean_impl(const type data[], size_t n)                       \
     {                                                                          \
         return gsl_stats_##name##_mean(data, 1, n);                            \
     }
@@ -72,10 +72,8 @@ DEFINE_MEAN(long double, long_double)
 #undef DEFINE_MEAN
 
 template <typename T>
-inline double mean(const ArrayBase<T> &data)
+inline double mean(const DenseBase<T> &data)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return mean_impl(m_data.data(), m_data.size());
 }
@@ -85,22 +83,21 @@ inline double mean(const ArrayBase<T> &data)
 // ========================================
 
 template <typename T>
-inline double wmean_impl(const T data[], const T w[], const size_t n)
+inline double wmean_impl(const T data[], const T w[], size_t n)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double wmean_impl(const double data[], const double w[], const size_t n)
+inline double wmean_impl(const double data[], const double w[], size_t n)
 {
     return gsl_stats_wmean(w, 1, data, 1, n);
 }
 
 template <typename T>
-inline double wmean(const ArrayBase<T> &data, const ArrayBase<T> &weight)
+inline double wmean(const DenseBase<T> &data, const DenseBase<T> &weight)
 {
-    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
-                 (data.size() == weight.size()));
+    eigen_assert(data.size() == weight.size());
 
     typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
     return wmean_impl(m_data.data(), m_w.data(), m_data.size());

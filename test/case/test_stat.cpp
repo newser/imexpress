@@ -338,19 +338,19 @@ TEST_CASE("stat_autocorr")
     g = gsl_stats_lag1_autocorrelation_m(c.data(), 1, c.size(), 1);
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
-    iexp::ArrayXi c2;
-    c2 = iexp::ArrayXi::Random(10);
+    iexp::MatrixXi c2(3, 4);
+    c2 = iexp::MatrixXi::Random(3, 4);
     v = iexp::stats::autocorr(c2);
     g = gsl_stats_int_lag1_autocorrelation(c2.data(), 1, c2.size());
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
-    c2 = iexp::ArrayXi::Random(10);
+    c2 = iexp::MatrixXi::Random(3, 4);
     v = iexp::stats::autocorr(c2, 1);
     g = gsl_stats_int_lag1_autocorrelation_m(c2.data(), 1, c2.size(), 1);
     REQUIRE(__D_EQ_IN(v, g, 1e-9));
 
     // compile
-    v = iexp::stats::mean(c + c2.cast<double>());
+    v = iexp::stats::mean(c2.cast<double>() + c2.cast<double>());
 }
 
 TEST_CASE("stat_cov")

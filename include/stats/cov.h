@@ -72,10 +72,9 @@ DEFINE_COV(long double, long_double)
 #undef DEFINE_COV
 
 template <typename T>
-inline double cov(const ArrayBase<T> &data1, const ArrayBase<T> &data2)
+inline double cov(const DenseBase<T> &data1, const DenseBase<T> &data2)
 {
-    eigen_assert(IS_VEC(data1) && IS_VEC(data2) &&
-                 (data1.size() == data2.size()));
+    eigen_assert(data1.size() == data2.size());
 
     typename type_eval<T>::type m_data1(data1.eval()), m_data2(data2.eval());
     return cov_impl(m_data1.data(), m_data2.data(), m_data1.size());
@@ -129,13 +128,12 @@ DEFINE_COV_M(long double, long_double)
 #undef DEFINE_COV_M
 
 template <typename T>
-inline double cov(const ArrayBase<T> &data1,
-                  const ArrayBase<T> &data2,
+inline double cov(const DenseBase<T> &data1,
+                  const DenseBase<T> &data2,
                   double mean1,
                   double mean2)
 {
-    eigen_assert(IS_VEC(data1) && IS_VEC(data2) &&
-                 (data1.size() == data2.size()));
+    eigen_assert(data1.size() == data2.size());
 
     typename type_eval<T>::type m_data1(data1.eval()), m_data2(data2.eval());
     return cov_impl(m_data1.data(),

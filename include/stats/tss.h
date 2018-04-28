@@ -72,10 +72,8 @@ DEFINE_TSS(long double, long_double)
 #undef DEFINE_TSS
 
 template <typename T>
-inline double tss(const ArrayBase<T> &data)
+inline double tss(const DenseBase<T> &data)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return tss_impl(m_data.data(), m_data.size());
 }
@@ -113,10 +111,8 @@ DEFINE_TSS_M(long double, long_double)
 #undef DEFINE_TSS_M
 
 template <typename T>
-inline double tss(const ArrayBase<T> &data, double mean)
+inline double tss(const DenseBase<T> &data, double mean)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return tss_m_impl(m_data.data(), m_data.size(), mean);
 }
@@ -138,10 +134,9 @@ inline double wtss_impl(const double data[], const double w[], size_t n)
 }
 
 template <typename T>
-inline double wtss(const ArrayBase<T> &data, const ArrayBase<T> &weight)
+inline double wtss(const DenseBase<T> &data, const DenseBase<T> &weight)
 {
-    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
-                 (data.size() == weight.size()));
+    eigen_assert(data.size() == weight.size());
 
     typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
     return wtss_impl(m_data.data(), m_w.data(), m_data.size());
@@ -167,12 +162,11 @@ inline double wtss_impl(const double data[],
 }
 
 template <typename T>
-inline double wtss(const ArrayBase<T> &data,
-                   const ArrayBase<T> &weight,
+inline double wtss(const DenseBase<T> &data,
+                   const DenseBase<T> &weight,
                    double mean)
 {
-    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
-                 (data.size() == weight.size()));
+    eigen_assert(data.size() == weight.size());
 
     typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
     return wtss_impl(m_data.data(), m_w.data(), m_data.size(), mean);

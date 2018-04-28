@@ -72,10 +72,8 @@ DEFINE_STD(long double, long_double)
 #undef DEFINE_STD
 
 template <typename T>
-inline double std(const ArrayBase<T> &data)
+inline double std(const DenseBase<T> &data)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return std_impl(m_data.data(), m_data.size());
 }
@@ -113,10 +111,8 @@ DEFINE_STD_M(long double, long_double)
 #undef DEFINE_STD_M
 
 template <typename T>
-inline double std(const ArrayBase<T> &data, double mean)
+inline double std(const DenseBase<T> &data, double mean)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return std_m_impl(m_data.data(), m_data.size(), mean);
 }
@@ -154,10 +150,8 @@ DEFINE_USTD_M(long double, long_double)
 #undef DEFINE_USTD_M
 
 template <typename T>
-inline double ustd(const ArrayBase<T> &data, double mean)
+inline double ustd(const DenseBase<T> &data, double mean)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return ustd_m_impl(m_data.data(), m_data.size(), mean);
 }
@@ -195,10 +189,8 @@ DEFINE_ABSTD(long double, long_double)
 #undef DEFINE_ABSTD
 
 template <typename T>
-inline double abstd(const ArrayBase<T> &data)
+inline double abstd(const DenseBase<T> &data)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return abstd_impl(m_data.data(), m_data.size());
 }
@@ -236,10 +228,8 @@ DEFINE_ABSTD_M(long double, long_double)
 #undef DEFINE_ABSTD_M
 
 template <typename T>
-inline double abstd(const ArrayBase<T> &data, double mean)
+inline double abstd(const DenseBase<T> &data, double mean)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return abstd_m_impl(m_data.data(), m_data.size(), mean);
 }
@@ -261,10 +251,9 @@ inline double wstd_impl(const double data[], const double w[], size_t n)
 }
 
 template <typename T>
-inline double wstd(const ArrayBase<T> &data, const ArrayBase<T> &weight)
+inline double wstd(const DenseBase<T> &data, const DenseBase<T> &weight)
 {
-    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
-                 (data.size() == weight.size()));
+    eigen_assert(data.size() == weight.size());
 
     typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
     return wstd_impl(m_data.data(), m_w.data(), m_data.size());
@@ -290,12 +279,11 @@ inline double wstd_impl(const double data[],
 }
 
 template <typename T>
-inline double wstd(const ArrayBase<T> &data,
-                   const ArrayBase<T> &weight,
+inline double wstd(const DenseBase<T> &data,
+                   const DenseBase<T> &weight,
                    double mean)
 {
-    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
-                 (data.size() == weight.size()));
+    eigen_assert(data.size() == weight.size());
 
     typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
     return wstd_impl(m_data.data(), m_w.data(), m_data.size(), mean);
@@ -321,12 +309,11 @@ inline double wustd_impl(const double data[],
 }
 
 template <typename T>
-inline double wustd(const ArrayBase<T> &data,
-                    const ArrayBase<T> &weight,
+inline double wustd(const DenseBase<T> &data,
+                    const DenseBase<T> &weight,
                     double mean)
 {
-    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
-                 (data.size() == weight.size()));
+    eigen_assert(data.size() == weight.size());
 
     typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
     return wustd_impl(m_data.data(), m_w.data(), m_data.size(), mean);
@@ -349,10 +336,9 @@ inline double wabstd_impl(const double data[], const double w[], size_t n)
 }
 
 template <typename T>
-inline double wabstd(const ArrayBase<T> &data, const ArrayBase<T> &weight)
+inline double wabstd(const DenseBase<T> &data, const DenseBase<T> &weight)
 {
-    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
-                 (data.size() == weight.size()));
+    eigen_assert(data.size() == weight.size());
 
     typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
     return wabstd_impl(m_data.data(), m_w.data(), m_data.size());
@@ -378,12 +364,11 @@ inline double wabstd_impl(const double data[],
 }
 
 template <typename T>
-inline double wabstd(const ArrayBase<T> &data,
-                     const ArrayBase<T> &weight,
+inline double wabstd(const DenseBase<T> &data,
+                     const DenseBase<T> &weight,
                      double mean)
 {
-    eigen_assert(IS_VEC(data) && IS_VEC(data) &&
-                 (data.size() == weight.size()));
+    eigen_assert(data.size() == weight.size());
 
     typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
     return wabstd_impl(m_data.data(), m_w.data(), m_data.size(), mean);

@@ -1770,7 +1770,7 @@ TEST_CASE("test_drch_rand")
         iexp::MatrixXd &wr = rand::drch::fill(w, 6, alpha);
         REQUIRE(&wr == &w);
 
-#if 1 // #ifdef IEXP_MGL2
+#if 0 // #ifdef IEXP_MGL2
         MatrixXd v1(2, 100);
         rand::drch::fill(v1, 2, alpha);
         VectorXd r = v1.row(0);

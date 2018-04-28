@@ -72,10 +72,8 @@ DEFINE_SKEWNESS(long double, long_double)
 #undef DEFINE_SKEWNESS
 
 template <typename T>
-inline double skewness(const ArrayBase<T> &data)
+inline double skewness(const DenseBase<T> &data)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return skewness_impl(m_data.data(), m_data.size());
 }
@@ -122,10 +120,8 @@ DEFINE_SKEWNESS_MV(long double, long_double)
 #undef DEFINE_SKEWNESS_MV
 
 template <typename T>
-inline double skewness(const ArrayBase<T> &data, double mean, double std)
+inline double skewness(const DenseBase<T> &data, double mean, double std)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return skewness_mv_impl(m_data.data(), m_data.size(), mean, std);
 }
@@ -147,10 +143,8 @@ inline double wskewness_impl(const double data[], const double w[], size_t n)
 }
 
 template <typename T>
-inline double wskewness(const ArrayBase<T> &data, const ArrayBase<T> &weight)
+inline double wskewness(const DenseBase<T> &data, const DenseBase<T> &weight)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
     return wskewness_impl(m_data.data(), m_w.data(), m_data.size());
 }
@@ -174,13 +168,11 @@ inline double wskewness_mv_impl(
 }
 
 template <typename T>
-inline double wskewness(const ArrayBase<T> &data,
-                        const ArrayBase<T> &weight,
+inline double wskewness(const DenseBase<T> &data,
+                        const DenseBase<T> &weight,
                         double mean,
                         double std)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
     return wskewness_mv_impl(m_data.data(),
                              m_w.data(),
@@ -206,10 +198,8 @@ inline double wkurtosis_impl(const double data[], const double w[], size_t n)
 }
 
 template <typename T>
-inline double wkurtosis(const ArrayBase<T> &data, const ArrayBase<T> &weight)
+inline double wkurtosis(const DenseBase<T> &data, const DenseBase<T> &weight)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
     return wkurtosis_impl(m_data.data(), m_w.data(), m_data.size());
 }
@@ -233,13 +223,11 @@ inline double wkurtosis_mv_impl(
 }
 
 template <typename T>
-inline double wkurtosis(const ArrayBase<T> &data,
-                        const ArrayBase<T> &weight,
+inline double wkurtosis(const DenseBase<T> &data,
+                        const DenseBase<T> &weight,
                         double mean,
                         double std)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval()), m_w(weight.eval());
     return wkurtosis_mv_impl(m_data.data(),
                              m_w.data(),

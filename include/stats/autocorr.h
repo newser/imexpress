@@ -72,10 +72,8 @@ DEFINE_AUTOCORR(long double, long_double)
 #undef DEFINE_AUTOCORR
 
 template <typename T>
-inline double autocorr(const ArrayBase<T> &data)
+inline double autocorr(const DenseBase<T> &data)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return autocorr_impl(m_data.data(), m_data.size());
 }
@@ -113,10 +111,8 @@ DEFINE_AUTOCORR_M(long double, long_double)
 #undef DEFINE_AUTOCORR_M
 
 template <typename T>
-inline double autocorr(const ArrayBase<T> &data, double mean)
+inline double autocorr(const DenseBase<T> &data, double mean)
 {
-    eigen_assert(IS_VEC(data));
-
     typename type_eval<T>::type m_data(data.eval());
     return autocorr_m_impl(m_data.data(), m_data.size(), mean);
 }
