@@ -47,19 +47,19 @@ namespace sf {
 // ========================================
 
 template <bool scaled, typename T>
-inline T airy_Ai_impl(const T x, const precision p)
+inline T airy_Ai_impl(T x, precision p)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double airy_Ai_impl<false, double>(const double x, const precision p)
+inline double airy_Ai_impl<false, double>(double x, precision p)
 {
     return gsl_sf_airy_Ai(x, (int)p);
 }
 
 template <>
-inline double airy_Ai_impl<true, double>(const double x, const precision p)
+inline double airy_Ai_impl<true, double>(double x, precision p)
 {
     return gsl_sf_airy_Ai_scaled(x, (int)p);
 }
@@ -68,12 +68,8 @@ template <bool scaled, typename T>
 class airy_Ai_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
     airy_Ai_functor(const T &x, precision p)
         : m_x(x)
@@ -81,7 +77,7 @@ class airy_Ai_functor
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
         return airy_Ai_impl<scaled>(m_x(i, j), m_p);
     }
@@ -93,57 +89,45 @@ class airy_Ai_functor
 
 template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<airy_Ai_functor<scaled, T>,
-                      typename airy_Ai_functor<scaled, T>::ArrayType>
-airy_Ai(const ArrayBase<T> &x, const precision p = precision::DOUBLE)
+                      typename airy_Ai_functor<scaled, T>::ResultType>
+airy_Ai(const DenseBase<T> &x, precision p = precision::DOUBLE)
 {
-    using ArrayType = typename airy_Ai_functor<scaled, T>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  airy_Ai_functor<scaled, T>(x.derived(), p));
+    using ResultType = typename airy_Ai_functor<scaled, T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   airy_Ai_functor<scaled, T>(x.derived(), p));
 }
 
 template <bool scaled, typename T>
-inline T airy_Ai_e_impl(const T x, const precision p, T &e)
+inline T airy_Ai_e_impl(T x, precision p, T &e)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double airy_Ai_e_impl<false, double>(const double x,
-                                            const precision p,
-                                            double &e)
+inline double airy_Ai_e_impl<false, double>(double x, precision p, double &e)
 {
     gsl_sf_result r;
-    if (gsl_sf_airy_Ai_e(x, (int)p, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("airy_Ai"));
+    gsl_sf_airy_Ai_e(x, (int)p, &r);
+    e = r.err;
+    return r.val;
 }
 
 template <>
-inline double airy_Ai_e_impl<true, double>(const double x,
-                                           const precision p,
-                                           double &e)
+inline double airy_Ai_e_impl<true, double>(double x, precision p, double &e)
 {
     gsl_sf_result r;
-    if (gsl_sf_airy_Ai_scaled_e(x, (int)p, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("airy_Ai_scaled"));
+    gsl_sf_airy_Ai_scaled_e(x, (int)p, &r);
+    e = r.err;
+    return r.val;
 }
 
 template <bool scaled, typename T, typename U>
 class airy_Ai_e_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
     airy_Ai_e_functor(const T &x, precision p, U &e)
         : m_x(x)
@@ -152,7 +136,7 @@ class airy_Ai_e_functor
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
         return airy_Ai_e_impl<scaled>(m_x(i, j), m_p, m_e(i, j));
     }
@@ -165,17 +149,16 @@ class airy_Ai_e_functor
 
 template <bool scaled = false, typename T = void, typename U = void>
 inline CwiseNullaryOp<airy_Ai_e_functor<scaled, T, U>,
-                      typename airy_Ai_e_functor<scaled, T, U>::ArrayType>
-airy_Ai(const ArrayBase<T> &x,
-        ArrayBase<U> &e,
-        const precision p = precision::DOUBLE)
+                      typename airy_Ai_e_functor<scaled, T, U>::ResultType>
+airy_Ai(const DenseBase<T> &x, DenseBase<U> &e, precision p = precision::DOUBLE)
 {
-    using ArrayType = typename airy_Ai_e_functor<scaled, T, U>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  airy_Ai_e_functor<scaled, T, U>(x.derived(),
-                                                                  p,
-                                                                  e.derived()));
+    using ResultType = typename airy_Ai_e_functor<scaled, T, U>::ResultType;
+    return ResultType::
+        NullaryExpr(x.rows(),
+                    x.cols(),
+                    airy_Ai_e_functor<scaled, T, U>(x.derived(),
+                                                    p,
+                                                    e.derived()));
 }
 
 // ========================================
@@ -183,21 +166,19 @@ airy_Ai(const ArrayBase<T> &x,
 // ========================================
 
 template <bool scaled, typename T>
-inline T airy_Ai_deriv_impl(const T x, const precision p)
+inline T airy_Ai_deriv_impl(T x, precision p)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double airy_Ai_deriv_impl<false, double>(const double x,
-                                                const precision p)
+inline double airy_Ai_deriv_impl<false, double>(double x, precision p)
 {
     return gsl_sf_airy_Ai_deriv(x, (int)p);
 }
 
 template <>
-inline double airy_Ai_deriv_impl<true, double>(const double x,
-                                               const precision p)
+inline double airy_Ai_deriv_impl<true, double>(double x, precision p)
 {
     return gsl_sf_airy_Ai_deriv_scaled(x, (int)p);
 }
@@ -206,12 +187,8 @@ template <bool scaled, typename T>
 class airy_Ai_deriv_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
     airy_Ai_deriv_functor(const T &x, precision p)
         : m_x(x)
@@ -219,7 +196,7 @@ class airy_Ai_deriv_functor
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
         return airy_Ai_deriv_impl<scaled>(m_x(i, j), m_p);
     }
@@ -231,58 +208,50 @@ class airy_Ai_deriv_functor
 
 template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<airy_Ai_deriv_functor<scaled, T>,
-                      typename airy_Ai_deriv_functor<scaled, T>::ArrayType>
-airy_Ai_deriv(const ArrayBase<T> &x, const precision p = precision::DOUBLE)
+                      typename airy_Ai_deriv_functor<scaled, T>::ResultType>
+airy_Ai_deriv(const DenseBase<T> &x, precision p = precision::DOUBLE)
 {
-    using ArrayType = typename airy_Ai_deriv_functor<scaled, T>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  airy_Ai_deriv_functor<scaled, T>(x.derived(),
-                                                                   p));
+    using ResultType = typename airy_Ai_deriv_functor<scaled, T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   airy_Ai_deriv_functor<scaled, T>(x.derived(),
+                                                                    p));
 }
 
 template <bool scaled, typename T>
-inline T airy_Ai_deriv_e_impl(const T x, const precision p, T &e)
+inline T airy_Ai_deriv_e_impl(T x, precision p, T &e)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double airy_Ai_deriv_e_impl<false, double>(const double x,
-                                                  const precision p,
+inline double airy_Ai_deriv_e_impl<false, double>(double x,
+                                                  precision p,
                                                   double &e)
 {
     gsl_sf_result r;
-    if (gsl_sf_airy_Ai_deriv_e(x, (int)p, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("airy_Ai_deriv"));
+    gsl_sf_airy_Ai_deriv_e(x, (int)p, &r);
+    e = r.err;
+    return r.val;
 }
 
 template <>
-inline double airy_Ai_deriv_e_impl<true, double>(const double x,
-                                                 const precision p,
+inline double airy_Ai_deriv_e_impl<true, double>(double x,
+                                                 precision p,
                                                  double &e)
 {
     gsl_sf_result r;
-    if (gsl_sf_airy_Ai_deriv_scaled_e(x, (int)p, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("airy_Ai_deriv_scaled"));
+    gsl_sf_airy_Ai_deriv_scaled_e(x, (int)p, &r);
+    e = r.err;
+    return r.val;
 }
 
 template <bool scaled, typename T, typename U>
 class airy_Ai_deriv_e_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
     airy_Ai_deriv_e_functor(const T &x, precision p, U &e)
         : m_x(x)
@@ -291,7 +260,7 @@ class airy_Ai_deriv_e_functor
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
         return airy_Ai_deriv_e_impl<scaled>(m_x(i, j), m_p, m_e(i, j));
     }
@@ -303,14 +272,16 @@ class airy_Ai_deriv_e_functor
 };
 
 template <bool scaled = false, typename T = void, typename U = void>
-inline CwiseNullaryOp<airy_Ai_deriv_e_functor<scaled, T, U>,
-                      typename airy_Ai_deriv_e_functor<scaled, T, U>::ArrayType>
-airy_Ai_deriv(const ArrayBase<T> &x,
-              ArrayBase<U> &e,
-              const precision p = precision::DOUBLE)
+inline CwiseNullaryOp<
+    airy_Ai_deriv_e_functor<scaled, T, U>,
+    typename airy_Ai_deriv_e_functor<scaled, T, U>::ResultType>
+airy_Ai_deriv(const DenseBase<T> &x,
+              DenseBase<U> &e,
+              precision p = precision::DOUBLE)
 {
-    using ArrayType = typename airy_Ai_deriv_e_functor<scaled, T, U>::ArrayType;
-    return ArrayType::
+    using ResultType =
+        typename airy_Ai_deriv_e_functor<scaled, T, U>::ResultType;
+    return ResultType::
         NullaryExpr(x.rows(),
                     x.cols(),
                     airy_Ai_deriv_e_functor<scaled, T, U>(x.derived(),
@@ -323,19 +294,19 @@ airy_Ai_deriv(const ArrayBase<T> &x,
 // ========================================
 
 template <bool scaled, typename T>
-inline T airy_Bi_impl(const T x, const precision p)
+inline T airy_Bi_impl(T x, precision p)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double airy_Bi_impl<false, double>(const double x, const precision p)
+inline double airy_Bi_impl<false, double>(double x, precision p)
 {
     return gsl_sf_airy_Bi(x, (int)p);
 }
 
 template <>
-inline double airy_Bi_impl<true, double>(const double x, const precision p)
+inline double airy_Bi_impl<true, double>(double x, precision p)
 {
     return gsl_sf_airy_Bi_scaled(x, (int)p);
 }
@@ -344,12 +315,8 @@ template <bool scaled, typename T>
 class airy_Bi_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
     airy_Bi_functor(const T &x, precision p)
         : m_x(x)
@@ -357,7 +324,7 @@ class airy_Bi_functor
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
         return airy_Bi_impl<scaled>(m_x(i, j), m_p);
     }
@@ -369,57 +336,45 @@ class airy_Bi_functor
 
 template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<airy_Bi_functor<scaled, T>,
-                      typename airy_Bi_functor<scaled, T>::ArrayType>
-airy_Bi(const ArrayBase<T> &x, const precision p = precision::DOUBLE)
+                      typename airy_Bi_functor<scaled, T>::ResultType>
+airy_Bi(const DenseBase<T> &x, precision p = precision::DOUBLE)
 {
-    using ArrayType = typename airy_Bi_functor<scaled, T>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  airy_Bi_functor<scaled, T>(x.derived(), p));
+    using ResultType = typename airy_Bi_functor<scaled, T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   airy_Bi_functor<scaled, T>(x.derived(), p));
 }
 
 template <bool scaled, typename T>
-inline T airy_Bi_e_impl(const T x, const precision p, T &e)
+inline T airy_Bi_e_impl(T x, precision p, T &e)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double airy_Bi_e_impl<false, double>(const double x,
-                                            const precision p,
-                                            double &e)
+inline double airy_Bi_e_impl<false, double>(double x, precision p, double &e)
 {
     gsl_sf_result r;
-    if (gsl_sf_airy_Bi_e(x, (int)p, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("airy_Bi"));
+    gsl_sf_airy_Bi_e(x, (int)p, &r);
+    e = r.err;
+    return r.val;
 }
 
 template <>
-inline double airy_Bi_e_impl<true, double>(const double x,
-                                           const precision p,
-                                           double &e)
+inline double airy_Bi_e_impl<true, double>(double x, precision p, double &e)
 {
     gsl_sf_result r;
-    if (gsl_sf_airy_Bi_scaled_e(x, (int)p, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("airy_Bi_scaled"));
+    gsl_sf_airy_Bi_scaled_e(x, (int)p, &r);
+    e = r.err;
+    return r.val;
 }
 
 template <bool scaled, typename T, typename U>
 class airy_Bi_e_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
     airy_Bi_e_functor(const T &x, precision p, U &e)
         : m_x(x)
@@ -428,7 +383,7 @@ class airy_Bi_e_functor
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
         return airy_Bi_e_impl<scaled>(m_x(i, j), m_p, m_e(i, j));
     }
@@ -441,17 +396,16 @@ class airy_Bi_e_functor
 
 template <bool scaled = false, typename T = void, typename U = void>
 inline CwiseNullaryOp<airy_Bi_e_functor<scaled, T, U>,
-                      typename airy_Bi_e_functor<scaled, T, U>::ArrayType>
-airy_Bi(const ArrayBase<T> &x,
-        ArrayBase<U> &e,
-        const precision p = precision::DOUBLE)
+                      typename airy_Bi_e_functor<scaled, T, U>::ResultType>
+airy_Bi(const DenseBase<T> &x, DenseBase<U> &e, precision p = precision::DOUBLE)
 {
-    using ArrayType = typename airy_Bi_e_functor<scaled, T, U>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  airy_Bi_e_functor<scaled, T, U>(x.derived(),
-                                                                  p,
-                                                                  e.derived()));
+    using ResultType = typename airy_Bi_e_functor<scaled, T, U>::ResultType;
+    return ResultType::
+        NullaryExpr(x.rows(),
+                    x.cols(),
+                    airy_Bi_e_functor<scaled, T, U>(x.derived(),
+                                                    p,
+                                                    e.derived()));
 }
 
 // ========================================
@@ -459,21 +413,19 @@ airy_Bi(const ArrayBase<T> &x,
 // ========================================
 
 template <bool scaled, typename T>
-inline T airy_Bi_deriv_impl(const T x, const precision p)
+inline T airy_Bi_deriv_impl(T x, precision p)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double airy_Bi_deriv_impl<false, double>(const double x,
-                                                const precision p)
+inline double airy_Bi_deriv_impl<false, double>(double x, precision p)
 {
     return gsl_sf_airy_Bi_deriv(x, (int)p);
 }
 
 template <>
-inline double airy_Bi_deriv_impl<true, double>(const double x,
-                                               const precision p)
+inline double airy_Bi_deriv_impl<true, double>(double x, precision p)
 {
     return gsl_sf_airy_Bi_deriv_scaled(x, (int)p);
 }
@@ -482,12 +434,8 @@ template <bool scaled, typename T>
 class airy_Bi_deriv_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
     airy_Bi_deriv_functor(const T &x, precision p)
         : m_x(x)
@@ -495,7 +443,7 @@ class airy_Bi_deriv_functor
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
         return airy_Bi_deriv_impl<scaled>(m_x(i, j), m_p);
     }
@@ -507,58 +455,50 @@ class airy_Bi_deriv_functor
 
 template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<airy_Bi_deriv_functor<scaled, T>,
-                      typename airy_Bi_deriv_functor<scaled, T>::ArrayType>
-airy_Bi_deriv(const ArrayBase<T> &x, const precision p = precision::DOUBLE)
+                      typename airy_Bi_deriv_functor<scaled, T>::ResultType>
+airy_Bi_deriv(const DenseBase<T> &x, precision p = precision::DOUBLE)
 {
-    using ArrayType = typename airy_Bi_deriv_functor<scaled, T>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  airy_Bi_deriv_functor<scaled, T>(x.derived(),
-                                                                   p));
+    using ResultType = typename airy_Bi_deriv_functor<scaled, T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   airy_Bi_deriv_functor<scaled, T>(x.derived(),
+                                                                    p));
 }
 
 template <bool scaled, typename T>
-inline T airy_Bi_deriv_e_impl(const T x, const precision p, T &e)
+inline T airy_Bi_deriv_e_impl(T x, precision p, T &e)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double airy_Bi_deriv_e_impl<false, double>(const double x,
-                                                  const precision p,
+inline double airy_Bi_deriv_e_impl<false, double>(double x,
+                                                  precision p,
                                                   double &e)
 {
     gsl_sf_result r;
-    if (gsl_sf_airy_Bi_deriv_e(x, (int)p, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("airy_Bi_deriv"));
+    gsl_sf_airy_Bi_deriv_e(x, (int)p, &r);
+    e = r.err;
+    return r.val;
 }
 
 template <>
-inline double airy_Bi_deriv_e_impl<true, double>(const double x,
-                                                 const precision p,
+inline double airy_Bi_deriv_e_impl<true, double>(double x,
+                                                 precision p,
                                                  double &e)
 {
     gsl_sf_result r;
-    if (gsl_sf_airy_Bi_deriv_scaled_e(x, (int)p, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("airy_Bi_deriv_scaled"));
+    gsl_sf_airy_Bi_deriv_scaled_e(x, (int)p, &r);
+    e = r.err;
+    return r.val;
 }
 
 template <bool scaled, typename T, typename U>
 class airy_Bi_deriv_e_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
     airy_Bi_deriv_e_functor(const T &x, precision p, U &e)
         : m_x(x)
@@ -567,7 +507,7 @@ class airy_Bi_deriv_e_functor
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
         return airy_Bi_deriv_e_impl<scaled>(m_x(i, j), m_p, m_e(i, j));
     }
@@ -579,14 +519,16 @@ class airy_Bi_deriv_e_functor
 };
 
 template <bool scaled = false, typename T = void, typename U = void>
-inline CwiseNullaryOp<airy_Bi_deriv_e_functor<scaled, T, U>,
-                      typename airy_Bi_deriv_e_functor<scaled, T, U>::ArrayType>
-airy_Bi_deriv(const ArrayBase<T> &x,
-              ArrayBase<U> &e,
-              const precision p = precision::DOUBLE)
+inline CwiseNullaryOp<
+    airy_Bi_deriv_e_functor<scaled, T, U>,
+    typename airy_Bi_deriv_e_functor<scaled, T, U>::ResultType>
+airy_Bi_deriv(const DenseBase<T> &x,
+              DenseBase<U> &e,
+              precision p = precision::DOUBLE)
 {
-    using ArrayType = typename airy_Bi_deriv_e_functor<scaled, T, U>::ArrayType;
-    return ArrayType::
+    using ResultType =
+        typename airy_Bi_deriv_e_functor<scaled, T, U>::ResultType;
+    return ResultType::
         NullaryExpr(x.rows(),
                     x.cols(),
                     airy_Bi_deriv_e_functor<scaled, T, U>(x.derived(),
