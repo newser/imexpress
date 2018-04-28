@@ -196,7 +196,7 @@ class mnom
     class pdf_functor
     {
       public:
-        using ResultType = typename dense_derive_kpnum<T, double>::type;
+        using ResultType = typename dense_derive_m2vnum<T, double>::type;
 
         pdf_functor(const T &x, size_t k, const double p[])
             : m_result(new double[M2V_NUM(T, x)])

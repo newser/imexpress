@@ -42,68 +42,64 @@ IEXP_NS_BEGIN
 // ========================================
 
 template <typename T>
-inline void smallest_impl(T *dest, const int k, const T *src, const int n)
+inline void smallest_impl(T *dest, int k, const T *x, int n)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline void smallest_impl(double *dest,
-                          const int k,
-                          const double *src,
-                          const int n)
+inline void smallest_impl(double *dest, int k, const double *x, int n)
 {
-    gsl_sort_smallest(dest, k, src, 1, n);
+    gsl_sort_smallest(dest, k, x, 1, n);
 }
 
 #define DEFINE_SMALLEST(type, suffix)                                          \
     template <>                                                                \
-    inline void smallest_impl(type *dest,                                      \
-                              const int k,                                     \
-                              const type *src,                                 \
-                              const int n)                                     \
+    inline void smallest_impl(type *dest, int k, const type *x, int n)         \
     {                                                                          \
-        gsl_sort_##suffix##_smallest(dest, k, src, 1, n);                      \
+        gsl_sort_##suffix##_smallest(dest, k, x, 1, n);                        \
     }
 DEFINE_TYPE_SUFFIX(DEFINE_SMALLEST)
-#undef DEFINE_SMALLEST
 
-template <typename T>
+template <bool row_form, typename T>
 class smallest_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::SizeAtCompileTime,
-                            1,
-                            ColMajor,
-                            T::SizeAtCompileTime,
-                            1>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T,
+                                             Scalar,
+                                             row_form ? 1 : Dynamic,
+                                             row_form ? Dynamic : 1,
+                                             0,
+                                             row_form ? 1 : Dynamic,
+                                             row_form ? Dynamic : 1>::type;
 
-    smallest_functor(const int k, const T &v)
-        : m_result(k)
+    smallest_functor(int k, const T &x)
+        : m_result(new Scalar[k])
     {
-        typename type_eval<T>::type m_v(v.eval());
-        smallest_impl(m_result.data(), k, m_v.data(), m_v.size());
+        typename type_eval<T>::type m_x(x.eval());
+        smallest_impl(m_result.get(), k, m_x.data(), m_x.size());
     }
 
-    const typename T::Scalar &operator()(Index i, Index j) const
+    Scalar operator()(Index i) const
     {
-        return m_result(i, j);
+        return m_result.get()[i];
     }
 
   private:
-    ArrayType m_result;
+    std::shared_ptr<Scalar> m_result;
 };
 
-template <typename T>
-inline CwiseNullaryOp<smallest_functor<T>,
-                      typename smallest_functor<T>::ArrayType>
-smallest(const int k, const ArrayBase<T> &v)
+template <bool row_form = false, typename T = void>
+inline CwiseNullaryOp<smallest_functor<row_form, T>,
+                      typename smallest_functor<row_form, T>::ResultType>
+smallest(int k, const DenseBase<T> &x)
 {
-    eigen_assert(IS_VEC(v));
-
-    using ArrayType = typename smallest_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(k, 1, smallest_functor<T>(k, v.derived()));
+    using ResultType = typename smallest_functor<row_form, T>::ResultType;
+    return ResultType::NullaryExpr(row_form ? 1 : k,
+                                   row_form ? k : 1,
+                                   smallest_functor<row_form, T>(k,
+                                                                 x.derived()));
 }
 
 // ========================================
@@ -111,74 +107,73 @@ smallest(const int k, const ArrayBase<T> &v)
 // ========================================
 
 template <typename T>
-inline void smallest_index_impl(size_t *index,
-                                const int k,
-                                const T *src,
-                                const int n)
+inline void smallest_index_impl(size_t *index, int k, const T *x, int n)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline void smallest_index_impl(size_t *index,
-                                const int k,
-                                const double *src,
-                                const int n)
+inline void smallest_index_impl(size_t *index, int k, const double *x, int n)
 {
-    gsl_sort_smallest_index(index, k, src, 1, n);
+    gsl_sort_smallest_index(index, k, x, 1, n);
 }
 
 #define DEFINE_SMALLEST_INDEX(type, suffix)                                    \
     template <>                                                                \
     inline void smallest_index_impl(size_t *index,                             \
-                                    const int k,                               \
-                                    const type *src,                           \
-                                    const int n)                               \
+                                    int k,                                     \
+                                    const type *x,                             \
+                                    int n)                                     \
     {                                                                          \
-        gsl_sort_##suffix##_smallest_index(index, k, src, 1, n);               \
+        gsl_sort_##suffix##_smallest_index(index, k, x, 1, n);                 \
     }
 DEFINE_TYPE_SUFFIX(DEFINE_SMALLEST_INDEX)
+#undef DEFINE_SMALLEST_INDEX
 
-template <typename T>
+template <bool row_form, typename T, typename U>
 class smallest_index_functor
 {
   public:
-    using ArrayType =
-        Array<int, T::SizeAtCompileTime, 1, ColMajor, T::SizeAtCompileTime, 1>;
-    using IndexArrayType = Array<size_t,
-                                 T::SizeAtCompileTime,
-                                 1,
-                                 ColMajor,
-                                 T::SizeAtCompileTime,
-                                 1>;
+    using ResultType = typename dense_derive<T,
+                                             U,
+                                             row_form ? 1 : Dynamic,
+                                             row_form ? Dynamic : 1,
+                                             0,
+                                             row_form ? 1 : Dynamic,
+                                             row_form ? Dynamic : 1>::type;
 
-    smallest_index_functor(const int k, const T &v)
-        : m_result(k)
+    smallest_index_functor(int k, const T &x)
+        : m_result(new size_t[k])
     {
-        typename type_eval<T>::type m_v(v.eval());
-        smallest_index_impl(m_result.data(), k, m_v.data(), m_v.size());
+        typename type_eval<T>::type m_x(x.eval());
+        smallest_index_impl(m_result.get(), k, m_x.data(), m_x.size());
     }
 
-    const int operator()(Index i, Index j) const
+    U operator()(Index i) const
     {
-        return (int)m_result(i, j);
+        // no overhead of casting integer
+        return static_cast<U>(m_result.get()[i]);
     }
 
   private:
-    IndexArrayType m_result;
+    // must be size_t array, not U
+    std::shared_ptr<size_t> m_result;
 };
 
-template <typename T>
-inline CwiseNullaryOp<smallest_index_functor<T>,
-                      typename smallest_index_functor<T>::ArrayType>
-smallest_index(const int k, const ArrayBase<T> &v)
+template <typename U = size_t, bool row_form = false, typename T = void>
+inline CwiseNullaryOp<
+    smallest_index_functor<row_form, T, U>,
+    typename smallest_index_functor<row_form, T, U>::ResultType>
+smallest_index(int k, const DenseBase<T> &x)
 {
-    eigen_assert(IS_VEC(v));
+    static_assert(IS_INTEGER(U), "only support integer index");
 
-    using ArrayType = typename smallest_index_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(k,
-                                  1,
-                                  smallest_index_functor<T>(k, v.derived()));
+    using ResultType =
+        typename smallest_index_functor<row_form, T, U>::ResultType;
+    return ResultType::
+        NullaryExpr(row_form ? 1 : k,
+                    row_form ? k : 1,
+                    smallest_index_functor<row_form, T, U>(k, x.derived()));
 }
 
 ////////////////////////////////////////////////////////////

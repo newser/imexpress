@@ -165,7 +165,7 @@ class drch
     class pdf_functor
     {
       public:
-        using ResultType = typename dense_derive_kpnum<T, double>::type;
+        using ResultType = typename dense_derive_m2vnum<T, double>::type;
 
         pdf_functor(const T &theta, size_t k, const double alpha[])
             : m_result(new double[M2V_NUM(T, theta)])

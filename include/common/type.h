@@ -156,7 +156,7 @@ template <typename T,
           int _Options = TP4(T) & ~RowMajor,
           int _MaxRows = ((TP4(T) == RowMajor) ? T::MaxRowsAtCompileTime : 1),
           int _MaxCols = ((TP4(T) == RowMajor) ? 1 : T::MaxColsAtCompileTime)>
-struct dense_derive_kpnum
+struct dense_derive_m2vnum
 {
     using matrix = Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>;
     using array = Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>;
@@ -170,7 +170,7 @@ template <typename T,
           int _Options = TP4(T) & ~RowMajor,
           int _MaxRows = ((TP4(T) == RowMajor) ? 1 : T::MaxRowsAtCompileTime),
           int _MaxCols = ((TP4(T) == RowMajor) ? T::MaxColsAtCompileTime : 1)>
-struct dense_derive_kpdim
+struct dense_derive_m2vdim
 {
     using matrix = Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>;
     using array = Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>;

@@ -297,7 +297,7 @@ class mgauss
     {
       public:
         using Scalar = typename T::Scalar;
-        using ResultType = typename dense_derive_kpdim<T>::type;
+        using ResultType = typename dense_derive_m2vdim<T>::type;
 
         mean_functor(const T &x)
             : m_result(new Scalar[M2V_DIM(T, x)])
