@@ -83,6 +83,27 @@ IEXP_NS_BEGIN
     while (0)
 // clang-format on
 
+#if 1 // #ifdef IEXP_MGL2
+#define __draw_1d(f, x0, x1, num, org_x, org_y)                                \
+    do {                                                                       \
+        using namespace iexp::sf;                                              \
+        iexp::VectorXd x = iexp::VectorXd::LinSpaced(num, x0, x1);             \
+        iexp::VectorXd y(num);                                                 \
+        y = f(x);                                                              \
+                                                                               \
+        mglData my(num);                                                       \
+        my.Link(y.data(), y.size());                                           \
+        mglGraph gr;                                                           \
+        gr.SetOrigin(org_x, org_x);                                            \
+        gr.SetRanges(x0, x1, y.minCoeff(), y.maxCoeff());                      \
+        gr.Axis();                                                             \
+        gr.Plot(my, "+");                                                      \
+        gr.WriteFrame(#f ".png");                                              \
+    } while (0)
+#else
+#define __draw_1d(f, x0, x1, num, org_x, org_y)
+#endif
+
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////

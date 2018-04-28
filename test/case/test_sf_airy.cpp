@@ -61,6 +61,9 @@ TEST_CASE("sf_airy")
     // y = iexp::sf::airy_Ai((x + x) * 2, e + e);
     y = iexp::sf::airy_Bi((x + x) * 2);
     y = iexp::sf::airy_Bi((x + x) * 2, e);
+
+    __draw_1d(airy_Ai, 0, 10, 100, 0, 0);
+    __draw_1d(airy_Bi, 0, 10, 100, 0, 0);
 }
 
 TEST_CASE("sf_airy_scaled")
@@ -180,6 +183,9 @@ TEST_CASE("sf_airy_deriv")
     // y = iexp::sf::airy_Ai((x + x) * 2, e + e);
     y = iexp::sf::airy_Bi((x + x) * 2);
     y = iexp::sf::airy_Bi((x + x) * 2, e);
+
+    __draw_1d(airy_Ai_deriv, 0, 10, 100, 0, 0);
+    __draw_1d(airy_Bi_deriv, 0, 10, 100, 0, 0);
 }
 
 TEST_CASE("sf_airy_deriv_scaled")

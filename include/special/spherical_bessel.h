@@ -40,250 +40,382 @@ namespace sf {
 // type definition
 ////////////////////////////////////////////////////////////
 
+enum sbessel_j
+{
+    j0,
+    j1,
+    j2,
+    jn,
+};
+
+enum sbessel_y
+{
+    y0,
+    y1,
+    y2,
+    yn,
+};
+
 // ========================================
-// bessel first kind
+// sbessel first kind
 // ========================================
 
-template <typename T>
-inline T sbessel_j_impl(const int n, const T x)
+template <sbessel_j order, typename T>
+inline T sbessel_j_impl(int n, T x)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double sbessel_j_impl(const int n, const double x)
+inline double sbessel_j_impl<j0, double>(int n, double x)
 {
-    // gsl_sf_bessel_jl does not allow negative x...
-    if (n == 0) {
-        return gsl_sf_bessel_j0(x);
-    } else if (n == 1) {
-        return gsl_sf_bessel_j1(x);
-    } else if (n == 2) {
-        return gsl_sf_bessel_j2(x);
-    } else {
-        return gsl_sf_bessel_jl(n, x);
-    }
+    return gsl_sf_bessel_j0(x);
 }
 
-template <typename T>
+template <>
+inline double sbessel_j_impl<j1, double>(int n, double x)
+{
+    return gsl_sf_bessel_j1(x);
+}
+
+template <>
+inline double sbessel_j_impl<j2, double>(int n, double x)
+{
+    return gsl_sf_bessel_j2(x);
+}
+
+template <>
+inline double sbessel_j_impl<jn, double>(int n, double x)
+{
+    return gsl_sf_bessel_jl(n, x);
+}
+
+template <sbessel_j order, typename T>
 class sbessel_j_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
-    sbessel_j_functor(const int n, const T &x)
+    sbessel_j_functor(int n, const T &x)
         : m_n(n)
         , m_x(x)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
-        return sbessel_j_impl(m_n, m_x(i, j));
+        return sbessel_j_impl<order, Scalar>(m_n, m_x(i, j));
     }
 
   private:
-    const int m_n;
+    int m_n;
     const T &m_x;
 };
 
 template <typename T>
-inline CwiseNullaryOp<sbessel_j_functor<T>,
-                      typename sbessel_j_functor<T>::ArrayType>
-sbessel_j(const int n, const ArrayBase<T> &x)
+inline CwiseNullaryOp<sbessel_j_functor<jn, T>,
+                      typename sbessel_j_functor<jn, T>::ResultType>
+sbessel_j(int n, const DenseBase<T> &x)
 {
-    using ArrayType = typename sbessel_j_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  sbessel_j_functor<T>(n, x.derived()));
+    using ResultType = typename sbessel_j_functor<jn, T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   sbessel_j_functor<jn, T>(n, x.derived()));
 }
 
-template <typename T>
-inline T sbessel_j_e_impl(const int n, const T x, T &e)
+template <enum sbessel_j order, typename T>
+inline CwiseNullaryOp<sbessel_j_functor<order, T>,
+                      typename sbessel_j_functor<order, T>::ResultType>
+sbessel_j(const DenseBase<T> &x)
+{
+    static_assert(order < jn, "order can only be j0/j1/j2");
+
+    using ResultType = typename sbessel_j_functor<order, T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   sbessel_j_functor<order, T>(order,
+                                                               x.derived()));
+}
+
+template <enum sbessel_j order, typename T>
+inline T sbessel_j_e_impl(int n, T x, T &e)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double sbessel_j_e_impl(const int n, const double x, double &e)
+inline double sbessel_j_e_impl<j0, double>(int n, double x, double &e)
 {
     gsl_sf_result r;
-    int s;
-    // gsl_sf_bessel_jl does not allow negative x...
-    if (n == 0) {
-        s = gsl_sf_bessel_j0_e(x, &r);
-    } else if (n == 1) {
-        s = gsl_sf_bessel_j1_e(x, &r);
-    } else if (n == 2) {
-        s = gsl_sf_bessel_j2_e(x, &r);
-    } else {
-        s = gsl_sf_bessel_jl_e(n, x, &r);
-    }
-    if (s == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("sbessel_j"));
+    gsl_sf_bessel_j0_e(x, &r);
+    e = r.err;
+    return r.val;
 }
 
-template <typename T, typename U>
+template <>
+inline double sbessel_j_e_impl<j1, double>(int n, double x, double &e)
+{
+    gsl_sf_result r;
+    gsl_sf_bessel_j1_e(x, &r);
+    e = r.err;
+    return r.val;
+}
+
+template <>
+inline double sbessel_j_e_impl<j2, double>(int n, double x, double &e)
+{
+    gsl_sf_result r;
+    gsl_sf_bessel_j2_e(x, &r);
+    e = r.err;
+    return r.val;
+}
+
+template <>
+inline double sbessel_j_e_impl<jn, double>(int n, double x, double &e)
+{
+    gsl_sf_result r;
+    gsl_sf_bessel_jl_e(n, x, &r);
+    e = r.err;
+    return r.val;
+}
+
+template <enum sbessel_j order, typename T, typename U>
 class sbessel_j_e_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
-    sbessel_j_e_functor(const int n, const T &x, U &e)
+    sbessel_j_e_functor(int n, const T &x, U &e)
         : m_n(n)
         , m_x(x)
         , m_e(e)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
-        return sbessel_j_e_impl(m_n, m_x(i, j), m_e(i, j));
+        return sbessel_j_e_impl<order, Scalar>(m_n, m_x(i, j), m_e(i, j));
     }
 
   private:
-    const int m_n;
+    int m_n;
     const T &m_x;
     U &m_e;
 };
 
 template <typename T, typename U>
-inline CwiseNullaryOp<sbessel_j_e_functor<T, U>,
-                      typename sbessel_j_e_functor<T, U>::ArrayType>
-sbessel_j(const int n, const ArrayBase<T> &x, ArrayBase<U> &e)
+inline CwiseNullaryOp<sbessel_j_e_functor<jn, T, U>,
+                      typename sbessel_j_e_functor<jn, T, U>::ResultType>
+sbessel_j(int n, const DenseBase<T> &x, DenseBase<U> &e)
 {
-    using ArrayType = typename sbessel_j_e_functor<T, U>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  sbessel_j_e_functor<T, U>(n,
-                                                            x.derived(),
-                                                            e.derived()));
+    using ResultType = typename sbessel_j_e_functor<jn, T, U>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   sbessel_j_e_functor<jn, T, U>(n,
+                                                                 x.derived(),
+                                                                 e.derived()));
+}
+
+template <enum sbessel_j order, typename T, typename U>
+inline CwiseNullaryOp<sbessel_j_e_functor<order, T, U>,
+                      typename sbessel_j_e_functor<order, T, U>::ResultType>
+sbessel_j(const DenseBase<T> &x, DenseBase<U> &e)
+{
+    static_assert(order < jn, "order can only be j0/j1/j2");
+
+    using ResultType = typename sbessel_j_e_functor<order, T, U>::ResultType;
+    return ResultType::
+        NullaryExpr(x.rows(),
+                    x.cols(),
+                    sbessel_j_e_functor<order, T, U>(order,
+                                                     x.derived(),
+                                                     e.derived()));
 }
 
 // ========================================
 // bessel second kind
 // ========================================
 
-template <typename T>
-inline T sbessel_y_impl(const int n, const T x)
+template <enum sbessel_y y, typename T>
+inline T sbessel_y_impl(int n, T x)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double sbessel_y_impl(const int n, const double x)
+inline double sbessel_y_impl<y0, double>(int n, double x)
+{
+    return gsl_sf_bessel_y0(x);
+}
+
+template <>
+inline double sbessel_y_impl<y1, double>(int n, double x)
+{
+    return gsl_sf_bessel_y1(x);
+}
+
+template <>
+inline double sbessel_y_impl<y2, double>(int n, double x)
+{
+    return gsl_sf_bessel_y2(x);
+}
+
+template <>
+inline double sbessel_y_impl<yn, double>(int n, double x)
 {
     return gsl_sf_bessel_yl(n, x);
 }
 
-template <typename T>
+template <enum sbessel_y order, typename T>
 class sbessel_y_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
-    sbessel_y_functor(const int n, const T &x)
+    sbessel_y_functor(int n, const T &x)
         : m_n(n)
         , m_x(x)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
-        return sbessel_y_impl(m_n, m_x(i, j));
+        return sbessel_y_impl<order, Scalar>(m_n, m_x(i, j));
     }
 
   private:
-    const int m_n;
+    int m_n;
     const T &m_x;
 };
 
 template <typename T>
-inline CwiseNullaryOp<sbessel_y_functor<T>,
-                      typename sbessel_y_functor<T>::ArrayType>
-sbessel_y(const int n, const ArrayBase<T> &x)
+inline CwiseNullaryOp<sbessel_y_functor<yn, T>,
+                      typename sbessel_y_functor<yn, T>::ResultType>
+sbessel_y(int n, const DenseBase<T> &x)
 {
-    using ArrayType = typename sbessel_y_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  sbessel_y_functor<T>(n, x.derived()));
+    using ResultType = typename sbessel_y_functor<yn, T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   sbessel_y_functor<yn, T>(n, x.derived()));
+}
+
+template <enum sbessel_y order, typename T>
+inline CwiseNullaryOp<sbessel_y_functor<order, T>,
+                      typename sbessel_y_functor<order, T>::ResultType>
+sbessel_y(const DenseBase<T> &x)
+{
+    static_assert(order < yn, "order can only be y0/y1/y2");
+
+    using ResultType = typename sbessel_y_functor<order, T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   sbessel_y_functor<order, T>(order,
+                                                               x.derived()));
 }
 
 template <typename T>
-inline T sbessel_y_e_impl(const int n, const T x, T &e)
+inline T sbessel_y_e_impl(int n, T x, T &e)
+{
+    UNSUPPORTED_TYPE(T);
+}
+
+template <enum sbessel_y order, typename T>
+inline T sbessel_y_e_impl(int n, T x, T &e)
 {
     UNSUPPORTED_TYPE(T);
 }
 
 template <>
-inline double sbessel_y_e_impl(const int n, const double x, double &e)
+inline double sbessel_y_e_impl<y0, double>(int n, double x, double &e)
 {
     gsl_sf_result r;
-    if (gsl_sf_bessel_yl_e(n, x, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("sbessel_y"));
+    gsl_sf_bessel_y0_e(x, &r);
+    e = r.err;
+    return r.val;
 }
 
-template <typename T, typename U>
+template <>
+inline double sbessel_y_e_impl<y1, double>(int n, double x, double &e)
+{
+    gsl_sf_result r;
+    gsl_sf_bessel_y1_e(x, &r);
+    e = r.err;
+    return r.val;
+}
+
+template <>
+inline double sbessel_y_e_impl<y2, double>(int n, double x, double &e)
+{
+    gsl_sf_result r;
+    gsl_sf_bessel_y2_e(x, &r);
+    e = r.err;
+    return r.val;
+}
+
+template <>
+inline double sbessel_y_e_impl<yn, double>(int n, double x, double &e)
+{
+    gsl_sf_result r;
+    gsl_sf_bessel_yl_e(n, x, &r);
+    e = r.err;
+    return r.val;
+}
+
+template <enum sbessel_y order, typename T, typename U>
 class sbessel_y_e_functor
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using Scalar = typename T::Scalar;
+    using ResultType = typename dense_derive<T>::type;
 
-    sbessel_y_e_functor(const int n, const T &x, U &e)
+    sbessel_y_e_functor(int n, const T &x, U &e)
         : m_n(n)
         , m_x(x)
         , m_e(e)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    Scalar operator()(Index i, Index j) const
     {
-        return sbessel_y_e_impl(m_n, m_x(i, j), m_e(i, j));
+        return sbessel_y_e_impl<order, Scalar>(m_n, m_x(i, j), m_e(i, j));
     }
 
   private:
-    const int m_n;
+    int m_n;
     const T &m_x;
     U &m_e;
 };
 
 template <typename T, typename U>
-inline CwiseNullaryOp<sbessel_y_e_functor<T, U>,
-                      typename sbessel_y_e_functor<T, U>::ArrayType>
-sbessel_y(const int n, const ArrayBase<T> &x, ArrayBase<U> &e)
+inline CwiseNullaryOp<sbessel_y_e_functor<yn, T, U>,
+                      typename sbessel_y_e_functor<yn, T, U>::ResultType>
+sbessel_y(int n, const DenseBase<T> &x, DenseBase<U> &e)
 {
-    using ArrayType = typename sbessel_y_e_functor<T, U>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  sbessel_y_e_functor<T, U>(n,
-                                                            x.derived(),
-                                                            e.derived()));
+    using ResultType = typename sbessel_y_e_functor<yn, T, U>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   sbessel_y_e_functor<yn, T, U>(n,
+                                                                 x.derived(),
+                                                                 e.derived()));
+}
+
+template <enum sbessel_y order, typename T, typename U>
+inline CwiseNullaryOp<sbessel_y_e_functor<order, T, U>,
+                      typename sbessel_y_e_functor<order, T, U>::ResultType>
+sbessel_y(const DenseBase<T> &x, DenseBase<U> &e)
+{
+    static_assert(order < yn, "order can only be y0/y1/y2");
+
+    using ResultType = typename sbessel_y_e_functor<order, T, U>::ResultType;
+    return ResultType::
+        NullaryExpr(x.rows(),
+                    x.cols(),
+                    sbessel_y_e_functor<order, T, U>(order,
+                                                     x.derived(),
+                                                     e.derived()));
 }
 
 ////////////////////////////////////////////////////////////
