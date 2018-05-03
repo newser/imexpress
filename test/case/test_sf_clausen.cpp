@@ -18,6 +18,8 @@ TEST_CASE("test_clausen")
     REQUIRE(__D_EQ9(m2(3, 0), 1.0149416064096535));
     REQUIRE(__D_EQ9(m2(4, 0), 1.0149416064096535));
 
+    __draw_1d(clausen, 0, 10, 100, 0, 0);
+
     m2 = iexp::sf::clausen(m, e);
     REQUIRE(__D_EQ9(m2(0, 0), 0.4478882448133546));
     REQUIRE(__D_EQ9(m2(1, 0), 0.8643791310538927));

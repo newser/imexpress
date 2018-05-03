@@ -45,140 +45,72 @@ namespace sf {
 // ========================================
 
 template <typename T>
-inline T coulw_f_impl(const T l, const T eta, const T x)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double coulw_f_impl(const double l, const double eta, const double x)
-{
-    gsl_sf_result F, Fp, G, Gp;
-    double eF, eG;
-    int s = gsl_sf_coulomb_wave_FG_e(eta, x, l, 0, &F, &Fp, &G, &Gp, &eF, &eG);
-    if (s == GSL_SUCCESS) {
-        return F.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("coulw_f"));
-}
-
-template <typename T>
-class coulw_f_functor
+class coulw_f_functor : public functor_m2vnum_4d<coulw_f_functor<T>, T, double>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
-    coulw_f_functor(const T &l, const T &eta, const T &x)
-        : m_l(l)
-        , m_eta(eta)
-        , m_x(x)
+    coulw_f_functor(const T &eta_x_l_k)
+        : functor_m2vnum_4d<coulw_f_functor<T>, T, double>(eta_x_l_k)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    double m2vnum_impl(double eta, double x, double l, double k) const
     {
-        return coulw_f_impl(m_l(i, j), m_eta(i, j), m_x(i, j));
+        gsl_sf_result F, Fp, G, Gp;
+        double eF, eG;
+        gsl_sf_coulomb_wave_FG_e(eta, x, l, k, &F, &Fp, &G, &Gp, &eF, &eG);
+        return F.val;
     }
-
-  private:
-    const T &m_l;
-    const T &m_eta;
-    const T &m_x;
 };
 
 template <typename T>
 inline CwiseNullaryOp<coulw_f_functor<T>,
-                      typename coulw_f_functor<T>::ArrayType>
-coulw_f(const ArrayBase<T> &l, const ArrayBase<T> &eta, const ArrayBase<T> &x)
+                      typename coulw_f_functor<T>::ResultType>
+coulw_f(const DenseBase<T> &eta_x_l_k)
 {
-    eigen_assert(MATRIX_SAME_SIZE(l, eta));
-    eigen_assert(MATRIX_SAME_SIZE(l, x));
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "only support double scalar");
 
-    using ArrayType = typename coulw_f_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(l.rows(),
-                                  l.cols(),
-                                  coulw_f_functor<T>(l.derived(),
-                                                     eta.derived(),
-                                                     x.derived()));
-}
-
-template <typename T>
-inline T coulw_f_e_impl(const T l, const T eta, const T x, T &e)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double coulw_f_e_impl(const double l,
-                             const double eta,
-                             const double x,
-                             double &e)
-{
-    gsl_sf_result F, Fp, G, Gp;
-    double eF, eG;
-    int s = gsl_sf_coulomb_wave_FG_e(eta, x, l, 0, &F, &Fp, &G, &Gp, &eF, &eG);
-    if (s == GSL_SUCCESS) {
-        e = F.err;
-        return F.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("coulw_f"));
+    using ResultType = typename coulw_f_functor<T>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, eta_x_l_k),
+                                   M2VNUM_COL(T, eta_x_l_k),
+                                   coulw_f_functor<T>(eta_x_l_k.derived()));
 }
 
 template <typename T, typename U>
 class coulw_f_e_functor
+    : public functor_m2vnum_4d_e<coulw_f_e_functor<T, U>, T, U, double>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
-    coulw_f_e_functor(const T &l, const T &eta, const T &x, U &e)
-        : m_l(l)
-        , m_eta(eta)
-        , m_x(x)
-        , m_e(e)
+    coulw_f_e_functor(const T &eta_x_l_k, U &e)
+        : functor_m2vnum_4d_e<coulw_f_e_functor<T, U>, T, U, double>(eta_x_l_k,
+                                                                     e)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    double m2vnum_e_impl(
+        double eta, double x, double l, double k, double &e) const
     {
-        return coulw_f_e_impl(m_l(i, j), m_eta(i, j), m_x(i, j), m_e(i, j));
+        gsl_sf_result F, Fp, G, Gp;
+        double eF, eG;
+        gsl_sf_coulomb_wave_FG_e(eta, x, l, k, &F, &Fp, &G, &Gp, &eF, &eG);
+        e = F.err;
+        return F.val;
     }
-
-  private:
-    const T &m_l;
-    const T &m_eta;
-    const T &m_x;
-    U &m_e;
 };
 
 template <typename T, typename U>
 inline CwiseNullaryOp<coulw_f_e_functor<T, U>,
-                      typename coulw_f_e_functor<T, U>::ArrayType>
-coulw_f(const ArrayBase<T> &l,
-        const ArrayBase<T> &eta,
-        const ArrayBase<T> &x,
-        ArrayBase<U> &e)
+                      typename coulw_f_e_functor<T, U>::ResultType>
+coulw_f(const DenseBase<T> &eta_x_l_k, DenseBase<U> &e)
 {
-    eigen_assert(MATRIX_SAME_SIZE(l, eta));
-    eigen_assert(MATRIX_SAME_SIZE(l, x));
-    eigen_assert(MATRIX_SAME_SIZE(l, e));
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "only support double scalar");
 
-    using ArrayType = typename coulw_f_e_functor<T, U>::ArrayType;
-    return ArrayType::NullaryExpr(l.rows(),
-                                  l.cols(),
-                                  coulw_f_e_functor<T, U>(l.derived(),
-                                                          eta.derived(),
-                                                          x.derived(),
-                                                          e.derived()));
+    using ResultType = typename coulw_f_e_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, eta_x_l_k),
+                                   M2VNUM_COL(T, eta_x_l_k),
+                                   coulw_f_e_functor<T, U>(eta_x_l_k.derived(),
+                                                           e.derived()));
 }
 
 // ========================================
@@ -186,140 +118,75 @@ coulw_f(const ArrayBase<T> &l,
 // ========================================
 
 template <typename T>
-inline T coulw_df_impl(const T l, const T eta, const T x)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double coulw_df_impl(const double l, const double eta, const double x)
-{
-    gsl_sf_result F, Fp, G, Gp;
-    double eF, eG;
-    int s = gsl_sf_coulomb_wave_FG_e(eta, x, l, 0, &F, &Fp, &G, &Gp, &eF, &eG);
-    if (s == GSL_SUCCESS) {
-        return Fp.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("coulw_df"));
-}
-
-template <typename T>
 class coulw_df_functor
+    : public functor_m2vnum_4d<coulw_df_functor<T>, T, double>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
-    coulw_df_functor(const T &l, const T &eta, const T &x)
-        : m_l(l)
-        , m_eta(eta)
-        , m_x(x)
+    coulw_df_functor(const T &eta_x_l_k)
+        : functor_m2vnum_4d<coulw_df_functor<T>, T, double>(eta_x_l_k)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    double m2vnum_impl(double eta, double x, double l, double k) const
     {
-        return coulw_df_impl(m_l(i, j), m_eta(i, j), m_x(i, j));
+        gsl_sf_result F, Fp, G, Gp;
+        double eF, eG;
+        gsl_sf_coulomb_wave_FG_e(eta, x, l, k, &F, &Fp, &G, &Gp, &eF, &eG);
+        return Fp.val;
     }
-
-  private:
-    const T &m_l;
-    const T &m_eta;
-    const T &m_x;
 };
 
 template <typename T>
 inline CwiseNullaryOp<coulw_df_functor<T>,
-                      typename coulw_df_functor<T>::ArrayType>
-coulw_df(const ArrayBase<T> &l, const ArrayBase<T> &eta, const ArrayBase<T> &x)
+                      typename coulw_df_functor<T>::ResultType>
+coulw_df(const DenseBase<T> &eta_x_l_k)
 {
-    eigen_assert(MATRIX_SAME_SIZE(l, eta));
-    eigen_assert(MATRIX_SAME_SIZE(l, x));
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "only support double scalar");
 
-    using ArrayType = typename coulw_df_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(l.rows(),
-                                  l.cols(),
-                                  coulw_df_functor<T>(l.derived(),
-                                                      eta.derived(),
-                                                      x.derived()));
-}
-
-template <typename T>
-inline T coulw_df_e_impl(const T l, const T eta, const T x, T &e)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double coulw_df_e_impl(const double l,
-                              const double eta,
-                              const double x,
-                              double &e)
-{
-    gsl_sf_result F, Fp, G, Gp;
-    double eF, eG;
-    int s = gsl_sf_coulomb_wave_FG_e(eta, x, l, 0, &F, &Fp, &G, &Gp, &eF, &eG);
-    if (s == GSL_SUCCESS) {
-        e = Fp.err;
-        return Fp.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("coulw_df"));
+    using ResultType = typename coulw_df_functor<T>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, eta_x_l_k),
+                                   M2VNUM_COL(T, eta_x_l_k),
+                                   coulw_df_functor<T>(eta_x_l_k.derived()));
 }
 
 template <typename T, typename U>
 class coulw_df_e_functor
+    : public functor_m2vnum_4d_e<coulw_df_e_functor<T, U>, T, U, double>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using ResultType = typename dense_derive_m2vnum<T, double>::type;
 
-    coulw_df_e_functor(const T &l, const T &eta, const T &x, U &e)
-        : m_l(l)
-        , m_eta(eta)
-        , m_x(x)
-        , m_e(e)
+    coulw_df_e_functor(const T &eta_x_l_k, U &e)
+        : functor_m2vnum_4d_e<coulw_df_e_functor<T, U>, T, U, double>(eta_x_l_k,
+                                                                      e)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    double m2vnum_e_impl(
+        double eta, double x, double l, double k, double &e) const
     {
-        return coulw_df_e_impl(m_l(i, j), m_eta(i, j), m_x(i, j), m_e(i, j));
+        gsl_sf_result F, Fp, G, Gp;
+        double eF, eG;
+        gsl_sf_coulomb_wave_FG_e(eta, x, l, k, &F, &Fp, &G, &Gp, &eF, &eG);
+        e = Fp.err;
+        return Fp.val;
     }
-
-  private:
-    const T &m_l;
-    const T &m_eta;
-    const T &m_x;
-    U &m_e;
 };
 
 template <typename T, typename U>
 inline CwiseNullaryOp<coulw_df_e_functor<T, U>,
-                      typename coulw_df_e_functor<T, U>::ArrayType>
-coulw_df(const ArrayBase<T> &l,
-         const ArrayBase<T> &eta,
-         const ArrayBase<T> &x,
-         ArrayBase<U> &e)
+                      typename coulw_df_e_functor<T, U>::ResultType>
+coulw_df(const DenseBase<T> &eta_x_l_k, DenseBase<U> &e)
 {
-    eigen_assert(MATRIX_SAME_SIZE(l, eta));
-    eigen_assert(MATRIX_SAME_SIZE(l, x));
-    eigen_assert(MATRIX_SAME_SIZE(l, e));
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "only support double scalar");
 
-    using ArrayType = typename coulw_df_e_functor<T, U>::ArrayType;
-    return ArrayType::NullaryExpr(l.rows(),
-                                  l.cols(),
-                                  coulw_df_e_functor<T, U>(l.derived(),
-                                                           eta.derived(),
-                                                           x.derived(),
-                                                           e.derived()));
+    using ResultType = typename coulw_df_e_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, eta_x_l_k),
+                                   M2VNUM_COL(T, eta_x_l_k),
+                                   coulw_df_e_functor<T, U>(eta_x_l_k.derived(),
+                                                            e.derived()));
 }
 
 // ========================================
@@ -327,140 +194,72 @@ coulw_df(const ArrayBase<T> &l,
 // ========================================
 
 template <typename T>
-inline T coulw_g_impl(const T l, const T eta, const T x)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double coulw_g_impl(const double l, const double eta, const double x)
-{
-    gsl_sf_result F, Fp, G, Gp;
-    double eF, eG;
-    int s = gsl_sf_coulomb_wave_FG_e(eta, x, l, 0, &F, &Fp, &G, &Gp, &eF, &eG);
-    if (s == GSL_SUCCESS) {
-        return G.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("coulw_g"));
-}
-
-template <typename T>
-class coulw_g_functor
+class coulw_g_functor : public functor_m2vnum_4d<coulw_g_functor<T>, T, double>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
-    coulw_g_functor(const T &l, const T &eta, const T &x)
-        : m_l(l)
-        , m_eta(eta)
-        , m_x(x)
+    coulw_g_functor(const T &eta_x_l_k)
+        : functor_m2vnum_4d<coulw_g_functor<T>, T, double>(eta_x_l_k)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    double m2vnum_impl(double eta, double x, double l, double k) const
     {
-        return coulw_g_impl(m_l(i, j), m_eta(i, j), m_x(i, j));
+        gsl_sf_result F, Fp, G, Gp;
+        double eF, eG;
+        gsl_sf_coulomb_wave_FG_e(eta, x, l, k, &F, &Fp, &G, &Gp, &eF, &eG);
+        return G.val;
     }
-
-  private:
-    const T &m_l;
-    const T &m_eta;
-    const T &m_x;
 };
 
 template <typename T>
 inline CwiseNullaryOp<coulw_g_functor<T>,
-                      typename coulw_g_functor<T>::ArrayType>
-coulw_g(const ArrayBase<T> &l, const ArrayBase<T> &eta, const ArrayBase<T> &x)
+                      typename coulw_g_functor<T>::ResultType>
+coulw_g(const DenseBase<T> &eta_x_l_k)
 {
-    eigen_assert(MATRIX_SAME_SIZE(l, eta));
-    eigen_assert(MATRIX_SAME_SIZE(l, x));
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "only support double scalar");
 
-    using ArrayType = typename coulw_g_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(l.rows(),
-                                  l.cols(),
-                                  coulw_g_functor<T>(l.derived(),
-                                                     eta.derived(),
-                                                     x.derived()));
-}
-
-template <typename T>
-inline T coulw_g_e_impl(const T l, const T eta, const T x, T &e)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double coulw_g_e_impl(const double l,
-                             const double eta,
-                             const double x,
-                             double &e)
-{
-    gsl_sf_result F, Fp, G, Gp;
-    double eF, eG;
-    int s = gsl_sf_coulomb_wave_FG_e(eta, x, l, 0, &F, &Fp, &G, &Gp, &eF, &eG);
-    if (s == GSL_SUCCESS) {
-        e = G.err;
-        return G.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("coulw_g"));
+    using ResultType = typename coulw_g_functor<T>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, eta_x_l_k),
+                                   M2VNUM_COL(T, eta_x_l_k),
+                                   coulw_g_functor<T>(eta_x_l_k.derived()));
 }
 
 template <typename T, typename U>
 class coulw_g_e_functor
+    : public functor_m2vnum_4d_e<coulw_g_e_functor<T, U>, T, U, double>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
-    coulw_g_e_functor(const T &l, const T &eta, const T &x, U &e)
-        : m_l(l)
-        , m_eta(eta)
-        , m_x(x)
-        , m_e(e)
+    coulw_g_e_functor(const T &eta_x_l_k, U &e)
+        : functor_m2vnum_4d_e<coulw_g_e_functor<T, U>, T, U, double>(eta_x_l_k,
+                                                                     e)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    double m2vnum_e_impl(
+        double eta, double x, double l, double k, double &e) const
     {
-        return coulw_g_e_impl(m_l(i, j), m_eta(i, j), m_x(i, j), m_e(i, j));
+        gsl_sf_result F, Fp, G, Gp;
+        double eF, eG;
+        gsl_sf_coulomb_wave_FG_e(eta, x, l, k, &F, &Fp, &G, &Gp, &eF, &eG);
+        e = G.err;
+        return G.val;
     }
-
-  private:
-    const T &m_l;
-    const T &m_eta;
-    const T &m_x;
-    U &m_e;
 };
 
 template <typename T, typename U>
 inline CwiseNullaryOp<coulw_g_e_functor<T, U>,
-                      typename coulw_g_e_functor<T, U>::ArrayType>
-coulw_g(const ArrayBase<T> &l,
-        const ArrayBase<T> &eta,
-        const ArrayBase<T> &x,
-        ArrayBase<U> &e)
+                      typename coulw_g_e_functor<T, U>::ResultType>
+coulw_g(const DenseBase<T> &eta_x_l_k, DenseBase<U> &e)
 {
-    eigen_assert(MATRIX_SAME_SIZE(l, eta));
-    eigen_assert(MATRIX_SAME_SIZE(l, x));
-    eigen_assert(MATRIX_SAME_SIZE(l, e));
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "only support double scalar");
 
-    using ArrayType = typename coulw_g_e_functor<T, U>::ArrayType;
-    return ArrayType::NullaryExpr(l.rows(),
-                                  l.cols(),
-                                  coulw_g_e_functor<T, U>(l.derived(),
-                                                          eta.derived(),
-                                                          x.derived(),
-                                                          e.derived()));
+    using ResultType = typename coulw_g_e_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, eta_x_l_k),
+                                   M2VNUM_COL(T, eta_x_l_k),
+                                   coulw_g_e_functor<T, U>(eta_x_l_k.derived(),
+                                                           e.derived()));
 }
 
 // ========================================
@@ -468,140 +267,75 @@ coulw_g(const ArrayBase<T> &l,
 // ========================================
 
 template <typename T>
-inline T coulw_dg_impl(const T l, const T eta, const T x)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double coulw_dg_impl(const double l, const double eta, const double x)
-{
-    gsl_sf_result F, Fp, G, Gp;
-    double eF, eG;
-    int s = gsl_sf_coulomb_wave_FG_e(eta, x, l, 0, &F, &Fp, &G, &Gp, &eF, &eG);
-    if (s == GSL_SUCCESS) {
-        return Gp.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("coulw_dg"));
-}
-
-template <typename T>
 class coulw_dg_functor
+    : public functor_m2vnum_4d<coulw_dg_functor<T>, T, double>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
-    coulw_dg_functor(const T &l, const T &eta, const T &x)
-        : m_l(l)
-        , m_eta(eta)
-        , m_x(x)
+    coulw_dg_functor(const T &eta_x_l_k)
+        : functor_m2vnum_4d<coulw_dg_functor<T>, T, double>(eta_x_l_k)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    double m2vnum_impl(double eta, double x, double l, double k) const
     {
-        return coulw_dg_impl(m_l(i, j), m_eta(i, j), m_x(i, j));
+        gsl_sf_result F, Fp, G, Gp;
+        double eF, eG;
+        gsl_sf_coulomb_wave_FG_e(eta, x, l, k, &F, &Fp, &G, &Gp, &eF, &eG);
+        return Gp.val;
     }
-
-  private:
-    const T &m_l;
-    const T &m_eta;
-    const T &m_x;
 };
 
 template <typename T>
 inline CwiseNullaryOp<coulw_dg_functor<T>,
-                      typename coulw_dg_functor<T>::ArrayType>
-coulw_dg(const ArrayBase<T> &l, const ArrayBase<T> &eta, const ArrayBase<T> &x)
+                      typename coulw_dg_functor<T>::ResultType>
+coulw_dg(const DenseBase<T> &eta_x_l_k)
 {
-    eigen_assert(MATRIX_SAME_SIZE(l, eta));
-    eigen_assert(MATRIX_SAME_SIZE(l, x));
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "only support double scalar");
 
-    using ArrayType = typename coulw_dg_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(l.rows(),
-                                  l.cols(),
-                                  coulw_dg_functor<T>(l.derived(),
-                                                      eta.derived(),
-                                                      x.derived()));
-}
-
-template <typename T>
-inline T coulw_dg_e_impl(const T l, const T eta, const T x, T &e)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double coulw_dg_e_impl(const double l,
-                              const double eta,
-                              const double x,
-                              double &e)
-{
-    gsl_sf_result F, Fp, G, Gp;
-    double eF, eG;
-    int s = gsl_sf_coulomb_wave_FG_e(eta, x, l, 0, &F, &Fp, &G, &Gp, &eF, &eG);
-    if (s == GSL_SUCCESS) {
-        e = Gp.err;
-        return Gp.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("coulw_dg"));
+    using ResultType = typename coulw_dg_functor<T>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, eta_x_l_k),
+                                   M2VNUM_COL(T, eta_x_l_k),
+                                   coulw_dg_functor<T>(eta_x_l_k.derived()));
 }
 
 template <typename T, typename U>
 class coulw_dg_e_functor
+    : public functor_m2vnum_4d_e<coulw_dg_e_functor<T, U>, T, U, double>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
+    using ResultType = typename dense_derive_m2vnum<T, double>::type;
 
-    coulw_dg_e_functor(const T &l, const T &eta, const T &x, U &e)
-        : m_l(l)
-        , m_eta(eta)
-        , m_x(x)
-        , m_e(e)
+    coulw_dg_e_functor(const T &eta_x_l_k, U &e)
+        : functor_m2vnum_4d_e<coulw_dg_e_functor<T, U>, T, U, double>(eta_x_l_k,
+                                                                      e)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    double m2vnum_e_impl(
+        double eta, double x, double l, double k, double &e) const
     {
-        return coulw_dg_e_impl(m_l(i, j), m_eta(i, j), m_x(i, j), m_e(i, j));
+        gsl_sf_result F, Fp, G, Gp;
+        double eF, eG;
+        gsl_sf_coulomb_wave_FG_e(eta, x, l, k, &F, &Fp, &G, &Gp, &eF, &eG);
+        e = Gp.err;
+        return Gp.val;
     }
-
-  private:
-    const T &m_l;
-    const T &m_eta;
-    const T &m_x;
-    U &m_e;
 };
 
 template <typename T, typename U>
 inline CwiseNullaryOp<coulw_dg_e_functor<T, U>,
-                      typename coulw_dg_e_functor<T, U>::ArrayType>
-coulw_dg(const ArrayBase<T> &l,
-         const ArrayBase<T> &eta,
-         const ArrayBase<T> &x,
-         ArrayBase<U> &e)
+                      typename coulw_dg_e_functor<T, U>::ResultType>
+coulw_dg(const DenseBase<T> &eta_x_l_k, DenseBase<U> &e)
 {
-    eigen_assert(MATRIX_SAME_SIZE(l, eta));
-    eigen_assert(MATRIX_SAME_SIZE(l, x));
-    eigen_assert(MATRIX_SAME_SIZE(l, e));
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "only support double scalar");
 
-    using ArrayType = typename coulw_dg_e_functor<T, U>::ArrayType;
-    return ArrayType::NullaryExpr(l.rows(),
-                                  l.cols(),
-                                  coulw_dg_e_functor<T, U>(l.derived(),
-                                                           eta.derived(),
-                                                           x.derived(),
-                                                           e.derived()));
+    using ResultType = typename coulw_dg_e_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, eta_x_l_k),
+                                   M2VNUM_COL(T, eta_x_l_k),
+                                   coulw_dg_e_functor<T, U>(eta_x_l_k.derived(),
+                                                            e.derived()));
 }
 
 // ========================================
@@ -609,69 +343,41 @@ coulw_dg(const ArrayBase<T> &l,
 // ========================================
 
 template <typename T>
-inline void coulw_fg_impl(
-    const T l, const int k, const T eta, const T x, T &F, T &G)
+class coulw_fg_functor : public functor_m2vnum_4d<coulw_fg_functor<T>,
+                                                  T,
+                                                  std::tuple<double, double>>
 {
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline void coulw_fg_impl(const double l,
-                          const int k,
-                          const double eta,
-                          const double x,
-                          double &F,
-                          double &G)
-{
-    gsl_sf_result rF, rFp, rG, rGp;
-    double eF, eG;
-    if (gsl_sf_coulomb_wave_FG_e(eta,
-                                 x,
-                                 l,
-                                 k,
-                                 &rF,
-                                 &rFp,
-                                 &rG,
-                                 &rGp,
-                                 &eF,
-                                 &eG) == GSL_SUCCESS) {
-        F = rF.val;
-        G = rG.val;
+  public:
+    coulw_fg_functor(const T &eta_x_l_k)
+        : functor_m2vnum_4d<coulw_fg_functor<T>, T, std::tuple<double, double>>(
+              eta_x_l_k)
+    {
     }
-}
 
-template <typename T, typename U>
-inline void coulw_fg(const ArrayBase<T> &l,
-                     const ArrayBase<U> &k,
-                     const ArrayBase<T> &eta,
-                     const ArrayBase<T> &x,
-                     ArrayBase<T> &F,
-                     ArrayBase<T> &G)
-{
-    static_assert(TYPE_IS(typename U::Scalar, int) ||
-                      TYPE_IS(typename U::Scalar, unsigned int),
-                  "k can only be int or uint array");
-
-    eigen_assert(MATRIX_SAME_SIZE(l, k));
-    eigen_assert(MATRIX_SAME_SIZE(l, k));
-    eigen_assert(MATRIX_SAME_SIZE(l, eta));
-    eigen_assert(MATRIX_SAME_SIZE(l, x));
-
-    // F.derived().resize(l.rows(), l.cols());
-    // G.derived().resize(l.rows(), l.cols());
-
-    // loop unroll?
-    // care row/col major?
-    for (Index i = 0; i < l.cols(); ++i) {
-        for (Index j = 0; j < l.rows(); ++j) {
-            coulw_fg_impl(l(j, i),
-                          k(j, i),
-                          eta(j, i),
-                          x(j, i),
-                          F.derived()(j, i),
-                          G.derived()(j, i));
-        }
+    std::tuple<double, double> m2vnum_impl(double eta,
+                                           double x,
+                                           double l,
+                                           double k) const
+    {
+        gsl_sf_result F, Fp, G, Gp;
+        double eF, eG;
+        gsl_sf_coulomb_wave_FG_e(eta, x, l, k, &F, &Fp, &G, &Gp, &eF, &eG);
+        return std::make_tuple(F.val, G.val);
     }
+};
+
+template <typename T>
+inline CwiseNullaryOp<coulw_fg_functor<T>,
+                      typename coulw_fg_functor<T>::ResultType>
+coulw_fg(const DenseBase<T> &eta_x_l_k)
+{
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "only support double scalar");
+
+    using ResultType = typename coulw_fg_functor<T>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, eta_x_l_k),
+                                   M2VNUM_COL(T, eta_x_l_k),
+                                   coulw_fg_functor<T>(eta_x_l_k.derived()));
 }
 
 // ========================================
@@ -679,79 +385,44 @@ inline void coulw_fg(const ArrayBase<T> &l,
 // ========================================
 
 template <typename T>
-inline void coulw_dfg_impl(
-    const T l, const int k, const T eta, const T x, T &F, T &G, T &dF, T &dG)
+class coulw_dfg_functor
+    : public functor_m2vnum_4d<coulw_dfg_functor<T>,
+                               T,
+                               std::tuple<double, double, double, double>>
 {
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline void coulw_dfg_impl(const double l,
-                           const int k,
-                           const double eta,
-                           const double x,
-                           double &F,
-                           double &G,
-                           double &dF,
-                           double &dG)
-{
-    gsl_sf_result rF, rFp, rG, rGp;
-    double eF, eG;
-    if (gsl_sf_coulomb_wave_FG_e(eta,
-                                 x,
-                                 l,
-                                 k,
-                                 &rF,
-                                 &rFp,
-                                 &rG,
-                                 &rGp,
-                                 &eF,
-                                 &eG) == GSL_SUCCESS) {
-        F = rF.val;
-        G = rG.val;
-        dF = rFp.val;
-        dG = rGp.val;
+  public:
+    coulw_dfg_functor(const T &eta_x_l_k)
+        : functor_m2vnum_4d<coulw_dfg_functor<T>,
+                            T,
+                            std::tuple<double, double, double, double>>(
+              eta_x_l_k)
+    {
     }
-}
 
-template <typename T, typename U>
-inline void coulw_dfg(const ArrayBase<T> &l,
-                      const ArrayBase<U> &k,
-                      const ArrayBase<T> &eta,
-                      const ArrayBase<T> &x,
-                      ArrayBase<T> &F,
-                      ArrayBase<T> &G,
-                      ArrayBase<T> &dF,
-                      ArrayBase<T> &dG)
-{
-    static_assert(TYPE_IS(typename U::Scalar, int) ||
-                      TYPE_IS(typename U::Scalar, unsigned int),
-                  "k can only be int or uint array");
-
-    eigen_assert(MATRIX_SAME_SIZE(l, k));
-    eigen_assert(MATRIX_SAME_SIZE(l, k));
-    eigen_assert(MATRIX_SAME_SIZE(l, eta));
-    eigen_assert(MATRIX_SAME_SIZE(l, x));
-
-    // F.derived().resize(l.rows(), l.cols());
-    // G.derived().resize(l.rows(), l.cols());
-    // dF.derived().resize(l.rows(), l.cols());
-    // dG.derived().resize(l.rows(), l.cols());
-
-    // loop unroll?
-    // care row/col major?
-    for (Index i = 0; i < l.cols(); ++i) {
-        for (Index j = 0; j < l.rows(); ++j) {
-            coulw_dfg_impl(l(j, i),
-                           k(j, i),
-                           eta(j, i),
-                           x(j, i),
-                           F.derived()(j, i),
-                           G.derived()(j, i),
-                           dF.derived()(j, i),
-                           dG.derived()(j, i));
-        }
+    std::tuple<double, double, double, double> m2vnum_impl(double eta,
+                                                           double x,
+                                                           double l,
+                                                           double k) const
+    {
+        gsl_sf_result F, Fp, G, Gp;
+        double eF, eG;
+        gsl_sf_coulomb_wave_FG_e(eta, x, l, k, &F, &Fp, &G, &Gp, &eF, &eG);
+        return std::make_tuple(F.val, G.val, Fp.val, Gp.val);
     }
+};
+
+template <typename T>
+inline CwiseNullaryOp<coulw_dfg_functor<T>,
+                      typename coulw_dfg_functor<T>::ResultType>
+coulw_dfg(const DenseBase<T> &eta_x_l_k)
+{
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "only support double scalar");
+
+    using ResultType = typename coulw_dfg_functor<T>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, eta_x_l_k),
+                                   M2VNUM_COL(T, eta_x_l_k),
+                                   coulw_dfg_functor<T>(eta_x_l_k.derived()));
 }
 
 // ========================================
@@ -759,122 +430,69 @@ inline void coulw_dfg(const ArrayBase<T> &l,
 // ========================================
 
 template <typename T>
-inline T coulw_cl_impl(const T l, const T eta)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double coulw_cl_impl(const double l, const double eta)
-{
-    gsl_sf_result r;
-    if (gsl_sf_coulomb_CL_e(l, eta, &r) == GSL_SUCCESS) {
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("coulw_cl"));
-}
-
-template <typename T>
 class coulw_cl_functor
+    : public functor_m2vnum_2d<coulw_cl_functor<T>, T, double>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
-    coulw_cl_functor(const T &l, const T &eta)
-        : m_l(l)
-        , m_eta(eta)
+    coulw_cl_functor(const T &l_eta)
+        : functor_m2vnum_2d<coulw_cl_functor<T>, T, double>(l_eta)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    double m2vnum_impl(double l, double eta) const
     {
-        return coulw_cl_impl(m_l(i, j), m_eta(i, j));
+        gsl_sf_result r;
+        gsl_sf_coulomb_CL_e(l, eta, &r);
+        return r.val;
     }
-
-  private:
-    const T &m_l;
-    const T &m_eta;
 };
 
 template <typename T>
 inline CwiseNullaryOp<coulw_cl_functor<T>,
-                      typename coulw_cl_functor<T>::ArrayType>
-coulw_cl(const ArrayBase<T> &l, const ArrayBase<T> &eta)
+                      typename coulw_cl_functor<T>::ResultType>
+coulw_cl(const DenseBase<T> &l_eta)
 {
-    eigen_assert(MATRIX_SAME_SIZE(l, eta));
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "only support double scalar");
 
-    using ArrayType = typename coulw_cl_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(l.rows(),
-                                  l.cols(),
-                                  coulw_cl_functor<T>(l.derived(),
-                                                      eta.derived()));
-}
-
-template <typename T>
-inline T coulw_cl_e_impl(const T l, const T eta, T &e)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double coulw_cl_e_impl(const double l, const double eta, double &e)
-{
-    gsl_sf_result r;
-    if (gsl_sf_coulomb_CL_e(l, eta, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("coulw_cl"));
+    using ResultType = typename coulw_cl_functor<T>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, l_eta),
+                                   M2VNUM_COL(T, l_eta),
+                                   coulw_cl_functor<T>(l_eta.derived()));
 }
 
 template <typename T, typename U>
 class coulw_cl_e_functor
+    : public functor_m2vnum_2d_e<coulw_cl_e_functor<T, U>, T, U, double>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
-    coulw_cl_e_functor(const T &l, const T &eta, U &e)
-        : m_l(l)
-        , m_eta(eta)
-        , m_e(e)
+    coulw_cl_e_functor(const T &l_eta, U &e)
+        : functor_m2vnum_2d_e<coulw_cl_e_functor<T, U>, T, U, double>(l_eta, e)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    double m2vnum_e_impl(double l, double eta, double &e) const
     {
-        return coulw_cl_e_impl(m_l(i, j), m_eta(i, j), m_e(i, j));
+        gsl_sf_result r;
+        gsl_sf_coulomb_CL_e(l, eta, &r);
+        e = r.err;
+        return r.val;
     }
-
-  private:
-    const T &m_l;
-    const T &m_eta;
-    U &m_e;
 };
 
 template <typename T, typename U>
 inline CwiseNullaryOp<coulw_cl_e_functor<T, U>,
-                      typename coulw_cl_e_functor<T, U>::ArrayType>
-coulw_cl(const ArrayBase<T> &l, const ArrayBase<T> &eta, ArrayBase<U> &e)
+                      typename coulw_cl_e_functor<T, U>::ResultType>
+coulw_cl(const DenseBase<T> &l_eta, DenseBase<U> &e)
 {
-    eigen_assert(MATRIX_SAME_SIZE(l, eta));
-    eigen_assert(MATRIX_SAME_SIZE(l, e));
+    static_assert(TYPE_IS(typename T::Scalar, double),
+                  "only support double scalar");
 
-    using ArrayType = typename coulw_cl_e_functor<T, U>::ArrayType;
-    return ArrayType::NullaryExpr(l.rows(),
-                                  l.cols(),
-                                  coulw_cl_e_functor<T, U>(l.derived(),
-                                                           eta.derived(),
-                                                           e.derived()));
+    using ResultType = typename coulw_cl_e_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, l_eta),
+                                   M2VNUM_COL(T, l_eta),
+                                   coulw_cl_e_functor<T, U>(l_eta.derived(),
+                                                            e.derived()));
 }
 
 ////////////////////////////////////////////////////////////

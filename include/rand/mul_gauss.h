@@ -25,6 +25,7 @@
 
 #include <common/common.h>
 
+#include <common/functor_m2vdim.h>
 #include <rand/rng.h>
 
 #include <gsl/gsl_linalg.h>

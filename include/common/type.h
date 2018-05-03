@@ -83,15 +83,16 @@ IEXP_NS_BEGIN
 
 #define M2V_DIM(type, x) ((TP4(T) == RowMajor) ? (x).cols() : (x).rows())
 
-// matrix to vector, keep count
-#define M2VNUM_ROW(type, x) ((TP4(T) == RowMajor) ? (x).rows() : 1)
-
-#define M2VNUM_COL(type, x) ((TP4(T) == RowMajor) ? 1 : (x).cols())
-
-// matrix to vector, keep dimension
-#define M2VDIM_ROW(type, x) ((TP4(T) == RowMajor) ? (x).cols() : 1)
-
-#define M2VDIM_COL(type, x) ((TP4(T) == RowMajor) ? 1 : (x).rows())
+#define DEFINE_DERIVED                                                         \
+    Derived &derived()                                                         \
+    {                                                                          \
+        return *static_cast<Derived *>(this);                                  \
+    }                                                                          \
+                                                                               \
+    const Derived &derived() const                                             \
+    {                                                                          \
+        return *static_cast<const Derived *>(this);                            \
+    }
 
 ////////////////////////////////////////////////////////////
 // type definition
@@ -143,34 +144,6 @@ template <typename T,
           int _MaxRows = TP5(T),
           int _MaxCols = TP6(T)>
 struct dense_derive
-{
-    using matrix = Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>;
-    using array = Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>;
-    using type = typename std::conditional<IS_MATRIX(T), matrix, array>::type;
-};
-
-template <typename T,
-          typename _Scalar = TP1(T),
-          int _Rows = ((TP4(T) == RowMajor) ? T::RowsAtCompileTime : 1),
-          int _Cols = ((TP4(T) == RowMajor) ? 1 : T::ColsAtCompileTime),
-          int _Options = TP4(T) & ~RowMajor,
-          int _MaxRows = ((TP4(T) == RowMajor) ? T::MaxRowsAtCompileTime : 1),
-          int _MaxCols = ((TP4(T) == RowMajor) ? 1 : T::MaxColsAtCompileTime)>
-struct dense_derive_m2vnum
-{
-    using matrix = Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>;
-    using array = Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>;
-    using type = typename std::conditional<IS_MATRIX(T), matrix, array>::type;
-};
-
-template <typename T,
-          typename _Scalar = TP1(T),
-          int _Rows = ((TP4(T) == RowMajor) ? 1 : T::RowsAtCompileTime),
-          int _Cols = ((TP4(T) == RowMajor) ? T::ColsAtCompileTime : 1),
-          int _Options = TP4(T) & ~RowMajor,
-          int _MaxRows = ((TP4(T) == RowMajor) ? 1 : T::MaxRowsAtCompileTime),
-          int _MaxCols = ((TP4(T) == RowMajor) ? T::MaxColsAtCompileTime : 1)>
-struct dense_derive_m2vdim
 {
     using matrix = Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>;
     using array = Array<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>;

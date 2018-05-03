@@ -16,41 +16,14 @@
  * USA.
  */
 
-#ifndef __IEXP_COMMON__
-#define __IEXP_COMMON__
+#ifndef __IEXP_FUNCTOR_FOREACH__
+#define __IEXP_FUNCTOR_FOREACH__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
-// clang-format off
-
-// environment must be first
-#include <common/environment.h>
-
-// define namespace
-#include <common/namespace.h>
-
-// library: eigen
-#include <common/eigen_config.h>
-#include <Eigen/Dense>
-
-// library: gsl
-#include <gsl/config.h>
-
-#include <common/def.h>
-#include <common/type.h>
-#include <common/util.h>
-#include <common/buf_sd.h>
-#include <common/buf_rc.h>
-#include <common/copy.h>
-#include <common/dim.h>
-
-#include <common/functor_foreach.h>
-#include <common/functor_m2vnum.h>
-#include <common/functor_m2vdim.h>
-
-// clang-format on
+#include <common/common.h>
 
 IEXP_NS_BEGIN
 
@@ -62,6 +35,53 @@ IEXP_NS_BEGIN
 // type definition
 ////////////////////////////////////////////////////////////
 
+template <typename Derived, typename T, typename R>
+class functor_foreach
+{
+    DEFINE_DERIVED
+
+  public:
+    using ResultType = typename dense_derive<T, R>::type;
+
+    functor_foreach(const T &x)
+        : m_x(x)
+    {
+    }
+
+    R operator()(Index i, Index j) const
+    {
+        return derived().foreach_impl(m_x(i, j));
+    }
+
+  private:
+    const T &m_x;
+};
+
+template <typename Derived, typename T, typename U, typename R>
+class functor_foreach_e
+{
+    DEFINE_DERIVED
+
+  public:
+    using ResultType = typename dense_derive<T, R>::type;
+
+    functor_foreach_e(const T &x, U &e)
+        : m_x(x)
+        , m_e(e)
+    {
+        eigen_assert(m_x.size() == m_e.size());
+    }
+
+    R operator()(Index i, Index j) const
+    {
+        return derived().foreach_e_impl(m_x(i, j), m_e(i, j));
+    }
+
+  private:
+    const T &m_x;
+    U &m_e;
+};
+
 ////////////////////////////////////////////////////////////
 // global variants
 ////////////////////////////////////////////////////////////
@@ -72,4 +92,4 @@ IEXP_NS_BEGIN
 
 IEXP_NS_END
 
-#endif /* __IEXP_COMMON__ */
+#endif /* __IEXP_FUNCTOR_FOREACH__ */

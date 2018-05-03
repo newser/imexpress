@@ -44,410 +44,276 @@ namespace sf {
 // location of n-th 0 of airy Ai
 // ========================================
 
-inline double airy_n0_Ai_impl(const unsigned int x)
-{
-    return gsl_sf_airy_zero_Ai(x);
-}
-
 template <typename T>
 class airy_n0_Ai_functor
+    : public functor_foreach<airy_n0_Ai_functor<T>, T, double>
 {
   public:
-    using ArrayType = Array<double,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
     airy_n0_Ai_functor(const T &x)
-        : m_x(x)
+        : functor_foreach<airy_n0_Ai_functor<T>, T, double>(x)
     {
     }
 
-    const double operator()(Index i, Index j) const
+    double foreach_impl(unsigned int x) const
     {
-        return airy_n0_Ai_impl((unsigned int)m_x(i, j));
+        return gsl_sf_airy_zero_Ai(x);
     }
-
-  private:
-    const T &m_x;
 };
 
 template <typename T>
 inline CwiseNullaryOp<airy_n0_Ai_functor<T>,
-                      typename airy_n0_Ai_functor<T>::ArrayType>
-airy_n0_Ai(const ArrayBase<T> &x)
+                      typename airy_n0_Ai_functor<T>::ResultType>
+airy_n0_Ai(const DenseBase<T> &x)
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "x can only be int or uint array");
+    static_assert(IS_INTEGER(typename T::Scalar),
+                  "only support integer scalar");
 
-    using ArrayType = typename airy_n0_Ai_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  airy_n0_Ai_functor<T>(x.derived()));
-}
-
-inline double airy_n0_Ai_e_impl(const unsigned int x, double &e)
-{
-    gsl_sf_result r;
-    if (gsl_sf_airy_zero_Ai_e(x, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("airy_zero_Ai"));
+    using ResultType = typename airy_n0_Ai_functor<T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   airy_n0_Ai_functor<T>(x.derived()));
 }
 
 template <typename T, typename U>
 class airy_n0_Ai_e_functor
+    : public functor_foreach_e<airy_n0_Ai_e_functor<T, U>, T, U, double>
 {
   public:
-    using ArrayType = Array<double,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
     airy_n0_Ai_e_functor(const T &x, U &e)
-        : m_x(x)
-        , m_e(e)
+        : functor_foreach_e<airy_n0_Ai_e_functor<T, U>, T, U, double>(x, e)
     {
     }
 
-    const double operator()(Index i, Index j) const
+    double foreach_e_impl(unsigned int x, double &e) const
     {
-        return airy_n0_Ai_e_impl(m_x(i, j), m_e(i, j));
+        gsl_sf_result r;
+        gsl_sf_airy_zero_Ai_e(x, &r);
+        e = r.err;
+        return r.val;
     }
-
-  private:
-    const T &m_x;
-    U &m_e;
 };
 
 template <typename T, typename U>
 inline CwiseNullaryOp<airy_n0_Ai_e_functor<T, U>,
-                      typename airy_n0_Ai_e_functor<T, U>::ArrayType>
-airy_n0_Ai(const ArrayBase<T> &x, ArrayBase<U> &e)
+                      typename airy_n0_Ai_e_functor<T, U>::ResultType>
+airy_n0_Ai(const DenseBase<T> &x, DenseBase<U> &e)
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "x can only be int or uint array");
+    static_assert(IS_INTEGER(typename T::Scalar),
+                  "only support integer scalar");
 
-    using ArrayType = typename airy_n0_Ai_e_functor<T, U>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  airy_n0_Ai_e_functor<T, U>(x.derived(),
-                                                             e.derived()));
+    using ResultType = typename airy_n0_Ai_e_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   airy_n0_Ai_e_functor<T, U>(x.derived(),
+                                                              e.derived()));
 }
 
 // ========================================
 // location of n-th 0 of airy Ai derivative
 // ========================================
 
-inline double airy_n0_Ai_deriv_impl(const unsigned int x)
-{
-    return gsl_sf_airy_zero_Ai_deriv(x);
-}
-
 template <typename T>
 class airy_n0_Ai_deriv_functor
+    : public functor_foreach<airy_n0_Ai_deriv_functor<T>, T, double>
 {
   public:
-    using ArrayType = Array<double,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
     airy_n0_Ai_deriv_functor(const T &x)
-        : m_x(x)
+        : functor_foreach<airy_n0_Ai_deriv_functor<T>, T, double>(x)
     {
     }
 
-    const double operator()(Index i, Index j) const
+    double foreach_impl(unsigned int x) const
     {
-        return airy_n0_Ai_deriv_impl((unsigned int)m_x(i, j));
+        return gsl_sf_airy_zero_Ai_deriv(x);
     }
-
-  private:
-    const T &m_x;
 };
 
 template <typename T>
 inline CwiseNullaryOp<airy_n0_Ai_deriv_functor<T>,
-                      typename airy_n0_Ai_deriv_functor<T>::ArrayType>
-airy_n0_Ai_deriv(const ArrayBase<T> &x)
+                      typename airy_n0_Ai_deriv_functor<T>::ResultType>
+airy_n0_Ai_deriv(const DenseBase<T> &x)
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "x can only be int or uint array");
+    static_assert(IS_INTEGER(typename T::Scalar),
+                  "only support integer scalar");
 
-    using ArrayType = typename airy_n0_Ai_deriv_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  airy_n0_Ai_deriv_functor<T>(x.derived()));
-}
-
-inline double airy_n0_Ai_deriv_e_impl(const unsigned int x, double &e)
-{
-    gsl_sf_result r;
-    if (gsl_sf_airy_zero_Ai_deriv_e(x, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("airy_zero_Ai_deriv"));
+    using ResultType = typename airy_n0_Ai_deriv_functor<T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   airy_n0_Ai_deriv_functor<T>(x.derived()));
 }
 
 template <typename T, typename U>
 class airy_n0_Ai_deriv_e_functor
+    : public functor_foreach_e<airy_n0_Ai_deriv_e_functor<T, U>, T, U, double>
 {
   public:
-    using ArrayType = Array<double,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
     airy_n0_Ai_deriv_e_functor(const T &x, U &e)
-        : m_x(x)
-        , m_e(e)
+        : functor_foreach_e<airy_n0_Ai_deriv_e_functor<T, U>, T, U, double>(x,
+                                                                            e)
     {
     }
 
-    const double operator()(Index i, Index j) const
+    double foreach_e_impl(unsigned int x, double &e) const
     {
-        return airy_n0_Ai_deriv_e_impl((unsigned int)m_x(i, j), m_e(i, j));
+        gsl_sf_result r;
+        gsl_sf_airy_zero_Ai_deriv_e(x, &r);
+        e = r.err;
+        return r.val;
     }
-
-  private:
-    const T &m_x;
-    U &m_e;
 };
 
 template <typename T, typename U>
 inline CwiseNullaryOp<airy_n0_Ai_deriv_e_functor<T, U>,
-                      typename airy_n0_Ai_deriv_e_functor<T, U>::ArrayType>
-airy_n0_Ai_deriv(const ArrayBase<T> &x, ArrayBase<U> &e)
+                      typename airy_n0_Ai_deriv_e_functor<T, U>::ResultType>
+airy_n0_Ai_deriv(const DenseBase<T> &x, DenseBase<U> &e)
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "x can only be int or uint array");
+    static_assert(IS_INTEGER(typename T::Scalar),
+                  "only support integer scalar");
 
-    using ArrayType = typename airy_n0_Ai_deriv_e_functor<T, U>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  airy_n0_Ai_deriv_e_functor<T,
-                                                             U>(x.derived(),
-                                                                e.derived()));
+    using ResultType = typename airy_n0_Ai_deriv_e_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   airy_n0_Ai_deriv_e_functor<T,
+                                                              U>(x.derived(),
+                                                                 e.derived()));
 }
 
 // ========================================
 // location of n-th 0 of airy Bi
 // ========================================
 
-inline double airy_n0_Bi_impl(const unsigned int x)
-{
-    return gsl_sf_airy_zero_Bi(x);
-}
-
 template <typename T>
 class airy_n0_Bi_functor
+    : public functor_foreach<airy_n0_Bi_functor<T>, T, double>
 {
   public:
-    using ArrayType = Array<double,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
     airy_n0_Bi_functor(const T &x)
-        : m_x(x)
+        : functor_foreach<airy_n0_Bi_functor<T>, T, double>(x)
     {
     }
 
-    const double operator()(Index i, Index j) const
+    double foreach_impl(unsigned int x) const
     {
-        return airy_n0_Bi_impl((unsigned int)m_x(i, j));
+        return gsl_sf_airy_zero_Bi(x);
     }
-
-  private:
-    const T &m_x;
 };
 
 template <typename T>
 inline CwiseNullaryOp<airy_n0_Bi_functor<T>,
-                      typename airy_n0_Bi_functor<T>::ArrayType>
-airy_n0_Bi(const ArrayBase<T> &x)
+                      typename airy_n0_Bi_functor<T>::ResultType>
+airy_n0_Bi(const DenseBase<T> &x)
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "x can only be int or uint array");
+    static_assert(IS_INTEGER(typename T::Scalar),
+                  "only support integer scalar");
 
-    using ArrayType = typename airy_n0_Bi_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  airy_n0_Bi_functor<T>(x.derived()));
-}
-
-inline double airy_n0_Bi_e_impl(const unsigned int x, double &e)
-{
-    gsl_sf_result r;
-    if (gsl_sf_airy_zero_Bi_e(x, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("airy_zero_Bi"));
+    using ResultType = typename airy_n0_Bi_functor<T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   airy_n0_Bi_functor<T>(x.derived()));
 }
 
 template <typename T, typename U>
 class airy_n0_Bi_e_functor
+    : public functor_foreach_e<airy_n0_Bi_e_functor<T, U>, T, U, double>
 {
   public:
-    using ArrayType = Array<double,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
     airy_n0_Bi_e_functor(const T &x, U &e)
-        : m_x(x)
-        , m_e(e)
+        : functor_foreach_e<airy_n0_Bi_e_functor<T, U>, T, U, double>(x, e)
     {
     }
 
-    const double operator()(Index i, Index j) const
+    double foreach_e_impl(unsigned int x, double &e) const
     {
-        return airy_n0_Bi_e_impl(m_x(i, j), m_e(i, j));
+        gsl_sf_result r;
+        gsl_sf_airy_zero_Bi_e(x, &r);
+        e = r.err;
+        return r.val;
     }
-
-  private:
-    const T &m_x;
-    U &m_e;
 };
 
 template <typename T, typename U>
 inline CwiseNullaryOp<airy_n0_Bi_e_functor<T, U>,
-                      typename airy_n0_Bi_e_functor<T, U>::ArrayType>
-airy_n0_Bi(const ArrayBase<T> &x, ArrayBase<U> &e)
+                      typename airy_n0_Bi_e_functor<T, U>::ResultType>
+airy_n0_Bi(const DenseBase<T> &x, DenseBase<U> &e)
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "x can only be int or uint array");
+    static_assert(IS_INTEGER(typename T::Scalar),
+                  "only support integer scalar");
 
-    using ArrayType = typename airy_n0_Bi_e_functor<T, U>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  airy_n0_Bi_e_functor<T, U>(x.derived(),
-                                                             e.derived()));
+    using ResultType = typename airy_n0_Bi_e_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   airy_n0_Bi_e_functor<T, U>(x.derived(),
+                                                              e.derived()));
 }
 
 // ========================================
 // location of n-th 0 of airy Bi derivative
 // ========================================
 
-inline double airy_n0_Bi_deriv_impl(const unsigned int x)
-{
-    return gsl_sf_airy_zero_Bi_deriv(x);
-}
-
 template <typename T>
 class airy_n0_Bi_deriv_functor
+    : public functor_foreach<airy_n0_Bi_deriv_functor<T>, T, double>
 {
   public:
-    using ArrayType = Array<double,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
     airy_n0_Bi_deriv_functor(const T &x)
-        : m_x(x)
+        : functor_foreach<airy_n0_Bi_deriv_functor<T>, T, double>(x)
     {
     }
 
-    const double operator()(Index i, Index j) const
+    double foreach_impl(unsigned int x) const
     {
-        return airy_n0_Bi_deriv_impl((unsigned int)m_x(i, j));
+        return gsl_sf_airy_zero_Bi_deriv(x);
     }
-
-  private:
-    const T &m_x;
 };
 
 template <typename T>
 inline CwiseNullaryOp<airy_n0_Bi_deriv_functor<T>,
-                      typename airy_n0_Bi_deriv_functor<T>::ArrayType>
-airy_n0_Bi_deriv(const ArrayBase<T> &x)
+                      typename airy_n0_Bi_deriv_functor<T>::ResultType>
+airy_n0_Bi_deriv(const DenseBase<T> &x)
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "x can only be int or uint array");
+    static_assert(IS_INTEGER(typename T::Scalar),
+                  "only support integer scalar");
 
-    using ArrayType = typename airy_n0_Bi_deriv_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  airy_n0_Bi_deriv_functor<T>(x.derived()));
-}
-
-inline double airy_n0_Bi_deriv_e_impl(const unsigned int x, double &e)
-{
-    gsl_sf_result r;
-    if (gsl_sf_airy_zero_Bi_deriv_e(x, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("airy_zero_Bi_deriv"));
+    using ResultType = typename airy_n0_Bi_deriv_functor<T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   airy_n0_Bi_deriv_functor<T>(x.derived()));
 }
 
 template <typename T, typename U>
 class airy_n0_Bi_deriv_e_functor
+    : public functor_foreach_e<airy_n0_Bi_deriv_e_functor<T, U>, T, U, double>
 {
   public:
-    using ArrayType = Array<double,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
     airy_n0_Bi_deriv_e_functor(const T &x, U &e)
-        : m_x(x)
-        , m_e(e)
+        : functor_foreach_e<airy_n0_Bi_deriv_e_functor<T, U>, T, U, double>(x,
+                                                                            e)
     {
     }
 
-    const double operator()(Index i, Index j) const
+    double foreach_e_impl(unsigned int x, double &e) const
     {
-        return airy_n0_Bi_deriv_e_impl((unsigned int)m_x(i, j), m_e(i, j));
+        gsl_sf_result r;
+        gsl_sf_airy_zero_Bi_deriv_e(x, &r);
+        e = r.err;
+        return r.val;
     }
-
-  private:
-    const T &m_x;
-    U &m_e;
 };
 
 template <typename T, typename U>
 inline CwiseNullaryOp<airy_n0_Bi_deriv_e_functor<T, U>,
-                      typename airy_n0_Bi_deriv_e_functor<T, U>::ArrayType>
-airy_n0_Bi_deriv(const ArrayBase<T> &x, ArrayBase<U> &e)
+                      typename airy_n0_Bi_deriv_e_functor<T, U>::ResultType>
+airy_n0_Bi_deriv(const DenseBase<T> &x, DenseBase<U> &e)
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "x can only be int or uint array");
+    static_assert(IS_INTEGER(typename T::Scalar),
+                  "only support integer scalar");
 
-    using ArrayType = typename airy_n0_Bi_deriv_e_functor<T, U>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  airy_n0_Bi_deriv_e_functor<T,
-                                                             U>(x.derived(),
-                                                                e.derived()));
+    using ResultType = typename airy_n0_Bi_deriv_e_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   airy_n0_Bi_deriv_e_functor<T,
+                                                              U>(x.derived(),
+                                                                 e.derived()));
 }
 
 ////////////////////////////////////////////////////////////
