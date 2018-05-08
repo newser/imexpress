@@ -45,7 +45,7 @@ enum sbessel_j
     j0,
     j1,
     j2,
-    jn,
+    j_n,
 };
 
 enum sbessel_y
@@ -53,75 +53,67 @@ enum sbessel_y
     y0,
     y1,
     y2,
-    yn,
+    y_n,
 };
 
 // ========================================
 // sbessel first kind
 // ========================================
 
-template <sbessel_j order, typename T>
-inline T sbessel_j_impl(int n, T x)
+template <sbessel_j order>
+inline double sbessel_j_impl(int n, double x)
 {
-    UNSUPPORTED_TYPE(T);
+    static_assert(order == j_n, "order must be j_n");
+    return gsl_sf_bessel_jl(n, x);
 }
 
 template <>
-inline double sbessel_j_impl<j0, double>(int n, double x)
+inline double sbessel_j_impl<j0>(int n, double x)
 {
     return gsl_sf_bessel_j0(x);
 }
 
 template <>
-inline double sbessel_j_impl<j1, double>(int n, double x)
+inline double sbessel_j_impl<j1>(int n, double x)
 {
     return gsl_sf_bessel_j1(x);
 }
 
 template <>
-inline double sbessel_j_impl<j2, double>(int n, double x)
+inline double sbessel_j_impl<j2>(int n, double x)
 {
     return gsl_sf_bessel_j2(x);
 }
 
-template <>
-inline double sbessel_j_impl<jn, double>(int n, double x)
-{
-    return gsl_sf_bessel_jl(n, x);
-}
-
 template <sbessel_j order, typename T>
 class sbessel_j_functor
+    : public functor_foreach<sbessel_j_functor<order, T>, T, double>
 {
   public:
-    using Scalar = typename T::Scalar;
-    using ResultType = typename dense_derive<T>::type;
-
     sbessel_j_functor(int n, const T &x)
-        : m_n(n)
-        , m_x(x)
+        : functor_foreach<sbessel_j_functor<order, T>, T, double>(x)
+        , m_n(n)
     {
     }
 
-    Scalar operator()(Index i, Index j) const
+    double foreach_impl(double x) const
     {
-        return sbessel_j_impl<order, Scalar>(m_n, m_x(i, j));
+        return sbessel_j_impl<order>(m_n, x);
     }
 
   private:
     int m_n;
-    const T &m_x;
 };
 
 template <typename T>
-inline CwiseNullaryOp<sbessel_j_functor<jn, T>,
-                      typename sbessel_j_functor<jn, T>::ResultType>
+inline CwiseNullaryOp<sbessel_j_functor<j_n, T>,
+                      typename sbessel_j_functor<j_n, T>::ResultType>
 sbessel_j(int n, const DenseBase<T> &x)
 {
-    using ResultType = typename sbessel_j_functor<jn, T>::ResultType;
+    using ResultType = typename sbessel_j_functor<j_n, T>::ResultType;
     return ResultType::NullaryExpr(x.rows(),
                                    x.cols(),
-                                   sbessel_j_functor<jn, T>(n, x.derived()));
+                                   sbessel_j_functor<j_n, T>(n, x.derived()));
 }
 
 template <enum sbessel_j order, typename T>
@@ -129,7 +121,7 @@ inline CwiseNullaryOp<sbessel_j_functor<order, T>,
                       typename sbessel_j_functor<order, T>::ResultType>
 sbessel_j(const DenseBase<T> &x)
 {
-    static_assert(order < jn, "order can only be j0/j1/j2");
+    static_assert(order < j_n, "order can only be j0/j1/j2");
 
     using ResultType = typename sbessel_j_functor<order, T>::ResultType;
     return ResultType::NullaryExpr(x.rows(),
@@ -138,14 +130,19 @@ sbessel_j(const DenseBase<T> &x)
                                                                x.derived()));
 }
 
-template <enum sbessel_j order, typename T>
-inline T sbessel_j_e_impl(int n, T x, T &e)
+template <enum sbessel_j order>
+inline double sbessel_j_e_impl(int n, double x, double &e)
 {
-    UNSUPPORTED_TYPE(T);
+    static_assert(order == j_n, "order must be j_n");
+
+    gsl_sf_result r;
+    gsl_sf_bessel_jl_e(n, x, &r);
+    e = r.err;
+    return r.val;
 }
 
 template <>
-inline double sbessel_j_e_impl<j0, double>(int n, double x, double &e)
+inline double sbessel_j_e_impl<j0>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_j0_e(x, &r);
@@ -154,7 +151,7 @@ inline double sbessel_j_e_impl<j0, double>(int n, double x, double &e)
 }
 
 template <>
-inline double sbessel_j_e_impl<j1, double>(int n, double x, double &e)
+inline double sbessel_j_e_impl<j1>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_j1_e(x, &r);
@@ -163,7 +160,7 @@ inline double sbessel_j_e_impl<j1, double>(int n, double x, double &e)
 }
 
 template <>
-inline double sbessel_j_e_impl<j2, double>(int n, double x, double &e)
+inline double sbessel_j_e_impl<j2>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_j2_e(x, &r);
@@ -171,51 +168,38 @@ inline double sbessel_j_e_impl<j2, double>(int n, double x, double &e)
     return r.val;
 }
 
-template <>
-inline double sbessel_j_e_impl<jn, double>(int n, double x, double &e)
-{
-    gsl_sf_result r;
-    gsl_sf_bessel_jl_e(n, x, &r);
-    e = r.err;
-    return r.val;
-}
-
 template <enum sbessel_j order, typename T, typename U>
 class sbessel_j_e_functor
+    : public functor_foreach_e<sbessel_j_e_functor<order, T, U>, T, U, double>
 {
   public:
-    using Scalar = typename T::Scalar;
-    using ResultType = typename dense_derive<T>::type;
-
     sbessel_j_e_functor(int n, const T &x, U &e)
-        : m_n(n)
-        , m_x(x)
-        , m_e(e)
+        : functor_foreach_e<sbessel_j_e_functor<order, T, U>, T, U, double>(x,
+                                                                            e)
+        , m_n(n)
     {
     }
 
-    Scalar operator()(Index i, Index j) const
+    double foreach_e_impl(double x, double &e) const
     {
-        return sbessel_j_e_impl<order, Scalar>(m_n, m_x(i, j), m_e(i, j));
+        return sbessel_j_e_impl<order>(m_n, x, e);
     }
 
   private:
     int m_n;
-    const T &m_x;
-    U &m_e;
 };
 
 template <typename T, typename U>
-inline CwiseNullaryOp<sbessel_j_e_functor<jn, T, U>,
-                      typename sbessel_j_e_functor<jn, T, U>::ResultType>
+inline CwiseNullaryOp<sbessel_j_e_functor<j_n, T, U>,
+                      typename sbessel_j_e_functor<j_n, T, U>::ResultType>
 sbessel_j(int n, const DenseBase<T> &x, DenseBase<U> &e)
 {
-    using ResultType = typename sbessel_j_e_functor<jn, T, U>::ResultType;
+    using ResultType = typename sbessel_j_e_functor<j_n, T, U>::ResultType;
     return ResultType::NullaryExpr(x.rows(),
                                    x.cols(),
-                                   sbessel_j_e_functor<jn, T, U>(n,
-                                                                 x.derived(),
-                                                                 e.derived()));
+                                   sbessel_j_e_functor<j_n, T, U>(n,
+                                                                  x.derived(),
+                                                                  e.derived()));
 }
 
 template <enum sbessel_j order, typename T, typename U>
@@ -223,7 +207,7 @@ inline CwiseNullaryOp<sbessel_j_e_functor<order, T, U>,
                       typename sbessel_j_e_functor<order, T, U>::ResultType>
 sbessel_j(const DenseBase<T> &x, DenseBase<U> &e)
 {
-    static_assert(order < jn, "order can only be j0/j1/j2");
+    static_assert(order < j_n, "order can only be j0/j1/j2");
 
     using ResultType = typename sbessel_j_e_functor<order, T, U>::ResultType;
     return ResultType::
@@ -238,68 +222,61 @@ sbessel_j(const DenseBase<T> &x, DenseBase<U> &e)
 // bessel second kind
 // ========================================
 
-template <enum sbessel_y y, typename T>
-inline T sbessel_y_impl(int n, T x)
+template <enum sbessel_y order>
+inline double sbessel_y_impl(int n, double x)
 {
-    UNSUPPORTED_TYPE(T);
+    static_assert(order == y_n, "order must be j_n");
+
+    return gsl_sf_bessel_yl(n, x);
 }
 
 template <>
-inline double sbessel_y_impl<y0, double>(int n, double x)
+inline double sbessel_y_impl<y0>(int n, double x)
 {
     return gsl_sf_bessel_y0(x);
 }
 
 template <>
-inline double sbessel_y_impl<y1, double>(int n, double x)
+inline double sbessel_y_impl<y1>(int n, double x)
 {
     return gsl_sf_bessel_y1(x);
 }
 
 template <>
-inline double sbessel_y_impl<y2, double>(int n, double x)
+inline double sbessel_y_impl<y2>(int n, double x)
 {
     return gsl_sf_bessel_y2(x);
 }
 
-template <>
-inline double sbessel_y_impl<yn, double>(int n, double x)
-{
-    return gsl_sf_bessel_yl(n, x);
-}
-
 template <enum sbessel_y order, typename T>
 class sbessel_y_functor
+    : public functor_foreach<sbessel_y_functor<order, T>, T, double>
 {
   public:
-    using Scalar = typename T::Scalar;
-    using ResultType = typename dense_derive<T>::type;
-
     sbessel_y_functor(int n, const T &x)
-        : m_n(n)
-        , m_x(x)
+        : functor_foreach<sbessel_y_functor<order, T>, T, double>(x)
+        , m_n(n)
     {
     }
 
-    Scalar operator()(Index i, Index j) const
+    double foreach_impl(double x) const
     {
-        return sbessel_y_impl<order, Scalar>(m_n, m_x(i, j));
+        return sbessel_y_impl<order>(m_n, x);
     }
 
   private:
     int m_n;
-    const T &m_x;
 };
 
 template <typename T>
-inline CwiseNullaryOp<sbessel_y_functor<yn, T>,
-                      typename sbessel_y_functor<yn, T>::ResultType>
+inline CwiseNullaryOp<sbessel_y_functor<y_n, T>,
+                      typename sbessel_y_functor<y_n, T>::ResultType>
 sbessel_y(int n, const DenseBase<T> &x)
 {
-    using ResultType = typename sbessel_y_functor<yn, T>::ResultType;
+    using ResultType = typename sbessel_y_functor<y_n, T>::ResultType;
     return ResultType::NullaryExpr(x.rows(),
                                    x.cols(),
-                                   sbessel_y_functor<yn, T>(n, x.derived()));
+                                   sbessel_y_functor<y_n, T>(n, x.derived()));
 }
 
 template <enum sbessel_y order, typename T>
@@ -307,7 +284,7 @@ inline CwiseNullaryOp<sbessel_y_functor<order, T>,
                       typename sbessel_y_functor<order, T>::ResultType>
 sbessel_y(const DenseBase<T> &x)
 {
-    static_assert(order < yn, "order can only be y0/y1/y2");
+    static_assert(order < y_n, "order can only be y0/y1/y2");
 
     using ResultType = typename sbessel_y_functor<order, T>::ResultType;
     return ResultType::NullaryExpr(x.rows(),
@@ -316,20 +293,19 @@ sbessel_y(const DenseBase<T> &x)
                                                                x.derived()));
 }
 
-template <typename T>
-inline T sbessel_y_e_impl(int n, T x, T &e)
+template <enum sbessel_y order>
+inline double sbessel_y_e_impl(int n, double x, double &e)
 {
-    UNSUPPORTED_TYPE(T);
-}
+    static_assert(order == y_n, "order must be y_n");
 
-template <enum sbessel_y order, typename T>
-inline T sbessel_y_e_impl(int n, T x, T &e)
-{
-    UNSUPPORTED_TYPE(T);
+    gsl_sf_result r;
+    gsl_sf_bessel_yl_e(n, x, &r);
+    e = r.err;
+    return r.val;
 }
 
 template <>
-inline double sbessel_y_e_impl<y0, double>(int n, double x, double &e)
+inline double sbessel_y_e_impl<y0>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_y0_e(x, &r);
@@ -338,7 +314,7 @@ inline double sbessel_y_e_impl<y0, double>(int n, double x, double &e)
 }
 
 template <>
-inline double sbessel_y_e_impl<y1, double>(int n, double x, double &e)
+inline double sbessel_y_e_impl<y1>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_y1_e(x, &r);
@@ -347,7 +323,7 @@ inline double sbessel_y_e_impl<y1, double>(int n, double x, double &e)
 }
 
 template <>
-inline double sbessel_y_e_impl<y2, double>(int n, double x, double &e)
+inline double sbessel_y_e_impl<y2>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_y2_e(x, &r);
@@ -355,51 +331,38 @@ inline double sbessel_y_e_impl<y2, double>(int n, double x, double &e)
     return r.val;
 }
 
-template <>
-inline double sbessel_y_e_impl<yn, double>(int n, double x, double &e)
-{
-    gsl_sf_result r;
-    gsl_sf_bessel_yl_e(n, x, &r);
-    e = r.err;
-    return r.val;
-}
-
 template <enum sbessel_y order, typename T, typename U>
 class sbessel_y_e_functor
+    : public functor_foreach_e<sbessel_y_e_functor<order, T, U>, T, U, double>
 {
   public:
-    using Scalar = typename T::Scalar;
-    using ResultType = typename dense_derive<T>::type;
-
     sbessel_y_e_functor(int n, const T &x, U &e)
-        : m_n(n)
-        , m_x(x)
-        , m_e(e)
+        : functor_foreach_e<sbessel_y_e_functor<order, T, U>, T, U, double>(x,
+                                                                            e)
+        , m_n(n)
     {
     }
 
-    Scalar operator()(Index i, Index j) const
+    double foreach_e_impl(double x, double &e) const
     {
-        return sbessel_y_e_impl<order, Scalar>(m_n, m_x(i, j), m_e(i, j));
+        return sbessel_y_e_impl<order>(m_n, x, e);
     }
 
   private:
     int m_n;
-    const T &m_x;
-    U &m_e;
 };
 
 template <typename T, typename U>
-inline CwiseNullaryOp<sbessel_y_e_functor<yn, T, U>,
-                      typename sbessel_y_e_functor<yn, T, U>::ResultType>
+inline CwiseNullaryOp<sbessel_y_e_functor<y_n, T, U>,
+                      typename sbessel_y_e_functor<y_n, T, U>::ResultType>
 sbessel_y(int n, const DenseBase<T> &x, DenseBase<U> &e)
 {
-    using ResultType = typename sbessel_y_e_functor<yn, T, U>::ResultType;
+    using ResultType = typename sbessel_y_e_functor<y_n, T, U>::ResultType;
     return ResultType::NullaryExpr(x.rows(),
                                    x.cols(),
-                                   sbessel_y_e_functor<yn, T, U>(n,
-                                                                 x.derived(),
-                                                                 e.derived()));
+                                   sbessel_y_e_functor<y_n, T, U>(n,
+                                                                  x.derived(),
+                                                                  e.derived()));
 }
 
 template <enum sbessel_y order, typename T, typename U>
@@ -407,7 +370,7 @@ inline CwiseNullaryOp<sbessel_y_e_functor<order, T, U>,
                       typename sbessel_y_e_functor<order, T, U>::ResultType>
 sbessel_y(const DenseBase<T> &x, DenseBase<U> &e)
 {
-    static_assert(order < yn, "order can only be y0/y1/y2");
+    static_assert(order < y_n, "order can only be y0/y1/y2");
 
     using ResultType = typename sbessel_y_e_functor<order, T, U>::ResultType;
     return ResultType::

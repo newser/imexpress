@@ -145,6 +145,7 @@ TEST_CASE("sf_sbessel_y")
     // REQUIRE(__D_EQ9(m2(0, 0), -6.5473079797378378e+30));
     REQUIRE(__D_EQ9(m2(1, 0), -0.172453672088057849));
 
+    e.resize(2);
     m2 = iexp::sf::sbessel_y(10, m, e);
     // REQUIRE(__D_EQ9(m2(0, 0), -6.5473079797378378e+30));
     REQUIRE(__D_EQ9(m2(1, 0), -0.172453672088057849));
@@ -245,6 +246,7 @@ TEST_CASE("sf_sbessel_k")
     // REQUIRE(__D_EQ_Nep(m2(0, 0), 1.8205599816961954439e+14, 1000));
     REQUIRE(__D_EQ9(m2(1, 0), 6.1173217814406597530e+06));
 
+    e.resize(2);
     m2 = iexp::sf::sbessel_k<true>(4, m, e);
     // REQUIRE(__D_EQ9(m2(0, 0), 1.8205599816961954439e+14));
     REQUIRE(__D_EQ9(m2(1, 0), 6.1173217814406597530e+06));

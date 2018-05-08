@@ -45,7 +45,7 @@ class clausen_functor : public functor_foreach<clausen_functor<T>, T, double>
 {
   public:
     clausen_functor(const T &x)
-        : functor_foreach<clausen_functor, T, double>(x)
+        : functor_foreach<clausen_functor<T>, T, double>(x)
     {
     }
 

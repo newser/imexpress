@@ -45,274 +45,123 @@ namespace sf {
 // ========================================
 
 template <typename T>
-inline T hydroR1_impl(const T z, const T r)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double hydroR1_impl(const double z, const double r)
-{
-    return gsl_sf_hydrogenicR_1(z, r);
-}
-
-template <typename T>
-class hydroR1_functor
+class hydroR1_functor : public functor_m2vnum_2d<hydroR1_functor<T>, T, double>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
-    hydroR1_functor(const T &z, const T &r)
-        : m_z(z)
-        , m_r(r)
+    hydroR1_functor(const T &z_r)
+        : functor_m2vnum_2d<hydroR1_functor<T>, T, double>(z_r)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    double m2vnum_impl(double z, double r) const
     {
-        return hydroR1_impl(m_z(i, j), m_r(i, j));
+        return gsl_sf_hydrogenicR_1(z, r);
     }
-
-  private:
-    const T &m_z;
-    const T &m_r;
 };
 
 template <typename T>
 inline CwiseNullaryOp<hydroR1_functor<T>,
-                      typename hydroR1_functor<T>::ArrayType>
-hydroR(const ArrayBase<T> &z, const ArrayBase<T> &r)
+                      typename hydroR1_functor<T>::ResultType>
+hydroR1(const DenseBase<T> &z_r)
 {
-    eigen_assert(MATRIX_SAME_SIZE(z, r));
-
-    using ArrayType = typename hydroR1_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(z.rows(),
-                                  z.cols(),
-                                  hydroR1_functor<T>(z.derived(), r.derived()));
-}
-
-template <typename T>
-inline T hydroR1_e_impl(const T z, const T r, T &e)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double hydroR1_e_impl(const double z, const double r, double &e)
-{
-    gsl_sf_result ret;
-    if (gsl_sf_hydrogenicR_1_e(z, r, &ret) == GSL_SUCCESS) {
-        e = ret.err;
-        return ret.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("hydroR"));
+    using ResultType = typename hydroR1_functor<T>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, z_r),
+                                   M2VNUM_COL(T, z_r),
+                                   hydroR1_functor<T>(z_r.derived()));
 }
 
 template <typename T, typename U>
 class hydroR1_e_functor
+    : public functor_m2vnum_2d_e<hydroR1_e_functor<T, U>, T, U, double>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
-    hydroR1_e_functor(const T &z, const T &r, U &e)
-        : m_z(z)
-        , m_r(r)
-        , m_e(e)
+    hydroR1_e_functor(const T &z_r, U &e)
+        : functor_m2vnum_2d_e<hydroR1_e_functor<T, U>, T, U, double>(z_r, e)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    double m2vnum_e_impl(double z, double r, double &e) const
     {
-        return hydroR1_e_impl(m_z(i, j), m_r(i, j), m_e(i, j));
+        gsl_sf_result ret;
+        gsl_sf_hydrogenicR_1_e(z, r, &ret);
+        e = ret.err;
+        return ret.val;
     }
-
-  private:
-    const T &m_z;
-    const T &m_r;
-    U &m_e;
 };
 
 template <typename T, typename U>
 inline CwiseNullaryOp<hydroR1_e_functor<T, U>,
-                      typename hydroR1_e_functor<T, U>::ArrayType>
-hydroR(const ArrayBase<T> &z, const ArrayBase<T> &r, ArrayBase<U> &e)
+                      typename hydroR1_e_functor<T, U>::ResultType>
+hydroR1(const DenseBase<T> &z_r, DenseBase<U> &e)
 {
-    eigen_assert(MATRIX_SAME_SIZE(z, r));
-
-    using ArrayType = typename hydroR1_e_functor<T, U>::ArrayType;
-    return ArrayType::NullaryExpr(z.rows(),
-                                  z.cols(),
-                                  hydroR1_e_functor<T, U>(z.derived(),
-                                                          r.derived(),
-                                                          e.derived()));
+    using ResultType = typename hydroR1_e_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, z_r),
+                                   M2VNUM_COL(T, z_r),
+                                   hydroR1_e_functor<T, U>(z_r.derived(),
+                                                           e.derived()));
 }
 
 // ========================================
 // hydrogenicR
 // ========================================
 
-template <typename T, typename V>
-inline T hydroR_impl(const V n, const V l, const T z, const T r)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double hydroR_impl(const int n,
-                          const int l,
-                          const double z,
-                          const double r)
-{
-    return gsl_sf_hydrogenicR(n, l, z, r);
-}
-
-template <typename T, typename V>
-class hydroR_functor
+template <typename T>
+class hydroR_functor : public functor_m2vnum_4d<hydroR_functor<T>, T, double>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
-    hydroR_functor(const V &n, const V &l, const T &z, const T &r)
-        : m_n(n)
-        , m_l(l)
-        , m_z(z)
-        , m_r(r)
+    hydroR_functor(const T &n_l_z_r)
+        : functor_m2vnum_4d<hydroR_functor<T>, T, double>(n_l_z_r)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    double m2vnum_impl(double n, double l, double z, double r) const
     {
-        return hydroR_impl((int)m_n(i, j),
-                           (int)m_l(i, j),
-                           m_z(i, j),
-                           m_r(i, j));
+        // if converting between double and int becomes perf bottleneck, we can
+        // implement another api which can specify n and l
+        return gsl_sf_hydrogenicR((int)n, (int)l, z, r);
     }
-
-  private:
-    const V &m_n;
-    const V &m_l;
-    const T &m_z;
-    const T &m_r;
 };
 
-template <typename T, typename V>
-inline CwiseNullaryOp<hydroR_functor<T, V>,
-                      typename hydroR_functor<T, V>::ArrayType>
-hydroR(const ArrayBase<V> &n,
-       const ArrayBase<V> &l,
-       const ArrayBase<T> &z,
-       const ArrayBase<T> &r)
+template <typename T>
+inline CwiseNullaryOp<hydroR_functor<T>, typename hydroR_functor<T>::ResultType>
+hydroR(const DenseBase<T> &n_l_z_r)
 {
-    static_assert(TYPE_IS(typename V::Scalar, int) ||
-                      TYPE_IS(typename V::Scalar, unsigned int),
-                  "n and l can only be int or uint array");
-    eigen_assert(MATRIX_SAME_SIZE(n, l));
-    eigen_assert(MATRIX_SAME_SIZE(n, z));
-    eigen_assert(MATRIX_SAME_SIZE(n, r));
-
-    using ArrayType = typename hydroR_functor<T, V>::ArrayType;
-    return ArrayType::NullaryExpr(n.rows(),
-                                  n.cols(),
-                                  hydroR_functor<T, V>(n.derived(),
-                                                       l.derived(),
-                                                       z.derived(),
-                                                       r.derived()));
+    using ResultType = typename hydroR_functor<T>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, n_l_z_r),
+                                   M2VNUM_COL(T, n_l_z_r),
+                                   hydroR_functor<T>(n_l_z_r.derived()));
 }
 
-template <typename T, typename V>
-inline T hydroR_e_impl(const V n, const V l, const T z, const T r, T &e)
+template <typename T, typename U>
+class hydroR_e_functor
+    : public functor_m2vnum_4d_e<hydroR_e_functor<T, U>, T, U, double>
 {
-    UNSUPPORTED_TYPE(T);
-}
+  public:
+    hydroR_e_functor(const T &n_l_z_r, U &e)
+        : functor_m2vnum_4d_e<hydroR_e_functor<T, U>, T, U, double>(n_l_z_r, e)
+    {
+    }
 
-template <>
-inline double hydroR_e_impl(
-    const int n, const int l, const double z, const double r, double &e)
-{
-    gsl_sf_result ret;
-    if (gsl_sf_hydrogenicR_e(n, l, z, r, &ret) == GSL_SUCCESS) {
+    double m2vnum_e_impl(
+        double n, double l, double z, double r, double &e) const
+    {
+        gsl_sf_result ret;
+        gsl_sf_hydrogenicR_e(n, l, z, r, &ret);
         e = ret.err;
         return ret.val;
     }
-    RETURN_NAN_OR_THROW(std::runtime_error("hydroR"));
-}
-
-template <typename T, typename U, typename V>
-class hydroR_e_functor
-{
-  public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
-    hydroR_e_functor(const V &n, const V &l, const T &z, const T &r, U &e)
-        : m_n(n)
-        , m_l(l)
-        , m_z(z)
-        , m_r(r)
-        , m_e(e)
-    {
-    }
-
-    const typename T::Scalar operator()(Index i, Index j) const
-    {
-        return hydroR_e_impl((int)m_n(i, j),
-                             (int)m_l(i, j),
-                             m_z(i, j),
-                             m_r(i, j),
-                             m_e(i, j));
-    }
-
-  private:
-    const V &m_n;
-    const V &m_l;
-    const T &m_z;
-    const T &m_r;
-    U &m_e;
 };
 
-template <typename T, typename U, typename V>
-inline CwiseNullaryOp<hydroR_e_functor<T, U, V>,
-                      typename hydroR_e_functor<T, U, V>::ArrayType>
-hydroR(const ArrayBase<V> &n,
-       const ArrayBase<V> &l,
-       const ArrayBase<T> &z,
-       const ArrayBase<T> &r,
-       ArrayBase<U> &e)
+template <typename T, typename U>
+inline CwiseNullaryOp<hydroR_e_functor<T, U>,
+                      typename hydroR_e_functor<T, U>::ResultType>
+hydroR(const DenseBase<T> &n_l_z_r, DenseBase<U> &e)
 {
-    static_assert(TYPE_IS(typename V::Scalar, int) ||
-                      TYPE_IS(typename V::Scalar, unsigned int),
-                  "n and l can only be int or uint array");
-    eigen_assert(MATRIX_SAME_SIZE(n, l));
-    eigen_assert(MATRIX_SAME_SIZE(n, z));
-    eigen_assert(MATRIX_SAME_SIZE(n, r));
-
-    using ArrayType = typename hydroR_e_functor<T, U, V>::ArrayType;
-    return ArrayType::NullaryExpr(n.rows(),
-                                  n.cols(),
-                                  hydroR_e_functor<T, U, V>(n.derived(),
-                                                            l.derived(),
-                                                            z.derived(),
-                                                            r.derived(),
-                                                            e.derived()));
+    using ResultType = typename hydroR_e_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, n_l_z_r),
+                                   M2VNUM_COL(T, n_l_z_r),
+                                   hydroR_e_functor<T, U>(n_l_z_r.derived(),
+                                                          e.derived()));
 }
 
 ////////////////////////////////////////////////////////////

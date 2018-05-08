@@ -41,106 +41,59 @@ namespace sf {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline T dawson_impl(const T x)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double dawson_impl(const double x)
-{
-    return gsl_sf_dawson(x);
-}
-
-template <typename T>
-class dawson_functor
+class dawson_functor : public functor_foreach<dawson_functor<T>, T, double>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
     dawson_functor(const T &x)
-        : m_x(x)
+        : functor_foreach<dawson_functor<T>, T, double>(x)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    double foreach_impl(double x) const
     {
-        return dawson_impl(m_x(i, j));
+        return gsl_sf_dawson(x);
     }
-
-  private:
-    const T &m_x;
 };
 
 template <typename T>
-inline CwiseNullaryOp<dawson_functor<T>, typename dawson_functor<T>::ArrayType>
-dawson(const ArrayBase<T> &x)
+inline CwiseNullaryOp<dawson_functor<T>, typename dawson_functor<T>::ResultType>
+dawson(const DenseBase<T> &x)
 {
-    using ArrayType = typename dawson_functor<T>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  dawson_functor<T>(x.derived()));
-}
-
-template <typename T>
-inline T dawson_e_impl(const T x, T &e)
-{
-    UNSUPPORTED_TYPE(T);
-}
-
-template <>
-inline double dawson_e_impl(const double x, double &e)
-{
-    gsl_sf_result r;
-    if (gsl_sf_dawson_e(x, &r) == GSL_SUCCESS) {
-        e = r.err;
-        return r.val;
-    }
-    RETURN_NAN_OR_THROW(std::runtime_error("dawson"));
+    using ResultType = typename dawson_functor<T>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   dawson_functor<T>(x.derived()));
 }
 
 template <typename T, typename U>
 class dawson_e_functor
+    : public functor_foreach_e<dawson_e_functor<T, U>, T, U, double>
 {
   public:
-    using ArrayType = Array<typename T::Scalar,
-                            T::RowsAtCompileTime,
-                            T::ColsAtCompileTime,
-                            T::Flags & RowMajorBit ? RowMajor : ColMajor,
-                            T::MaxRowsAtCompileTime,
-                            T::MaxColsAtCompileTime>;
-
     dawson_e_functor(const T &x, U &e)
-        : m_x(x)
-        , m_e(e)
+        : functor_foreach_e<dawson_e_functor<T, U>, T, U, double>(x, e)
     {
     }
 
-    const typename T::Scalar operator()(Index i, Index j) const
+    double foreach_e_impl(double x, double &e) const
     {
-        return dawson_e_impl(m_x(i, j), m_e(i, j));
+        gsl_sf_result r;
+        gsl_sf_dawson_e(x, &r);
+        e = r.err;
+        return r.val;
     }
-
-  private:
-    const T &m_x;
-    U &m_e;
 };
 
 template <typename T, typename U>
 inline CwiseNullaryOp<dawson_e_functor<T, U>,
-                      typename dawson_e_functor<T, U>::ArrayType>
-dawson(const ArrayBase<T> &x, ArrayBase<U> &e)
+                      typename dawson_e_functor<T, U>::ResultType>
+dawson(const DenseBase<T> &x, DenseBase<U> &e)
 {
-    using ArrayType = typename dawson_e_functor<T, U>::ArrayType;
-    return ArrayType::NullaryExpr(x.rows(),
-                                  x.cols(),
-                                  dawson_e_functor<T, U>(x.derived(),
-                                                         e.derived()));
+    using ResultType = typename dawson_e_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   dawson_e_functor<T, U>(x.derived(),
+                                                          e.derived()));
 }
 
 ////////////////////////////////////////////////////////////

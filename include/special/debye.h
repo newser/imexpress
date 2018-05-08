@@ -42,108 +42,63 @@ namespace sf {
 
 #define DEFINE_DEBYE(n)                                                        \
     template <typename T>                                                      \
-    inline T debye##n##_impl(const T x)                                        \
-    {                                                                          \
-        UNSUPPORTED_TYPE(T);                                                   \
-    }                                                                          \
-                                                                               \
-    template <>                                                                \
-    inline double debye##n##_impl(const double x)                              \
-    {                                                                          \
-        return gsl_sf_debye_##n(x);                                            \
-    }                                                                          \
-                                                                               \
-    template <typename T>                                                      \
     class debye##n##_functor                                                   \
+        : public functor_foreach<debye##n##_functor<T>, T, double>             \
     {                                                                          \
       public:                                                                  \
-        using ArrayType = Array<typename T::Scalar,                            \
-                                T::RowsAtCompileTime,                          \
-                                T::ColsAtCompileTime,                          \
-                                T::Flags & RowMajorBit ? RowMajor : ColMajor,  \
-                                T::MaxRowsAtCompileTime,                       \
-                                T::MaxColsAtCompileTime>;                      \
-                                                                               \
         debye##n##_functor(const T &x)                                         \
-            : m_x(x)                                                           \
+            : functor_foreach<debye##n##_functor<T>, T, double>(x)             \
         {                                                                      \
         }                                                                      \
                                                                                \
-        const typename T::Scalar operator()(Index i, Index j) const            \
+        double foreach_impl(double x) const                                    \
         {                                                                      \
-            return debye##n##_impl(m_x(i, j));                                 \
+            return gsl_sf_debye_##n(x);                                        \
         }                                                                      \
-                                                                               \
-      private:                                                                 \
-        const T &m_x;                                                          \
     };                                                                         \
                                                                                \
     template <typename T>                                                      \
     inline CwiseNullaryOp<debye##n##_functor<T>,                               \
-                          typename debye##n##_functor<T>::ArrayType>           \
-        debye##n(const ArrayBase<T> &x)                                        \
+                          typename debye##n##_functor<T>::ResultType>          \
+        debye##n(const DenseBase<T> &x)                                        \
     {                                                                          \
-        using ArrayType = typename debye##n##_functor<T>::ArrayType;           \
-        return ArrayType::NullaryExpr(x.rows(),                                \
-                                      x.cols(),                                \
-                                      debye##n##_functor<T>(x.derived()));     \
-    }                                                                          \
-                                                                               \
-    template <typename T>                                                      \
-    inline T debye##n##_e_impl(const T x, T &e)                                \
-    {                                                                          \
-        UNSUPPORTED_TYPE(T);                                                   \
-    }                                                                          \
-                                                                               \
-    template <>                                                                \
-    inline double debye##n##_e_impl(const double x, double &e)                 \
-    {                                                                          \
-        gsl_sf_result r;                                                       \
-        if (gsl_sf_debye_##n##_e(x, &r) == GSL_SUCCESS) {                      \
-            e = r.err;                                                         \
-            return r.val;                                                      \
-        }                                                                      \
-        RETURN_NAN_OR_THROW(std::runtime_error("debye##n##"));                 \
+        using ResultType = typename debye##n##_functor<T>::ResultType;         \
+        return ResultType::NullaryExpr(x.rows(),                               \
+                                       x.cols(),                               \
+                                       debye##n##_functor<T>(x.derived()));    \
     }                                                                          \
                                                                                \
     template <typename T, typename U>                                          \
     class debye##n##_e_functor                                                 \
+        : public functor_foreach_e<debye##n##_e_functor<T, U>, T, U, double>   \
     {                                                                          \
       public:                                                                  \
-        using ArrayType = Array<typename T::Scalar,                            \
-                                T::RowsAtCompileTime,                          \
-                                T::ColsAtCompileTime,                          \
-                                T::Flags & RowMajorBit ? RowMajor : ColMajor,  \
-                                T::MaxRowsAtCompileTime,                       \
-                                T::MaxColsAtCompileTime>;                      \
-                                                                               \
         debye##n##_e_functor(const T &x, U &e)                                 \
-            : m_x(x)                                                           \
-            , m_e(e)                                                           \
+            : functor_foreach_e<debye##n##_e_functor<T, U>, T, U, double>(x,   \
+                                                                          e)   \
         {                                                                      \
         }                                                                      \
                                                                                \
-        const typename T::Scalar operator()(Index i, Index j) const            \
+        double foreach_e_impl(double x, double &e) const                       \
         {                                                                      \
-            return debye##n##_e_impl(m_x(i, j), m_e(i, j));                    \
+            gsl_sf_result r;                                                   \
+            gsl_sf_debye_##n##_e(x, &r);                                       \
+            e = r.err;                                                         \
+            return r.val;                                                      \
         }                                                                      \
-                                                                               \
-      private:                                                                 \
-        const T &m_x;                                                          \
-        U &m_e;                                                                \
     };                                                                         \
                                                                                \
     template <typename T, typename U>                                          \
     inline CwiseNullaryOp<debye##n##_e_functor<T, U>,                          \
-                          typename debye##n##_e_functor<T, U>::ArrayType>      \
-        debye##n(const ArrayBase<T> &x, ArrayBase<U> &e)                       \
+                          typename debye##n##_e_functor<T, U>::ResultType>     \
+        debye##n(const DenseBase<T> &x, DenseBase<U> &e)                       \
     {                                                                          \
-        using ArrayType = typename debye##n##_e_functor<T, U>::ArrayType;      \
-        return ArrayType::NullaryExpr(x.rows(),                                \
-                                      x.cols(),                                \
-                                      debye##n##_e_functor<T,                  \
-                                                           U>(x.derived(),     \
-                                                              e.derived()));   \
+        using ResultType = typename debye##n##_e_functor<T, U>::ResultType;    \
+        return ResultType::NullaryExpr(x.rows(),                               \
+                                       x.cols(),                               \
+                                       debye##n##_e_functor<T,                 \
+                                                            U>(x.derived(),    \
+                                                               e.derived()));  \
     }
 
 DEFINE_DEBYE(1)
