@@ -298,6 +298,87 @@ DEFINE_FUNCTOR_M2VNUM_E_COLMAJOR(4)
     Base::m_x(0, i), Base::m_x(1, i), Base::m_x(2, i), Base::m_x(3, i)
 DEFINE_FUNCTOR_M2VNUM_E_END(4)
 
+// 5 parameters
+DEFINE_FUNCTOR_M2VNUM_ROWMAJOR(5)
+    Base::m_x(i, 0), Base::m_x(i, 1), Base::m_x(i, 2), Base::m_x(i, 3), Base::m_x(i, 4)
+DEFINE_FUNCTOR_M2VNUM_COLMAJOR(5)
+    Base::m_x(0, i), Base::m_x(1, i), Base::m_x(2, i), Base::m_x(3, i), Base::m_x(4, i)
+DEFINE_FUNCTOR_M2VNUM_END(5)
+
+DEFINE_FUNCTOR_M2VNUM_E_ROWMAJOR(5)
+    Base::m_x(i, 0), Base::m_x(i, 1), Base::m_x(i, 2), Base::m_x(i, 3), Base::m_x(i, 4)
+DEFINE_FUNCTOR_M2VNUM_E_COLMAJOR(5)
+    Base::m_x(0, i), Base::m_x(1, i), Base::m_x(2, i), Base::m_x(3, i), Base::m_x(4, i)
+DEFINE_FUNCTOR_M2VNUM_E_END(5)
+
+// 6 parameters
+DEFINE_FUNCTOR_M2VNUM_ROWMAJOR(6)
+    Base::m_x(i, 0), Base::m_x(i, 1), Base::m_x(i, 2), Base::m_x(i, 3), Base::m_x(i, 4),
+    Base::m_x(i, 5)
+DEFINE_FUNCTOR_M2VNUM_COLMAJOR(6)
+    Base::m_x(0, i), Base::m_x(1, i), Base::m_x(2, i), Base::m_x(3, i), Base::m_x(4, i),
+    Base::m_x(5, i)
+DEFINE_FUNCTOR_M2VNUM_END(6)
+
+DEFINE_FUNCTOR_M2VNUM_E_ROWMAJOR(6)
+    Base::m_x(i, 0), Base::m_x(i, 1), Base::m_x(i, 2), Base::m_x(i, 3), Base::m_x(i, 4),
+    Base::m_x(i, 5)
+DEFINE_FUNCTOR_M2VNUM_E_COLMAJOR(6)
+    Base::m_x(0, i), Base::m_x(1, i), Base::m_x(2, i), Base::m_x(3, i), Base::m_x(4, i),
+    Base::m_x(5, i)
+DEFINE_FUNCTOR_M2VNUM_E_END(6)
+
+// 7 parameters
+DEFINE_FUNCTOR_M2VNUM_ROWMAJOR(7)
+    Base::m_x(i, 0), Base::m_x(i, 1), Base::m_x(i, 2), Base::m_x(i, 3), Base::m_x(i, 4),
+    Base::m_x(i, 5), Base::m_x(i, 6)
+DEFINE_FUNCTOR_M2VNUM_COLMAJOR(7)
+    Base::m_x(0, i), Base::m_x(1, i), Base::m_x(2, i), Base::m_x(3, i), Base::m_x(4, i),
+    Base::m_x(5, i), Base::m_x(6, i)
+DEFINE_FUNCTOR_M2VNUM_END(7)
+
+DEFINE_FUNCTOR_M2VNUM_E_ROWMAJOR(7)
+    Base::m_x(i, 0), Base::m_x(i, 1), Base::m_x(i, 2), Base::m_x(i, 3), Base::m_x(i, 4),
+    Base::m_x(i, 5), Base::m_x(i, 6)
+DEFINE_FUNCTOR_M2VNUM_E_COLMAJOR(7)
+    Base::m_x(0, i), Base::m_x(1, i), Base::m_x(2, i), Base::m_x(3, i), Base::m_x(4, i),
+    Base::m_x(5, i), Base::m_x(6, i)
+DEFINE_FUNCTOR_M2VNUM_E_END(7)
+
+// 8 parameters
+DEFINE_FUNCTOR_M2VNUM_ROWMAJOR(8)
+    Base::m_x(i, 0), Base::m_x(i, 1), Base::m_x(i, 2), Base::m_x(i, 3), Base::m_x(i, 4),
+    Base::m_x(i, 5), Base::m_x(i, 6), Base::m_x(i, 7)
+DEFINE_FUNCTOR_M2VNUM_COLMAJOR(8)
+    Base::m_x(0, i), Base::m_x(1, i), Base::m_x(2, i), Base::m_x(3, i), Base::m_x(4, i),
+    Base::m_x(5, i), Base::m_x(6, i), Base::m_x(7, i)
+DEFINE_FUNCTOR_M2VNUM_END(8)
+
+DEFINE_FUNCTOR_M2VNUM_E_ROWMAJOR(8)
+    Base::m_x(i, 0), Base::m_x(i, 1), Base::m_x(i, 2), Base::m_x(i, 3), Base::m_x(i, 4),
+    Base::m_x(i, 5), Base::m_x(i, 6), Base::m_x(i, 7)
+DEFINE_FUNCTOR_M2VNUM_E_COLMAJOR(8)
+    Base::m_x(0, i), Base::m_x(1, i), Base::m_x(2, i), Base::m_x(3, i), Base::m_x(4, i),
+    Base::m_x(5, i), Base::m_x(6, i), Base::m_x(7, i)
+DEFINE_FUNCTOR_M2VNUM_E_END(8)
+
+// 9 parameters
+DEFINE_FUNCTOR_M2VNUM_ROWMAJOR(9)
+    Base::m_x(i, 0), Base::m_x(i, 1), Base::m_x(i, 2), Base::m_x(i, 3), Base::m_x(i, 4),
+    Base::m_x(i, 5), Base::m_x(i, 6), Base::m_x(i, 7), Base::m_x(i, 8)
+DEFINE_FUNCTOR_M2VNUM_COLMAJOR(9)
+    Base::m_x(0, i), Base::m_x(1, i), Base::m_x(2, i), Base::m_x(3, i), Base::m_x(4, i),
+    Base::m_x(5, i), Base::m_x(6, i), Base::m_x(7, i), Base::m_x(8, i)
+DEFINE_FUNCTOR_M2VNUM_END(9)
+
+DEFINE_FUNCTOR_M2VNUM_E_ROWMAJOR(9)
+    Base::m_x(i, 0), Base::m_x(i, 1), Base::m_x(i, 2), Base::m_x(i, 3), Base::m_x(i, 4),
+    Base::m_x(i, 5), Base::m_x(i, 6), Base::m_x(i, 7), Base::m_x(i, 8)
+DEFINE_FUNCTOR_M2VNUM_E_COLMAJOR(9)
+    Base::m_x(0, i), Base::m_x(1, i), Base::m_x(2, i), Base::m_x(3, i), Base::m_x(4, i),
+    Base::m_x(5, i), Base::m_x(6, i), Base::m_x(7, i), Base::m_x(8, i)
+DEFINE_FUNCTOR_M2VNUM_E_END(9)
+
     // clang-format on
 
     ////////////////////////////////////////////////////////////
