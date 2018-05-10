@@ -45,78 +45,62 @@ namespace sf {
 // ========================================
 
 template <typename T>
-inline double wigner3j_impl(
-    const T ja, const T jb, const T jc, const T ma, const T mb, const T mc)
+class wigner3j_functor
+    : public functor_m2vnum_6d<wigner3j_functor<T>, T, double>
 {
-    UNSUPPORTED_TYPE(T);
-}
+  public:
+    wigner3j_functor(const T &jm)
+        : functor_m2vnum_6d<wigner3j_functor<T>, T, double>(jm)
+    {
+    }
 
-template <>
-inline double wigner3j_impl(const int ja,
-                            const int jb,
-                            const int jc,
-                            const int ma,
-                            const int mb,
-                            const int mc)
-{
-    return gsl_sf_coupling_3j(ja, jb, jc, ma, mb, mc);
-}
+    double m2vnum_impl(int ja, int jb, int jc, int ma, int mb, int mc) const
+    {
+        return gsl_sf_coupling_3j(ja, jb, jc, ma, mb, mc);
+    }
+};
 
 template <typename T>
-double wigner3j(const ArrayBase<T> &c)
+inline CwiseNullaryOp<wigner3j_functor<T>,
+                      typename wigner3j_functor<T>::ResultType>
+wigner3j(const DenseBase<T> &jm)
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "c can only be int or uint array");
-    eigen_assert((c.rows() == 2) && (c.cols() == 3));
-
-    return wigner3j_impl(c(0, 0), c(0, 1), c(0, 2), c(1, 0), c(1, 1), c(1, 2));
+    using ResultType = typename wigner3j_functor<T>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, jm),
+                                   M2VNUM_COL(T, jm),
+                                   wigner3j_functor<T>(jm.derived()));
 }
 
 template <typename T, typename U>
-inline double wigner3j_e_impl(const T ja,
-                              const T jb,
-                              const T jc,
-                              const T ma,
-                              const T mb,
-                              const T mc,
-                              U &e)
+class wigner3j_e_functor
+    : public functor_m2vnum_6d_e<wigner3j_e_functor<T, U>, T, U, double>
 {
-    UNSUPPORTED_TYPE(T);
-}
+  public:
+    wigner3j_e_functor(const T &jm, U &e)
+        : functor_m2vnum_6d_e<wigner3j_e_functor<T, U>, T, U, double>(jm, e)
+    {
+    }
 
-template <>
-inline double wigner3j_e_impl(const int ja,
-                              const int jb,
-                              const int jc,
-                              const int ma,
-                              const int mb,
-                              const int mc,
-                              double &e)
-{
-    gsl_sf_result r;
-    if (gsl_sf_coupling_3j_e(ja, jb, jc, ma, mb, mc, &r) == GSL_SUCCESS) {
+    double m2vnum_e_impl(
+        int ja, int jb, int jc, int ma, int mb, int mc, double &e) const
+    {
+        gsl_sf_result r;
+        gsl_sf_coupling_3j_e(ja, jb, jc, ma, mb, mc, &r);
         e = r.err;
         return r.val;
     }
-    RETURN_NAN_OR_THROW(std::runtime_error("wigner3j"));
-}
+};
 
-template <typename T>
-double wigner3j(const ArrayBase<T> &c, double &e)
+template <typename T, typename U>
+inline CwiseNullaryOp<wigner3j_e_functor<T, U>,
+                      typename wigner3j_e_functor<T, U>::ResultType>
+wigner3j(const DenseBase<T> &jm, DenseBase<U> &e)
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "c can only be int or uint array");
-    eigen_assert((c.rows() == 2) && (c.cols() == 3));
-
-    return wigner3j_e_impl(c(0, 0),
-                           c(0, 1),
-                           c(0, 2),
-                           c(1, 0),
-                           c(1, 1),
-                           c(1, 2),
-                           e);
+    using ResultType = typename wigner3j_e_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, jm),
+                                   M2VNUM_COL(T, jm),
+                                   wigner3j_e_functor<T, U>(jm.derived(),
+                                                            e.derived()));
 }
 
 // ========================================
@@ -124,78 +108,62 @@ double wigner3j(const ArrayBase<T> &c, double &e)
 // ========================================
 
 template <typename T>
-inline double wigner6j_impl(
-    const T ja, const T jb, const T jc, const T jd, const T je, const T jf)
+class wigner6j_functor
+    : public functor_m2vnum_6d<wigner6j_functor<T>, T, double>
 {
-    UNSUPPORTED_TYPE(T);
-}
+  public:
+    wigner6j_functor(const T &j)
+        : functor_m2vnum_6d<wigner6j_functor<T>, T, double>(j)
+    {
+    }
 
-template <>
-inline double wigner6j_impl(const int ja,
-                            const int jb,
-                            const int jc,
-                            const int jd,
-                            const int je,
-                            const int jf)
-{
-    return gsl_sf_coupling_6j(ja, jb, jc, jd, je, jf);
-}
+    double m2vnum_impl(int ja, int jb, int jc, int jd, int je, int jf) const
+    {
+        return gsl_sf_coupling_6j(ja, jb, jc, jd, je, jf);
+    }
+};
 
 template <typename T>
-double wigner6j(const ArrayBase<T> &c)
+inline CwiseNullaryOp<wigner6j_functor<T>,
+                      typename wigner6j_functor<T>::ResultType>
+wigner6j(const DenseBase<T> &j)
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "c can only be int or uint array");
-    eigen_assert((c.rows() == 2) && (c.cols() == 3));
-
-    return wigner6j_impl(c(0, 0), c(0, 1), c(0, 2), c(1, 0), c(1, 1), c(1, 2));
+    using ResultType = typename wigner6j_functor<T>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, j),
+                                   M2VNUM_COL(T, j),
+                                   wigner6j_functor<T>(j.derived()));
 }
 
 template <typename T, typename U>
-inline double wigner6j_e_impl(const T ja,
-                              const T jb,
-                              const T jc,
-                              const T jd,
-                              const T je,
-                              const T jf,
-                              U &e)
+class wigner6j_e_functor
+    : public functor_m2vnum_6d_e<wigner6j_e_functor<T, U>, T, U, double>
 {
-    UNSUPPORTED_TYPE(T);
-}
+  public:
+    wigner6j_e_functor(const T &j, U &e)
+        : functor_m2vnum_6d_e<wigner6j_e_functor<T, U>, T, U, double>(j, e)
+    {
+    }
 
-template <>
-inline double wigner6j_e_impl(const int ja,
-                              const int jb,
-                              const int jc,
-                              const int jd,
-                              const int je,
-                              const int jf,
-                              double &e)
-{
-    gsl_sf_result r;
-    if (gsl_sf_coupling_6j_e(ja, jb, jc, jd, je, jf, &r) == GSL_SUCCESS) {
+    double m2vnum_e_impl(
+        int ja, int jb, int jc, int jd, int je, int jf, double &e) const
+    {
+        gsl_sf_result r;
+        gsl_sf_coupling_6j_e(ja, jb, jc, jd, je, jf, &r);
         e = r.err;
         return r.val;
     }
-    RETURN_NAN_OR_THROW(std::runtime_error("wigner6j"));
-}
+};
 
-template <typename T>
-double wigner6j(const ArrayBase<T> &c, double &e)
+template <typename T, typename U>
+inline CwiseNullaryOp<wigner6j_e_functor<T, U>,
+                      typename wigner6j_e_functor<T, U>::ResultType>
+wigner6j(const DenseBase<T> &j, DenseBase<U> &e)
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "c can only be int or uint array");
-    eigen_assert((c.rows() == 2) && (c.cols() == 3));
-
-    return wigner6j_e_impl(c(0, 0),
-                           c(0, 1),
-                           c(0, 2),
-                           c(1, 0),
-                           c(1, 1),
-                           c(1, 2),
-                           e);
+    using ResultType = typename wigner6j_e_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, j),
+                                   M2VNUM_COL(T, j),
+                                   wigner6j_e_functor<T, U>(j.derived(),
+                                                            e.derived()));
 }
 
 // ========================================
@@ -203,106 +171,72 @@ double wigner6j(const ArrayBase<T> &c, double &e)
 // ========================================
 
 template <typename T>
-inline double wigner9j_impl(const T ja,
-                            const T jb,
-                            const T jc,
-                            const T jd,
-                            const T je,
-                            const T jf,
-                            const T jg,
-                            const T jh,
-                            const T ji)
+class wigner9j_functor
+    : public functor_m2vnum_9d<wigner9j_functor<T>, T, double>
 {
-    UNSUPPORTED_TYPE(T);
-}
+  public:
+    wigner9j_functor(const T &j)
+        : functor_m2vnum_9d<wigner9j_functor<T>, T, double>(j)
+    {
+    }
 
-template <>
-inline double wigner9j_impl(const int ja,
-                            const int jb,
-                            const int jc,
-                            const int jd,
-                            const int je,
-                            const int jf,
-                            const int jg,
-                            const int jh,
-                            const int ji)
-{
-    return gsl_sf_coupling_9j(ja, jb, jc, jd, je, jf, jg, jh, ji);
-}
+    double m2vnum_impl(
+        int ja, int jb, int jc, int jd, int je, int jf, int jg, int jh, int ji)
+        const
+    {
+        return gsl_sf_coupling_9j(ja, jb, jc, jd, je, jf, jg, jh, ji);
+    }
+};
 
 template <typename T>
-double wigner9j(const ArrayBase<T> &c)
+inline CwiseNullaryOp<wigner9j_functor<T>,
+                      typename wigner9j_functor<T>::ResultType>
+wigner9j(const DenseBase<T> &j)
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "c can only be int or uint array");
-    eigen_assert((c.rows() == 3) && (c.cols() == 3));
-
-    return wigner9j_impl(c(0, 0),
-                         c(0, 1),
-                         c(0, 2),
-                         c(1, 0),
-                         c(1, 1),
-                         c(1, 2),
-                         c(2, 0),
-                         c(2, 1),
-                         c(2, 2));
+    using ResultType = typename wigner9j_functor<T>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, j),
+                                   M2VNUM_COL(T, j),
+                                   wigner9j_functor<T>(j.derived()));
 }
 
 template <typename T, typename U>
-inline double wigner9j_e_impl(const T ja,
-                              const T jb,
-                              const T jc,
-                              const T jd,
-                              const T je,
-                              const T jf,
-                              const T jg,
-                              const T jh,
-                              const T ji,
-                              U &e)
+class wigner9j_e_functor
+    : public functor_m2vnum_9d_e<wigner9j_e_functor<T, U>, T, U, double>
 {
-    UNSUPPORTED_TYPE(T);
-}
+  public:
+    wigner9j_e_functor(const T &j, U &e)
+        : functor_m2vnum_9d_e<wigner9j_e_functor<T, U>, T, U, double>(j, e)
+    {
+    }
 
-template <>
-inline double wigner9j_e_impl(const int ja,
-                              const int jb,
-                              const int jc,
-                              const int jd,
-                              const int je,
-                              const int jf,
-                              const int jg,
-                              const int jh,
-                              const int ji,
-                              double &e)
-{
-    gsl_sf_result r;
-    if (gsl_sf_coupling_9j_e(ja, jb, jc, jd, je, jf, jg, jh, ji, &r) ==
-        GSL_SUCCESS) {
+    double m2vnum_e_impl(int ja,
+                         int jb,
+                         int jc,
+                         int jd,
+                         int je,
+                         int jf,
+                         int jg,
+                         int jh,
+                         int ji,
+                         double &e) const
+    {
+        gsl_sf_result r;
+        gsl_sf_coupling_9j_e(ja, jb, jc, jd, je, jf, jg, jh, ji, &r);
         e = r.err;
         return r.val;
     }
-    RETURN_NAN_OR_THROW(std::runtime_error("wigner9j"));
-}
+};
 
-template <typename T>
-double wigner9j(const ArrayBase<T> &c, double &e)
+template <typename T, typename U>
+inline CwiseNullaryOp<wigner9j_e_functor<T, U>,
+                      typename wigner9j_e_functor<T, U>::ResultType>
+wigner9j(const DenseBase<T> &j, DenseBase<U> &e)
 {
-    static_assert(TYPE_IS(typename T::Scalar, int) ||
-                      TYPE_IS(typename T::Scalar, unsigned int),
-                  "c can only be int or uint array");
-    eigen_assert((c.rows() == 3) && (c.cols() == 3));
-
-    return wigner9j_e_impl(c(0, 0),
-                           c(0, 1),
-                           c(0, 2),
-                           c(1, 0),
-                           c(1, 1),
-                           c(1, 2),
-                           c(2, 0),
-                           c(2, 1),
-                           c(2, 2),
-                           e);
+    using ResultType = typename wigner9j_e_functor<T, U>::ResultType;
+    return ResultType::NullaryExpr(M2VNUM_ROW(T, j),
+                                   M2VNUM_COL(T, j),
+                                   wigner9j_e_functor<T, U>(j.derived(),
+                                                            e.derived()));
 }
 
 ////////////////////////////////////////////////////////////
