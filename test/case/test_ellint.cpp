@@ -1,6 +1,7 @@
 #include <catch.hpp>
 #include <iostream>
 #include <special/elliptic_integral.h>
+#include <special/elliptic_jacobi.h>
 #include <test_util.h>
 
 using namespace iexp;
@@ -235,4 +236,21 @@ TEST_CASE("test_ellint_rj")
     gsl_sf_result re;
     gsl_sf_ellint_RJ_e(p(0), p(1), p(2), p(3), GSL_PREC_DOUBLE, &re);
     REQUIRE(__D_EQ9(e(0), re.err));
+}
+
+TEST_CASE("test_elljac")
+{
+    Matrix<double, 2, 2> p;
+    p.col(0) << 0.5, 0.5;
+    p.col(1) << 1.0, 0.3;
+
+    Matrix<std::tuple<double, double, double>, 1, 2> r;
+    r = elljac(p);
+    REQUIRE(__D_EQ9(std::get<0>(r(0)), 0.4707504736556572833));
+    REQUIRE(__D_EQ9(std::get<1>(r(0)), 0.8822663948904402865));
+    REQUIRE(__D_EQ9(std::get<2>(r(0)), 0.9429724257773856873));
+
+    REQUIRE(__D_EQ9(std::get<0>(r(1)), 0.8187707145344889190));
+    REQUIRE(__D_EQ9(std::get<1>(r(1)), 0.5741206467465548795));
+    REQUIRE(__D_EQ9(std::get<2>(r(1)), 0.8938033089590823040));
 }
