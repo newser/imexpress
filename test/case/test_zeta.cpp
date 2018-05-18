@@ -1,4 +1,5 @@
 #include <catch.hpp>
+#include <common/template_foreach.h>
 #include <iostream>
 #include <special/zeta.h>
 #include <test_util.h>
