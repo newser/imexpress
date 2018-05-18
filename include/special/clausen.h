@@ -25,6 +25,8 @@
 
 #include <common/common.h>
 
+#include <common/template_foreach.h>
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_sf_clausen.h>
 
@@ -40,62 +42,9 @@ namespace sf {
 // type definition
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-class clausen_functor : public functor_foreach<clausen_functor<T>, T, double>
-{
-  public:
-    clausen_functor(const T &x)
-        : functor_foreach<clausen_functor<T>, T, double>(x)
-    {
-    }
+DEFINE_TEMPLATE_FOREACH(clausen, double, double, gsl_sf_clausen)
 
-    double foreach_impl(double x) const
-    {
-        return gsl_sf_clausen(x);
-    }
-};
-
-template <typename T>
-inline CwiseNullaryOp<clausen_functor<T>,
-                      typename clausen_functor<T>::ResultType>
-clausen(const DenseBase<T> &x)
-{
-    using ResultType = typename clausen_functor<T>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   clausen_functor<T>(x.derived()));
-}
-
-template <typename T, typename U>
-class clausen_e_functor
-    : public functor_foreach_e<clausen_e_functor<T, U>, T, U, double>
-{
-  public:
-    clausen_e_functor(const T &x, U &e)
-        : functor_foreach_e<clausen_e_functor<T, U>, T, U, double>(x, e)
-    {
-    }
-
-    double foreach_e_impl(double x, double &e) const
-    {
-        gsl_sf_result r;
-        gsl_sf_clausen_e(x, &r);
-        e = r.err;
-        return r.val;
-    }
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<clausen_e_functor<T, U>,
-                      typename clausen_e_functor<T, U>::ResultType>
-clausen(const DenseBase<T> &x, DenseBase<U> &e)
-{
-    using ResultType = typename clausen_e_functor<T, U>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   clausen_e_functor<T, U>(x.derived(),
-                                                           e.derived()));
-}
+DEFINE_TEMPLATE_FOREACH_E(clausen, double, double, gsl_sf_clausen_e)
 
 ////////////////////////////////////////////////////////////
 // global variants

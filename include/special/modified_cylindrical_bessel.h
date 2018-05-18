@@ -58,100 +58,131 @@ enum cbessel_k
 // modified bessel first kind
 // ========================================
 
-template <enum cbessel_i order, bool scaled>
-inline double cbessel_i_impl(int n, double x)
+template <enum cbessel_i order, bool scaled, typename N>
+inline double cbessel_i_impl(N n, double x)
 {
-    throw std::invalid_argument("");
+    throw std::invalid_argument("invalid template parameters");
 }
 
 template <>
-inline double cbessel_i_impl<I0, true>(int n, double x)
+inline double cbessel_i_impl<I0, true, int>(int n, double x)
 {
     return gsl_sf_bessel_I0_scaled(x);
 }
 
 template <>
-inline double cbessel_i_impl<I0, false>(int n, double x)
+inline double cbessel_i_impl<I0, false, int>(int n, double x)
 {
     return gsl_sf_bessel_I0(x);
 }
 
 template <>
-inline double cbessel_i_impl<I1, true>(int n, double x)
+inline double cbessel_i_impl<I1, true, int>(int n, double x)
 {
     return gsl_sf_bessel_I1_scaled(x);
 }
 
 template <>
-inline double cbessel_i_impl<I1, false>(int n, double x)
+inline double cbessel_i_impl<I1, false, int>(int n, double x)
 {
     return gsl_sf_bessel_I1(x);
 }
 
 template <>
-inline double cbessel_i_impl<I_n, true>(int n, double x)
+inline double cbessel_i_impl<I_n, true, int>(int n, double x)
 {
     return gsl_sf_bessel_In_scaled(n, x);
 }
 
 template <>
-inline double cbessel_i_impl<I_n, false>(int n, double x)
+inline double cbessel_i_impl<I_n, false, int>(int n, double x)
 {
     return gsl_sf_bessel_In(n, x);
 }
 
-template <enum cbessel_i order, bool scaled, typename T>
+template <>
+inline double cbessel_i_impl<I_n, true, double>(double n, double x)
+{
+    return gsl_sf_bessel_Inu_scaled(n, x);
+}
+
+template <>
+inline double cbessel_i_impl<I_n, false, double>(double n, double x)
+{
+    return gsl_sf_bessel_Inu(n, x);
+}
+
+template <enum cbessel_i order, bool scaled, typename T, typename N>
 class cbessel_i_functor
-    : public functor_foreach<cbessel_i_functor<order, scaled, T>, T, double>
+    : public functor_foreach<cbessel_i_functor<order, scaled, T, N>, T, double>
 {
   public:
-    cbessel_i_functor(int n, const T &x)
-        : functor_foreach<cbessel_i_functor<order, scaled, T>, T, double>(x)
+    cbessel_i_functor(N n, const T &x)
+        : functor_foreach<cbessel_i_functor<order, scaled, T, N>, T, double>(x)
         , m_n(n)
     {
     }
 
     double foreach_impl(double x) const
     {
-        return cbessel_i_impl<order, scaled>(m_n, x);
+        return cbessel_i_impl<order, scaled, N>(m_n, x);
     }
 
   private:
-    int m_n;
+    N m_n;
 };
 
-template <bool scaled = true, typename T = void>
-inline CwiseNullaryOp<cbessel_i_functor<I_n, scaled, T>,
-                      typename cbessel_i_functor<I_n, scaled, T>::ResultType>
+template <bool scaled = false, typename T = void>
+inline CwiseNullaryOp<
+    cbessel_i_functor<I_n, scaled, T, int>,
+    typename cbessel_i_functor<I_n, scaled, T, int>::ResultType>
 cbessel_i(int n, const DenseBase<T> &x)
 {
-    using ResultType = typename cbessel_i_functor<I_n, scaled, T>::ResultType;
+    using ResultType =
+        typename cbessel_i_functor<I_n, scaled, T, int>::ResultType;
     return ResultType::
         NullaryExpr(x.rows(),
                     x.cols(),
-                    cbessel_i_functor<I_n, scaled, T>(n, x.derived()));
+                    cbessel_i_functor<I_n, scaled, T, int>(n, x.derived()));
 }
 
-template <enum cbessel_i order, bool scaled = true, typename T = void>
-inline CwiseNullaryOp<cbessel_i_functor<order, scaled, T>,
-                      typename cbessel_i_functor<order, scaled, T>::ResultType>
+template <bool scaled = false, typename T = void>
+inline CwiseNullaryOp<
+    cbessel_i_functor<I_n, scaled, T, double>,
+    typename cbessel_i_functor<I_n, scaled, T, double>::ResultType>
+cbessel_i(double n, const DenseBase<T> &x)
+{
+    using ResultType =
+        typename cbessel_i_functor<I_n, scaled, T, double>::ResultType;
+    return ResultType::
+        NullaryExpr(x.rows(),
+                    x.cols(),
+                    cbessel_i_functor<I_n, scaled, T, double>(n, x.derived()));
+}
+
+template <enum cbessel_i order, bool scaled = false, typename T = void>
+inline CwiseNullaryOp<
+    cbessel_i_functor<order, scaled, T, int>,
+    typename cbessel_i_functor<order, scaled, T, int>::ResultType>
 cbessel_i(const DenseBase<T> &x)
 {
-    using ResultType = typename cbessel_i_functor<order, scaled, T>::ResultType;
+    using ResultType =
+        typename cbessel_i_functor<order, scaled, T, int>::ResultType;
     return ResultType::
         NullaryExpr(x.rows(),
                     x.cols(),
-                    cbessel_i_functor<order, scaled, T>(order, x.derived()));
+                    cbessel_i_functor<order, scaled, T, int>(order,
+                                                             x.derived()));
 }
 
-template <enum cbessel_i order, bool scaled>
-inline double cbessel_i_e_impl(int n, double x, double &e)
+template <enum cbessel_i order, bool scaled, typename N>
+inline double cbessel_i_e_impl(N n, double x, double &e)
 {
-    throw std::invalid_argument("");
+    throw std::invalid_argument("invalid template parameters");
 }
 
 template <>
-inline double cbessel_i_e_impl<I0, true>(int n, double x, double &e)
+inline double cbessel_i_e_impl<I0, true, int>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_I0_scaled_e(x, &r);
@@ -160,7 +191,7 @@ inline double cbessel_i_e_impl<I0, true>(int n, double x, double &e)
 }
 
 template <>
-inline double cbessel_i_e_impl<I0, false>(int n, double x, double &e)
+inline double cbessel_i_e_impl<I0, false, int>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_I0_e(x, &r);
@@ -169,7 +200,7 @@ inline double cbessel_i_e_impl<I0, false>(int n, double x, double &e)
 }
 
 template <>
-inline double cbessel_i_e_impl<I1, true>(int n, double x, double &e)
+inline double cbessel_i_e_impl<I1, true, int>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_I1_scaled_e(x, &r);
@@ -178,7 +209,7 @@ inline double cbessel_i_e_impl<I1, true>(int n, double x, double &e)
 }
 
 template <>
-inline double cbessel_i_e_impl<I1, false>(int n, double x, double &e)
+inline double cbessel_i_e_impl<I1, false, int>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_I1_e(x, &r);
@@ -187,7 +218,7 @@ inline double cbessel_i_e_impl<I1, false>(int n, double x, double &e)
 }
 
 template <>
-inline double cbessel_i_e_impl<I_n, true>(int n, double x, double &e)
+inline double cbessel_i_e_impl<I_n, true, int>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_In_scaled_e(n, x, &r);
@@ -196,7 +227,7 @@ inline double cbessel_i_e_impl<I_n, true>(int n, double x, double &e)
 }
 
 template <>
-inline double cbessel_i_e_impl<I_n, false>(int n, double x, double &e)
+inline double cbessel_i_e_impl<I_n, false, int>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_In_e(n, x, &r);
@@ -204,16 +235,36 @@ inline double cbessel_i_e_impl<I_n, false>(int n, double x, double &e)
     return r.val;
 }
 
-template <enum cbessel_i order, bool scaled, typename T, typename U>
+template <>
+inline double cbessel_i_e_impl<I_n, true, double>(double n, double x, double &e)
+{
+    gsl_sf_result r;
+    gsl_sf_bessel_Inu_scaled_e(n, x, &r);
+    e = r.err;
+    return r.val;
+}
+
+template <>
+inline double cbessel_i_e_impl<I_n, false, double>(double n,
+                                                   double x,
+                                                   double &e)
+{
+    gsl_sf_result r;
+    gsl_sf_bessel_Inu_e(n, x, &r);
+    e = r.err;
+    return r.val;
+}
+
+template <enum cbessel_i order, bool scaled, typename T, typename U, typename N>
 class cbessel_i_e_functor
-    : public functor_foreach_e<cbessel_i_e_functor<order, scaled, T, U>,
+    : public functor_foreach_e<cbessel_i_e_functor<order, scaled, T, U, N>,
                                T,
                                U,
                                double>
 {
   public:
-    cbessel_i_e_functor(int n, const T &x, U &e)
-        : functor_foreach_e<cbessel_i_e_functor<order, scaled, T, U>,
+    cbessel_i_e_functor(N n, const T &x, U &e)
+        : functor_foreach_e<cbessel_i_e_functor<order, scaled, T, U, N>,
                             T,
                             U,
                             double>(x, e)
@@ -223,101 +274,132 @@ class cbessel_i_e_functor
 
     double foreach_e_impl(double x, double &e) const
     {
-        return cbessel_i_e_impl<order, scaled>(m_n, x, e);
+        return cbessel_i_e_impl<order, scaled, N>(m_n, x, e);
     }
 
   private:
-    int m_n;
+    N m_n;
 };
 
-template <bool scaled = true, typename T = void, typename U = void>
+template <bool scaled = false, typename T = void, typename U = void>
 inline CwiseNullaryOp<
-    cbessel_i_e_functor<I_n, scaled, T, U>,
-    typename cbessel_i_e_functor<I_n, scaled, T, U>::ResultType>
+    cbessel_i_e_functor<I_n, scaled, T, U, int>,
+    typename cbessel_i_e_functor<I_n, scaled, T, U, int>::ResultType>
 cbessel_i(int n, const DenseBase<T> &x, DenseBase<U> &e)
 {
     using ResultType =
-        typename cbessel_i_e_functor<I_n, scaled, T, U>::ResultType;
+        typename cbessel_i_e_functor<I_n, scaled, T, U, int>::ResultType;
     return ResultType::
         NullaryExpr(x.rows(),
                     x.cols(),
-                    cbessel_i_e_functor<I_n, scaled, T, U>(n,
-                                                           x.derived(),
-                                                           e.derived()));
+                    cbessel_i_e_functor<I_n, scaled, T, U, int>(n,
+                                                                x.derived(),
+                                                                e.derived()));
+}
+
+template <bool scaled = false, typename T = void, typename U = void>
+inline CwiseNullaryOp<
+    cbessel_i_e_functor<I_n, scaled, T, U, double>,
+    typename cbessel_i_e_functor<I_n, scaled, T, U, double>::ResultType>
+cbessel_i(double n, const DenseBase<T> &x, DenseBase<U> &e)
+{
+    using ResultType =
+        typename cbessel_i_e_functor<I_n, scaled, T, U, double>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   cbessel_i_e_functor<I_n,
+                                                       scaled,
+                                                       T,
+                                                       U,
+                                                       double>(n,
+                                                               x.derived(),
+                                                               e.derived()));
 }
 
 template <enum cbessel_i order,
-          bool scaled = true,
+          bool scaled = false,
           typename T = void,
           typename U = void>
 inline CwiseNullaryOp<
-    cbessel_i_e_functor<order, scaled, T, U>,
-    typename cbessel_i_e_functor<order, scaled, T, U>::ResultType>
+    cbessel_i_e_functor<order, scaled, T, U, int>,
+    typename cbessel_i_e_functor<order, scaled, T, U, int>::ResultType>
 cbessel_i(const DenseBase<T> &x, DenseBase<U> &e)
 {
     using ResultType =
-        typename cbessel_i_e_functor<order, scaled, T, U>::ResultType;
+        typename cbessel_i_e_functor<order, scaled, T, U, int>::ResultType;
     return ResultType::
         NullaryExpr(x.rows(),
                     x.cols(),
-                    cbessel_i_e_functor<order, scaled, T, U>(order,
-                                                             x.derived(),
-                                                             e.derived()));
+                    cbessel_i_e_functor<order, scaled, T, U, int>(order,
+                                                                  x.derived(),
+                                                                  e.derived()));
 }
 
 // ========================================
 // modified bessel second kind
 // ========================================
 
-template <enum cbessel_k order, bool scaled>
-inline double cbessel_k_impl(int n, double x)
+template <enum cbessel_k order, bool scaled, typename N>
+inline double cbessel_k_impl(N n, double x)
 {
-    throw std::invalid_argument("");
+    throw std::invalid_argument("invalid template parameters");
 }
 
 template <>
-inline double cbessel_k_impl<K0, true>(int n, double x)
+inline double cbessel_k_impl<K0, true, int>(int n, double x)
 {
     return gsl_sf_bessel_K0_scaled(x);
 }
 
 template <>
-inline double cbessel_k_impl<K0, false>(int n, double x)
+inline double cbessel_k_impl<K0, false, int>(int n, double x)
 {
     return gsl_sf_bessel_K0(x);
 }
 
 template <>
-inline double cbessel_k_impl<K1, true>(int n, double x)
+inline double cbessel_k_impl<K1, true, int>(int n, double x)
 {
     return gsl_sf_bessel_K1_scaled(x);
 }
 
 template <>
-inline double cbessel_k_impl<K1, false>(int n, double x)
+inline double cbessel_k_impl<K1, false, int>(int n, double x)
 {
     return gsl_sf_bessel_K1(x);
 }
 
 template <>
-inline double cbessel_k_impl<K_n, true>(int n, double x)
+inline double cbessel_k_impl<K_n, true, int>(int n, double x)
 {
     return gsl_sf_bessel_Kn_scaled(n, x);
 }
 
 template <>
-inline double cbessel_k_impl<K_n, false>(int n, double x)
+inline double cbessel_k_impl<K_n, false, int>(int n, double x)
 {
     return gsl_sf_bessel_Kn(n, x);
 }
 
-template <enum cbessel_k order, bool scaled, typename T>
+template <>
+inline double cbessel_k_impl<K_n, true, double>(double n, double x)
+{
+    return gsl_sf_bessel_Knu_scaled(n, x);
+}
+
+template <>
+inline double cbessel_k_impl<K_n, false, double>(double n, double x)
+{
+    return gsl_sf_bessel_Knu(n, x);
+}
+
+template <enum cbessel_k order, bool scaled, typename T, typename N>
 class cbessel_k_functor
-    : public functor_foreach<cbessel_k_functor<order, scaled, T>, T, double>
+    : public functor_foreach<cbessel_k_functor<order, scaled, T, N>, T, double>
 {
   public:
-    cbessel_k_functor(int n, const T &x)
-        : functor_foreach<cbessel_k_functor<order, scaled, T>, T, double>(x)
+    cbessel_k_functor(N n, const T &x)
+        : functor_foreach<cbessel_k_functor<order, scaled, T, N>, T, double>(x)
         , m_n(n)
     {
     }
@@ -328,41 +410,60 @@ class cbessel_k_functor
     }
 
   private:
-    int m_n;
+    N m_n;
 };
 
-template <bool scaled = true, typename T = void>
-inline CwiseNullaryOp<cbessel_k_functor<K_n, scaled, T>,
-                      typename cbessel_k_functor<K_n, scaled, T>::ResultType>
+template <bool scaled = false, typename T = void>
+inline CwiseNullaryOp<
+    cbessel_k_functor<K_n, scaled, T, int>,
+    typename cbessel_k_functor<K_n, scaled, T, int>::ResultType>
 cbessel_k(int n, const DenseBase<T> &x)
 {
-    using ResultType = typename cbessel_k_functor<K_n, scaled, T>::ResultType;
+    using ResultType =
+        typename cbessel_k_functor<K_n, scaled, T, int>::ResultType;
     return ResultType::
         NullaryExpr(x.rows(),
                     x.cols(),
-                    cbessel_k_functor<K_n, scaled, T>(n, x.derived()));
+                    cbessel_k_functor<K_n, scaled, T, int>(n, x.derived()));
 }
 
-template <enum cbessel_k order, bool scaled = true, typename T = void>
-inline CwiseNullaryOp<cbessel_k_functor<order, scaled, T>,
-                      typename cbessel_k_functor<order, scaled, T>::ResultType>
+template <bool scaled = false, typename T = void>
+inline CwiseNullaryOp<
+    cbessel_k_functor<K_n, scaled, T, double>,
+    typename cbessel_k_functor<K_n, scaled, T, double>::ResultType>
+cbessel_k(double n, const DenseBase<T> &x)
+{
+    using ResultType =
+        typename cbessel_k_functor<K_n, scaled, T, double>::ResultType;
+    return ResultType::
+        NullaryExpr(x.rows(),
+                    x.cols(),
+                    cbessel_k_functor<K_n, scaled, T, double>(n, x.derived()));
+}
+
+template <enum cbessel_k order, bool scaled = false, typename T = void>
+inline CwiseNullaryOp<
+    cbessel_k_functor<order, scaled, T, int>,
+    typename cbessel_k_functor<order, scaled, T, int>::ResultType>
 cbessel_k(const DenseBase<T> &x)
 {
-    using ResultType = typename cbessel_k_functor<order, scaled, T>::ResultType;
+    using ResultType =
+        typename cbessel_k_functor<order, scaled, T, int>::ResultType;
     return ResultType::
         NullaryExpr(x.rows(),
                     x.cols(),
-                    cbessel_k_functor<order, scaled, T>(order, x.derived()));
+                    cbessel_k_functor<order, scaled, T, int>(order,
+                                                             x.derived()));
 }
 
-template <enum cbessel_k order, bool scaled>
-inline double cbessel_k_e_impl(int n, double x, double &e)
+template <enum cbessel_k order, bool scaled, typename N>
+inline double cbessel_k_e_impl(N n, double x, double &e)
 {
-    throw std::invalid_argument("must set template param 'scaled' to true");
+    throw std::invalid_argument("invalid template parameters");
 }
 
 template <>
-inline double cbessel_k_e_impl<K0, true>(int n, double x, double &e)
+inline double cbessel_k_e_impl<K0, true, int>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_K0_scaled_e(x, &r);
@@ -371,7 +472,7 @@ inline double cbessel_k_e_impl<K0, true>(int n, double x, double &e)
 }
 
 template <>
-inline double cbessel_k_e_impl<K0, false>(int n, double x, double &e)
+inline double cbessel_k_e_impl<K0, false, int>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_K0_e(x, &r);
@@ -380,7 +481,7 @@ inline double cbessel_k_e_impl<K0, false>(int n, double x, double &e)
 }
 
 template <>
-inline double cbessel_k_e_impl<K1, true>(int n, double x, double &e)
+inline double cbessel_k_e_impl<K1, true, int>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_K1_scaled_e(x, &r);
@@ -389,7 +490,7 @@ inline double cbessel_k_e_impl<K1, true>(int n, double x, double &e)
 }
 
 template <>
-inline double cbessel_k_e_impl<K1, false>(int n, double x, double &e)
+inline double cbessel_k_e_impl<K1, false, int>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_K1_e(x, &r);
@@ -398,7 +499,7 @@ inline double cbessel_k_e_impl<K1, false>(int n, double x, double &e)
 }
 
 template <>
-inline double cbessel_k_e_impl<K_n, true>(int n, double x, double &e)
+inline double cbessel_k_e_impl<K_n, true, int>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_Kn_scaled_e(n, x, &r);
@@ -407,7 +508,7 @@ inline double cbessel_k_e_impl<K_n, true>(int n, double x, double &e)
 }
 
 template <>
-inline double cbessel_k_e_impl<K_n, false>(int n, double x, double &e)
+inline double cbessel_k_e_impl<K_n, false, int>(int n, double x, double &e)
 {
     gsl_sf_result r;
     gsl_sf_bessel_Kn_e(n, x, &r);
@@ -415,16 +516,36 @@ inline double cbessel_k_e_impl<K_n, false>(int n, double x, double &e)
     return r.val;
 }
 
-template <enum cbessel_k order, bool scaled, typename T, typename U>
+template <>
+inline double cbessel_k_e_impl<K_n, true, double>(double n, double x, double &e)
+{
+    gsl_sf_result r;
+    gsl_sf_bessel_Knu_scaled_e(n, x, &r);
+    e = r.err;
+    return r.val;
+}
+
+template <>
+inline double cbessel_k_e_impl<K_n, false, double>(double n,
+                                                   double x,
+                                                   double &e)
+{
+    gsl_sf_result r;
+    gsl_sf_bessel_Knu_e(n, x, &r);
+    e = r.err;
+    return r.val;
+}
+
+template <enum cbessel_k order, bool scaled, typename T, typename U, typename N>
 class cbessel_k_e_functor
-    : public functor_foreach_e<cbessel_k_e_functor<order, scaled, T, U>,
+    : public functor_foreach_e<cbessel_k_e_functor<order, scaled, T, U, N>,
                                T,
                                U,
                                double>
 {
   public:
-    cbessel_k_e_functor(int n, const T &x, U &e)
-        : functor_foreach_e<cbessel_k_e_functor<order, scaled, T, U>,
+    cbessel_k_e_functor(N n, const T &x, U &e)
+        : functor_foreach_e<cbessel_k_e_functor<order, scaled, T, U, N>,
                             T,
                             U,
                             double>(x, e)
@@ -438,42 +559,61 @@ class cbessel_k_e_functor
     }
 
   private:
-    int m_n;
+    N m_n;
 };
 
-template <bool scaled = true, typename T = void, typename U = void>
+template <bool scaled = false, typename T = void, typename U = void>
 inline CwiseNullaryOp<
-    cbessel_k_e_functor<K_n, scaled, T, U>,
-    typename cbessel_k_e_functor<K_n, scaled, T, U>::ResultType>
+    cbessel_k_e_functor<K_n, scaled, T, U, int>,
+    typename cbessel_k_e_functor<K_n, scaled, T, U, int>::ResultType>
 cbessel_k(int n, const DenseBase<T> &x, DenseBase<U> &e)
 {
     using ResultType =
-        typename cbessel_k_e_functor<K_n, scaled, T, U>::ResultType;
+        typename cbessel_k_e_functor<K_n, scaled, T, U, int>::ResultType;
     return ResultType::
         NullaryExpr(x.rows(),
                     x.cols(),
-                    cbessel_k_e_functor<K_n, scaled, T, U>(n,
-                                                           x.derived(),
-                                                           e.derived()));
+                    cbessel_k_e_functor<K_n, scaled, T, U, int>(n,
+                                                                x.derived(),
+                                                                e.derived()));
+}
+
+template <bool scaled = false, typename T = void, typename U = void>
+inline CwiseNullaryOp<
+    cbessel_k_e_functor<K_n, scaled, T, U, double>,
+    typename cbessel_k_e_functor<K_n, scaled, T, U, double>::ResultType>
+cbessel_k(double n, const DenseBase<T> &x, DenseBase<U> &e)
+{
+    using ResultType =
+        typename cbessel_k_e_functor<K_n, scaled, T, U, double>::ResultType;
+    return ResultType::NullaryExpr(x.rows(),
+                                   x.cols(),
+                                   cbessel_k_e_functor<K_n,
+                                                       scaled,
+                                                       T,
+                                                       U,
+                                                       double>(n,
+                                                               x.derived(),
+                                                               e.derived()));
 }
 
 template <enum cbessel_k order,
-          bool scaled = true,
+          bool scaled = false,
           typename T = void,
           typename U = void>
 inline CwiseNullaryOp<
-    cbessel_k_e_functor<order, scaled, T, U>,
-    typename cbessel_k_e_functor<order, scaled, T, U>::ResultType>
+    cbessel_k_e_functor<order, scaled, T, U, int>,
+    typename cbessel_k_e_functor<order, scaled, T, U, int>::ResultType>
 cbessel_k(const DenseBase<T> &x, DenseBase<U> &e)
 {
     using ResultType =
-        typename cbessel_k_e_functor<order, scaled, T, U>::ResultType;
+        typename cbessel_k_e_functor<order, scaled, T, U, int>::ResultType;
     return ResultType::
         NullaryExpr(x.rows(),
                     x.cols(),
-                    cbessel_k_e_functor<order, scaled, T, U>(order,
-                                                             x.derived(),
-                                                             e.derived()));
+                    cbessel_k_e_functor<order, scaled, T, U, int>(order,
+                                                                  x.derived(),
+                                                                  e.derived()));
 }
 
 ////////////////////////////////////////////////////////////

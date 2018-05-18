@@ -25,6 +25,8 @@
 
 #include <common/common.h>
 
+#include <common/template_foreach.h>
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_sf_dawson.h>
 
@@ -40,61 +42,9 @@ namespace sf {
 // type definition
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-class dawson_functor : public functor_foreach<dawson_functor<T>, T, double>
-{
-  public:
-    dawson_functor(const T &x)
-        : functor_foreach<dawson_functor<T>, T, double>(x)
-    {
-    }
+DEFINE_TEMPLATE_FOREACH(dawson, double, double, gsl_sf_dawson)
 
-    double foreach_impl(double x) const
-    {
-        return gsl_sf_dawson(x);
-    }
-};
-
-template <typename T>
-inline CwiseNullaryOp<dawson_functor<T>, typename dawson_functor<T>::ResultType>
-dawson(const DenseBase<T> &x)
-{
-    using ResultType = typename dawson_functor<T>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   dawson_functor<T>(x.derived()));
-}
-
-template <typename T, typename U>
-class dawson_e_functor
-    : public functor_foreach_e<dawson_e_functor<T, U>, T, U, double>
-{
-  public:
-    dawson_e_functor(const T &x, U &e)
-        : functor_foreach_e<dawson_e_functor<T, U>, T, U, double>(x, e)
-    {
-    }
-
-    double foreach_e_impl(double x, double &e) const
-    {
-        gsl_sf_result r;
-        gsl_sf_dawson_e(x, &r);
-        e = r.err;
-        return r.val;
-    }
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<dawson_e_functor<T, U>,
-                      typename dawson_e_functor<T, U>::ResultType>
-dawson(const DenseBase<T> &x, DenseBase<U> &e)
-{
-    using ResultType = typename dawson_e_functor<T, U>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   dawson_e_functor<T, U>(x.derived(),
-                                                          e.derived()));
-}
+DEFINE_TEMPLATE_FOREACH_E(dawson, double, double, gsl_sf_dawson_e)
 
 ////////////////////////////////////////////////////////////
 // global variants

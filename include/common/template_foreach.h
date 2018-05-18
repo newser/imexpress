@@ -31,17 +31,18 @@
 // type definition
 ////////////////////////////////////////////////////////////
 
-#define DEFINE_TEMPLATE_FOREACH(name, rt, p1t, gf)                             \
+#define DEFINE_TEMPLATE_FOREACH(name, return_t, scalar_t, gf)                  \
     template <typename T>                                                      \
-    class name##_functor : public functor_foreach<name##_functor<T>, T, rt>    \
+    class name##_functor                                                       \
+        : public functor_foreach<name##_functor<T>, T, return_t>               \
     {                                                                          \
       public:                                                                  \
         name##_functor(const T &x)                                             \
-            : functor_foreach<name##_functor<T>, T, rt>(x)                     \
+            : functor_foreach<name##_functor<T>, T, return_t>(x)               \
         {                                                                      \
         }                                                                      \
                                                                                \
-        rt foreach_impl(p1t x) const                                           \
+        return_t foreach_impl(scalar_t x) const                                \
         {                                                                      \
             return gf(x);                                                      \
         }                                                                      \
@@ -58,18 +59,18 @@
                                        name##_functor<T>(x.derived()));        \
     }
 
-#define DEFINE_TEMPLATE_FOREACH_E(name, rt, p1t, gfe)                          \
+#define DEFINE_TEMPLATE_FOREACH_E(name, return_t, scalar_t, gfe)               \
     template <typename T, typename U>                                          \
     class name##_e_functor                                                     \
-        : public functor_foreach_e<name##_e_functor<T, U>, T, U, rt>           \
+        : public functor_foreach_e<name##_e_functor<T, U>, T, U, return_t>     \
     {                                                                          \
       public:                                                                  \
         name##_e_functor(const T &x, U &e)                                     \
-            : functor_foreach_e<name##_e_functor<T, U>, T, U, rt>(x, e)        \
+            : functor_foreach_e<name##_e_functor<T, U>, T, U, return_t>(x, e)  \
         {                                                                      \
         }                                                                      \
                                                                                \
-        rt foreach_e_impl(p1t x, p1t &e) const                                 \
+        return_t foreach_e_impl(scalar_t x, double &e) const                   \
         {                                                                      \
             gsl_sf_result r;                                                   \
             gfe(x, &r);                                                        \

@@ -25,6 +25,9 @@
 
 #include <common/common.h>
 
+#include <common/template_m2vnum_2d.h>
+#include <common/template_m2vnum_4d.h>
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_sf_coulomb.h>
 
@@ -44,125 +47,21 @@ namespace sf {
 // hydrogenicR_1
 // ========================================
 
-template <typename T>
-class hydroR1_functor : public functor_m2vnum_2d<hydroR1_functor<T>, T, double>
-{
-  public:
-    hydroR1_functor(const T &z_r)
-        : functor_m2vnum_2d<hydroR1_functor<T>, T, double>(z_r)
-    {
-    }
+DEFINE_TEMPLATE_M2VNUM_2D(
+    hydroR1, double, double, double, double, gsl_sf_hydrogenicR_1)
 
-    double m2vnum_impl(double z, double r) const
-    {
-        return gsl_sf_hydrogenicR_1(z, r);
-    }
-};
-
-template <typename T>
-inline CwiseNullaryOp<hydroR1_functor<T>,
-                      typename hydroR1_functor<T>::ResultType>
-hydroR1(const DenseBase<T> &z_r)
-{
-    using ResultType = typename hydroR1_functor<T>::ResultType;
-    return ResultType::NullaryExpr(M2VNUM_ROW(T, z_r),
-                                   M2VNUM_COL(T, z_r),
-                                   hydroR1_functor<T>(z_r.derived()));
-}
-
-template <typename T, typename U>
-class hydroR1_e_functor
-    : public functor_m2vnum_2d_e<hydroR1_e_functor<T, U>, T, U, double>
-{
-  public:
-    hydroR1_e_functor(const T &z_r, U &e)
-        : functor_m2vnum_2d_e<hydroR1_e_functor<T, U>, T, U, double>(z_r, e)
-    {
-    }
-
-    double m2vnum_e_impl(double z, double r, double &e) const
-    {
-        gsl_sf_result ret;
-        gsl_sf_hydrogenicR_1_e(z, r, &ret);
-        e = ret.err;
-        return ret.val;
-    }
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<hydroR1_e_functor<T, U>,
-                      typename hydroR1_e_functor<T, U>::ResultType>
-hydroR1(const DenseBase<T> &z_r, DenseBase<U> &e)
-{
-    using ResultType = typename hydroR1_e_functor<T, U>::ResultType;
-    return ResultType::NullaryExpr(M2VNUM_ROW(T, z_r),
-                                   M2VNUM_COL(T, z_r),
-                                   hydroR1_e_functor<T, U>(z_r.derived(),
-                                                           e.derived()));
-}
+DEFINE_TEMPLATE_M2VNUM_2D_E(
+    hydroR1, double, double, double, double, gsl_sf_hydrogenicR_1_e)
 
 // ========================================
 // hydrogenicR
 // ========================================
 
-template <typename T>
-class hydroR_functor : public functor_m2vnum_4d<hydroR_functor<T>, T, double>
-{
-  public:
-    hydroR_functor(const T &n_l_z_r)
-        : functor_m2vnum_4d<hydroR_functor<T>, T, double>(n_l_z_r)
-    {
-    }
+DEFINE_TEMPLATE_M2VNUM_4D(
+    hydroR, double, double, int, int, double, double, gsl_sf_hydrogenicR)
 
-    double m2vnum_impl(double n, double l, double z, double r) const
-    {
-        // if converting between double and int becomes perf bottleneck, we can
-        // implement another api which can specify n and l
-        return gsl_sf_hydrogenicR((int)n, (int)l, z, r);
-    }
-};
-
-template <typename T>
-inline CwiseNullaryOp<hydroR_functor<T>, typename hydroR_functor<T>::ResultType>
-hydroR(const DenseBase<T> &n_l_z_r)
-{
-    using ResultType = typename hydroR_functor<T>::ResultType;
-    return ResultType::NullaryExpr(M2VNUM_ROW(T, n_l_z_r),
-                                   M2VNUM_COL(T, n_l_z_r),
-                                   hydroR_functor<T>(n_l_z_r.derived()));
-}
-
-template <typename T, typename U>
-class hydroR_e_functor
-    : public functor_m2vnum_4d_e<hydroR_e_functor<T, U>, T, U, double>
-{
-  public:
-    hydroR_e_functor(const T &n_l_z_r, U &e)
-        : functor_m2vnum_4d_e<hydroR_e_functor<T, U>, T, U, double>(n_l_z_r, e)
-    {
-    }
-
-    double m2vnum_e_impl(
-        double n, double l, double z, double r, double &e) const
-    {
-        gsl_sf_result ret;
-        gsl_sf_hydrogenicR_e(n, l, z, r, &ret);
-        e = ret.err;
-        return ret.val;
-    }
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<hydroR_e_functor<T, U>,
-                      typename hydroR_e_functor<T, U>::ResultType>
-hydroR(const DenseBase<T> &n_l_z_r, DenseBase<U> &e)
-{
-    using ResultType = typename hydroR_e_functor<T, U>::ResultType;
-    return ResultType::NullaryExpr(M2VNUM_ROW(T, n_l_z_r),
-                                   M2VNUM_COL(T, n_l_z_r),
-                                   hydroR_e_functor<T, U>(n_l_z_r.derived(),
-                                                          e.derived()));
-}
+DEFINE_TEMPLATE_M2VNUM_4D_E(
+    hydroR, double, double, int, int, double, double, gsl_sf_hydrogenicR_e)
 
 ////////////////////////////////////////////////////////////
 // global variants

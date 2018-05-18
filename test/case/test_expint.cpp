@@ -222,15 +222,15 @@ TEST_CASE("test_atanint")
 {
     Vector4d p, r, e;
     r << 1.0e-10, 1.0e-05, 1.0, 10.0;
-    p = cosint(r);
+    p = atanint(r);
     REQUIRE(__D_EQ9(p(0), 1.0e-10));
     REQUIRE(__D_EQ9(p(1), 9.99999999988888888889e-06));
     REQUIRE(__D_EQ9(p(2), 0.91596559417721901505));
     REQUIRE(__D_EQ9(p(3), 3.71678149306806859029));
 
-    __draw_1d(cosint, 0.1, 10, 100, 0, 0);
+    __draw_1d(atanint, 0.1, 10, 100, 0, 0);
 
-    p = cosint(r, e);
+    p = atanint(r, e);
     REQUIRE(__D_EQ9(p(0), 1.0e-10));
     REQUIRE(__D_EQ9(p(1), 9.99999999988888888889e-06));
     REQUIRE(__D_EQ9(p(2), 0.91596559417721901505));

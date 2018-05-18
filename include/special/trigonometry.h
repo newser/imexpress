@@ -52,12 +52,21 @@ DEFINE_TEMPLATE_FOREACH(cos, double, double, gsl_sf_cos)
 DEFINE_TEMPLATE_FOREACH_E(cos, double, double, gsl_sf_cos_e)
 
 // hypot
-DEFINE_TEMPLATE_M2VNUM_2D(hypot, double, double, double, gsl_sf_hypot)
-DEFINE_TEMPLATE_M2VNUM_2D_E(hypot, double, double, double, gsl_sf_hypot_e)
+DEFINE_TEMPLATE_M2VNUM_2D(hypot, double, double, double, double, gsl_sf_hypot)
+DEFINE_TEMPLATE_M2VNUM_2D_E(
+    hypot, double, double, double, double, gsl_sf_hypot_e)
 
 // sinc
 DEFINE_TEMPLATE_FOREACH(sinc, double, double, gsl_sf_sinc)
 DEFINE_TEMPLATE_FOREACH_E(sinc, double, double, gsl_sf_sinc_e)
+
+// lnsinh
+DEFINE_TEMPLATE_FOREACH(lnsinh, double, double, gsl_sf_lnsinh)
+DEFINE_TEMPLATE_FOREACH_E(lnsinh, double, double, gsl_sf_lnsinh_e)
+
+// lncosh
+DEFINE_TEMPLATE_FOREACH(lncosh, double, double, gsl_sf_lncosh)
+DEFINE_TEMPLATE_FOREACH_E(lncosh, double, double, gsl_sf_lncosh_e)
 
 ////////////////////////////////////////////////////////////
 // global variants

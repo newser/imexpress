@@ -110,7 +110,7 @@ class sbessel_i_functor
     int m_n;
 };
 
-template <bool scaled = true, typename T = void>
+template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<sbessel_i_functor<i_n, scaled, T>,
                       typename sbessel_i_functor<i_n, scaled, T>::ResultType>
 sbessel_i(int n, const DenseBase<T> &x)
@@ -122,7 +122,7 @@ sbessel_i(int n, const DenseBase<T> &x)
                     sbessel_i_functor<i_n, scaled, T>(n, x.derived()));
 }
 
-template <enum sbessel_i order, bool scaled = true, typename T = void>
+template <enum sbessel_i order, bool scaled = false, typename T = void>
 inline CwiseNullaryOp<sbessel_i_functor<order, scaled, T>,
                       typename sbessel_i_functor<order, scaled, T>::ResultType>
 sbessel_i(const DenseBase<T> &x)
@@ -202,7 +202,7 @@ class sbessel_i_e_functor
     int m_n;
 };
 
-template <bool scaled = true, typename T = void, typename U = void>
+template <bool scaled = false, typename T = void, typename U = void>
 inline CwiseNullaryOp<
     sbessel_i_e_functor<i_n, scaled, T, U>,
     typename sbessel_i_e_functor<i_n, scaled, T, U>::ResultType>
@@ -219,7 +219,7 @@ sbessel_i(int n, const DenseBase<T> &x, DenseBase<U> &e)
 }
 
 template <enum sbessel_i order,
-          bool scaled = true,
+          bool scaled = false,
           typename T = void,
           typename U = void>
 inline CwiseNullaryOp<
@@ -291,7 +291,7 @@ class sbessel_k_functor
     int m_n;
 };
 
-template <bool scaled = true, typename T = void>
+template <bool scaled = false, typename T = void>
 inline CwiseNullaryOp<sbessel_k_functor<k_n, scaled, T>,
                       typename sbessel_k_functor<k_n, scaled, T>::ResultType>
 sbessel_k(int n, const DenseBase<T> &x)
@@ -303,7 +303,7 @@ sbessel_k(int n, const DenseBase<T> &x)
                     sbessel_k_functor<k_n, scaled, T>(n, x.derived()));
 }
 
-template <enum sbessel_k order, bool scaled = true, typename T = void>
+template <enum sbessel_k order, bool scaled = false, typename T = void>
 inline CwiseNullaryOp<sbessel_k_functor<order, scaled, T>,
                       typename sbessel_k_functor<order, scaled, T>::ResultType>
 sbessel_k(const DenseBase<T> &x)
@@ -383,7 +383,7 @@ class sbessel_k_e_functor
     int m_n;
 };
 
-template <bool scaled = true, typename T = void, typename U = void>
+template <bool scaled = false, typename T = void, typename U = void>
 inline CwiseNullaryOp<
     sbessel_k_e_functor<k_n, scaled, T, U>,
     typename sbessel_k_e_functor<k_n, scaled, T, U>::ResultType>
@@ -400,7 +400,7 @@ sbessel_k(int n, const DenseBase<T> &x, DenseBase<U> &e)
 }
 
 template <enum sbessel_k order,
-          bool scaled = true,
+          bool scaled = false,
           typename T = void,
           typename U = void>
 inline CwiseNullaryOp<

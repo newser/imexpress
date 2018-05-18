@@ -25,6 +25,8 @@
 
 #include <common/common.h>
 
+#include <common/template_foreach.h>
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_sf_expint.h>
 
@@ -44,123 +46,17 @@ namespace sf {
 // expint_1
 // ========================================
 
-template <typename T>
-class expint_1_functor : public functor_foreach<expint_1_functor<T>, T, double>
-{
-  public:
-    expint_1_functor(const T &x)
-        : functor_foreach<expint_1_functor<T>, T, double>(x)
-    {
-    }
+DEFINE_TEMPLATE_FOREACH(expint_1, double, double, gsl_sf_expint_E1)
 
-    double foreach_impl(double x) const
-    {
-        return gsl_sf_expint_E1(x);
-    }
-};
-
-template <typename T>
-inline CwiseNullaryOp<expint_1_functor<T>,
-                      typename expint_1_functor<T>::ResultType>
-expint_1(const DenseBase<T> &x)
-{
-    using ResultType = typename expint_1_functor<T>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   expint_1_functor<T>(x.derived()));
-}
-
-template <typename T, typename U>
-class expint_1_e_functor
-    : public functor_foreach_e<expint_1_e_functor<T, U>, T, U, double>
-{
-  public:
-    expint_1_e_functor(const T &x, U &e)
-        : functor_foreach_e<expint_1_e_functor<T, U>, T, U, double>(x, e)
-    {
-    }
-
-    double foreach_e_impl(double x, double &e) const
-    {
-        gsl_sf_result r;
-        gsl_sf_expint_E1_e(x, &r);
-        e = r.err;
-        return r.val;
-    }
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<expint_1_e_functor<T, U>,
-                      typename expint_1_e_functor<T, U>::ResultType>
-expint_1(const DenseBase<T> &x, DenseBase<U> &e)
-{
-    using ResultType = typename expint_1_e_functor<T, U>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   expint_1_e_functor<T, U>(x.derived(),
-                                                            e.derived()));
-}
+DEFINE_TEMPLATE_FOREACH_E(expint_1, double, double, gsl_sf_expint_E1_e)
 
 // ========================================
 // expint_2
 // ========================================
 
-template <typename T>
-class expint_2_functor : public functor_foreach<expint_2_functor<T>, T, double>
-{
-  public:
-    expint_2_functor(const T &x)
-        : functor_foreach<expint_2_functor<T>, T, double>(x)
-    {
-    }
+DEFINE_TEMPLATE_FOREACH(expint_2, double, double, gsl_sf_expint_E2)
 
-    double foreach_impl(double x) const
-    {
-        return gsl_sf_expint_E2(x);
-    }
-};
-
-template <typename T>
-inline CwiseNullaryOp<expint_2_functor<T>,
-                      typename expint_2_functor<T>::ResultType>
-expint_2(const DenseBase<T> &x)
-{
-    using ResultType = typename expint_2_functor<T>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   expint_2_functor<T>(x.derived()));
-}
-
-template <typename T, typename U>
-class expint_2_e_functor
-    : public functor_foreach_e<expint_2_e_functor<T, U>, T, U, double>
-{
-  public:
-    expint_2_e_functor(const T &x, U &e)
-        : functor_foreach_e<expint_2_e_functor<T, U>, T, U, double>(x, e)
-    {
-    }
-
-    double foreach_e_impl(double x, double &e) const
-    {
-        gsl_sf_result r;
-        gsl_sf_expint_E2_e(x, &r);
-        e = r.err;
-        return r.val;
-    }
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<expint_2_e_functor<T, U>,
-                      typename expint_2_e_functor<T, U>::ResultType>
-expint_2(const DenseBase<T> &x, DenseBase<U> &e)
-{
-    using ResultType = typename expint_2_e_functor<T, U>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   expint_2_e_functor<T, U>(x.derived(),
-                                                            e.derived()));
-}
+DEFINE_TEMPLATE_FOREACH_E(expint_2, double, double, gsl_sf_expint_E2_e)
 
 // ========================================
 // expint
@@ -235,428 +131,57 @@ expint(int n, const DenseBase<T> &x, DenseBase<U> &e)
 // expint_ei
 // ========================================
 
-template <typename T>
-class expint_ei_functor
-    : public functor_foreach<expint_ei_functor<T>, T, double>
-{
-  public:
-    expint_ei_functor(const T &x)
-        : functor_foreach<expint_ei_functor<T>, T, double>(x)
-    {
-    }
+DEFINE_TEMPLATE_FOREACH(expint_ei, double, double, gsl_sf_expint_Ei)
 
-    double foreach_impl(double x) const
-    {
-        return gsl_sf_expint_Ei(x);
-    }
-};
-
-template <typename T>
-inline CwiseNullaryOp<expint_ei_functor<T>,
-                      typename expint_ei_functor<T>::ResultType>
-expint_ei(const DenseBase<T> &x)
-{
-    using ResultType = typename expint_ei_functor<T>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   expint_ei_functor<T>(x.derived()));
-}
-
-template <typename T, typename U>
-class expint_ei_e_functor
-    : public functor_foreach_e<expint_ei_e_functor<T, U>, T, U, double>
-{
-  public:
-    expint_ei_e_functor(const T &x, U &e)
-        : functor_foreach_e<expint_ei_e_functor<T, U>, T, U, double>(x, e)
-    {
-    }
-
-    double foreach_e_impl(double x, double &e) const
-    {
-        gsl_sf_result r;
-        gsl_sf_expint_Ei_e(x, &r);
-        e = r.err;
-        return r.val;
-    }
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<expint_ei_e_functor<T, U>,
-                      typename expint_ei_e_functor<T, U>::ResultType>
-expint_ei(const DenseBase<T> &x, DenseBase<U> &e)
-{
-    using ResultType = typename expint_ei_e_functor<T, U>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   expint_ei_e_functor<T, U>(x.derived(),
-                                                             e.derived()));
-}
+DEFINE_TEMPLATE_FOREACH_E(expint_ei, double, double, gsl_sf_expint_Ei_e)
 
 // ========================================
 // expint_ei3
 // ========================================
 
-template <typename T>
-class expint_ei3_functor
-    : public functor_foreach<expint_ei3_functor<T>, T, double>
-{
-  public:
-    expint_ei3_functor(const T &x)
-        : functor_foreach<expint_ei3_functor<T>, T, double>(x)
-    {
-    }
+DEFINE_TEMPLATE_FOREACH(expint_ei3, double, double, gsl_sf_expint_3)
 
-    double foreach_impl(double x) const
-    {
-        return gsl_sf_expint_3(x);
-    }
-};
-
-template <typename T>
-inline CwiseNullaryOp<expint_ei3_functor<T>,
-                      typename expint_ei3_functor<T>::ResultType>
-expint_ei3(const DenseBase<T> &x)
-{
-    using ResultType = typename expint_ei3_functor<T>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   expint_ei3_functor<T>(x.derived()));
-}
-
-template <typename T, typename U>
-class expint_ei3_e_functor
-    : public functor_foreach_e<expint_ei3_e_functor<T, U>, T, U, double>
-{
-  public:
-    expint_ei3_e_functor(const T &x, U &e)
-        : functor_foreach_e<expint_ei3_e_functor<T, U>, T, U, double>(x, e)
-    {
-    }
-
-    double foreach_e_impl(double x, double &e) const
-    {
-        gsl_sf_result r;
-        gsl_sf_expint_3_e(x, &r);
-        e = r.err;
-        return r.val;
-    }
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<expint_ei3_e_functor<T, U>,
-                      typename expint_ei3_e_functor<T, U>::ResultType>
-expint_ei3(const DenseBase<T> &x, DenseBase<U> &e)
-{
-    using ResultType = typename expint_ei3_e_functor<T, U>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   expint_ei3_e_functor<T, U>(x.derived(),
-                                                              e.derived()));
-}
+DEFINE_TEMPLATE_FOREACH_E(expint_ei3, double, double, gsl_sf_expint_3_e)
 
 // ========================================
 // sinh integral
 // ========================================
 
-template <typename T>
-class sinhint_functor : public functor_foreach<sinhint_functor<T>, T, double>
-{
-  public:
-    sinhint_functor(const T &x)
-        : functor_foreach<sinhint_functor<T>, T, double>(x)
-    {
-    }
+DEFINE_TEMPLATE_FOREACH(sinhint, double, double, gsl_sf_Shi)
 
-    double foreach_impl(double x) const
-    {
-        return gsl_sf_Shi(x);
-    }
-};
-
-template <typename T>
-inline CwiseNullaryOp<sinhint_functor<T>,
-                      typename sinhint_functor<T>::ResultType>
-sinhint(const DenseBase<T> &x)
-{
-    using ResultType = typename sinhint_functor<T>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   sinhint_functor<T>(x.derived()));
-}
-
-template <typename T, typename U>
-class sinhint_e_functor
-    : public functor_foreach_e<sinhint_e_functor<T, U>, T, U, double>
-{
-  public:
-    sinhint_e_functor(const T &x, U &e)
-        : functor_foreach_e<sinhint_e_functor<T, U>, T, U, double>(x, e)
-    {
-    }
-
-    double foreach_e_impl(double x, double &e) const
-    {
-        gsl_sf_result r;
-        gsl_sf_Shi_e(x, &r);
-        e = r.err;
-        return r.val;
-    }
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<sinhint_e_functor<T, U>,
-                      typename sinhint_e_functor<T, U>::ResultType>
-sinhint(const DenseBase<T> &x, DenseBase<U> &e)
-{
-    using ResultType = typename sinhint_e_functor<T, U>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   sinhint_e_functor<T, U>(x.derived(),
-                                                           e.derived()));
-}
+DEFINE_TEMPLATE_FOREACH_E(sinhint, double, double, gsl_sf_Shi_e)
 
 // ========================================
 // cosh integral
 // ========================================
 
-template <typename T>
-class coshint_functor : public functor_foreach<coshint_functor<T>, T, double>
-{
-  public:
-    coshint_functor(const T &x)
-        : functor_foreach<coshint_functor<T>, T, double>(x)
-    {
-    }
+DEFINE_TEMPLATE_FOREACH(coshint, double, double, gsl_sf_Chi)
 
-    double foreach_impl(double x) const
-    {
-        return gsl_sf_Chi(x);
-    }
-};
-
-template <typename T>
-inline CwiseNullaryOp<coshint_functor<T>,
-                      typename coshint_functor<T>::ResultType>
-coshint(const DenseBase<T> &x)
-{
-    using ResultType = typename coshint_functor<T>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   coshint_functor<T>(x.derived()));
-}
-
-template <typename T, typename U>
-class coshint_e_functor
-    : public functor_foreach_e<coshint_e_functor<T, U>, T, U, double>
-{
-  public:
-    coshint_e_functor(const T &x, U &e)
-        : functor_foreach_e<coshint_e_functor<T, U>, T, U, double>(x, e)
-    {
-    }
-
-    double foreach_e_impl(double x, double &e) const
-    {
-        gsl_sf_result r;
-        gsl_sf_Chi_e(x, &r);
-        e = r.err;
-        return r.val;
-    }
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<coshint_e_functor<T, U>,
-                      typename coshint_e_functor<T, U>::ResultType>
-coshint(const DenseBase<T> &x, DenseBase<U> &e)
-{
-    using ResultType = typename coshint_e_functor<T, U>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   coshint_e_functor<T, U>(x.derived(),
-                                                           e.derived()));
-}
+DEFINE_TEMPLATE_FOREACH_E(coshint, double, double, gsl_sf_Chi_e)
 
 // ========================================
 // sin integral
 // ========================================
 
-template <typename T>
-class sinint_functor : public functor_foreach<sinint_functor<T>, T, double>
-{
-  public:
-    sinint_functor(const T &x)
-        : functor_foreach<sinint_functor<T>, T, double>(x)
-    {
-    }
+DEFINE_TEMPLATE_FOREACH(sinint, double, double, gsl_sf_Si)
 
-    double foreach_impl(double x) const
-    {
-        return gsl_sf_Si(x);
-    }
-};
-
-template <typename T>
-inline CwiseNullaryOp<sinint_functor<T>, typename sinint_functor<T>::ResultType>
-sinint(const DenseBase<T> &x)
-{
-    using ResultType = typename sinint_functor<T>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   sinint_functor<T>(x.derived()));
-}
-
-template <typename T, typename U>
-class sinint_e_functor
-    : public functor_foreach_e<sinint_e_functor<T, U>, T, U, double>
-{
-  public:
-    sinint_e_functor(const T &x, U &e)
-        : functor_foreach_e<sinint_e_functor<T, U>, T, U, double>(x, e)
-    {
-    }
-
-    double foreach_e_impl(double x, double &e) const
-    {
-        gsl_sf_result r;
-        gsl_sf_Si_e(x, &r);
-        e = r.err;
-        return r.val;
-    }
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<sinint_e_functor<T, U>,
-                      typename sinint_e_functor<T, U>::ResultType>
-sinint(const DenseBase<T> &x, DenseBase<U> &e)
-{
-    using ResultType = typename sinint_e_functor<T, U>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   sinint_e_functor<T, U>(x.derived(),
-                                                          e.derived()));
-}
+DEFINE_TEMPLATE_FOREACH_E(sinint, double, double, gsl_sf_Si_e)
 
 // ========================================
 // cos integral
 // ========================================
 
-template <typename T>
-class cosint_functor : public functor_foreach<cosint_functor<T>, T, double>
-{
-  public:
-    cosint_functor(const T &x)
-        : functor_foreach<cosint_functor<T>, T, double>(x)
-    {
-    }
+DEFINE_TEMPLATE_FOREACH(cosint, double, double, gsl_sf_Ci)
 
-    double foreach_impl(double x) const
-    {
-        return gsl_sf_Ci(x);
-    }
-};
-
-template <typename T>
-inline CwiseNullaryOp<cosint_functor<T>, typename cosint_functor<T>::ResultType>
-cosint(const DenseBase<T> &x)
-{
-    using ResultType = typename cosint_functor<T>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   cosint_functor<T>(x.derived()));
-}
-
-template <typename T, typename U>
-class cosint_e_functor
-    : public functor_foreach_e<cosint_e_functor<T, U>, T, U, double>
-{
-  public:
-    cosint_e_functor(const T &x, U &e)
-        : functor_foreach_e<cosint_e_functor<T, U>, T, U, double>(x, e)
-    {
-    }
-
-    double foreach_e_impl(double x, double &e) const
-    {
-        gsl_sf_result r;
-        gsl_sf_Ci_e(x, &r);
-        e = r.err;
-        return r.val;
-    }
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<cosint_e_functor<T, U>,
-                      typename cosint_e_functor<T, U>::ResultType>
-cosint(const DenseBase<T> &x, DenseBase<U> &e)
-{
-    using ResultType = typename cosint_e_functor<T, U>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   cosint_e_functor<T, U>(x.derived(),
-                                                          e.derived()));
-}
+DEFINE_TEMPLATE_FOREACH_E(cosint, double, double, gsl_sf_Ci_e)
 
 // ========================================
-// cos integral
+// atan integral
 // ========================================
 
-template <typename T>
-class atanint_functor : public functor_foreach<atanint_functor<T>, T, double>
-{
-  public:
-    atanint_functor(const T &x)
-        : functor_foreach<atanint_functor<T>, T, double>(x)
-    {
-    }
+DEFINE_TEMPLATE_FOREACH(atanint, double, double, gsl_sf_atanint)
 
-    double foreach_impl(double x) const
-    {
-        return gsl_sf_atanint(x);
-    }
-};
-
-template <typename T>
-inline CwiseNullaryOp<atanint_functor<T>,
-                      typename atanint_functor<T>::ResultType>
-atanint(const DenseBase<T> &x)
-{
-    using ResultType = typename atanint_functor<T>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   atanint_functor<T>(x.derived()));
-}
-
-template <typename T, typename U>
-class atanint_e_functor
-    : public functor_foreach_e<atanint_e_functor<T, U>, T, U, double>
-{
-  public:
-    atanint_e_functor(const T &x, U &e)
-        : functor_foreach_e<atanint_e_functor<T, U>, T, U, double>(x, e)
-    {
-    }
-
-    double foreach_e_impl(double x, double &e) const
-    {
-        gsl_sf_result r;
-        gsl_sf_atanint_e(x, &r);
-        e = r.err;
-        return r.val;
-    }
-};
-
-template <typename T, typename U>
-inline CwiseNullaryOp<atanint_e_functor<T, U>,
-                      typename atanint_e_functor<T, U>::ResultType>
-atanint(const DenseBase<T> &x, DenseBase<U> &e)
-{
-    using ResultType = typename atanint_e_functor<T, U>::ResultType;
-    return ResultType::NullaryExpr(x.rows(),
-                                   x.cols(),
-                                   atanint_e_functor<T, U>(x.derived(),
-                                                           e.derived()));
-}
+DEFINE_TEMPLATE_FOREACH_E(atanint, double, double, gsl_sf_atanint_e)
 
 ////////////////////////////////////////////////////////////
 // global variants

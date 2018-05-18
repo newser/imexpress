@@ -81,3 +81,41 @@ TEST_CASE("test_hypot")
     gsl_sf_hypot_e(2, 4, &re);
     REQUIRE(e(1) == re.err);
 }
+
+TEST_CASE("test_lnsinh")
+{
+    Matrix2d p, r, e;
+    p << 0.1, 1, 5, 100;
+    r = sf::lnsinh(p);
+    REQUIRE(r(0, 0) == gsl_sf_lnsinh(p(0, 0)));
+    REQUIRE(r(1, 1) == gsl_sf_lnsinh(p(1, 1)));
+
+    r = sf::lnsinh(p, e);
+    REQUIRE(r(0, 0) == gsl_sf_lnsinh(p(0, 0)));
+    REQUIRE(r(1, 1) == gsl_sf_lnsinh(p(1, 1)));
+
+    gsl_sf_result re;
+    gsl_sf_lnsinh_e(0.1, &re);
+    REQUIRE(e(0, 0) == re.err);
+    gsl_sf_lnsinh_e(100, &re);
+    REQUIRE(e(1, 1) == re.err);
+}
+
+TEST_CASE("test_lncosh")
+{
+    Matrix2d p, r, e;
+    p << 0.1, 1, 5, 100;
+    r = sf::lncosh(p);
+    REQUIRE(r(0, 0) == gsl_sf_lncosh(p(0, 0)));
+    REQUIRE(r(1, 1) == gsl_sf_lncosh(p(1, 1)));
+
+    r = sf::lncosh(p, e);
+    REQUIRE(r(0, 0) == gsl_sf_lncosh(p(0, 0)));
+    REQUIRE(r(1, 1) == gsl_sf_lncosh(p(1, 1)));
+
+    gsl_sf_result re;
+    gsl_sf_lncosh_e(0.1, &re);
+    REQUIRE(e(0, 0) == re.err);
+    gsl_sf_lncosh_e(100, &re);
+    REQUIRE(e(1, 1) == re.err);
+}

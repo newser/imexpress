@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_TEMPLATE_M2VNUM_2D__
-#define __IEXP_TEMPLATE_M2VNUM_2D__
+#ifndef __IEXP_TEMPLATE_M2VNUM_4D__
+#define __IEXP_TEMPLATE_M2VNUM_4D__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -31,20 +31,24 @@
 // type definition
 ////////////////////////////////////////////////////////////
 
-#define DEFINE_TEMPLATE_M2VNUM_2D(name, return_t, scalar_t, p1t, p2t, gf)      \
+#define DEFINE_TEMPLATE_M2VNUM_4D(                                             \
+    name, return_t, scalar_t, p1t, p2t, p3t, p4t, gf)                          \
     template <typename T>                                                      \
     class name##_functor                                                       \
-        : public functor_m2vnum_2d<name##_functor<T>, T, return_t>             \
+        : public functor_m2vnum_4d<name##_functor<T>, T, return_t>             \
     {                                                                          \
       public:                                                                  \
         name##_functor(const T &x)                                             \
-            : functor_m2vnum_2d<name##_functor<T>, T, return_t>(x)             \
+            : functor_m2vnum_4d<name##_functor<T>, T, return_t>(x)             \
         {                                                                      \
         }                                                                      \
                                                                                \
-        return_t m2vnum_impl(scalar_t x1, scalar_t x2) const                   \
+        return_t m2vnum_impl(scalar_t x1,                                      \
+                             scalar_t x2,                                      \
+                             scalar_t x3,                                      \
+                             scalar_t x4) const                                \
         {                                                                      \
-            return gf((p1t)x1, (p2t)x2);                                       \
+            return gf((p1t)x1, (p2t)x2, (p3t)x3, (p4t)x4);                     \
         }                                                                      \
     };                                                                         \
                                                                                \
@@ -62,24 +66,29 @@
                                        name##_functor<T>(x.derived()));        \
     }
 
-#define DEFINE_TEMPLATE_M2VNUM_2D_E(name, return_t, scalar_t, p1t, p2t, gfe)   \
+#define DEFINE_TEMPLATE_M2VNUM_4D_E(                                           \
+    name, return_t, scalar_t, p1t, p2t, p3t, p4t, gfe)                         \
     template <typename T, typename U>                                          \
     class name##_e_functor                                                     \
-        : public functor_m2vnum_2d_e<name##_e_functor<T, U>, T, U, return_t>   \
+        : public functor_m2vnum_4d_e<name##_e_functor<T, U>, T, U, return_t>   \
     {                                                                          \
       public:                                                                  \
         name##_e_functor(const T &x, U &e)                                     \
-            : functor_m2vnum_2d_e<name##_e_functor<T, U>, T, U, return_t>(x,   \
+            : functor_m2vnum_4d_e<name##_e_functor<T, U>, T, U, return_t>(x,   \
                                                                           e)   \
         {                                                                      \
         }                                                                      \
                                                                                \
-        return_t m2vnum_e_impl(scalar_t x1, scalar_t x2, double &e) const      \
+        return_t m2vnum_e_impl(scalar_t x1,                                    \
+                               scalar_t x2,                                    \
+                               scalar_t x3,                                    \
+                               scalar_t x4,                                    \
+                               double &e) const                                \
         {                                                                      \
-            gsl_sf_result r;                                                   \
-            gfe((p1t)x1, (p2t)x2, &r);                                         \
-            e = r.err;                                                         \
-            return r.val;                                                      \
+            gsl_sf_result ret;                                                 \
+            gfe((p1t)x1, (p2t)x2, (p3t)x3, (p4t)x4, &ret);                     \
+            e = ret.err;                                                       \
+            return ret.val;                                                    \
         }                                                                      \
     };                                                                         \
                                                                                \
@@ -106,4 +115,4 @@
 // interface declaration
 ////////////////////////////////////////////////////////////
 
-#endif /* __IEXP_TEMPLATE_M2VNUM_2D__ */
+#endif /* __IEXP_TEMPLATE_M2VNUM_4D__ */

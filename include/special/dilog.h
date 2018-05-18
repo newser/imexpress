@@ -25,6 +25,8 @@
 
 #include <common/common.h>
 
+#include <common/template_foreach.h>
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_sf_dilog.h>
 
