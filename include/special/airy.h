@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_SPECIAL_AIRY__
-#define __IEXP_SPECIAL_AIRY__
+#ifndef __IEXP_SF_AIRY__
+#define __IEXP_SF_AIRY__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -469,4 +469,4 @@ airy_Bi_deriv(const DenseBase<T> &x, DenseBase<U> &e)
 
 IEXP_NS_END
 
-#endif /* __IEXP_SPECIAL_AIRY__ */
+#endif /* __IEXP_SF_AIRY__ */
