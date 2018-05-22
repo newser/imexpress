@@ -71,6 +71,7 @@ add_group(stats ${ROOT_PATH}/include/stats ${ROOT_PATH}/source/stats IEXP_SOURCE
 add_group(rstat ${ROOT_PATH}/include/rstat ${ROOT_PATH}/source/rstat IEXP_SOURCE)
 add_group(histogram ${ROOT_PATH}/include/histogram ${ROOT_PATH}/source/histogram IEXP_SOURCE)
 add_group(siman ${ROOT_PATH}/include/siman ${ROOT_PATH}/source/siman IEXP_SOURCE)
+add_group(dae ${ROOT_PATH}/include/dae ${ROOT_PATH}/source/dae IEXP_SOURCE)
 
 #
 # build
@@ -92,6 +93,10 @@ target_include_directories(imexpress PRIVATE ${LIBRARY_PATH}/eigen)
 
 # fft
 target_include_directories(imexpress PRIVATE ${LIBRARY_PATH}/fft/fftw/api)
+
+# dae
+target_include_directories(imexpress PRIVATE ${LIBRARY_PATH}/dae/sundials/include)
+target_include_directories(imexpress PRIVATE ${OUT_PATH}/dae/sundials/include)
 
 #
 # link
@@ -118,9 +123,9 @@ if (FFT_FLOAT_LIB)
 endif ()
 target_link_libraries(imexpress ${FFT_LIB})
 
-# ode
-add_subdirectory(${LIBRARY_PATH}/ode ode)
-target_link_libraries(imexpress ${ODE_LIB})
+# dae
+add_subdirectory(${LIBRARY_PATH}/dae dae)
+target_link_libraries(imexpress ${DAE_LIB})
 
 # test
 add_subdirectory(${ROOT_PATH}/test test)

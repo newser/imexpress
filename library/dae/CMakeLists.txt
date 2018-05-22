@@ -17,7 +17,7 @@
 # definition
 #
 
-set(ODE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/sundials)
+set(DAE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/sundials)
 
 #
 # customization
@@ -64,7 +64,7 @@ hide(PETSC_ENABLE BOOL OFF)
 hide(EXAMPLES_ENABLE_C BOOL OFF)
 hide(EXAMPLES_ENABLE_CXX BOOL OFF)
 
-set(ODE_LIB
+set(DAE_LIB
     sundials_nvecserial_static
     sundials_sunmatrixdense_static
     sundials_sunmatrixband_static
@@ -100,10 +100,10 @@ macro(import_sundials name dir)
 endmacro()
 
 if (build_sundials)
-    add_subdirectory(${ODE_PATH} ${CMAKE_CURRENT_BINARY_DIR}/sundials)
+    add_subdirectory(${DAE_PATH} ${CMAKE_CURRENT_BINARY_DIR}/sundials)
 
     # no need to show compile warnings
-    foreach (lib ${ODE_LIB})
+    foreach (lib ${DAE_LIB})
         target_compile_options(${lib} PRIVATE ${FLAG_DISABLE_WARNING})
     endforeach()
 else ()
