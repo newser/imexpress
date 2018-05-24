@@ -20,7 +20,7 @@
 // import header files
 ////////////////////////////////////////////////////////////
 
-#include <dae/sunmatrix.h>
+#include <dae/sunvec.h>
 
 IEXP_NS_BEGIN
 
@@ -42,16 +42,33 @@ namespace dae {
 // global variant
 ////////////////////////////////////////////////////////////
 
-struct _generic_SUNMatrix_Ops sunmatrx_ops = {
-    SUNMatGetID_Dense,
-    SUNMatClone_Dense,
-    SUNMatDestroy_Dense,
-    SUNMatZero_Dense,
-    SUNMatCopy_Dense,
-    SUNMatScaleAdd_Dense,
-    SUNMatScaleAddI_Dense,
-    SUNMatMatvec_Dense,
-    SUNMatSpace_Dense,
+struct _generic_N_Vector_Ops sunvec_ops = {
+    N_VGetVectorID_Serial,
+    N_VClone_Serial,
+    N_VCloneEmpty_Serial,
+    N_VDestroy_Serial,
+    N_VSpace_Serial,
+    N_VGetArrayPointer_Serial,
+    N_VSetArrayPointer_Serial,
+    N_VLinearSum_Serial,
+    N_VConst_Serial,
+    N_VProd_Serial,
+    N_VDiv_Serial,
+    N_VScale_Serial,
+    N_VAbs_Serial,
+    N_VInv_Serial,
+    N_VAddConst_Serial,
+    N_VDotProd_Serial,
+    N_VMaxNorm_Serial,
+    N_VWrmsNorm_Serial,
+    N_VWrmsNormMask_Serial,
+    N_VMin_Serial,
+    N_VWL2Norm_Serial,
+    N_VL1Norm_Serial,
+    N_VCompare_Serial,
+    N_VInvTest_Serial,
+    N_VConstrMask_Serial,
+    N_VMinQuotient_Serial,
 };
 
 ////////////////////////////////////////////////////////////

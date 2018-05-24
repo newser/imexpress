@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_DAE_SUNMATRIX__
-#define __IEXP_DAE_SUNMATRIX__
+#ifndef __IEXP_DAE_SUNVEC__
+#define __IEXP_DAE_SUNVEC__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -25,8 +25,8 @@
 
 #include <common/common.h>
 
-#include <sundials/sundials_matrix.h>
-#include <sunmatrix/sunmatrix_dense.h>
+#include <nvector/nvector_serial.h>
+#include <sundials/sundials_nvector.h>
 
 IEXP_NS_BEGIN
 
@@ -40,74 +40,54 @@ namespace dae {
 // type definition
 ////////////////////////////////////////////////////////////
 
-extern struct _generic_SUNMatrix_Ops sunmatrx_ops;
+extern struct _generic_N_Vector_Ops sunvec_ops;
 
-class sunmat_dense
+class sunvec_serial
 {
   public:
     template <typename T>
-    sunmat_dense(DenseBase<T> &a,
-                 typename std::enable_if<bool(T::Flags &DirectAccessBit)>::type
-                     * = nullptr)
+    sunvec_serial(DenseBase<T> &a,
+                  typename std::enable_if<bool(T::Flags &DirectAccessBit)>::type
+                      * = nullptr)
     {
-        if (a.Flags & RowMajorBit) {
-            // sundial matrix is of col major form
-            new_mat(a);
-        } else {
-            m_result = &m_mat;
+        m_result = &m_vec;
 
-            m_dense.M = a.rows();
-            m_dense.N = a.cols();
-            m_dense.data = a.derived().data();
-            m_dense.ldata = a.size();
-            m_dense.cols = new realtype *[a.cols()];
-            for (sunindextype j = 0; j < a.cols(); ++j) {
-                m_dense.cols[j] = m_dense.data + j * a.rows();
-            }
+        m_serial.length = a.size();
+        m_serial.own_data = SUNFALSE;
+        m_serial.data = a.derived().data();
 
-            m_mat.content = &m_dense;
-            m_mat.ops = &sunmatrx_ops;
-        }
+        m_vec.content = &m_serial;
+        m_vec.ops = &sunvec_ops;
     }
 
     template <typename T>
-    sunmat_dense(
+    sunvec_serial(
         const DenseBase<T> &a,
         typename std::enable_if<!bool(T::Flags & DirectAccessBit)>::type * =
             nullptr)
     {
-        new_mat(a);
-    }
-
-    ~sunmat_dense()
-    {
-        if (m_result == &m_mat) {
-            delete[] m_dense.cols;
-        } else {
-            SUNMatDestroy(m_result);
+        m_result = N_VNew_Serial(a.size());
+        for (sunindextype i = 0; i < a.size(); ++i) {
+            NV_Ith_S(m_result, i) = a(i);
         }
     }
 
-    SUNMatrix sunmat()
+    ~sunvec_serial()
+    {
+        if (m_result != &m_vec) {
+            N_VDestroy(m_result);
+        }
+    }
+
+    N_Vector sunvec()
     {
         return m_result;
     }
 
   private:
-    SUNMatrix m_result;
-    struct _SUNMatrixContent_Dense m_dense;
-    struct _generic_SUNMatrix m_mat;
-
-    template <typename T>
-    void new_mat(const DenseBase<T> &a)
-    {
-        m_result = SUNDenseMatrix(a.rows(), a.cols());
-        for (sunindextype j = 0; j < a.cols(); ++j) {
-            for (sunindextype i = 0; i < a.rows(); ++i) {
-                SM_ELEMENT_D(m_result, i, j) = a(i, j);
-            }
-        }
-    }
+    N_Vector m_result;
+    struct _N_VectorContent_Serial m_serial;
+    struct _generic_N_Vector m_vec;
 };
 
 ////////////////////////////////////////////////////////////
@@ -121,4 +101,4 @@ class sunmat_dense
 
 IEXP_NS_END
 
-#endif /* __IEXP_DAE_SUNMATRIX__ */
+#endif /* __IEXP_DAE_SUNVEC__ */
