@@ -40,36 +40,74 @@ namespace dae {
 // type definition
 ////////////////////////////////////////////////////////////
 
-template <typename T>
+extern struct _generic_SUNMatrix_Ops sunmatrx_ops;
+
 class sunmat_dense
 {
   public:
-    sunmat_dense(const DenseBase<T> &a)
-        : m_eval(a.derived().eval())
+    template <typename T>
+    sunmat_dense(DenseBase<T> &a,
+                 typename std::enable_if<bool(T::Flags &DirectAccessBit)>::type
+                     * = nullptr)
     {
-        m_dense.M = a.rows();
-        m_dense.N = a.cols();
-        m_dense.data = m_eval.data();
-        m_dense.ldata = a.size();
-        m_dense.cols = new realtype *[a.cols()];
-        for (sunindextype j = 0; j < a.cols(); ++j) {
-            m_dense.cols[j] = m_eval.data() + j * a.rows();
-        }
+        if (a.Flags & RowMajorBit) {
+            // sundial matrix is of col major form
+            new_mat(a);
+        } else {
+            m_result = &m_mat;
 
-        m_mat.content = &m_dense;
-        m_mat.ops = &s_ops;
+            m_dense.M = a.rows();
+            m_dense.N = a.cols();
+            m_dense.data = a.derived().data();
+            m_dense.ldata = a.size();
+            m_dense.cols = new realtype *[a.cols()];
+            for (sunindextype j = 0; j < a.cols(); ++j) {
+                m_dense.cols[j] = m_dense.data + j * a.rows();
+            }
+
+            m_mat.content = &m_dense;
+            m_mat.ops = &sunmatrx_ops;
+        }
+    }
+
+    template <typename T>
+    sunmat_dense(
+        const DenseBase<T> &a,
+        typename std::enable_if<!bool(T::Flags & DirectAccessBit)>::type * =
+            nullptr)
+    {
+        new_mat(a);
     }
 
     ~sunmat_dense()
     {
+        if (m_result == &m_mat) {
+            delete[] m_dense.cols;
+        } else {
+            SUNMatDestroy(m_result);
+        }
+    }
+
+    SUNMatrix sunmat()
+    {
+        return m_result;
     }
 
   private:
-    static struct _generic_SUNMatrix_Ops s_ops;
-
-    typename type_eval<typename T::Derived>::type m_eval;
+    SUNMatrix m_result;
     struct _SUNMatrixContent_Dense m_dense;
     struct _generic_SUNMatrix m_mat;
+
+    template <typename T>
+    void new_mat(const DenseBase<T> &a)
+    {
+        m_result = SUNDenseMatrix(a.rows(), a.cols());
+        for (sunindextype j = 0; j < a.cols(); ++j) {
+            for (sunindextype i = 0; i < a.rows(); ++i) {
+                SM_ELEMENT_D(m_result, i, j) = a(i, j);
+            }
+        }
+    }
 };
 
 ////////////////////////////////////////////////////////////
