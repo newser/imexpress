@@ -10,7 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received v copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
  * USA.
@@ -46,30 +46,32 @@ class sunvec_serial
 {
   public:
     template <typename T>
-    sunvec_serial(DenseBase<T> &a,
+    sunvec_serial(DenseBase<T> &v,
+                  bool copy,
                   typename std::enable_if<bool(T::Flags &DirectAccessBit)>::type
                       * = nullptr)
     {
-        m_result = &m_vec;
+        if (copy) {
+            copy_vector(v);
+        } else {
+            m_result = &m_vec;
 
-        m_serial.length = a.size();
-        m_serial.own_data = SUNFALSE;
-        m_serial.data = a.derived().data();
+            m_serial.length = v.size();
+            m_serial.own_data = SUNFALSE;
+            m_serial.data = v.derived().data();
 
-        m_vec.content = &m_serial;
-        m_vec.ops = &sunvec_ops;
+            m_vec.content = &m_serial;
+            m_vec.ops = &sunvec_ops;
+        }
     }
 
     template <typename T>
     sunvec_serial(
-        const DenseBase<T> &a,
+        const DenseBase<T> &v,
         typename std::enable_if<!bool(T::Flags & DirectAccessBit)>::type * =
             nullptr)
     {
-        m_result = N_VNew_Serial(a.size());
-        for (sunindextype i = 0; i < a.size(); ++i) {
-            NV_Ith_S(m_result, i) = a(i);
-        }
+        copy_vector(v);
     }
 
     ~sunvec_serial()
@@ -79,7 +81,7 @@ class sunvec_serial
         }
     }
 
-    N_Vector sunvec()
+    N_Vector n_vector()
     {
         return m_result;
     }
@@ -88,6 +90,16 @@ class sunvec_serial
     N_Vector m_result;
     struct _N_VectorContent_Serial m_serial;
     struct _generic_N_Vector m_vec;
+
+    template <typename T>
+    void copy_vector(const DenseBase<T> &v)
+    {
+        m_result = N_VNew_Serial(v.size());
+        IEXP_NOT_NULLPTR(m_result);
+        for (sunindextype i = 0; i < v.size(); ++i) {
+            NV_Ith_S(m_result, i) = v(i);
+        }
+    }
 };
 
 ////////////////////////////////////////////////////////////

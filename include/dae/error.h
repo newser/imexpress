@@ -60,34 +60,13 @@ class solver
     }
 
   protected:
-    static const char *s_err_desc[9];
-
+    template <typename T>
     solver()
         : m_ls(nullptr)
     {
     }
 
-    void check(int e)
-    {
-        if (e < 0) {
-            throw std::runtime_error(s_err_desc[-e - 1]);
-        }
-    }
-
     SUNLinearSolver m_ls;
-};
-
-template <typename Derived>
-const char *solver<Derived>::s_err_desc[9] = {
-    "the memory argument to the function is NULL",
-    "an illegal input has been provided to the function",
-    "failed memory access or allocation",
-    "an unrecoverable failure occurred in the ATimes routine",
-    "an unrecoverable failure occurred in the Pset routine",
-    "an unrecoverable failure occurred in the Psolve routine",
-    "an unrecoverable failure occurred in an external linear solver package",
-    "a failure occurred during Gram-Schmidt orthogonalization",
-    "a singular R matrix was encountered in a QR factorization",
 };
 
 // ========================================
@@ -102,8 +81,7 @@ class dense : public solver<dense>
     {
         sunvec_serial sun_y(y, false);
         sunmat_dense sun_a(a, false);
-        m_ls = SUNDenseLinearSolver(sun_y.n_vector(), sun_a.sunmatrix());
-        IEXP_NOT_NULLPTR(m_ls);
+        m_ls = SUNDenseLinearSolver(sun_y.sunvec(), sun_a.sunmat());
     }
 };
 

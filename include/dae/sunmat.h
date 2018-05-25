@@ -47,12 +47,13 @@ class sunmat_dense
   public:
     template <typename T>
     sunmat_dense(DenseBase<T> &a,
-                 typename std::enable_if<bool(T::Flags &DirectAccessBit)>::type
+                 bool copy,
+                 typename std::enable_if<bool(T::Flags &DirectAccessBit) &&
+                                         !bool(T::Flags & RowMajorBit)>::type
                      * = nullptr)
     {
-        if (a.Flags & RowMajorBit) {
-            // sundial matrix is of col major form
-            new_mat(a);
+        if (copy) {
+            copy_matrix(a);
         } else {
             m_result = &m_mat;
 
@@ -73,10 +74,10 @@ class sunmat_dense
     template <typename T>
     sunmat_dense(
         const DenseBase<T> &a,
-        typename std::enable_if<!bool(T::Flags & DirectAccessBit)>::type * =
-            nullptr)
+        typename std::enable_if<!bool(T::Flags & DirectAccessBit) ||
+                                bool(T::Flags & RowMajorBit)>::type * = nullptr)
     {
-        new_mat(a);
+        copy_matrix(a);
     }
 
     ~sunmat_dense()
@@ -88,7 +89,7 @@ class sunmat_dense
         }
     }
 
-    SUNMatrix sunmat()
+    SUNMatrix sunmatrix()
     {
         return m_result;
     }
@@ -99,9 +100,10 @@ class sunmat_dense
     struct _generic_SUNMatrix m_mat;
 
     template <typename T>
-    void new_mat(const DenseBase<T> &a)
+    void copy_matrix(const DenseBase<T> &a)
     {
         m_result = SUNDenseMatrix(a.rows(), a.cols());
+        IEXP_NOT_NULLPTR(m_result);
         for (sunindextype j = 0; j < a.cols(); ++j) {
             for (sunindextype i = 0; i < a.rows(); ++i) {
                 SM_ELEMENT_D(m_result, i, j) = a(i, j);
