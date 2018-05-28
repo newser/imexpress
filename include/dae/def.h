@@ -16,14 +16,17 @@
  * USA.
  */
 
-#ifndef __IEXP_DAE_ERROR__
-#define __IEXP_DAE_ERROR__
+#ifndef __IEXP_DAE_DEF__
+#define __IEXP_DAE_DEF__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
 #include <common/common.h>
+
+#include <cvode/cvode.h>
+#include <sundials/sundials_iterative.h>
 
 IEXP_NS_BEGIN
 
@@ -33,25 +36,34 @@ namespace dae {
 // macro definition
 ////////////////////////////////////////////////////////////
 
-#define cv_check(expr)                                                         \
-    do {                                                                       \
-        int __e = expr;                                                        \
-        if (__e < 0) {                                                         \
-            iexp::dae::cv_throw(__e);                                          \
-        }                                                                      \
-    } while (0)
-
-#define ls_check(expr)                                                         \
-    do {                                                                       \
-        int __e = expr;                                                        \
-        if (__e < 0) {                                                         \
-            iexp::dae::ls_throw(__e);                                          \
-        }                                                                      \
-    } while (0)
-
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
+
+enum class precondition
+{
+    none = PREC_NONE,
+    left = PREC_LEFT,
+    right = PREC_RIGHT,
+};
+
+enum class gram_schmidt
+{
+    modified = MODIFIED_GS,
+    classical = CLASSICAL_GS,
+};
+
+enum class multistep
+{
+    ADAMS = CV_ADAMS,
+    BDF = CV_BDF,
+};
+
+enum class iteration
+{
+    FUNCTIONAL = CV_FUNCTIONAL,
+    NEWTON = CV_NEWTON,
+};
 
 ////////////////////////////////////////////////////////////
 // global variants
@@ -60,12 +72,8 @@ namespace dae {
 ////////////////////////////////////////////////////////////
 // interface declaration
 ////////////////////////////////////////////////////////////
-
-extern void cv_throw(int e);
-
-extern void ls_throw(int e);
 }
 
 IEXP_NS_END
 
-#endif /* __IEXP_DAE_ERROR__ */
+#endif /* __IEXP_DAE_DEF__ */

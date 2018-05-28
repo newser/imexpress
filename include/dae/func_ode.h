@@ -16,14 +16,16 @@
  * USA.
  */
 
-#ifndef __IEXP_DAE_ERROR__
-#define __IEXP_DAE_ERROR__
+#ifndef __IEXP_DAE_FUNC_ODE__
+#define __IEXP_DAE_FUNC_ODE__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
 #include <common/common.h>
+
+#include <dae/ode.h>
 
 IEXP_NS_BEGIN
 
@@ -33,25 +35,26 @@ namespace dae {
 // macro definition
 ////////////////////////////////////////////////////////////
 
-#define cv_check(expr)                                                         \
-    do {                                                                       \
-        int __e = expr;                                                        \
-        if (__e < 0) {                                                         \
-            iexp::dae::cv_throw(__e);                                          \
-        }                                                                      \
-    } while (0)
-
-#define ls_check(expr)                                                         \
-    do {                                                                       \
-        int __e = expr;                                                        \
-        if (__e < 0) {                                                         \
-            iexp::dae::ls_throw(__e);                                          \
-        }                                                                      \
-    } while (0)
-
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
+
+class func_ode : public ode<func_ode>
+{
+  public:
+    template <typename T>
+    func_ode(multistep lmm,
+             const DY_TYPE &dy,
+             double t0,
+             const DenseBase<T> &y0)
+        : ode<func_ode>(lmm, iteration::FUNCTIONAL, dy, t0, y0)
+    {
+    }
+
+    void prepare()
+    {
+    }
+};
 
 ////////////////////////////////////////////////////////////
 // global variants
@@ -60,12 +63,8 @@ namespace dae {
 ////////////////////////////////////////////////////////////
 // interface declaration
 ////////////////////////////////////////////////////////////
-
-extern void cv_throw(int e);
-
-extern void ls_throw(int e);
 }
 
 IEXP_NS_END
 
-#endif /* __IEXP_DAE_ERROR__ */
+#endif /* __IEXP_DAE_FUNC_ODE__ */

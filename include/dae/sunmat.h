@@ -47,11 +47,14 @@ class sunmat_dense
   public:
     template <typename T>
     sunmat_dense(DenseBase<T> &a,
-                 bool copy,
+                 bool copy = true,
                  typename std::enable_if<bool(T::Flags &DirectAccessBit) &&
                                          !bool(T::Flags & RowMajorBit)>::type
                      * = nullptr)
     {
+        static_assert(TYPE_IS(typename T::Scalar, realtype),
+                      "only support realtype scalar");
+
         if (copy) {
             copy_matrix(a);
         } else {
@@ -77,6 +80,9 @@ class sunmat_dense
         typename std::enable_if<!bool(T::Flags & DirectAccessBit) ||
                                 bool(T::Flags & RowMajorBit)>::type * = nullptr)
     {
+        static_assert(TYPE_IS(typename T::Scalar, realtype),
+                      "only support realtype scalar");
+
         copy_matrix(a);
     }
 

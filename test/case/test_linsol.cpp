@@ -1,11 +1,17 @@
 #include <catch.hpp>
+#include <dae/dense_ode.h>
+#include <dae/dense_ode.h>
+#include <dae/func_ode.h>
+#include <dae/function.h>
 #include <dae/linsol.h>
+#include <dae/ode.h>
 #include <dae/sunmat.h>
 #include <dae/sunvec.h>
 #include <iostream>
 #include <test_util.h>
 
 using namespace iexp;
+using namespace iexp::dae;
 
 TEST_CASE("test_is_matrix_ar")
 {
@@ -112,17 +118,17 @@ TEST_CASE("test_sunvec")
     REQUIRE(NV_Ith_S(nv2, 3) == 2 * v1(3));
 }
 
-class test_ls : public dae::linsol::solver<test_ls>
+class test_ls : public dae::linsol<test_ls>
 {
   public:
     test_ls()
-        : dae::linsol::solver<test_ls>()
+        : dae::linsol<test_ls>()
     {
     }
 
     void test_ec(int err_code)
     {
-        check(err_code);
+        ls_check(err_code);
     }
 };
 
@@ -144,4 +150,210 @@ TEST_CASE("test_linsol_solver")
         ls.test_ec(-9);
     }
     except_str("a singular R matrix was encountered in a QR factorization");
+}
+
+class test_dy
+{
+  public:
+    int compute_dy(double t, Map<const VectorXd> &y, Map<VectorXd> &dy)
+    {
+        for (int i = 0; i < dy.size(); ++i) {
+            dy[i] = y[i] + t;
+        }
+        return 1;
+    }
+};
+
+TEST_CASE("test_dy")
+{
+    N_Vector y = N_VNew_Serial(3);
+    NV_Ith_S(y, 0) = 1;
+    NV_Ith_S(y, 1) = 2;
+    NV_Ith_S(y, 2) = 3;
+    N_Vector dy = N_VNew_Serial(3);
+
+    test_dy td;
+    int ret = dy_func<test_dy>::s_dy(9, y, dy, &td);
+    REQUIRE(ret == 1);
+    REQUIRE(NV_Ith_S(dy, 0) == 10);
+    REQUIRE(NV_Ith_S(dy, 1) == 11);
+    REQUIRE(NV_Ith_S(dy, 2) == 12);
+}
+
+class test_jac
+{
+  public:
+    int compute_jac(double t,
+                    Map<const VectorXd> &y,
+                    Map<const VectorXd> &fy,
+                    Map<MatrixXd> &jac)
+    {
+        REQUIRE(y.size() == 3);
+        REQUIRE(fy.size() == 3);
+        REQUIRE(jac.rows() == 3);
+        REQUIRE(jac.cols() == 3);
+        for (int i = 0; i < jac.rows(); ++i) {
+            for (int j = 0; j < jac.cols(); ++j) {
+                jac(i, j) = y(i) * fy(j);
+            }
+        }
+        return 2;
+    }
+};
+
+TEST_CASE("test_jac")
+{
+    N_Vector y = N_VNew_Serial(3);
+    NV_Ith_S(y, 0) = 1;
+    NV_Ith_S(y, 1) = 2;
+    NV_Ith_S(y, 2) = 3;
+
+    N_Vector fy = N_VNew_Serial(3);
+    NV_Ith_S(fy, 0) = 4;
+    NV_Ith_S(fy, 1) = 5;
+    NV_Ith_S(fy, 2) = 6;
+
+    SUNMatrix j = SUNDenseMatrix(3, 3);
+
+    test_jac tj;
+    jac_func<test_jac>::s_jac(9, y, fy, j, &tj, nullptr, nullptr, nullptr);
+    REQUIRE(SM_ELEMENT_D(j, 0, 0) == 4);
+    REQUIRE(SM_ELEMENT_D(j, 0, 2) == 6);
+    REQUIRE(SM_ELEMENT_D(j, 2, 0) == 12);
+    REQUIRE(SM_ELEMENT_D(j, 2, 2) == 18);
+}
+
+double sol_val(double t)
+{
+    return -(0.5 + 2 * t) * exp(-6 * t);
+}
+
+TEST_CASE("test_func_ode")
+{
+    /*
+     ivp:
+     u''/2 + 6u' + 18u = 0
+     u(0) = -1/2
+     u'(0) = 1
+
+     solution
+     u = -e^(-6t)/2 - 2te^(-6t)
+
+     converted:
+     y0 = u
+     y1 = u'
+     */
+
+    for (int i = 0; i < 2; ++i) {
+        VectorXd y(2);
+        y << -0.5, 1;
+
+        multistep ms = (i == 0 ? multistep::ADAMS : multistep::BDF);
+
+        func_ode dfo(ms,
+                     [](double t,
+                        Map<const VectorXd> &y,
+                        Map<VectorXd> &dy) -> int {
+                         dy[0] = y[1];
+                         dy[1] = -12 * y[1] - 36 * y[0];
+                         return CV_SUCCESS;
+                     },
+                     0,
+                     y);
+
+        dfo.tolerance(0, 1e-6);
+
+        for (double t = 0.1; t < 1; t += 0.1) {
+            double tv = t;
+            dfo.go(tv, y);
+
+            double ans = sol_val(tv);
+            REQUIRE(__D_EQ6(y[0], ans));
+        }
+    }
+}
+
+TEST_CASE("test_dense_ode")
+{
+    /*
+     ivp:
+     u''/2 + 6u' + 18u = 0
+     u(0) = -1/2
+     u'(0) = 1
+
+     solution
+     u = -e^(-6t)/2 - 2te^(-6t)
+
+     converted:
+     y0 = u
+     y1 = u'
+     */
+
+    for (int i = 0; i < 2; ++i) {
+        VectorXd y(2);
+        y << -0.5, 1;
+
+        multistep ms = (i == 0 ? multistep::ADAMS : multistep::BDF);
+
+        dense_ode dfo(ms,
+                      [](double t,
+                         Map<const VectorXd> &y,
+                         Map<VectorXd> &dy) -> int {
+                          dy[0] = y[1];
+                          dy[1] = -12 * y[1] - 36 * y[0];
+                          return CV_SUCCESS;
+                      },
+                      0,
+                      y);
+
+        dfo.tolerance(0, 1e-6);
+
+        for (double t = 0.1; t < 1; t += 0.1) {
+            double tv = t;
+            dfo.go(tv, y);
+
+            double ans = sol_val(tv);
+            REQUIRE(__D_EQ6(y[0], ans));
+        }
+    }
+
+    for (int i = 0; i < 2; ++i) {
+        VectorXd y(2);
+        y << -0.5, 1;
+
+        multistep ms = (i == 0 ? multistep::ADAMS : multistep::BDF);
+
+        dense_ode dfo(ms,
+                      [](double t,
+                         Map<const VectorXd> &y,
+                         Map<VectorXd> &dy) -> int {
+                          dy[0] = y[1];
+                          dy[1] = -12 * y[1] - 36 * y[0];
+                          return CV_SUCCESS;
+                      },
+                      0,
+                      y);
+
+        dfo.tolerance(0, 1e-6);
+
+        dfo.jac([](double t,
+                   Map<const VectorXd> &y,
+                   Map<const VectorXd> &fy,
+                   Map<MatrixXd> &jac) -> int {
+            jac(0, 0) = 0;
+            jac(0, 1) = 1;
+            jac(1, 1) = -36;
+            jac(1, 1) = -12;
+
+            return CV_SUCCESS;
+        });
+
+        for (double t = 0.1; t < 1; t += 0.1) {
+            double tv = t;
+            dfo.go(tv, y);
+
+            double ans = sol_val(tv);
+            REQUIRE(__D_EQ6(y[0], ans));
+        }
+    }
 }

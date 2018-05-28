@@ -25,17 +25,22 @@
 
 #include <common/common.h>
 
+#include <dae/def.h>
 #include <dae/sunmat.h>
 #include <dae/sunvec.h>
 
 #include <sundials/sundials_linearsolver.h>
+#include <sunlinsol/sunlinsol_band.h>
 #include <sunlinsol/sunlinsol_dense.h>
+#include <sunlinsol/sunlinsol_spbcgs.h>
+#include <sunlinsol/sunlinsol_spfgmr.h>
+#include <sunlinsol/sunlinsol_spgmr.h>
+#include <sunlinsol/sunlinsol_sptfqmr.h>
 
 IEXP_NS_BEGIN
 
 namespace dae {
 
-namespace linsol {
 ////////////////////////////////////////////////////////////
 // macro definition
 ////////////////////////////////////////////////////////////
@@ -45,11 +50,11 @@ namespace linsol {
 ////////////////////////////////////////////////////////////
 
 // ========================================
-// base
+// base linear solver
 // ========================================
 
 template <typename Derived>
-class solver
+class linsol
 {
     DEFINE_DERIVED
 
@@ -60,50 +65,155 @@ class solver
     }
 
   protected:
-    static const char *s_err_desc[9];
-
-    solver()
+    linsol()
         : m_ls(nullptr)
     {
-    }
-
-    void check(int e)
-    {
-        if (e < 0) {
-            throw std::runtime_error(s_err_desc[-e - 1]);
-        }
     }
 
     SUNLinearSolver m_ls;
 };
 
-template <typename Derived>
-const char *solver<Derived>::s_err_desc[9] = {
-    "the memory argument to the function is NULL",
-    "an illegal input has been provided to the function",
-    "failed memory access or allocation",
-    "an unrecoverable failure occurred in the ATimes routine",
-    "an unrecoverable failure occurred in the Pset routine",
-    "an unrecoverable failure occurred in the Psolve routine",
-    "an unrecoverable failure occurred in an external linear solver package",
-    "a failure occurred during Gram-Schmidt orthogonalization",
-    "a singular R matrix was encountered in a QR factorization",
+// ========================================
+// dense linear solver
+// ========================================
+
+class dense_linsol : public linsol<dense_linsol>
+{
+  public:
+    dense_linsol(N_Vector y, SUNMatrix a)
+    {
+        m_ls = SUNDenseLinearSolver(y, a);
+        IEXP_NOT_NULLPTR(m_ls);
+    }
 };
 
 // ========================================
-// dense
+// band linear solver
 // ========================================
 
-class dense : public solver<dense>
+class band_linsol : public linsol<band_linsol>
 {
   public:
-    template <typename T, typename U>
-    dense(const DenseBase<T> &y, const DenseBase<T> &a)
+    band_linsol(N_Vector y, SUNMatrix a)
     {
-        sunvec_serial sun_y(y, false);
-        sunmat_dense sun_a(a, false);
-        m_ls = SUNDenseLinearSolver(sun_y.n_vector(), sun_a.sunmatrix());
+        m_ls = SUNBandLinearSolver(y, a);
         IEXP_NOT_NULLPTR(m_ls);
+    }
+};
+
+// ========================================
+// Scaled, Preconditioned, Generalized Minimum Residual
+// ========================================
+
+class spgmr_linsol : public linsol<spgmr_linsol>
+{
+  public:
+    spgmr_linsol(N_Vector y, precondition pretype, int maxl)
+    {
+        m_ls = SUNSPGMR(y, (int)pretype, maxl);
+        IEXP_NOT_NULLPTR(m_ls);
+    }
+
+    spgmr_linsol &precondition(precondition pretype)
+    {
+        SUNSPGMRSetPrecType(m_ls, (int)pretype);
+        return *this;
+    }
+
+    spgmr_linsol &gram_schmidt(gram_schmidt gstype)
+    {
+        SUNSPGMRSetGSType(m_ls, (int)gstype);
+        return *this;
+    }
+
+    spgmr_linsol &max_restart(int maxrs)
+    {
+        SUNSPGMRSetMaxRestarts(m_ls, maxrs);
+        return *this;
+    }
+};
+
+// ========================================
+// Scaled, Preconditioned, Flexible, Generalized Minimum Residual
+// ========================================
+
+class spfgmr_linsol : public linsol<spfgmr_linsol>
+{
+  public:
+    spfgmr_linsol(N_Vector y, precondition pretype, int maxl)
+    {
+        m_ls = SUNSPFGMR(y, (int)pretype, maxl);
+        IEXP_NOT_NULLPTR(m_ls);
+    }
+
+    spfgmr_linsol &precondition(precondition pretype)
+    {
+        SUNSPFGMRSetPrecType(m_ls, (int)pretype);
+        return *this;
+    }
+
+    spfgmr_linsol &gram_schmidt(gram_schmidt gstype)
+    {
+        SUNSPFGMRSetGSType(m_ls, (int)gstype);
+        return *this;
+    }
+
+    spfgmr_linsol &max_restart(int maxrs)
+    {
+        SUNSPFGMRSetMaxRestarts(m_ls, maxrs);
+        return *this;
+    }
+};
+
+// ========================================
+// Scaled, Preconditioned,  Bi-Conjugate Gradient, Stabilized
+// ========================================
+
+class spbcgs_linsol : public linsol<spbcgs_linsol>
+{
+  public:
+    spbcgs_linsol(N_Vector y, precondition pretype, int maxl)
+    {
+        m_ls = SUNSPBCGS(y, (int)pretype, maxl);
+        IEXP_NOT_NULLPTR(m_ls);
+    }
+
+    spbcgs_linsol &precondition(precondition pretype)
+    {
+        SUNSPBCGSSetPrecType(m_ls, (int)pretype);
+        return *this;
+    }
+
+    spbcgs_linsol &maxl(int maxl)
+    {
+        SUNSPBCGSSetMaxl(m_ls, maxl);
+        return *this;
+    }
+};
+
+// ========================================
+//  Scaled, Preconditioned, Transpose-Free Quasi-Minimum Residual
+// ========================================
+
+class sptfqmr_linsol : public linsol<sptfqmr_linsol>
+{
+  public:
+    sptfqmr_linsol(N_Vector y, precondition pretype, int maxl)
+    {
+        m_ls = SUNSPTFQMR(y, (int)pretype, maxl);
+        IEXP_NOT_NULLPTR(m_ls);
+    }
+
+    sptfqmr_linsol &precondition(precondition pretype)
+    {
+        SUNSPTFQMRSetPrecType(m_ls, (int)pretype);
+        return *this;
+    }
+
+    sptfqmr_linsol &maxl(int maxl)
+    {
+        SUNSPTFQMRSetMaxl(m_ls, maxl);
+        return *this;
     }
 };
 
@@ -114,7 +224,6 @@ class dense : public solver<dense>
 ////////////////////////////////////////////////////////////
 // interface declaration
 ////////////////////////////////////////////////////////////
-}
 }
 
 IEXP_NS_END

@@ -46,11 +46,14 @@ class sunvec_serial
 {
   public:
     template <typename T>
-    sunvec_serial(DenseBase<T> &v,
-                  bool copy,
+    sunvec_serial(const DenseBase<T> &v,
+                  bool copy = true,
                   typename std::enable_if<bool(T::Flags &DirectAccessBit)>::type
                       * = nullptr)
     {
+        static_assert(TYPE_IS(typename T::Scalar, realtype),
+                      "only support realtype scalar");
+
         if (copy) {
             copy_vector(v);
         } else {
@@ -58,7 +61,7 @@ class sunvec_serial
 
             m_serial.length = v.size();
             m_serial.own_data = SUNFALSE;
-            m_serial.data = v.derived().data();
+            m_serial.data = const_cast<realtype *>(v.derived().data());
 
             m_vec.content = &m_serial;
             m_vec.ops = &sunvec_ops;
@@ -71,6 +74,9 @@ class sunvec_serial
         typename std::enable_if<!bool(T::Flags & DirectAccessBit)>::type * =
             nullptr)
     {
+        static_assert(TYPE_IS(typename T::Scalar, realtype),
+                      "only support realtype scalar");
+
         copy_vector(v);
     }
 

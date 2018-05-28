@@ -16,14 +16,19 @@
  * USA.
  */
 
-#ifndef __IEXP_DAE_ERROR__
-#define __IEXP_DAE_ERROR__
+#ifndef __IEXP_DAE_DENSE_ODE__
+#define __IEXP_DAE_DENSE_ODE__
 
 ////////////////////////////////////////////////////////////
 // import header files
 ////////////////////////////////////////////////////////////
 
 #include <common/common.h>
+
+#include <dae/linsol.h>
+#include <dae/ode.h>
+
+#include <cvode/cvode_direct.h>
 
 IEXP_NS_BEGIN
 
@@ -33,25 +38,61 @@ namespace dae {
 // macro definition
 ////////////////////////////////////////////////////////////
 
-#define cv_check(expr)                                                         \
-    do {                                                                       \
-        int __e = expr;                                                        \
-        if (__e < 0) {                                                         \
-            iexp::dae::cv_throw(__e);                                          \
-        }                                                                      \
-    } while (0)
-
-#define ls_check(expr)                                                         \
-    do {                                                                       \
-        int __e = expr;                                                        \
-        if (__e < 0) {                                                         \
-            iexp::dae::ls_throw(__e);                                          \
-        }                                                                      \
-    } while (0)
-
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
+
+class dense_ode : public ode<dense_ode>
+{
+  public:
+    template <typename T>
+    dense_ode(multistep lmm,
+              const DY_TYPE &dy,
+              double t0,
+              const DenseBase<T> &y0)
+        : ode<dense_ode>(lmm, iteration::NEWTON, dy, t0, y0)
+        , m_A(SUNDenseMatrix(y0.size(), y0.size()))
+        , m_ls(m_y0.n_vector(), m_A)
+    {
+        IEXP_NOT_NULLPTR(m_A);
+    }
+
+    dense_linsol &linsol()
+    {
+        return m_ls;
+    }
+
+    dense_ode &jac(const JAC_TYPE &jac)
+    {
+        m_jac = jac;
+        return *this;
+    }
+
+    void prepare()
+    {
+        cv_check(CVDlsSetLinearSolver(m_cvode, m_ls.sunls(), m_A));
+
+        if (m_jac) {
+            cv_check(CVDlsSetJacFn(m_cvode, jac_func<dense_ode>::s_jac));
+        } else {
+            cv_check(CVDlsSetJacFn(m_cvode, nullptr));
+        }
+    }
+
+    int compute_jac(double t,
+                    Map<const VectorXd> &y,
+                    Map<const VectorXd> &fy,
+                    Map<MatrixXd> &jac)
+    {
+        eigen_assert(m_jac);
+        return m_jac(t, y, fy, jac);
+    }
+
+  private:
+    SUNMatrix m_A;
+    dense_linsol m_ls;
+    JAC_TYPE m_jac;
+};
 
 ////////////////////////////////////////////////////////////
 // global variants
@@ -60,12 +101,8 @@ namespace dae {
 ////////////////////////////////////////////////////////////
 // interface declaration
 ////////////////////////////////////////////////////////////
-
-extern void cv_throw(int e);
-
-extern void ls_throw(int e);
 }
 
 IEXP_NS_END
 
-#endif /* __IEXP_DAE_ERROR__ */
+#endif /* __IEXP_DAE_DENSE_ODE__ */
