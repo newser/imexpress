@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_DAE_DENSE_ODE__
-#define __IEXP_DAE_DENSE_ODE__
+#ifndef __IEXP_DAE_KRYLOV_ODE__
+#define __IEXP_DAE_KRYLOV_ODE__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -28,7 +28,7 @@
 #include <dae/linsol.h>
 #include <dae/ode.h>
 
-#include <cvode/cvode_direct.h>
+#include <cvode/cvode_spils.h>
 
 IEXP_NS_BEGIN
 
@@ -42,58 +42,42 @@ namespace dae {
 // type definition
 ////////////////////////////////////////////////////////////
 
-class dense_ode : public ode<dense_ode>
+template <typename LS>
+class krylov_ode : public ode<krylov_ode<LS>>
 {
   public:
     template <typename T>
-    dense_ode(multistep lmm,
-              const DY_TYPE &dy,
-              double t0,
-              const DenseBase<T> &y0)
-        : ode<dense_ode>(lmm, iteration::NEWTON, dy, t0, y0)
-        , m_A(SUNDenseMatrix(y0.size(), y0.size()))
-        , m_ls(m_y0.n_vector(), m_A)
+    krylov_ode(multistep lmm,
+               const DY_TYPE &dy,
+               double t0,
+               const DenseBase<T> &y0,
+               int max_kdim = 0)
+        : ode<krylov_ode<LS>>(lmm, iteration::NEWTON, dy, t0, y0)
+        , m_ls(this->m_y0.n_vector(), precondition::NONE, max_kdim)
     {
-        IEXP_NOT_NULLPTR(m_A);
     }
 
-    dense_linsol &linsol()
+    LS &linsol()
     {
         return m_ls;
     }
 
-    dense_ode &jac(const JAC_TYPE &jac)
-    {
-        m_jac = jac;
-        return *this;
-    }
-
     void prepare()
     {
-        cv_check(CVDlsSetLinearSolver(m_cvode, m_ls.sunls(), m_A));
-
-        if (m_jac) {
-            cv_check(CVDlsSetJacFn(m_cvode, jac_func<dense_ode>::s_jac));
-        } else {
-            cv_check(CVDlsSetJacFn(m_cvode, nullptr));
-        }
+        cv_check(CVSpilsSetLinearSolver(this->m_cvode, m_ls.sunls()));
     }
 
-    int compute_jac(double t,
-                    Map<const VectorXd> &y,
-                    Map<const VectorXd> &fy,
-                    Map<MatrixXd> &jac,
-                    void *opaque)
-    {
-        eigen_assert(m_jac);
-        return m_jac(t, y, fy, jac, opaque);
-    }
-
-  private:
-    SUNMatrix m_A;
-    dense_linsol m_ls;
-    JAC_TYPE m_jac;
+  protected:
+    LS m_ls;
 };
+
+using spgmr_ode = krylov_ode<spgmr_linsol>;
+
+using spfgmr_ode = krylov_ode<spfgmr_linsol>;
+
+using spbcgs_ode = krylov_ode<spbcgs_linsol>;
+
+using sptfqmr_ode = krylov_ode<sptfqmr_linsol>;
 
 ////////////////////////////////////////////////////////////
 // global variants
@@ -106,4 +90,4 @@ class dense_ode : public ode<dense_ode>
 
 IEXP_NS_END
 
-#endif /* __IEXP_DAE_DENSE_ODE__ */
+#endif /* __IEXP_DAE_KRYLOV_ODE__ */

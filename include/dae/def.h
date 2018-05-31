@@ -42,15 +42,15 @@ namespace dae {
 
 enum class precondition
 {
-    none = PREC_NONE,
-    left = PREC_LEFT,
-    right = PREC_RIGHT,
+    NONE = PREC_NONE,
+    LEFT = PREC_LEFT,
+    RIGHT = PREC_RIGHT,
 };
 
 enum class gram_schmidt
 {
-    modified = MODIFIED_GS,
-    classical = CLASSICAL_GS,
+    MODIFIED = MODIFIED_GS,
+    CLASSICAL = CLASSICAL_GS,
 };
 
 enum class multistep

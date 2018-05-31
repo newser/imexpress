@@ -1,8 +1,10 @@
 #include <catch.hpp>
 #include <dae/dense_ode.h>
 #include <dae/dense_ode.h>
+#include <dae/diag_ode.h>
 #include <dae/func_ode.h>
 #include <dae/function.h>
+#include <dae/krylov_ode.h>
 #include <dae/linsol.h>
 #include <dae/ode.h>
 #include <dae/sunmat.h>
@@ -155,13 +157,29 @@ TEST_CASE("test_linsol_solver")
 class test_dy
 {
   public:
-    int compute_dy(double t, Map<const VectorXd> &y, Map<VectorXd> &dy)
+    int compute_dy(double t,
+                   Map<const VectorXd> &y,
+                   Map<VectorXd> &dy,
+                   void *opaque)
     {
+        REQUIRE(opaque == (void *)(uintptr_t)1);
         for (int i = 0; i < dy.size(); ++i) {
             dy[i] = y[i] + t;
         }
         return 1;
     }
+
+    void opaque(void *opaque)
+    {
+        m_opaque = opaque;
+    }
+    void *opaque()
+    {
+        return m_opaque;
+    }
+
+  private:
+    void *m_opaque;
 };
 
 TEST_CASE("test_dy")
@@ -173,6 +191,8 @@ TEST_CASE("test_dy")
     N_Vector dy = N_VNew_Serial(3);
 
     test_dy td;
+    td.opaque((void *)(uintptr_t)1);
+
     int ret = dy_func<test_dy>::s_dy(9, y, dy, &td);
     REQUIRE(ret == 1);
     REQUIRE(NV_Ith_S(dy, 0) == 10);
@@ -186,12 +206,15 @@ class test_jac
     int compute_jac(double t,
                     Map<const VectorXd> &y,
                     Map<const VectorXd> &fy,
-                    Map<MatrixXd> &jac)
+                    Map<MatrixXd> &jac,
+                    void *opaque)
     {
         REQUIRE(y.size() == 3);
         REQUIRE(fy.size() == 3);
         REQUIRE(jac.rows() == 3);
         REQUIRE(jac.cols() == 3);
+        REQUIRE(opaque == (void *)(uintptr_t)2);
+
         for (int i = 0; i < jac.rows(); ++i) {
             for (int j = 0; j < jac.cols(); ++j) {
                 jac(i, j) = y(i) * fy(j);
@@ -199,6 +222,18 @@ class test_jac
         }
         return 2;
     }
+
+    void opaque(void *opaque)
+    {
+        m_opaque = opaque;
+    }
+    void *opaque()
+    {
+        return m_opaque;
+    }
+
+  private:
+    void *m_opaque;
 };
 
 TEST_CASE("test_jac")
@@ -216,6 +251,8 @@ TEST_CASE("test_jac")
     SUNMatrix j = SUNDenseMatrix(3, 3);
 
     test_jac tj;
+    tj.opaque((void *)(uintptr_t)2);
+
     jac_func<test_jac>::s_jac(9, y, fy, j, &tj, nullptr, nullptr, nullptr);
     REQUIRE(SM_ELEMENT_D(j, 0, 0) == 4);
     REQUIRE(SM_ELEMENT_D(j, 0, 2) == 6);
@@ -253,7 +290,8 @@ TEST_CASE("test_func_ode")
         func_ode dfo(ms,
                      [](double t,
                         Map<const VectorXd> &y,
-                        Map<VectorXd> &dy) -> int {
+                        Map<VectorXd> &dy,
+                        void *opaque) -> int {
                          dy[0] = y[1];
                          dy[1] = -12 * y[1] - 36 * y[0];
                          return CV_SUCCESS;
@@ -298,7 +336,8 @@ TEST_CASE("test_dense_ode")
         dense_ode dfo(ms,
                       [](double t,
                          Map<const VectorXd> &y,
-                         Map<VectorXd> &dy) -> int {
+                         Map<VectorXd> &dy,
+                         void *opaque) -> int {
                           dy[0] = y[1];
                           dy[1] = -12 * y[1] - 36 * y[0];
                           return CV_SUCCESS;
@@ -326,7 +365,8 @@ TEST_CASE("test_dense_ode")
         dense_ode dfo(ms,
                       [](double t,
                          Map<const VectorXd> &y,
-                         Map<VectorXd> &dy) -> int {
+                         Map<VectorXd> &dy,
+                         void *opaque) -> int {
                           dy[0] = y[1];
                           dy[1] = -12 * y[1] - 36 * y[0];
                           return CV_SUCCESS;
@@ -339,7 +379,8 @@ TEST_CASE("test_dense_ode")
         dfo.jac([](double t,
                    Map<const VectorXd> &y,
                    Map<const VectorXd> &fy,
-                   Map<MatrixXd> &jac) -> int {
+                   Map<MatrixXd> &jac,
+                   void *opaque) -> int {
             jac(0, 0) = 0;
             jac(0, 1) = 1;
             jac(1, 1) = -36;
@@ -347,6 +388,166 @@ TEST_CASE("test_dense_ode")
 
             return CV_SUCCESS;
         });
+
+        for (double t = 0.1; t < 1; t += 0.1) {
+            double tv = t;
+            dfo.go(tv, y);
+
+            double ans = sol_val(tv);
+            REQUIRE(__D_EQ6(y[0], ans));
+        }
+    }
+}
+
+TEST_CASE("test_spgmr_ode")
+{
+    for (int i = 0; i < 2; ++i) {
+        VectorXd y(2);
+        y << -0.5, 1;
+
+        multistep ms = (i == 0 ? multistep::ADAMS : multistep::BDF);
+
+        spgmr_ode dfo(ms,
+                      [](double t,
+                         Map<const VectorXd> &y,
+                         Map<VectorXd> &dy,
+                         void *opaque) -> int {
+                          dy[0] = y[1];
+                          dy[1] = -12 * y[1] - 36 * y[0];
+                          return CV_SUCCESS;
+                      },
+                      0,
+                      y);
+
+        dfo.tolerance(0, 1e-6);
+
+        for (double t = 0.1; t < 1; t += 0.1) {
+            double tv = t;
+            dfo.go(tv, y);
+
+            double ans = sol_val(tv);
+            REQUIRE(__D_EQ6(y[0], ans));
+        }
+    }
+}
+
+TEST_CASE("test_diag_ode")
+{
+    for (int i = 0; i < 2; ++i) {
+        VectorXd y(2);
+        y << -0.5, 1;
+
+        multistep ms = (i == 0 ? multistep::ADAMS : multistep::BDF);
+
+        diag_ode dfo(ms,
+                     [](double t,
+                        Map<const VectorXd> &y,
+                        Map<VectorXd> &dy,
+                        void *opaque) -> int {
+                         dy[0] = y[1];
+                         dy[1] = -12 * y[1] - 36 * y[0];
+                         return CV_SUCCESS;
+                     },
+                     0,
+                     y);
+
+        dfo.tolerance(0, 1e-6);
+
+        for (double t = 0.1; t < 1; t += 0.1) {
+            double tv = t;
+            dfo.go(tv, y);
+
+            double ans = sol_val(tv);
+            REQUIRE(__D_EQ6(y[0], ans));
+        }
+    }
+}
+
+TEST_CASE("test_spfgmr_ode")
+{
+    for (int i = 0; i < 2; ++i) {
+        VectorXd y(2);
+        y << -0.5, 1;
+
+        multistep ms = (i == 0 ? multistep::ADAMS : multistep::BDF);
+
+        spfgmr_ode dfo(ms,
+                       [](double t,
+                          Map<const VectorXd> &y,
+                          Map<VectorXd> &dy,
+                          void *opaque) -> int {
+                           dy[0] = y[1];
+                           dy[1] = -12 * y[1] - 36 * y[0];
+                           return CV_SUCCESS;
+                       },
+                       0,
+                       y);
+
+        dfo.tolerance(0, 1e-6);
+
+        for (double t = 0.1; t < 1; t += 0.1) {
+            double tv = t;
+            dfo.go(tv, y);
+
+            double ans = sol_val(tv);
+            REQUIRE(__D_EQ6(y[0], ans));
+        }
+    }
+}
+
+TEST_CASE("test_spbcgs_ode")
+{
+    for (int i = 0; i < 2; ++i) {
+        VectorXd y(2);
+        y << -0.5, 1;
+
+        multistep ms = (i == 0 ? multistep::ADAMS : multistep::BDF);
+
+        spbcgs_ode dfo(ms,
+                       [](double t,
+                          Map<const VectorXd> &y,
+                          Map<VectorXd> &dy,
+                          void *opaque) -> int {
+                           dy[0] = y[1];
+                           dy[1] = -12 * y[1] - 36 * y[0];
+                           return CV_SUCCESS;
+                       },
+                       0,
+                       y);
+
+        dfo.tolerance(0, 1e-6);
+
+        for (double t = 0.1; t < 1; t += 0.1) {
+            double tv = t;
+            dfo.go(tv, y);
+
+            double ans = sol_val(tv);
+            REQUIRE(__D_EQ6(y[0], ans));
+        }
+    }
+}
+
+TEST_CASE("test_sptfqmr_ode")
+{
+    for (int i = 0; i < 2; ++i) {
+        VectorXd y(2);
+        y << -0.5, 1;
+
+        multistep ms = (i == 0 ? multistep::ADAMS : multistep::BDF);
+
+        sptfqmr_ode dfo(ms,
+                        [](double t,
+                           Map<const VectorXd> &y,
+                           Map<VectorXd> &dy,
+                           void *opaque) -> int {
+                            dy[0] = y[1];
+                            dy[1] = -12 * y[1] - 36 * y[0];
+                            return CV_SUCCESS;
+                        },
+                        0,
+                        y);
+
+        dfo.tolerance(0, 1e-6);
 
         for (double t = 0.1; t < 1; t += 0.1) {
             double tv = t;

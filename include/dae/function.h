@@ -50,8 +50,8 @@ template <typename T>
 class dy_func
 {
   public:
-    using type =
-        std::function<int(double t, Map<const VectorXd> &y, Map<VectorXd> &dy)>;
+    using type = std::function<
+        int(double t, Map<const VectorXd> &y, Map<VectorXd> &dy, void *opaque)>;
 
     static int s_dy(realtype t, N_Vector y, N_Vector ydot, void *user_data)
     {
@@ -65,7 +65,8 @@ class dy_func
                                      N_VGetLength_Serial(y));
         Map<VectorXd> mapped_dy(N_VGetArrayPointer(ydot),
                                 N_VGetLength_Serial(ydot));
-        return ((T *)user_data)->compute_dy(t, mapped_y, mapped_dy);
+        return ((T *)user_data)
+            ->compute_dy(t, mapped_y, mapped_dy, ((T *)user_data)->opaque());
     }
 };
 
@@ -76,7 +77,8 @@ class jac_func
     using type = std::function<int(double t,
                                    Map<const VectorXd> &y,
                                    Map<const VectorXd> &fy,
-                                   Map<MatrixXd> &jac)>;
+                                   Map<MatrixXd> &jac,
+                                   void *opaque)>;
 
     static int s_jac(realtype t,
                      N_Vector y,
@@ -103,7 +105,11 @@ class jac_func
                                  SM_ROWS_D(jac),
                                  SM_COLUMNS_D(jac));
         return ((T *)user_data)
-            ->compute_jac(t, mapped_y, mapped_fy, mapped_jac);
+            ->compute_jac(t,
+                          mapped_y,
+                          mapped_fy,
+                          mapped_jac,
+                          ((T *)user_data)->opaque());
     }
 };
 

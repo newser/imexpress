@@ -62,6 +62,17 @@ class ode
         return derived();
     }
 
+    void *opaque()
+    {
+        return m_opaque;
+    }
+
+    Derived &opaque(void *opq)
+    {
+        m_opaque = opq;
+        return derived();
+    }
+
     template <typename T>
     int go(double &tout, DenseBase<T> &yout, bool one_step = false)
     {
@@ -82,9 +93,12 @@ class ode
         return e;
     }
 
-    int compute_dy(double t, Map<const VectorXd> &y, Map<VectorXd> &dy)
+    int compute_dy(double t,
+                   Map<const VectorXd> &y,
+                   Map<VectorXd> &dy,
+                   void *opaque)
     {
-        return m_dy(t, y, dy);
+        return m_dy(t, y, dy, opaque);
     }
 
   protected:
@@ -116,6 +130,7 @@ class ode
         double t0,
         const DenseBase<T> &y0)
         : m_cvode(nullptr)
+        , m_opaque(nullptr)
         , m_dy(dy)
         , m_y0(y0)
         , m_ready(false)
@@ -147,6 +162,7 @@ class ode
     }
 
     void *m_cvode;
+    void *m_opaque;
     const DY_TYPE m_dy;
     sunvec_serial m_y0;
     bool m_ready : 1;

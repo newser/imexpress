@@ -108,9 +108,9 @@ class band_linsol : public linsol<band_linsol>
 class spgmr_linsol : public linsol<spgmr_linsol>
 {
   public:
-    spgmr_linsol(N_Vector y, precondition pretype, int maxl)
+    spgmr_linsol(N_Vector y, precondition pretype, int max_kdim)
     {
-        m_ls = SUNSPGMR(y, (int)pretype, maxl);
+        m_ls = SUNSPGMR(y, (int)pretype, max_kdim);
         IEXP_NOT_NULLPTR(m_ls);
     }
 
@@ -140,9 +140,9 @@ class spgmr_linsol : public linsol<spgmr_linsol>
 class spfgmr_linsol : public linsol<spfgmr_linsol>
 {
   public:
-    spfgmr_linsol(N_Vector y, precondition pretype, int maxl)
+    spfgmr_linsol(N_Vector y, precondition pretype, int max_kdim)
     {
-        m_ls = SUNSPFGMR(y, (int)pretype, maxl);
+        m_ls = SUNSPFGMR(y, (int)pretype, max_kdim);
         IEXP_NOT_NULLPTR(m_ls);
     }
 
@@ -172,9 +172,9 @@ class spfgmr_linsol : public linsol<spfgmr_linsol>
 class spbcgs_linsol : public linsol<spbcgs_linsol>
 {
   public:
-    spbcgs_linsol(N_Vector y, precondition pretype, int maxl)
+    spbcgs_linsol(N_Vector y, precondition pretype, int max_kdim)
     {
-        m_ls = SUNSPBCGS(y, (int)pretype, maxl);
+        m_ls = SUNSPBCGS(y, (int)pretype, max_kdim);
         IEXP_NOT_NULLPTR(m_ls);
     }
 
@@ -184,9 +184,9 @@ class spbcgs_linsol : public linsol<spbcgs_linsol>
         return *this;
     }
 
-    spbcgs_linsol &maxl(int maxl)
+    spbcgs_linsol &max_kdim(int max_kdim)
     {
-        SUNSPBCGSSetMaxl(m_ls, maxl);
+        SUNSPBCGSSetMaxl(m_ls, max_kdim);
         return *this;
     }
 };
@@ -198,9 +198,9 @@ class spbcgs_linsol : public linsol<spbcgs_linsol>
 class sptfqmr_linsol : public linsol<sptfqmr_linsol>
 {
   public:
-    sptfqmr_linsol(N_Vector y, precondition pretype, int maxl)
+    sptfqmr_linsol(N_Vector y, precondition pretype, int max_kdim)
     {
-        m_ls = SUNSPTFQMR(y, (int)pretype, maxl);
+        m_ls = SUNSPTFQMR(y, (int)pretype, max_kdim);
         IEXP_NOT_NULLPTR(m_ls);
     }
 
@@ -210,9 +210,9 @@ class sptfqmr_linsol : public linsol<sptfqmr_linsol>
         return *this;
     }
 
-    sptfqmr_linsol &maxl(int maxl)
+    sptfqmr_linsol &max_kdim(int max_kdim)
     {
-        SUNSPTFQMRSetMaxl(m_ls, maxl);
+        SUNSPTFQMRSetMaxl(m_ls, max_kdim);
         return *this;
     }
 };
