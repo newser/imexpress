@@ -55,9 +55,6 @@ class krylov_ode : public ode<krylov_ode<LS>>
                int max_kdim = 0)
         : ode<krylov_ode<LS>>(lmm, iteration::NEWTON, dy, t0, y0)
         , m_ls(this->m_y0.n_vector(), precondition::NONE, max_kdim)
-        , m_dim(0)
-        , m_up_dim(0)
-        , m_low_dim(0)
     {
     }
 
@@ -79,6 +76,22 @@ class krylov_ode : public ode<krylov_ode<LS>>
     {
     }
 
+    template <typename T>
+    krylov_ode(multistep lmm,
+               const DY_TYPE &dy,
+               double t0,
+               const DenseBase<T> &y0,
+               precondition pretype,
+               PSETUP_TYPE psetup,
+               PSOLVE_TYPE psolve,
+               int max_kdim = 0)
+        : ode<krylov_ode<LS>>(lmm, iteration::NEWTON, dy, t0, y0)
+        , m_ls(this->m_y0.n_vector(), pretype, max_kdim)
+        , m_psetup(psetup)
+        , m_psolve(psolve)
+    {
+    }
+
     LS &linsol()
     {
         return m_ls;
@@ -91,11 +104,45 @@ class krylov_ode : public ode<krylov_ode<LS>>
         if (m_dim != 0) {
             cv_check(CVBandPrecInit(this->m_cvode, m_dim, m_up_dim, m_low_dim));
         }
+
+        if (m_psetup || m_psolve) {
+            cv_check(
+                CVSpilsSetPreconditioner(this->m_cvode,
+                                         psetup_func<krylov_ode<LS>>::s_psetup,
+                                         psolve_func<
+                                             krylov_ode<LS>>::s_psolve));
+        }
+    }
+
+    int psetup(double t,
+               Map<const VectorXd> &y,
+               Map<const VectorXd> &dy,
+               bool jac_ok,
+               bool &jac_updated,
+               double gamma,
+               void *opaque)
+    {
+        return m_psetup(t, y, dy, jac_ok, jac_updated, gamma, opaque);
+    }
+
+    int psolve(double t,
+               Map<const VectorXd> &y,
+               Map<const VectorXd> &dy,
+               Map<const VectorXd> &r,
+               Map<VectorXd> &z,
+               double gamma,
+               double delta,
+               precondition pretype,
+               void *opaque)
+    {
+        return m_psolve(t, y, dy, r, z, gamma, delta, pretype, opaque);
     }
 
   protected:
     LS m_ls;
-    sunindextype m_dim, m_up_dim, m_low_dim;
+    sunindextype m_dim{0}, m_up_dim{0}, m_low_dim{0};
+    PSETUP_TYPE m_psetup;
+    PSOLVE_TYPE m_psolve;
 };
 
 using spgmr_ode = krylov_ode<spgmr_linsol>;

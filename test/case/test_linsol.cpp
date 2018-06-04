@@ -306,6 +306,162 @@ TEST_CASE("test_weight")
     REQUIRE(NV_Ith_S(ewt, 2) == 4);
 }
 
+class test_psetup
+{
+  public:
+    void opaque(void *opaque)
+    {
+        m_opaque = opaque;
+    }
+    void *opaque()
+    {
+        return m_opaque;
+    }
+
+    int psetup(double t,
+               Map<const VectorXd> &y,
+               Map<const VectorXd> &dy,
+               bool jac_ok,
+               bool &jac_updated,
+               double gamma,
+               void *opaque)
+    {
+        REQUIRE(t == 3.14);
+
+        REQUIRE(y.size() == 3);
+        REQUIRE(y(0) == 1);
+        REQUIRE(y(1) == 2);
+        REQUIRE(y(2) == 3);
+
+        REQUIRE(dy.size() == 3);
+        REQUIRE(dy(0) == 9);
+        REQUIRE(dy(1) == 8);
+        REQUIRE(dy(2) == 7);
+
+        REQUIRE(jac_ok);
+
+        jac_updated = jac_ok;
+
+        REQUIRE(gamma == 1.234);
+
+        REQUIRE(opaque == (void *)(uintptr_t)4);
+
+        return 100;
+    }
+
+  private:
+    void *m_opaque;
+};
+
+TEST_CASE("test_psetup")
+{
+    N_Vector y = N_VNew_Serial(3);
+    NV_Ith_S(y, 0) = 1;
+    NV_Ith_S(y, 1) = 2;
+    NV_Ith_S(y, 2) = 3;
+
+    N_Vector dy = N_VNew_Serial(3);
+    NV_Ith_S(dy, 0) = 9;
+    NV_Ith_S(dy, 1) = 8;
+    NV_Ith_S(dy, 2) = 7;
+
+    test_psetup tw;
+    tw.opaque((void *)(uintptr_t)4);
+
+    booleantype jj = false;
+    int r =
+        psetup_func<test_psetup>::s_psetup(3.14, y, dy, true, &jj, 1.234, &tw);
+    REQUIRE(jj);
+    REQUIRE(r == 100);
+}
+
+class test_psolve
+{
+  public:
+    void opaque(void *opaque)
+    {
+        m_opaque = opaque;
+    }
+    void *opaque()
+    {
+        return m_opaque;
+    }
+
+    int psolve(double t,
+               Map<const VectorXd> &y,
+               Map<const VectorXd> &dy,
+               Map<const VectorXd> &r,
+               Map<VectorXd> &z,
+               double gamma,
+               double delta,
+               precondition pretype,
+               void *opaque)
+    {
+        REQUIRE(t == 3.14);
+
+        REQUIRE(y.size() == 3);
+        REQUIRE(y(0) == 1);
+        REQUIRE(y(1) == 2);
+        REQUIRE(y(2) == 3);
+
+        REQUIRE(dy.size() == 3);
+        REQUIRE(dy(0) == 9);
+        REQUIRE(dy(1) == 8);
+        REQUIRE(dy(2) == 7);
+
+        REQUIRE(r.size() == 3);
+        REQUIRE(r(0) == 19);
+        REQUIRE(r(1) == 18);
+        REQUIRE(r(2) == 17);
+
+        z = y + dy;
+
+        REQUIRE(gamma == 1.1);
+        REQUIRE(delta == 2.2);
+
+        if (opaque == (void *)(uintptr_t)1) {
+            REQUIRE(pretype == precondition::LEFT);
+        } else {
+            REQUIRE(pretype == precondition::RIGHT);
+        }
+
+        return 10;
+    }
+
+  private:
+    void *m_opaque;
+};
+
+TEST_CASE("test_psolve")
+{
+    N_Vector y = N_VNew_Serial(3);
+    NV_Ith_S(y, 0) = 1;
+    NV_Ith_S(y, 1) = 2;
+    NV_Ith_S(y, 2) = 3;
+
+    N_Vector dy = N_VNew_Serial(3);
+    NV_Ith_S(dy, 0) = 9;
+    NV_Ith_S(dy, 1) = 8;
+    NV_Ith_S(dy, 2) = 7;
+
+    N_Vector r = N_VNew_Serial(3);
+    NV_Ith_S(r, 0) = 19;
+    NV_Ith_S(r, 1) = 18;
+    NV_Ith_S(r, 2) = 17;
+
+    N_Vector z = N_VNew_Serial(3);
+
+    test_psolve tw;
+    tw.opaque((void *)(uintptr_t)1);
+
+    int ret =
+        psolve_func<test_psolve>::s_psolve(3.14, y, dy, r, z, 1.1, 2.2, 1, &tw);
+    REQUIRE(ret == 10);
+    REQUIRE(NV_Ith_S(z, 0) == (NV_Ith_S(y, 0) + NV_Ith_S(dy, 0)));
+    REQUIRE(NV_Ith_S(z, 1) == (NV_Ith_S(y, 1) + NV_Ith_S(dy, 1)));
+    REQUIRE(NV_Ith_S(z, 2) == (NV_Ith_S(y, 2) + NV_Ith_S(dy, 2)));
+}
+
 double sol_val(double t)
 {
     return -(0.5 + 2 * t) * exp(-6 * t);

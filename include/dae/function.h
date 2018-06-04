@@ -44,6 +44,10 @@ namespace dae {
 
 #define WEIGHT_TYPE typename weight_func<void>::type
 
+#define PSETUP_TYPE typename psetup_func<void>::type
+
+#define PSOLVE_TYPE typename psolve_func<void>::type
+
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
@@ -124,8 +128,6 @@ class weight_func
 
     static int s_weight(N_Vector y, N_Vector ewt, void *user_data)
     {
-        static_assert(TYPE_IS(realtype, double), "only support double scalar");
-
         eigen_assert(N_VGetVectorID(y) == SUNDIALS_NVEC_SERIAL);
         eigen_assert(N_VGetVectorID(ewt) == SUNDIALS_NVEC_SERIAL);
 
@@ -135,6 +137,104 @@ class weight_func
                                  N_VGetLength_Serial(ewt));
         return ((T *)user_data)
             ->compute_weight(mapped_y, mapped_ewt, ((T *)user_data)->opaque());
+    }
+};
+
+template <typename T>
+class psetup_func
+{
+  public:
+    using type = std::function<int(double t,
+                                   Map<const VectorXd> &y,
+                                   Map<const VectorXd> &dy,
+                                   bool jac_ok,
+                                   bool &jac_updated,
+                                   double gamma,
+                                   void *opaque)>;
+
+    static int s_psetup(realtype t,
+                        N_Vector y,
+                        N_Vector fy,
+                        booleantype jok,
+                        booleantype *jcurPtr,
+                        realtype gamma,
+                        void *user_data)
+    {
+        static_assert(TYPE_IS(realtype, double), "only support double scalar");
+
+        eigen_assert(N_VGetVectorID(y) == SUNDIALS_NVEC_SERIAL);
+        eigen_assert(N_VGetVectorID(fy) == SUNDIALS_NVEC_SERIAL);
+        eigen_assert(N_VGetLength_Serial(y) == N_VGetLength_Serial(fy));
+
+        Map<const VectorXd> mapped_y(N_VGetArrayPointer(y),
+                                     N_VGetLength_Serial(y));
+        Map<const VectorXd> mapped_dy(N_VGetArrayPointer(fy),
+                                      N_VGetLength_Serial(fy));
+        bool jac_updated;
+        int ret = ((T *)user_data)
+                      ->psetup(t,
+                               mapped_y,
+                               mapped_dy,
+                               jok,
+                               jac_updated,
+                               gamma,
+                               ((T *)user_data)->opaque());
+        *jcurPtr = jac_updated;
+        return ret;
+    }
+};
+
+template <typename T>
+class psolve_func
+{
+  public:
+    using type = std::function<int(double t,
+                                   Map<const VectorXd> &y,
+                                   Map<const VectorXd> &dy,
+                                   Map<const VectorXd> &r,
+                                   Map<VectorXd> &z,
+                                   double gamma,
+                                   double delta,
+                                   precondition pretype,
+                                   void *opaque)>;
+
+    static int s_psolve(realtype t,
+                        N_Vector y,
+                        N_Vector fy,
+                        N_Vector r,
+                        N_Vector z,
+                        realtype gamma,
+                        realtype delta,
+                        int lr,
+                        void *user_data)
+    {
+        static_assert(TYPE_IS(realtype, double), "only support double scalar");
+
+        eigen_assert(N_VGetVectorID(y) == SUNDIALS_NVEC_SERIAL);
+        eigen_assert(N_VGetVectorID(fy) == SUNDIALS_NVEC_SERIAL);
+        eigen_assert(N_VGetVectorID(r) == SUNDIALS_NVEC_SERIAL);
+        eigen_assert(N_VGetVectorID(z) == SUNDIALS_NVEC_SERIAL);
+        eigen_assert(N_VGetLength_Serial(y) == N_VGetLength_Serial(fy));
+        eigen_assert(N_VGetLength_Serial(y) == N_VGetLength_Serial(r));
+        eigen_assert(N_VGetLength_Serial(y) == N_VGetLength_Serial(z));
+
+        Map<const VectorXd> mapped_y(N_VGetArrayPointer(y),
+                                     N_VGetLength_Serial(y));
+        Map<const VectorXd> mapped_dy(N_VGetArrayPointer(fy),
+                                      N_VGetLength_Serial(fy));
+        Map<const VectorXd> mapped_r(N_VGetArrayPointer(r),
+                                     N_VGetLength_Serial(r));
+        Map<VectorXd> mapped_z(N_VGetArrayPointer(z), N_VGetLength_Serial(z));
+        return ((T *)user_data)
+            ->psolve(t,
+                     mapped_y,
+                     mapped_dy,
+                     mapped_r,
+                     mapped_z,
+                     gamma,
+                     delta,
+                     lr == 1 ? precondition::LEFT : precondition::RIGHT,
+                     ((T *)user_data)->opaque());
     }
 };
 
