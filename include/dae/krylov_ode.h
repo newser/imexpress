@@ -28,6 +28,7 @@
 #include <dae/linsol.h>
 #include <dae/ode.h>
 
+#include <cvode/cvode_bandpre.h>
 #include <cvode/cvode_spils.h>
 
 IEXP_NS_BEGIN
@@ -54,6 +55,27 @@ class krylov_ode : public ode<krylov_ode<LS>>
                int max_kdim = 0)
         : ode<krylov_ode<LS>>(lmm, iteration::NEWTON, dy, t0, y0)
         , m_ls(this->m_y0.n_vector(), precondition::NONE, max_kdim)
+        , m_dim(0)
+        , m_up_dim(0)
+        , m_low_dim(0)
+    {
+    }
+
+    template <typename T>
+    krylov_ode(multistep lmm,
+               const DY_TYPE &dy,
+               double t0,
+               const DenseBase<T> &y0,
+               precondition pretype,
+               int dim,
+               int up_dim,
+               int low_dim,
+               int max_kdim = 0)
+        : ode<krylov_ode<LS>>(lmm, iteration::NEWTON, dy, t0, y0)
+        , m_ls(this->m_y0.n_vector(), pretype, max_kdim)
+        , m_dim(dim)
+        , m_up_dim(up_dim)
+        , m_low_dim(low_dim)
     {
     }
 
@@ -65,10 +87,15 @@ class krylov_ode : public ode<krylov_ode<LS>>
     void prepare()
     {
         cv_check(CVSpilsSetLinearSolver(this->m_cvode, m_ls.sunls()));
+
+        if (m_dim != 0) {
+            cv_check(CVBandPrecInit(this->m_cvode, m_dim, m_up_dim, m_low_dim));
+        }
     }
 
   protected:
     LS m_ls;
+    sunindextype m_dim, m_up_dim, m_low_dim;
 };
 
 using spgmr_ode = krylov_ode<spgmr_linsol>;

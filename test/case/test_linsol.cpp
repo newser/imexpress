@@ -612,4 +612,37 @@ TEST_CASE("test_sptfqmr_ode")
             REQUIRE(__D_EQ6(y[0], ans));
         }
     }
+
+    for (int i = 0; i < 2; ++i) {
+        VectorXd y(2);
+        y << -0.5, 1;
+
+        multistep ms = (i == 0 ? multistep::ADAMS : multistep::BDF);
+
+        sptfqmr_ode dfo(ms,
+                        [](double t,
+                           Map<const VectorXd> &y,
+                           Map<VectorXd> &dy,
+                           void *opaque) -> int {
+                            dy[0] = y[1];
+                            dy[1] = -12 * y[1] - 36 * y[0];
+                            return CV_SUCCESS;
+                        },
+                        0,
+                        y,
+                        precondition::LEFT,
+                        2,
+                        1,
+                        1);
+
+        dfo.tolerance(0, 1e-6);
+
+        for (double t = 0.1; t < 1; t += 0.1) {
+            double tv = t;
+            dfo.go(tv, y);
+
+            double ans = sol_val(tv);
+            REQUIRE(__D_EQ6(y[0], ans));
+        }
+    }
 }
