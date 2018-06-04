@@ -260,6 +260,52 @@ TEST_CASE("test_jac")
     REQUIRE(SM_ELEMENT_D(j, 2, 2) == 18);
 }
 
+class test_weight
+{
+  public:
+    void opaque(void *opaque)
+    {
+        m_opaque = opaque;
+    }
+    void *opaque()
+    {
+        return m_opaque;
+    }
+
+    int compute_weight(Map<const VectorXd> &y, Map<VectorXd> &ewt, void *opaque)
+    {
+        REQUIRE(y.size() == 3);
+        REQUIRE(ewt.size() == 3);
+        REQUIRE(opaque == (void *)(uintptr_t)3);
+
+        for (int i = 0; i < ewt.size(); ++i) {
+            ewt[i] = y[i] + 1;
+        }
+        return 0;
+    }
+
+  private:
+    void *m_opaque;
+};
+
+TEST_CASE("test_weight")
+{
+    N_Vector y = N_VNew_Serial(3);
+    NV_Ith_S(y, 0) = 1;
+    NV_Ith_S(y, 1) = 2;
+    NV_Ith_S(y, 2) = 3;
+
+    N_Vector ewt = N_VNew_Serial(3);
+
+    test_weight tw;
+    tw.opaque((void *)(uintptr_t)3);
+
+    weight_func<test_weight>::s_weight(y, ewt, &tw);
+    REQUIRE(NV_Ith_S(ewt, 0) == 2);
+    REQUIRE(NV_Ith_S(ewt, 1) == 3);
+    REQUIRE(NV_Ith_S(ewt, 2) == 4);
+}
+
 double sol_val(double t)
 {
     return -(0.5 + 2 * t) * exp(-6 * t);
@@ -375,6 +421,15 @@ TEST_CASE("test_dense_ode")
                       y);
 
         dfo.tolerance(0, 1e-6);
+
+        dfo.tolerance([](Map<const VectorXd> &y,
+                         Map<VectorXd> &ewt,
+                         void *opaque) -> int {
+            for (int i = 0; i < ewt.size(); ++i) {
+                ewt[i] = 1 / (1e-6 * y[i]);
+            }
+            return CV_SUCCESS;
+        });
 
         dfo.jac([](double t,
                    Map<const VectorXd> &y,

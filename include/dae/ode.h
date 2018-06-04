@@ -62,6 +62,12 @@ class ode
         return derived();
     }
 
+    Derived &tolerance(const WEIGHT_TYPE &weight)
+    {
+        m_weight = weight;
+        return derived();
+    }
+
     void *opaque()
     {
         return m_opaque;
@@ -77,6 +83,7 @@ class ode
     int go(double &tout, DenseBase<T> &yout, bool one_step = false)
     {
         if (!m_ready) {
+            init2();
             derived().prepare();
             m_ready = true;
         }
@@ -99,6 +106,11 @@ class ode
                    void *opaque)
     {
         return m_dy(t, y, dy, opaque);
+    }
+
+    int compute_weight(Map<const VectorXd> &y, Map<VectorXd> &ewt, void *opaque)
+    {
+        return m_weight(y, ewt, opaque);
     }
 
   protected:
@@ -161,10 +173,18 @@ class ode
         cv_check(CVodeSetErrHandlerFn(m_cvode, err_handler, nullptr));
     }
 
+    void init2()
+    {
+        if (m_weight) {
+            cv_check(CVodeWFtolerances(m_cvode, weight_func<ode>::s_weight));
+        }
+    }
+
     void *m_cvode;
     void *m_opaque;
     const DY_TYPE m_dy;
     sunvec_serial m_y0;
+    WEIGHT_TYPE m_weight;
     bool m_ready : 1;
 };
 

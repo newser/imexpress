@@ -42,6 +42,8 @@ namespace dae {
 
 #define JAC_TYPE typename jac_func<void>::type
 
+#define WEIGHT_TYPE typename weight_func<void>::type
+
 ////////////////////////////////////////////////////////////
 // type definition
 ////////////////////////////////////////////////////////////
@@ -110,6 +112,29 @@ class jac_func
                           mapped_fy,
                           mapped_jac,
                           ((T *)user_data)->opaque());
+    }
+};
+
+template <typename T>
+class weight_func
+{
+  public:
+    using type = std::function<
+        int(Map<const VectorXd> &y, Map<VectorXd> &ewt, void *opaque)>;
+
+    static int s_weight(N_Vector y, N_Vector ewt, void *user_data)
+    {
+        static_assert(TYPE_IS(realtype, double), "only support double scalar");
+
+        eigen_assert(N_VGetVectorID(y) == SUNDIALS_NVEC_SERIAL);
+        eigen_assert(N_VGetVectorID(ewt) == SUNDIALS_NVEC_SERIAL);
+
+        Map<const VectorXd> mapped_y(N_VGetArrayPointer(y),
+                                     N_VGetLength_Serial(y));
+        Map<VectorXd> mapped_ewt(N_VGetArrayPointer(ewt),
+                                 N_VGetLength_Serial(ewt));
+        return ((T *)user_data)
+            ->compute_weight(mapped_y, mapped_ewt, ((T *)user_data)->opaque());
     }
 };
 
