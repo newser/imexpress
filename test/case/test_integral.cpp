@@ -1,4 +1,5 @@
 #include <catch.hpp>
+#include <common/function.h>
 #include <integral/cquad.h>
 #include <integral/fixed.h>
 #include <integral/glfixed.h>
@@ -27,12 +28,12 @@ static double foo(double x)
 
 TEST_CASE("integral_func")
 {
-    integral::unary_func<double> f([](double x) -> double { return 2 * x; });
+    unary_func<double> f([](double x) -> double { return 2 * x; });
     int dummy[10]{1, 2, 3, 4, 5, 6, 7, 8, 9};
     double v = f.gsl()->function(1.2, f.gsl()->params);
     REQUIRE(v == 2.4);
 
-    // integral::unary_func<double> f2([](float x) -> float { return x; });
+    // unary_func<double> f2([](float x) -> float { return x; });
 
     class t_op
     {
@@ -42,12 +43,12 @@ TEST_CASE("integral_func")
             return x + 2;
         }
     };
-    integral::unary_func<double> f2((t_op()));
+    unary_func<double> f2((t_op()));
     int dummy2[10]{1, 2, 3, 4, 5, 6, 7, 8, 9};
     v = f2.gsl()->function(1.2, f2.gsl()->params);
     REQUIRE(v == 3.2);
 
-    integral::unary_func<double> f3(foo);
+    unary_func<double> f3(foo);
     int dummy3[10]{1, 2, 3, 4, 5, 6, 7, 8, 9};
     v = f3.gsl()->function(1.2, f3.gsl()->params);
     REQUIRE(v == 1.44);
@@ -427,7 +428,7 @@ TEST_CASE("integral_monte_func")
     v = f.gsl()->f(d, 2, f.gsl()->params);
     REQUIRE(v == 451);
 
-    // integral::unary_func<double> f2([](float x) -> float { return x; });
+    // unary_func<double> f2([](float x) -> float { return x; });
 
     class t_op
     {

@@ -79,6 +79,15 @@ class ode
         return derived();
     }
 
+#if 0
+    template <typename T>
+    void get_weight(DenseBase<T> &w)
+    {
+        sunvec_serial sv(w, false);
+        cv_check(CVodeGetErrWeights(m_cvode, sv.n_vector()));
+    }
+#endif
+
     template <typename T>
     int go(double &tout, DenseBase<T> &yout, bool one_step = false)
     {

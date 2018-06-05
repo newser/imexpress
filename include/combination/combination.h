@@ -25,9 +25,6 @@
 
 #include <common/common.h>
 
-#include <common/common.h>
-#include <common/copy.h>
-
 #include <gsl/gsl_combination.h>
 
 IEXP_NS_BEGIN

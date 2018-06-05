@@ -72,6 +72,7 @@ add_group(rstat ${ROOT_PATH}/include/rstat ${ROOT_PATH}/source/rstat IEXP_SOURCE
 add_group(histogram ${ROOT_PATH}/include/histogram ${ROOT_PATH}/source/histogram IEXP_SOURCE)
 add_group(siman ${ROOT_PATH}/include/siman ${ROOT_PATH}/source/siman IEXP_SOURCE)
 add_group(dae ${ROOT_PATH}/include/dae ${ROOT_PATH}/source/dae IEXP_SOURCE)
+add_group(froot ${ROOT_PATH}/include/froot ${ROOT_PATH}/source/froot IEXP_SOURCE)
 
 #
 # build

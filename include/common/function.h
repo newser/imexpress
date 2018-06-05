@@ -16,8 +16,8 @@
  * USA.
  */
 
-#ifndef __IEXP_INTEGRAL_FUNCTION__
-#define __IEXP_INTEGRAL_FUNCTION__
+#ifndef __IEXP_FUNCTION__
+#define __IEXP_FUNCTION__
 
 ////////////////////////////////////////////////////////////
 // import header files
@@ -30,8 +30,6 @@
 
 IEXP_NS_BEGIN
 
-namespace integral {
-
 ////////////////////////////////////////////////////////////
 // macro definition
 ////////////////////////////////////////////////////////////
@@ -41,79 +39,38 @@ namespace integral {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-class monte_func
+class unary_func
 {
   public:
-    using type_1d = std::function<T(T)>;
-    using type_nd = std::function<T(T *, size_t)>;
+    using type = std::function<T(T)>;
 
-    static T s_func_1d(T *x, size_t dim, void *param)
+    static T s_func(T x, void *param)
     {
-        return ((type_1d *)param)->operator()(x[0]);
+        return ((type *)param)->operator()(x);
     }
 
-    static T s_func_nd(T *x, size_t dim, void *param)
-    {
-        return ((type_nd *)param)->operator()(x, dim);
-    }
-
-    monte_func(const type_1d &f)
+    unary_func(const type &f)
         : m_fn(f)
-        , m_gsl_fn{s_func_1d,
-                   1,
-                   const_cast<void *>(
-                       reinterpret_cast<const void *>(&m_fn._1d))}
+        , m_gsl_fn{s_func,
+                   const_cast<void *>(reinterpret_cast<const void *>(&m_fn))}
     {
         static_assert(TYPE_IS(T, double), "only support double now");
     }
 
-    monte_func(size_t dim, const type_nd &f)
-        : m_fn(f)
-        , m_gsl_fn{s_func_nd,
-                   dim,
-                   const_cast<void *>(
-                       reinterpret_cast<const void *>(&m_fn._nd))}
+    T operator()(T x)
     {
-        static_assert(TYPE_IS(T, double), "only support double now");
-
-        // dim must be large than 1, or destructor does not work correctly
-        eigen_assert(dim > 1);
+        return m_fn(x);
     }
 
-    ~monte_func()
-    {
-        if (m_gsl_fn.dim == 1) {
-            m_fn._1d.~type_1d();
-        } else {
-            m_fn._nd.~type_nd();
-        }
-    }
-
-    const gsl_monte_function *gsl() const
+    const gsl_function *gsl() const
     {
         return &m_gsl_fn;
     }
 
   private:
     // m_fn can not be reference, msvc requires copying it
-    union fn
-    {
-        fn(const type_1d &f)
-            : _1d(f)
-        {
-        }
-        fn(const type_nd &f)
-            : _nd(f)
-        {
-        }
-        ~fn()
-        {
-        }
-
-        const type_1d _1d;
-        const type_nd _nd;
-    } m_fn;
-    const gsl_monte_function m_gsl_fn;
+    const type m_fn;
+    const gsl_function m_gsl_fn;
 };
 
 ////////////////////////////////////////////////////////////
@@ -123,8 +80,7 @@ class monte_func
 ////////////////////////////////////////////////////////////
 // interface declaration
 ////////////////////////////////////////////////////////////
-}
 
 IEXP_NS_END
 
-#endif /* __IEXP_INTEGRAL_FUNCTION__ */
+#endif /* __IEXP_FUNCTION__ */
