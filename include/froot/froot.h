@@ -122,6 +122,7 @@ class froot
             gsl_root_fsolver_iterate(m_fsolver);
             x1 = gsl_root_fsolver_root(m_fsolver);
             status = gsl_root_test_delta(x1, x0, epsabs, epsrel);
+            x0 = x1;
         } while ((status == GSL_CONTINUE) && (i++ < max_iter));
         return x1;
     }
