@@ -50,8 +50,6 @@ class mfroot
 
         static int s_f(const gsl_vector *x, void *param, gsl_vector *f)
         {
-            eigen_assert(x->size == f->size);
-
             Map<const VectorXd> mapped_x(x->data, x->size);
             Map<VectorXd> mapped_f(f->data, f->size);
             return ((f_func *)param)->f(mapped_x, mapped_f) ? GSL_SUCCESS

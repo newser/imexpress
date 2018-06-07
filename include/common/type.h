@@ -150,6 +150,8 @@ struct dense_derive
     using type = typename std::conditional<IS_MATRIX(T), matrix, array>::type;
 };
 
+using RowMatrixXd = Matrix<double, Dynamic, Dynamic, RowMajor>;
+
 ////////////////////////////////////////////////////////////
 // global variants
 ////////////////////////////////////////////////////////////

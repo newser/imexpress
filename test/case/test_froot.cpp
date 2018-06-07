@@ -2,6 +2,7 @@
 #include <common/gslvec.h>
 #include <froot/dfroot.h>
 #include <froot/froot.h>
+#include <froot/mdfroot.h>
 #include <froot/mfroot.h>
 #include <iostream>
 #include <math/constant.h>
@@ -196,6 +197,63 @@ TEST_CASE("test_mfroot")
             },
             x,
             (mfroot::type)i);
+
+        Vector2d rt = fr.find(0, 1e-6);
+        REQUIRE(__D_EQ6(rt(0), 1));
+        REQUIRE(__D_EQ6(rt(1), 1));
+
+        mfroot fr2(
+            [](Map<const VectorXd> &x, Map<VectorXd> &f) -> bool {
+                f(0) = 1 - x(0);
+                f(1) = 10 * (x(1) - x(0) * x(0));
+                return true;
+            },
+            x,
+            (mfroot::type)i);
+
+        rt = fr2.find(1e-6);
+        REQUIRE(__D_EQ6(rt(0), 1));
+        REQUIRE(__D_EQ6(rt(1), 1));
+    }
+}
+
+bool jac(Map<const VectorXd> &x, Map<RowMatrixXd> &jac)
+{
+    jac(0, 0) = -1;
+    jac(0, 1) = 0;
+    jac(1, 0) = -20 * x(0);
+    jac(1, 1) = 10;
+    return true;
+}
+
+bool fdf(Map<const VectorXd> &x, Map<VectorXd> &f, Map<RowMatrixXd> &jac)
+{
+    f(0) = 1 - x(0);
+    f(1) = 10 * (x(1) - x(0) * x(0));
+
+    jac(0, 0) = -1;
+    jac(0, 1) = 0;
+    jac(1, 0) = -20 * x(0);
+    jac(1, 1) = 10;
+    return true;
+}
+
+TEST_CASE("test_mdfroot")
+{
+    for (int i = 0; i < 4; ++i) {
+        Vector2d x;
+        x << -10.0, -5.0;
+
+        mdfroot fr(
+            [](Map<const VectorXd> &x, Map<VectorXd> &f) -> bool {
+                f(0) = 1 - x(0);
+                f(1) = 10 * (x(1) - x(0) * x(0));
+                return true;
+            },
+            jac,
+            fdf,
+            x,
+            (mdfroot::type)i);
 
         Vector2d rt = fr.find(0, 1e-6);
         REQUIRE(__D_EQ6(rt(0), 1));
