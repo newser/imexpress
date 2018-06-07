@@ -1,4 +1,5 @@
 #include <catch.hpp>
+#include <common/gslvec.h>
 #include <froot/dfroot.h>
 #include <froot/froot.h>
 #include <iostream>
@@ -125,5 +126,57 @@ TEST_CASE("test_dfroot")
 
         rt = fr.find(1e-6);
         REQUIRE((__D_EQ6(rt, 1) || __D_EQ6(rt, 2) || __D_EQ6(rt, 3)));
+    }
+}
+
+TEST_CASE("test_gslvec")
+{
+    {
+        VectorXcd v(3);
+
+        // noncopy
+        gslvec<std::complex<double>> gv(v, false);
+        gsl_vector_complex *pgv = gv.gsl_vector();
+        v[0] = std::complex<double>(1, 2);
+        gsl_complex vv = gsl_vector_complex_get(pgv, 0);
+        REQUIRE(vv.dat[0] == 1);
+        REQUIRE(vv.dat[1] == 2);
+        vv.dat[0] = 3;
+        vv.dat[1] = 4;
+        gsl_vector_complex_set(pgv, 1, vv);
+        REQUIRE(v[1] == std::complex<double>(3, 4));
+
+        // copy
+        v.setConstant(std::complex<double>(12, 34));
+        gslvec<std::complex<double>> gv2(v, true);
+        pgv = gv2.gsl_vector();
+        v[0] = std::complex<double>(23, 45);
+        vv = gsl_vector_complex_get(pgv, 0);
+        REQUIRE(vv.dat[0] == 12);
+        REQUIRE(vv.dat[1] == 34);
+        vv.dat[0] = 34;
+        vv.dat[1] = 45;
+        gsl_vector_complex_set(pgv, 1, vv);
+        REQUIRE(v[1] == std::complex<double>(12, 34));
+
+        // can not copy
+        v.setConstant(std::complex<double>(12, 34));
+        gslvec<std::complex<double>> gv3(v + v);
+        pgv = gv3.gsl_vector();
+        v[0] = std::complex<double>(23, 45);
+        vv = gsl_vector_complex_get(pgv, 0);
+        REQUIRE(vv.dat[0] == 24);
+        REQUIRE(vv.dat[1] == 68);
+    }
+
+    {
+        VectorXd v(3);
+
+        gslvec<double> gv(v, false);
+        gsl_vector *pgv = gv.gsl_vector();
+        v[0] = 1;
+        REQUIRE(gsl_vector_get(pgv, 0) == 1);
+        gsl_vector_set(pgv, 1, 9);
+        REQUIRE(v[1] == 9);
     }
 }
