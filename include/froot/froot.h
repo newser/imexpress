@@ -127,7 +127,7 @@ class froot
         return x1;
     }
 
-    unary_func<double> m_fn;
+    const unary_func<double> m_fn;
     gsl_root_fsolver *m_fsolver;
 };
 

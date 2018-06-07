@@ -111,7 +111,7 @@ class dfroot
            const fdf_func::fdf_type &fdf,
            double x0,
            type t = type::STEFFENSON)
-        : m_fdf(f, df, fdf, this)
+        : m_fdf(f, df, fdf, &m_fdf)
         , m_fsolver(gsl_root_fdfsolver_alloc(s_fsolver_map[(int)t]))
     {
         IEXP_NOT_NULLPTR(m_fsolver);

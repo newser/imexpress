@@ -2,6 +2,7 @@
 #include <common/gslvec.h>
 #include <froot/dfroot.h>
 #include <froot/froot.h>
+#include <froot/mfroot.h>
 #include <iostream>
 #include <math/constant.h>
 #include <test_util.h>
@@ -178,5 +179,39 @@ TEST_CASE("test_gslvec")
         REQUIRE(gsl_vector_get(pgv, 0) == 1);
         gsl_vector_set(pgv, 1, 9);
         REQUIRE(v[1] == 9);
+    }
+}
+
+TEST_CASE("test_mfroot")
+{
+    for (int i = 0; i < 4; ++i) {
+        Vector2d x;
+        x << -10.0, -5.0;
+
+        mfroot fr(
+            [](Map<const VectorXd> &x, Map<VectorXd> &f) -> bool {
+                f(0) = 1 - x(0);
+                f(1) = 10 * (x(1) - x(0) * x(0));
+                return true;
+            },
+            x,
+            (mfroot::type)i);
+
+        Vector2d rt = fr.find(0, 1e-6);
+        REQUIRE(__D_EQ6(rt(0), 1));
+        REQUIRE(__D_EQ6(rt(1), 1));
+
+        mfroot fr2(
+            [](Map<const VectorXd> &x, Map<VectorXd> &f) -> bool {
+                f(0) = 1 - x(0);
+                f(1) = 10 * (x(1) - x(0) * x(0));
+                return true;
+            },
+            x,
+            (mfroot::type)i);
+
+        rt = fr2.find(1e-6);
+        REQUIRE(__D_EQ6(rt(0), 1));
+        REQUIRE(__D_EQ6(rt(1), 1));
     }
 }
