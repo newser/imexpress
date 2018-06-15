@@ -45,17 +45,19 @@ class mfmin
     class f_func
     {
       public:
-        using type = std::function<double(Map<const VectorXd> &x)>;
+        using type =
+            std::function<double(Map<const VectorXd> &x, void *opaque)>;
 
-        static double s_f(const gsl_vector *x, void *param)
+        static double s_f(const gsl_vector *x, void *opaque)
         {
             Map<const VectorXd> mapped_x(x->data, x->size);
-            return ((f_func *)param)->f(mapped_x);
+            return ((f_func *)opaque)->f(mapped_x);
         }
 
-        f_func(const type &f, size_t n, void *param)
+        f_func(const type &f, size_t n, void *opaque)
             : m_f(f)
-            , m_gsl_mf{s_f, n, param}
+            , m_gsl_mf{s_f, n, this}
+            , m_opaque(opaque)
         {
         }
 
@@ -66,12 +68,13 @@ class mfmin
 
         double f(Map<const VectorXd> &x)
         {
-            return m_f(x);
+            return m_f(x, m_opaque);
         }
 
       private:
         const type m_f;
         const gsl_multimin_function m_gsl_mf;
+        void *m_opaque;
     };
 
   public:
@@ -86,8 +89,9 @@ class mfmin
     mfmin(const f_func::type &f,
           const DenseBase<T> &x,
           const DenseBase<U> &step,
+          void *opaque = nullptr,
           type t = type::NMSIMPLEX2RAND)
-        : m_fn(f, x.size(), const_cast<f_func *>(&m_fn))
+        : m_fn(f, x.size(), opaque)
         , m_fmin(gsl_multimin_fminimizer_alloc(s_mfmin_map[(int)t], x.size()))
     {
         IEXP_NOT_NULLPTR(m_fmin);
