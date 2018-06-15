@@ -54,6 +54,7 @@ class qng_t
     T operator()(const typename unary_func<T>::type &fn,
                  T a,
                  T b,
+                 void *opaque = nullptr,
                  T *abserr = nullptr,
                  size_t *neval = nullptr)
     {
@@ -93,10 +94,11 @@ template <>
 double qng_t<double>::operator()(const typename unary_func<double>::type &fn,
                                  double a,
                                  double b,
+                                 void *opaque,
                                  double *abserr,
                                  size_t *neval)
 {
-    unary_func<double> m_fn(fn);
+    unary_func<double> m_fn(fn, opaque);
     double r, e;
     size_t n;
     gsl_integration_qng(m_fn.gsl(),

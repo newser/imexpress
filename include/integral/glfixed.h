@@ -58,7 +58,10 @@ class glfixed_t
         }
     }
 
-    T operator()(const typename unary_func<T>::type &fn, T a, T b)
+    T operator()(const typename unary_func<T>::type &fn,
+                 T a,
+                 T b,
+                 void *opaque = nullptr)
     {
         UNSUPPORTED_TYPE(T);
     }
@@ -91,14 +94,17 @@ class glfixed_t
 
 template <>
 double glfixed_t<double>::operator()(
-    const typename unary_func<double>::type &fn, double a, double b)
+    const typename unary_func<double>::type &fn,
+    double a,
+    double b,
+    void *opaque)
 {
     if (m_table == nullptr) {
         m_table = gsl_integration_glfixed_table_alloc(m_n);
         IEXP_NOT_NULLPTR(m_table);
     }
 
-    unary_func<double> m_fn(fn);
+    unary_func<double> m_fn(fn, opaque);
     return gsl_integration_glfixed(m_fn.gsl(), a, b, m_table);
 }
 

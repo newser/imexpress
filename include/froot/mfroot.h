@@ -45,20 +45,21 @@ class mfroot
     class f_func
     {
       public:
-        using type =
-            std::function<bool(Map<const VectorXd> &x, Map<VectorXd> &f)>;
+        using type = std::function<
+            bool(Map<const VectorXd> &x, Map<VectorXd> &f, void *opaque)>;
 
-        static int s_f(const gsl_vector *x, void *param, gsl_vector *f)
+        static int s_f(const gsl_vector *x, void *opaque, gsl_vector *f)
         {
             Map<const VectorXd> mapped_x(x->data, x->size);
             Map<VectorXd> mapped_f(f->data, f->size);
-            return ((f_func *)param)->f(mapped_x, mapped_f) ? GSL_SUCCESS
-                                                            : GSL_FAILURE;
+            return ((f_func *)opaque)->f(mapped_x, mapped_f) ? GSL_SUCCESS
+                                                             : GSL_FAILURE;
         }
 
-        f_func(const type &f, size_t n, void *param)
+        f_func(const type &f, size_t n, void *opaque)
             : m_f(f)
-            , m_gsl_mf{s_f, n, param}
+            , m_gsl_mf{s_f, n, this}
+            , m_opaque(opaque)
         {
         }
 
@@ -67,14 +68,15 @@ class mfroot
             return &m_gsl_mf;
         }
 
-        bool f(Map<const VectorXd> &x, Map<VectorXd> &f)
+        bool f(Map<const VectorXd> &x, Map<VectorXd> &f) const
         {
-            return m_f(x, f);
+            return m_f(x, f, m_opaque);
         }
 
       private:
         const type m_f;
         const gsl_multiroot_function m_gsl_mf;
+        void *m_opaque;
     };
 
   public:
@@ -87,8 +89,11 @@ class mfroot
     };
 
     template <typename T>
-    mfroot(const f_func::type &f, const DenseBase<T> &x, type t = type::HYBRIDS)
-        : m_fn(f, x.size(), const_cast<f_func *>(&m_fn))
+    mfroot(const f_func::type &f,
+           const DenseBase<T> &x,
+           void *opaque = nullptr,
+           type t = type::HYBRIDS)
+        : m_fn(f, x.size(), opaque)
         , m_fsolver(
               gsl_multiroot_fsolver_alloc(s_fsolver_map[(int)t], x.size()))
     {

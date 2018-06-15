@@ -74,6 +74,7 @@ class qag_t
     T operator()(const typename unary_func<T>::type &fn,
                  T a,
                  T b,
+                 void *opaque = nullptr,
                  T *abserr = nullptr)
     {
         UNSUPPORTED_TYPE(T);
@@ -144,6 +145,7 @@ template <>
 double qag_t<double>::operator()(const typename unary_func<double>::type &fn,
                                  double a,
                                  double b,
+                                 void *opaque,
                                  double *abserr)
 {
     if (m_workspace == nullptr) {
@@ -151,7 +153,7 @@ double qag_t<double>::operator()(const typename unary_func<double>::type &fn,
         IEXP_NOT_NULLPTR(m_workspace);
     }
 
-    unary_func<double> m_fn(fn);
+    unary_func<double> m_fn(fn, opaque);
     double r, e;
     gsl_integration_qag(m_fn.gsl(),
                         a,

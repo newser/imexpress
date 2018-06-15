@@ -64,6 +64,7 @@ class qawc_t
                  T a,
                  T b,
                  T c,
+                 void *opaque = nullptr,
                  T *abserr = nullptr)
     {
         UNSUPPORTED_TYPE(T);
@@ -123,6 +124,7 @@ double qawc_t<double>::operator()(const typename unary_func<double>::type &fn,
                                   double a,
                                   double b,
                                   double c,
+                                  void *opaque,
                                   double *abserr)
 {
     if (m_workspace == nullptr) {
@@ -130,7 +132,7 @@ double qawc_t<double>::operator()(const typename unary_func<double>::type &fn,
         IEXP_NOT_NULLPTR(m_workspace);
     }
 
-    unary_func<double> m_fn(fn);
+    unary_func<double> m_fn(fn, opaque);
     double r, e;
     gsl_integration_qawc((gsl_function *)m_fn.gsl(),
                          a,

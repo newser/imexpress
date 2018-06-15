@@ -21,14 +21,20 @@
 using namespace iexp;
 using namespace std;
 
-static double foo(double x)
+static double foo(double x, void *p)
 {
+    REQUIRE(p == (void *)(intptr_t)999);
     return x * x;
 }
 
 TEST_CASE("integral_func")
 {
-    unary_func<double> f([](double x) -> double { return 2 * x; });
+    unary_func<double> f(
+        [](double x, void *p) -> double {
+            REQUIRE(p == (void *)(intptr_t)999);
+            return 2 * x;
+        },
+        (void *)(intptr_t)999);
     int dummy[10]{1, 2, 3, 4, 5, 6, 7, 8, 9};
     double v = f.gsl()->function(1.2, f.gsl()->params);
     REQUIRE(v == 2.4);
@@ -38,17 +44,18 @@ TEST_CASE("integral_func")
     class t_op
     {
       public:
-        double operator()(double x)
+        double operator()(double x, void *p)
         {
+            REQUIRE(p == (void *)(intptr_t)999);
             return x + 2;
         }
     };
-    unary_func<double> f2((t_op()));
+    unary_func<double> f2((t_op()), (void *)(intptr_t)999);
     int dummy2[10]{1, 2, 3, 4, 5, 6, 7, 8, 9};
     v = f2.gsl()->function(1.2, f2.gsl()->params);
     REQUIRE(v == 3.2);
 
-    unary_func<double> f3(foo);
+    unary_func<double> f3(foo, (void *)(intptr_t)999);
     int dummy3[10]{1, 2, 3, 4, 5, 6, 7, 8, 9};
     v = f3.gsl()->function(1.2, f3.gsl()->params);
     REQUIRE(v == 1.44);
@@ -60,9 +67,10 @@ TEST_CASE("integral_qng")
     size_t neval;
 
     integral::qng q(1e-1, 0.0);
-    result = q([](double x) { return pow(x, 2.6) * log(1 / x); },
+    result = q([](double x, void *) { return pow(x, 2.6) * log(1 / x); },
                0,
                1,
+               nullptr,
                &abserr,
                &neval);
     REQUIRE(__D_EQ9(result, 7.716049379303083211E-02));
@@ -72,16 +80,17 @@ TEST_CASE("integral_qng")
     REQUIRE(q.epsabs() == 1e-1);
     REQUIRE(q.epsrel() == 0.0);
 
-    result = q([](double x) { return pow(x, 2.6) * log(1 / x); },
+    result = q([](double x, void *) { return pow(x, 2.6) * log(1 / x); },
                1,
                0,
+               nullptr,
                &abserr,
                &neval);
     REQUIRE(__D_EQ9(result, -7.716049379303083211E-02));
     REQUIRE(__D_EQ9(abserr, 9.424302199601294244E-08));
     REQUIRE(neval == 21);
 
-    result = q([](double x) { return pow(x, 2.6) * log(1 / x); }, 0, 1);
+    result = q([](double x, void *) { return pow(x, 2.6) * log(1 / x); }, 0, 1);
     REQUIRE(__D_EQ9(result, 7.716049379303083211E-02));
 }
 
@@ -90,8 +99,10 @@ TEST_CASE("integral_qag")
     double result, abserr;
 
     integral::qag q(0.0, 1e-10, integral::qag::key::GAUSS15, 1000);
-    result =
-        q([](double x) { return pow(x, 2.6) * log(1 / x); }, 0.0, 1.0, &abserr);
+    result = q([](double x, void *) { return pow(x, 2.6) * log(1 / x); },
+               0.0,
+               1.0,
+               &abserr);
     REQUIRE(__D_EQ_IN(result, 7.716049382715854665E-02, 1E-15));
     REQUIRE(__D_EQ_IN(abserr, 6.679384885865053037E-12, 1E-6));
 
@@ -99,12 +110,15 @@ TEST_CASE("integral_qag")
     REQUIRE(q.epsrel() == 1e-10);
     REQUIRE(q.key() == integral::qag::key::GAUSS15);
 
-    result =
-        q([](double x) { return pow(x, 2.6) * log(1 / x); }, 1.0, 0.0, &abserr);
+    result = q([](double x, void *) { return pow(x, 2.6) * log(1 / x); },
+               1.0,
+               0.0,
+               &abserr);
     REQUIRE(__D_EQ_IN(result, -7.716049382715854665E-02, 1E-15));
     REQUIRE(__D_EQ_IN(abserr, 6.679384885865053037E-12, 1E-6));
 
-    result = q([](double x) { return pow(x, 2.6) * log(1 / x); }, 1.0, 0.0);
+    result =
+        q([](double x, void *) { return pow(x, 2.6) * log(1 / x); }, 1.0, 0.0);
     REQUIRE(__D_EQ_IN(result, -7.716049382715854665E-02, 1E-15));
 }
 
@@ -113,16 +127,20 @@ TEST_CASE("integral_qags")
     double result, abserr;
 
     integral::qags q(0.0, 1e-10, 1000);
-    result =
-        q([](double x) { return pow(x, 2.6) * log(1 / x); }, 0.0, 1.0, &abserr);
+    result = q([](double x, void *) { return pow(x, 2.6) * log(1 / x); },
+               0.0,
+               1.0,
+               &abserr);
     REQUIRE(__D_EQ_IN(result, 7.716049382715854665E-02, 1E-15));
     REQUIRE(__D_EQ_IN(abserr, 6.679384885865053037E-12, 1E-6));
 
     REQUIRE(q.epsabs() == 0.0);
     REQUIRE(q.epsrel() == 1e-10);
 
-    result =
-        q([](double x) { return pow(x, 2.6) * log(1 / x); }, 1.0, 0.0, &abserr);
+    result = q([](double x, void *) { return pow(x, 2.6) * log(1 / x); },
+               1.0,
+               0.0,
+               &abserr);
     REQUIRE(__D_EQ_IN(result, -7.716049382715854665E-02, 1E-15));
     REQUIRE(__D_EQ_IN(abserr, 6.679384885865053037E-12, 1E-6));
 }
@@ -134,13 +152,14 @@ TEST_CASE("integral_qagp")
 
     integral::qagp q(0.0, 1.0e-3, 1000);
     result = q(
-        [](double x) {
+        [](double x, void *) {
             double x2 = x * x;
             double x3 = x * x2;
             return x3 * log(fabs((x2 - 1.0) * (x2 - 2.0)));
         },
         pts,
         4,
+        nullptr,
         &abserr);
     REQUIRE(__D_EQ_IN(result, 5.274080611672716401E+01, 1E-14));
     REQUIRE(__D_EQ_IN(abserr, 1.755703848687062418E-04, 1E-5));
@@ -149,7 +168,7 @@ TEST_CASE("integral_qagp")
     REQUIRE(q.epsrel() == 1.0e-3);
 
     result = q(
-        [](double x) {
+        [](double x, void *) {
             double x2 = x * x;
             double x3 = x * x2;
             return x3 * log(fabs((x2 - 1.0) * (x2 - 2.0)));
@@ -165,18 +184,18 @@ TEST_CASE("integral_qagi")
     double result, abserr;
 
     integral::qagi q(1.0e-7, 0.0, 1000);
-    result = q([](double x) { return exp(-x - x * x); }, &abserr);
+    result = q([](double x, void *) { return exp(-x - x * x); }, &abserr);
     REQUIRE(__D_EQ_IN(result, 2.275875794468747770E+00, 1E-14));
     REQUIRE(__D_EQ_IN(abserr, 7.436490118267390744E-09, 1E-5));
 
     REQUIRE(q.epsabs() == 1.0e-7);
     REQUIRE(q.epsrel() == 0.0);
 
-    result = q([](double x) { return exp(-x - x * x); }, &abserr);
+    result = q([](double x, void *) { return exp(-x - x * x); }, &abserr);
     REQUIRE(__D_EQ_IN(result, 2.275875794468747770E+00, 1E-14));
     REQUIRE(__D_EQ_IN(abserr, 7.436490118267390744E-09, 1E-5));
 
-    result = q([](double x) { return exp(-x - x * x); });
+    result = q([](double x, void *) { return exp(-x - x * x); });
     REQUIRE(__D_EQ_IN(result, 2.275875794468747770E+00, 1E-14));
 }
 
@@ -185,14 +204,14 @@ TEST_CASE("integral_qagil")
     double result, abserr;
 
     integral::qagil q(1.0e-7, 0.0, 1000);
-    result = q([](double x) { return exp(x); }, 1.0, &abserr);
+    result = q([](double x, void *) { return exp(x); }, 1.0, &abserr);
     REQUIRE(__D_EQ_IN(result, 2.718281828459044647E+00, 1E-14));
     REQUIRE(__D_EQ_IN(abserr, 1.588185109253204805E-10, 1E-5));
 
     REQUIRE(q.epsabs() == 1.0e-7);
     REQUIRE(q.epsrel() == 0.0);
 
-    result = q([](double x) { return exp(x); }, 1.0, &abserr);
+    result = q([](double x, void *) { return exp(x); }, 1.0, &abserr);
     REQUIRE(__D_EQ_IN(result, 2.718281828459044647E+00, 1E-14));
     REQUIRE(__D_EQ_IN(abserr, 1.588185109253204805E-10, 1E-5));
 }
@@ -202,7 +221,7 @@ TEST_CASE("integral_qagiu")
     double result, abserr;
 
     integral::qagiu q(0.0, 1.0e-3, 1000);
-    result = q([](double x) { return log(x) / (1.0 + 100.0 * x * x); },
+    result = q([](double x, void *) { return log(x) / (1.0 + 100.0 * x * x); },
                0.0,
                &abserr);
     REQUIRE(__D_EQ_IN(result, -3.616892186127022568E-01, 1E-14));
@@ -211,7 +230,7 @@ TEST_CASE("integral_qagiu")
     REQUIRE(q.epsabs() == 0.0);
     REQUIRE(q.epsrel() == 1.0e-3);
 
-    result = q([](double x) { return log(x) / (1.0 + 100.0 * x * x); },
+    result = q([](double x, void *) { return log(x) / (1.0 + 100.0 * x * x); },
                0.0,
                &abserr);
     REQUIRE(__D_EQ_IN(result, -3.616892186127022568E-01, 1E-14));
@@ -223,10 +242,11 @@ TEST_CASE("integral_qawc")
     double result, abserr;
 
     integral::qawc q(0.0, 1.0e-3, 1000);
-    result = q([](double x) { return 1.0 / (5.0 * x * x * x + 6.0); },
+    result = q([](double x, void *) { return 1.0 / (5.0 * x * x * x + 6.0); },
                -1.0,
                5.0,
                0.0,
+               nullptr,
                &abserr);
     REQUIRE(__D_EQ_IN(result, -8.994400695837000137E-02, 1E-14));
     REQUIRE(__D_EQ_IN(abserr, 1.185290176227023727E-06, 1E-6));
@@ -234,10 +254,11 @@ TEST_CASE("integral_qawc")
     REQUIRE(q.epsabs() == 0.0);
     REQUIRE(q.epsrel() == 1.0e-3);
 
-    result = q([](double x) { return 1.0 / (5.0 * x * x * x + 6.0); },
+    result = q([](double x, void *) { return 1.0 / (5.0 * x * x * x + 6.0); },
                -1.0,
                5.0,
                0.0,
+               nullptr,
                &abserr);
     REQUIRE(__D_EQ_IN(result, -8.994400695837000137E-02, 1E-14));
     REQUIRE(__D_EQ_IN(abserr, 1.185290176227023727E-06, 1E-6));
@@ -253,7 +274,7 @@ TEST_CASE("integral_qaws")
 
         0.0, 1.0e-7, 1000);
     result = q(
-        [](double x) -> double {
+        [](double x, void *) -> double {
             if (x == 0.0) {
                 return 0.0;
             } else {
@@ -266,6 +287,7 @@ TEST_CASE("integral_qaws")
         t,
         0.0,
         1.0,
+        nullptr,
         &abserr);
     REQUIRE(__D_EQ_IN(result, -1.892751853489401670E-01, 1E-14));
     REQUIRE(__D_EQ_IN(abserr, 1.129133712015747658E-08, 1E-6));
@@ -276,7 +298,7 @@ TEST_CASE("integral_qaws")
     q.epsabs(0.0);
     q.epsrel(1.0e-7);
     result = q(
-        [](double x) -> double {
+        [](double x, void *) -> double {
             if (x == 0.0) {
                 return 0.0;
             } else {
@@ -313,7 +335,7 @@ TEST_CASE("integral_qawo")
 
     integral::qawo q(0.0, 1e-7, 1000);
     result = q(
-        [](double x) -> double {
+        [](double x, void *) -> double {
             if (x == 0.0) {
                 return 0.0;
             }
@@ -330,7 +352,7 @@ TEST_CASE("integral_qawo")
 
     q.epsabs(0.0).epsrel(1.0e-7);
     result = q(
-        [](double x) -> double {
+        [](double x, void *) -> double {
             if (x == 0.0) {
                 return 0.0;
             }
@@ -353,7 +375,7 @@ TEST_CASE("integral_qawf")
 
         1e-7, 1000);
     result = q(
-        [](double x) -> double {
+        [](double x, void *) -> double {
             if (x == 0.0) {
                 return 0;
             }
@@ -366,7 +388,7 @@ TEST_CASE("integral_qawf")
     REQUIRE(__D_EQ_IN(abserr, 1.556289974669056164E-08, 1E-3));
 
     result = q(
-        [](double x) -> double {
+        [](double x, void *) -> double {
             if (x == 0.0) {
                 return 0;
             }
@@ -775,11 +797,21 @@ TEST_CASE("integral_cquad")
     size_t neval;
 
     integral::cquad q(0.0, 1e-12, 200);
-    result = q([](double x) { return exp(x); }, 0.0, 1.0, &abserr, &neval);
+    result = q([](double x, void *) { return exp(x); },
+               0.0,
+               1.0,
+               nullptr,
+               &abserr,
+               &neval);
     REQUIRE(__D_EQ_IN(result, 1.7182818284590452354, 1E-12));
     REQUIRE(fabs(result - 1.7182818284590452354) <= abserr);
 
-    result = q([](double x) { return x >= 0.3; }, 0.0, 1.0, &abserr, &neval);
+    result = q([](double x, void *) { return x >= 0.3; },
+               0.0,
+               1.0,
+               nullptr,
+               &abserr,
+               &neval);
     REQUIRE(__D_EQ_IN(result, 0.7, 1E-12));
     REQUIRE(fabs(result - 0.7) <= abserr);
 
@@ -793,10 +825,10 @@ TEST_CASE("integral_glfixed")
     double result;
 
     integral::glfixed q(1000);
-    result = q([](double x) { return exp(x); }, 0.0, 1.0);
+    result = q([](double x, void *) { return exp(x); }, 0.0, 1.0);
     REQUIRE(__D_EQ9(result, 1.718281828605944));
 
-    result = q([](double x) { return x >= 0.3; }, 0.0, 1.0);
+    result = q([](double x, void *) { return x >= 0.3; }, 0.0, 1.0);
     REQUIRE(__D_EQ_IN(result, 0.7, 1E-4));
 }
 
@@ -805,7 +837,7 @@ TEST_CASE("integral_fixed")
     double result, expect;
 
     integral::fixed q(integral::fixed::type::LEGENDRE, 200, 1.2, 1.6, 0, 0);
-    result = q([](double x) -> double { return exp(-x - x * x); });
+    result = q([](double x, void *) -> double { return exp(-x - x * x); });
     expect = 0.01505500344456001;
     REQUIRE(fabs(result - expect) / expect < 1.0e-12);
 
@@ -813,7 +845,7 @@ TEST_CASE("integral_fixed")
     q2.n();
     q2.x();
     q2.w();
-    result = q2([](double x) -> double { return exp(-x - x * x); });
+    result = q2([](double x, void *) -> double { return exp(-x - x * x); });
     expect = 3.173064776410033e-5;
     REQUIRE(fabs(result - expect) / expect < 1.0e-12);
 }

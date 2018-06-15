@@ -52,8 +52,9 @@ class fmin
          double lower,
          double upper,
          double guess,
+         void *opaque = nullptr,
          type t = type::BRENT)
-        : m_fn(fn)
+        : m_fn(fn, opaque)
         , m_fmin(gsl_min_fminimizer_alloc(s_fmin_map[(int)t]))
     {
         IEXP_NOT_NULLPTR(m_fmin);

@@ -17,10 +17,11 @@ TEST_CASE("test_froot")
         try {
             // root: 1, 2
             froot
-            fr([](double x)
+            fr([](double x, void *)
                    -> double { return x * x * x - 6 * x * x + 11 * x - 6; },
                0.1,
                0.99,
+               nullptr,
                (froot::type)i);
             REQUIRE(false);
         } catch (...) {
@@ -30,10 +31,11 @@ TEST_CASE("test_froot")
     // 1 root
     for (int i = 0; i < 3; ++i) {
         // root: 1, 2
-        froot fr([](double x)
+        froot fr([](double x, void *)
                      -> double { return x * x * x - 6 * x * x + 11 * x - 6; },
                  0.1,
                  1.2,
+                 nullptr,
                  (froot::type)i);
 
         double rt;
@@ -53,10 +55,11 @@ TEST_CASE("test_froot")
         try {
             // root: 1, 2
             froot
-            fr([](double x)
+            fr([](double x, void *)
                    -> double { return x * x * x - 6 * x * x + 11 * x - 6; },
                0.1,
                2.2,
+               nullptr,
                (froot::type)i);
             REQUIRE(false);
         } catch (...) {
@@ -66,10 +69,11 @@ TEST_CASE("test_froot")
     // multiple root in interval
     for (int i = 0; i < 3; ++i) {
         // root: 1, 2
-        froot fr([](double x)
+        froot fr([](double x, void *)
                      -> double { return x * x * x - 6 * x * x + 11 * x - 6; },
                  0.1,
                  3.2,
+                 nullptr,
                  (froot::type)i);
 
         double rt;
@@ -190,12 +194,13 @@ TEST_CASE("test_mfroot")
         x << -10.0, -5.0;
 
         mfroot fr(
-            [](Map<const VectorXd> &x, Map<VectorXd> &f) -> bool {
+            [](Map<const VectorXd> &x, Map<VectorXd> &f, void *) -> bool {
                 f(0) = 1 - x(0);
                 f(1) = 10 * (x(1) - x(0) * x(0));
                 return true;
             },
             x,
+            nullptr,
             (mfroot::type)i);
 
         Vector2d rt = fr.find(0, 1e-6);
@@ -203,12 +208,13 @@ TEST_CASE("test_mfroot")
         REQUIRE(__D_EQ6(rt(1), 1));
 
         mfroot fr2(
-            [](Map<const VectorXd> &x, Map<VectorXd> &f) -> bool {
+            [](Map<const VectorXd> &x, Map<VectorXd> &f, void *) -> bool {
                 f(0) = 1 - x(0);
                 f(1) = 10 * (x(1) - x(0) * x(0));
                 return true;
             },
             x,
+            nullptr,
             (mfroot::type)i);
 
         rt = fr2.find(1e-6);
@@ -217,7 +223,7 @@ TEST_CASE("test_mfroot")
     }
 }
 
-bool jac(Map<const VectorXd> &x, Map<RowMatrixXd> &jac)
+bool jac(Map<const VectorXd> &x, Map<RowMatrixXd> &jac, void *)
 {
     jac(0, 0) = -1;
     jac(0, 1) = 0;
@@ -226,7 +232,10 @@ bool jac(Map<const VectorXd> &x, Map<RowMatrixXd> &jac)
     return true;
 }
 
-bool fdf(Map<const VectorXd> &x, Map<VectorXd> &f, Map<RowMatrixXd> &jac)
+bool fdf(Map<const VectorXd> &x,
+         Map<VectorXd> &f,
+         Map<RowMatrixXd> &jac,
+         void *)
 {
     f(0) = 1 - x(0);
     f(1) = 10 * (x(1) - x(0) * x(0));
@@ -245,7 +254,7 @@ TEST_CASE("test_mdfroot")
         x << -10.0, -5.0;
 
         mdfroot fr(
-            [](Map<const VectorXd> &x, Map<VectorXd> &f) -> bool {
+            [](Map<const VectorXd> &x, Map<VectorXd> &f, void *) -> bool {
                 f(0) = 1 - x(0);
                 f(1) = 10 * (x(1) - x(0) * x(0));
                 return true;
@@ -253,6 +262,7 @@ TEST_CASE("test_mdfroot")
             jac,
             fdf,
             x,
+            nullptr,
             (mdfroot::type)i);
 
         Vector2d rt = fr.find(0, 1e-6);
@@ -260,12 +270,13 @@ TEST_CASE("test_mdfroot")
         REQUIRE(__D_EQ6(rt(1), 1));
 
         mfroot fr2(
-            [](Map<const VectorXd> &x, Map<VectorXd> &f) -> bool {
+            [](Map<const VectorXd> &x, Map<VectorXd> &f, void *) -> bool {
                 f(0) = 1 - x(0);
                 f(1) = 10 * (x(1) - x(0) * x(0));
                 return true;
             },
             x,
+            nullptr,
             (mfroot::type)i);
 
         rt = fr2.find(1e-6);

@@ -63,6 +63,7 @@ class qagp_t
     T operator()(const typename unary_func<T>::type &fn,
                  const T *pts,
                  size_t npts,
+                 void *opaque = nullptr,
                  T *abserr = nullptr)
     {
         UNSUPPORTED_TYPE(T);
@@ -70,6 +71,7 @@ class qagp_t
 
     T operator()(const typename unary_func<T>::type &fn,
                  const std::initializer_list<T> &pts,
+                 void *opaque = nullptr,
                  T *abserr = nullptr)
     {
         UNSUPPORTED_TYPE(T);
@@ -128,6 +130,7 @@ template <>
 double qagp_t<double>::operator()(const typename unary_func<double>::type &fn,
                                   const double *pts,
                                   size_t npts,
+                                  void *opaque,
                                   double *abserr)
 {
     if (m_workspace == nullptr) {
@@ -135,7 +138,7 @@ double qagp_t<double>::operator()(const typename unary_func<double>::type &fn,
         IEXP_NOT_NULLPTR(m_workspace);
     }
 
-    unary_func<double> m_fn(fn);
+    unary_func<double> m_fn(fn, opaque);
     double r, e;
     gsl_integration_qagp(m_fn.gsl(),
                          const_cast<double *>(pts),
@@ -152,9 +155,10 @@ double qagp_t<double>::operator()(const typename unary_func<double>::type &fn,
 template <>
 double qagp_t<double>::operator()(const typename unary_func<double>::type &fn,
                                   const std::initializer_list<double> &pts,
+                                  void *opaque,
                                   double *abserr)
 {
-    return operator()(fn, pts.begin(), pts.size(), abserr);
+    return operator()(fn, pts.begin(), pts.size(), opaque, abserr);
 }
 
 typedef qagp_t<double> qagp;

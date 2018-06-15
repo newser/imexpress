@@ -64,7 +64,9 @@ class qagi_t
         }
     }
 
-    T operator()(const typename unary_func<T>::type &fn, T *abserr = nullptr)
+    T operator()(const typename unary_func<T>::type &fn,
+                 void *opaque = nullptr,
+                 T *abserr = nullptr)
     {
         UNSUPPORTED_TYPE(T);
     }
@@ -120,6 +122,7 @@ class qagi_t
 
 template <>
 double qagi_t<double>::operator()(const typename unary_func<double>::type &fn,
+                                  void *opaque,
                                   double *abserr)
 {
     if (m_workspace == nullptr) {
@@ -127,7 +130,7 @@ double qagi_t<double>::operator()(const typename unary_func<double>::type &fn,
         IEXP_NOT_NULLPTR(m_workspace);
     }
 
-    unary_func<double> m_fn(fn);
+    unary_func<double> m_fn(fn, opaque);
     double r, e;
     gsl_integration_qagi((gsl_function *)m_fn.gsl(),
                          m_epsabs,
@@ -166,6 +169,7 @@ class qagiu_t
 
     double operator()(const typename unary_func<T>::type &fn,
                       T a,
+                      void *opaque = nullptr,
                       T *abserr = nullptr)
     {
         UNSUPPORTED_TYPE(T);
@@ -223,6 +227,7 @@ class qagiu_t
 template <>
 double qagiu_t<double>::operator()(const typename unary_func<double>::type &fn,
                                    double a,
+                                   void *opaque,
                                    double *abserr)
 {
     if (m_workspace == nullptr) {
@@ -230,7 +235,7 @@ double qagiu_t<double>::operator()(const typename unary_func<double>::type &fn,
         IEXP_NOT_NULLPTR(m_workspace);
     }
 
-    unary_func<double> m_fn(fn);
+    unary_func<double> m_fn(fn, opaque);
     double r, e;
     gsl_integration_qagiu((gsl_function *)m_fn.gsl(),
                           a,
@@ -270,6 +275,7 @@ class qagil_t
 
     double operator()(const typename unary_func<T>::type &fn,
                       T b,
+                      void *opaque = nullptr,
                       T *abserr = nullptr)
     {
         UNSUPPORTED_TYPE(T);
@@ -327,6 +333,7 @@ class qagil_t
 template <>
 double qagil_t<double>::operator()(const typename unary_func<double>::type &fn,
                                    double b,
+                                   void *opaque,
                                    double *abserr)
 {
     if (m_workspace == nullptr) {
@@ -334,7 +341,7 @@ double qagil_t<double>::operator()(const typename unary_func<double>::type &fn,
         IEXP_NOT_NULLPTR(m_workspace);
     }
 
-    unary_func<double> m_fn(fn);
+    unary_func<double> m_fn(fn, opaque);
     double r, e;
     gsl_integration_qagil((gsl_function *)m_fn.gsl(),
                           b,

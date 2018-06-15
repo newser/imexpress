@@ -51,8 +51,9 @@ class froot
     froot(const unary_func<double>::type &fn,
           double lower,
           double upper,
+          void *opaque = nullptr,
           type t = type::BRENT)
-        : m_fn(fn)
+        : m_fn(fn, opaque)
         , m_fsolver(gsl_root_fsolver_alloc(s_fsolver_map[(int)t]))
     {
         IEXP_NOT_NULLPTR(m_fsolver);

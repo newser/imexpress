@@ -76,7 +76,7 @@ class fixed_t
         }
     }
 
-    T operator()(const typename unary_func<T>::type &fn)
+    T operator()(const typename unary_func<T>::type &fn, void *opaque = nullptr)
     {
         UNSUPPORTED_TYPE(T);
     }
@@ -177,11 +177,12 @@ class fixed_t
 };
 
 template <>
-double fixed_t<double>::operator()(const typename unary_func<double>::type &fn)
+double fixed_t<double>::operator()(const typename unary_func<double>::type &fn,
+                                   void *opaque)
 {
     init();
 
-    unary_func<double> m_fn(fn);
+    unary_func<double> m_fn(fn, opaque);
     double r;
     gsl_integration_fixed(m_fn.gsl(), &r, m_workspace);
     return r;

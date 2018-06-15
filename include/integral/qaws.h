@@ -156,6 +156,7 @@ class qaws_t
                  qaws_table_t<T> &w,
                  T a,
                  T b,
+                 void *opaque = nullptr,
                  T *abserr = nullptr)
     {
         UNSUPPORTED_TYPE(T);
@@ -215,6 +216,7 @@ double qaws_t<double>::operator()(const typename unary_func<double>::type &fn,
                                   qaws_table_t<double> &w,
                                   double a,
                                   double b,
+                                  void *opaque,
                                   double *abserr)
 {
     if (m_workspace == nullptr) {
@@ -222,7 +224,7 @@ double qaws_t<double>::operator()(const typename unary_func<double>::type &fn,
         IEXP_NOT_NULLPTR(m_workspace);
     }
 
-    unary_func<double> m_fn(fn);
+    unary_func<double> m_fn(fn, opaque);
     double r, e;
     gsl_integration_qaws((gsl_function *)m_fn.gsl(),
                          a,
